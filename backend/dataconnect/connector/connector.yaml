@@ -1,0 +1,7 @@
+connectorId: "plusprayer"
+# Generated client SDKs are configured here once operations exist.
+# Example (uncomment + adjust when wiring the Flutter app):
+# generate:
+#   dartSdk:
+#     outputDir: "../../../app/lib/dataconnect-generated"
+#     package: "plusprayer_connector"
