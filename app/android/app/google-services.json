@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1014435277143",
+    "project_id": "plus-prayer",
+    "storage_bucket": "plus-prayer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1014435277143:android:8b211102644683b796b612",
+        "android_client_info": {
+          "package_name": "dev.hammock.plusprayer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNd1zWGGYYf0lcM628ast3YaPu3HDaOtg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

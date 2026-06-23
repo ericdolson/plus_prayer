@@ -1,0 +1,15 @@
+{
+  "//": "RTDB security rules. Presence and live counts are READ by clients, WRITTEN by server only. Populate concrete rules when implementing the presence/onDisconnect design and the live-count mirror.",
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "presence": {
+      ".read": "auth != null",
+      ".write": false
+    },
+    "liveCounts": {
+      ".read": "auth != null",
+      ".write": false
+    }
+  }
+}

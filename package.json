@@ -1,0 +1,14 @@
+{
+  "name": "plusprayer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Task launcher only — NOT a Node app. This is a polyglot monorepo (Flutter app, Cloud Functions, SQL Connect, publishing scripts). The root package.json exists solely to alias common deploy/dev commands. Real Firebase config lives in backend/. See CLAUDE.md.",
+  "scripts": {
+    "deploy:backend": "cd backend && firebase deploy",
+    "deploy:dataconnect": "cd backend && firebase deploy --only dataconnect",
+    "deploy:functions": "cd backend && firebase deploy --only functions",
+    "deploy:rules": "cd backend && firebase deploy --only database,storage",
+    "emulators": "cd backend && firebase emulators:start",
+    "upgradefirebase": "curl -sL firebase.tools | upgrade=true bash"
+  }
+}

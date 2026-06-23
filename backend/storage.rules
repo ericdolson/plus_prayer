@@ -1,0 +1,10 @@
+rules_version = '2';
+// Cloud Storage security rules. Media bytes live here (NOT in git).
+// Populate concrete rules when wiring storage. Default deny.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

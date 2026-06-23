@@ -1,0 +1,50 @@
+# ---- Media: NEVER commit raw/finished video or audio ----
+# Media lives in Cloud Storage and is referenced by manifest only.
+*.mp4
+*.mov
+*.m4a
+*.wav
+*.aac
+*.avi
+*.mkv
+/shorts/
+publishing/shorts/
+
+# ---- Secrets / credentials ----
+*.env
+.env*
+service-account*.json
+*-service-account.json
+# App's Firebase client config is allowed in app/ (build inputs), but keep
+# any server service-account keys out:
+backend/**/service-account*.json
+
+# ---- Node / Functions ----
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.firebase/
+firebase-debug.log*
+functions/lib/
+
+# ---- Flutter / Dart ----
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/build/
+app/.pub-cache/
+app/ios/Pods/
+app/android/local.properties
+app/symbols/
+# pubspec.lock is intentionally committed for apps (reproducible builds)
+
+# ---- SQL Connect generated SDK output (regenerated from schema) ----
+**/dataconnect-generated/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp

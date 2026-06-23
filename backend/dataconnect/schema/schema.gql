@@ -1,0 +1,306 @@
+# ============================================================================
+# +Prayer — SQL Connect schema (MVP)
+# ============================================================================
+# Managed PostgreSQL via Firebase SQL Connect. Region: us-central1.
+#
+# SCOPE: Core daily-prayer loop only. Groups, following, and usernames are
+# DEFERRED — but the core is deliberately shaped so they become clean additive
+# changes (nullable columns / new tables), never painful migrations.
+#
+# SYNTAX NOTE: Verify exact directive syntax against current SQL Connect docs
+# when deploying — default-value expressions (auth.uid, request.time), @unique,
+# @searchable, and composite @table(key: [...]) spellings have evolved. Treat
+# this file as the authoritative DESIGN; let the VS Code extension / Claude Code
+# reconcile exact syntax at deploy time.
+#
+# ----------------------------------------------------------------------------
+# COUNTS & STREAKS MODEL (read this before adding any count/streak columns)
+# ----------------------------------------------------------------------------
+# Principle: DERIVE on read; do NOT store derived data until a read is a
+# MEASURED bottleneck. A stored aggregate buys read speed at the cost of write
+# complexity and the risk of drift (a stored copy silently disagreeing with the
+# source of truth). Most of the stats below are computed with ONE operation from
+# existing tables, and a computed value is always correct by construction.
+#
+# Three "prayed for" counts a subject (e.g. "Mom") can show, all DERIVED:
+#
+#   TIER 1 — "I prayed for Mom N times" (personal, intimate)
+#     Derivation: count of this user's PrayerSubjectLink rows for Mom's subject.
+#     SEMANTICS STILL OPEN: is tier 1 "raw times I logged a prayer for her"
+#     (count of links — needs NOTHING) or "list cycles I prayed for her on"
+#     (needs Prayer.listContextNumber — see Prayer below). Personal prayers are
+#     NOT list-linked, so the cycle version requires that field. UNRESOLVED —
+#     do not add the field until this is decided.
+#
+#   TIER 2 — "my group prayed for Mom N times" (later, with groups)
+#     Same shape as tier 3 but scoped to a bounded group context. Deferred.
+#
+#   TIER 3 — "the world prayed for Mom N times" (awe)
+#     DEFINITION (core mechanic): praying for a list credits EVERYONE on that
+#     list as having been prayed for. So Mom's world-count =
+#       SUM(PrayerList.prayerCount) over every list where Mom has a
+#       PrayerListEntry.
+#     Example: Mom on lists 1–4, each list got 1,000 prayers => 4,000.
+#     Fully derivable TODAY from PrayerListEntry + PrayerList.prayerCount.
+#     No identity resolution needed — it's Mom's OWN subject's entries; we never
+#     compare one user's "Mom" to another's.
+#
+#   IMPORTANT — do NOT sum tier-3 counts across subjects into a headline number.
+#   Every subject on a list is credited that list's full prayerCount, so summing
+#   subjects multiply-counts. Tier 3 is a per-subject "how held was this person"
+#   figure ONLY. "How many prayers the world OFFERED" is a different number
+#   (PrayerList.prayerCount itself) and must be surfaced as a distinct statement.
+#
+# LIVE world-count (tier 3) — client stitches static + live, sqlc never subscribes:
+#   - sqlc query returns: (a) SUM(prayerCount) over the subject's CLOSED lists
+#     ONLY (current list EXCLUDED), and (b) a boolean "is subject on the current
+#     list".
+#   - If (b) is true, the CLIENT adds the live current-list count from its
+#     existing RTDB subscription on top of (a).
+#   - Rule that prevents double-counting: sqlc owns everything UP TO BUT NOT
+#     INCLUDING the current list; RTDB owns the current list. No overlap.
+#   - Requires settle-on-close (see PrayerList.prayerCount): when a list stops
+#     being current, the transition job freezes its final live count into
+#     prayerCount, so the historical sum always reads finalized values.
+#
+# STREAKS:
+#   - USER participation streak (consecutive list numbers the user prayed the
+#     COMMUNITY list) is STORED on User — frequently read, and bestStreak is
+#     expensive to re-derive over all history each load. See User below.
+#   - PER-SUBJECT streak ("consecutive cycles I prayed for Mom") is DERIVED, not
+#     stored. It is only well-defined once personal prayers carry a list-cycle
+#     stamp (Prayer.listContextNumber) — which is the same OPEN decision as tier
+#     1. Until then, per-subject streak over COMMUNITY prayers is derivable, but
+#     personal-only prayers can't be placed on the axis. Denormalize a per-
+#     subject streak column ONLY if it becomes a constantly-rendered hot value.
+# ============================================================================
+
+
+enum SubjectKind { SOUL INTENTION }
+
+
+# ----------------------------------------------------------------------------
+# User
+# ----------------------------------------------------------------------------
+# One row per Firebase Auth user (Google, Apple, or Anonymous).
+# At signup, a User AND their self-PrayerSubject are created together in one
+# transaction — the "you are the first soul" mechanic is true from second one.
+#
+# IMPORTANT: anonymous users who later sign in with Google/Apple must be LINKED
+# (Firebase account linking), not treated as a fresh sign-in, or they lose their
+# souls and history. This is auth-flow logic, but it's load-bearing here because
+# the anonymous user is themselves a soul on the list.
+# ----------------------------------------------------------------------------
+type User @table {
+  id: String! @default(expr: "auth.uid")     # Firebase Auth UID as PK
+  displayName: String!                       # how the app ADDRESSES the user; from login or gathered
+  authProvider: String                       # "google" | "apple" | "anonymous"
+  isAnonymous: Boolean! @default(expr: "false")
+
+  # --- Freemium entitlement (server-written ONLY, on billing events) ---
+  planTier: String! @default(expr: "free")   # "free" | "plan_a" | "plan_b" | ...
+  # Number of ADDITIONAL subjects allowed on the printed list, BEYOND the
+  # always-free self-subject. free = 0 (self only). Paid tiers set 5, 10, etc.
+  # Stored as a concrete number (not derived from planTier) so one-off grants
+  # (promos, beta thank-yous) are possible without inventing fake plans.
+  includeLimit: Int! @default(expr: "0")
+
+  # --- USER PARTICIPATION STREAK (STORED — exception to "derive on read") ---
+  # Streak = consecutive LIST NUMBERS prayed for, NOT calendar days. This avoids
+  # all per-user timezone math. Tradeoff accepted: a fully-missed list breaks the
+  # streak with no make-up (one list per day, gone once the next publishes). A
+  # grace/freeze mechanic can be layered later with no schema change.
+  # STORED (not derived) because it's read on nearly every app open and
+  # bestStreak ("longest run ever") is costly to recompute over all history each
+  # time. lastPrayedListNumber also powers a future grace check cheaply.
+  # Updated server-side on a community-prayer commit. Risk to watch: drift — if
+  # it ever disagrees with derivation in practice, switch to computed-and-cached.
+  currentStreak: Int! @default(expr: "0")
+  bestStreak: Int! @default(expr: "0")
+  lastPrayedListNumber: Int
+
+  createdAt: Timestamp! @default(expr: "request.time")
+  # FUTURE: username: String @unique   (added when social/discovery/following ships)
+}
+
+
+# ----------------------------------------------------------------------------
+# PrayerSubject  (souls AND intentions, unified)
+# ----------------------------------------------------------------------------
+# Unified table with a `kind` discriminator. Souls and intentions share almost
+# everything and always travel together (on lists, inside prayers); splitting
+# them would only double joins. The only kind-specific field is answeredAt,
+# which simply stays null for souls.
+#
+# SOUL      = a person held in prayer, ongoing/open-ended ("Mom", the departed).
+# INTENTION = a specific request with a lifecycle ("Find steady work"); can be
+#             marked answered — the gratitude payoff users love.
+#
+# STATS NOTE: a subject's "prayed for" counts (tiers 1/2/3) and per-subject
+# streak are DERIVED, not stored here (see the COUNTS & STREAKS MODEL header).
+# Add a denormalized counter/streak column ONLY if it becomes a hot read.
+# ----------------------------------------------------------------------------
+type PrayerSubject @table {
+  owner: User!
+  kind: SubjectKind!
+
+  # Two names with two audiences:
+  publicName: String! @searchable            # printed on the list / shown publicly ("Gary Olson")
+  personalLabel: String                      # owner-only, intimate ("Dad"); optional
+
+  note: String                               # optional detail
+
+  # The owner's own soul, auto-created at signup. ALWAYS carried on the list,
+  # free, pinned to the top of the owner's entry, and NOT counted against
+  # includeLimit. (Being carried is the dividend for participating, not a slot
+  # the user spends.) sortOrder is ignored for the self-subject.
+  isSelf: Boolean! @default(expr: "false")
+
+  isActive: Boolean! @default(expr: "true")  # eligible to appear on daily lists
+
+  # Governs the "above the fold" cutoff for NON-self subjects: the top
+  # `includeLimit` active non-self subjects by sortOrder are carried on the next
+  # list. Reordering (not toggling) is the chosen UX — gentler than asking a user
+  # to deselect a loved one, and a natural, non-coercive upgrade prompt.
+  sortOrder: Int! @default(expr: "0")
+
+  answeredAt: Timestamp                      # intentions marked answered; null = soul / open
+  createdAt: Timestamp! @default(expr: "request.time")
+
+  # FUTURE: groupId: ...        (groups: subject visible to a group)
+  # FUTURE: visibility: ...     (private / followers / group)
+  # FUTURE: relatedSubject: PrayerSubject   (attach an intention to a soul)
+}
+
+
+# ----------------------------------------------------------------------------
+# PrayerList  (one per day)
+# ----------------------------------------------------------------------------
+# Highest listNumber = current. Generated by the manual ~8am transition.
+# Assembled as draft → reviewed → published (status), so an unreviewed list is
+# never treated as live and names get a human checkpoint before being sealed.
+# ----------------------------------------------------------------------------
+type PrayerList @table {
+  listNumber: Int! @unique                   # sequential; highest = current
+  listDate: Date!
+  status: String! @default(expr: "draft")    # "draft" | "published" — review gate before printing
+  publishedAt: Timestamp
+
+  # Denormalized counts (server-written). Counters are a standard read
+  # optimization, not "un-relational."
+  soulCount: Int! @default(expr: "0")
+  intentionCount: Int! @default(expr: "0")
+
+  # prayerCount = total prayers offered toward THIS list.
+  # LIVE while this list is current: incremented on each prayer commit and
+  # MIRRORED to RTDB for the live display (clients subscribe to RTDB, not sqlc).
+  # SETTLE-ON-CLOSE: when this list stops being current (the manual ~8am
+  # transition opens the next list), the transition job FREEZES the final live
+  # count into this field as its permanent settled value. This is what makes the
+  # tier-3 world-count's historical sum read finalized numbers and lets the
+  # client safely add the live RTDB value for the current list only (no double-
+  # count). See the COUNTS & STREAKS MODEL header.
+  prayerCount: Int! @default(expr: "0")
+
+  createdAt: Timestamp! @default(expr: "request.time")
+}
+
+
+# ----------------------------------------------------------------------------
+# PrayerListPost  (social posts for a list — one row per platform)
+# ----------------------------------------------------------------------------
+# Platforms (initial): youtube, instagram, threads, tiktok, facebook.
+# (TikTok = reach/discovery only; no comment API. Threads = reply-only.)
+# ----------------------------------------------------------------------------
+type PrayerListPost @table(key: ["list", "platform"]) {
+  list: PrayerList!
+  platform: String!                          # "youtube" | "instagram" | "threads" | "tiktok" | "facebook"
+  url: String
+  externalId: String                         # platform post id
+}
+
+
+# ----------------------------------------------------------------------------
+# PrayerListEntry  (the assembled list — target of the join-and-write)
+# ----------------------------------------------------------------------------
+# Built server-side at transition time. publicName is a FROZEN snapshot: editing
+# a subject later does NOT change an already-printed list.
+#
+# Assembly rule for a user who prayed for the current list:
+#   include their active self-subject (always, pinned top),
+#   PLUS their top `includeLimit` active non-self subjects by sortOrder.
+#
+# TIER-3 WORLD-COUNT SOURCE: this table is what records "subject X was on list
+# N". A subject's world-count = SUM(PrayerList.prayerCount) over the lists where
+# the subject has an entry here. That derivation is the whole reason "the world
+# prayed for Mom 4,000 times" is computable without any cross-user identity.
+#
+# source distinguishes trust tiers for moderation: "app" (authenticated user's
+# own subjects, higher trust) vs "social" (a 🙏 from an internet account, lower
+# trust — strict name filtering). moderationStatus gates individual names
+# without killing the whole list; held entries are recoverable, not deleted.
+# ----------------------------------------------------------------------------
+type PrayerListEntry @table(key: ["list", "subject"]) {
+  list: PrayerList!
+  subject: PrayerSubject!
+  owner: User!                               # denormalized for fast per-user filtering
+  kind: SubjectKind!                         # snapshot
+  publicName: String!                        # FROZEN at publish time
+
+  source: String! @default(expr: "app")      # "app" | "social"
+  moderationStatus: String! @default(expr: "approved")  # "approved" | "held" | "excluded"
+  heldReason: String                         # populated when held/excluded
+}
+
+
+# ----------------------------------------------------------------------------
+# Prayer  (a completed, logged prayer — immutable history)
+# ----------------------------------------------------------------------------
+# Written once, when the user finishes. The live "currently praying" state is in
+# RTDB, NOT here — this table is clean completed history with no in-progress flag.
+#
+# communityList = "this prayer earned a reciprocal spot on the list." REQUIRED
+# the first time a user prays against the current list (the reciprocal mechanic);
+# null for a personal-only prayer (e.g. a user who already prayed the community
+# list today and is now logging a personal prayer just for their people).
+# Enforced in the mutation / app logic, not the schema.
+#
+# OPEN DECISION — listContextNumber:
+#   A personal-only prayer has communityList = null, so it is NOT placed on the
+#   list-number axis. IF tier-1 personal counts/streaks should be measured in
+#   "list cycles I prayed for X" (rather than raw event counts), add:
+#       listContextNumber: Int      # the list number current when this prayer
+#                                    # was logged; ALWAYS set, independent of
+#                                    # communityList. Pure metadata for
+#                                    # aggregation/streaks.
+#   This is UNRESOLVED. Not added yet — adding it is a clean additive change
+#   whenever tier-1 semantics are decided. (Tier-3 world-count does NOT need it.)
+# ----------------------------------------------------------------------------
+type Prayer @table {
+  user: User!
+  prayedAt: Timestamp! @default(expr: "request.time")
+  durationSeconds: Int!
+  communityList: PrayerList                  # null = personal-only prayer
+  note: String                               # optional private reflection
+
+  # Consent-gated, optional. Primarily powers the user's OWN "where I prayed"
+  # history/map now; can feed a coarse/fuzzed global view later. Store precise,
+  # fuzz on output for any aggregate display. Impossible to backfill — capture now.
+  latitude: Float
+  longitude: Float
+
+  # FUTURE/OPEN: listContextNumber: Int   (see OPEN DECISION note above)
+}
+
+
+# ----------------------------------------------------------------------------
+# PrayerSubjectLink  (which subjects were included in a given prayer)
+# ----------------------------------------------------------------------------
+# Many-to-many between Prayer and PrayerSubject.
+# TIER-1 SOURCE: "I prayed for Mom N times" = count of these rows for Mom's
+# subject across the user's prayers (see COUNTS & STREAKS MODEL header).
+# ----------------------------------------------------------------------------
+type PrayerSubjectLink @table(key: ["prayer", "subject"]) {
+  prayer: Prayer!
+  subject: PrayerSubject!
+}

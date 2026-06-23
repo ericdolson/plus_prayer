@@ -1,0 +1,20 @@
+{
+  "//": "Deploys run from inside backend/. Paths are relative to this file. This is a starting stub — the SQL Connect setup (Gemini/VS Code extension or Claude Code) will populate exact paths/config on init. Verify against current Firebase CLI.",
+  "dataconnect": {
+    "source": "dataconnect"
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "emulators": {
+    "dataconnect": {
+      "dataDir": "dataconnect/.dataconnect/pgliteData"
+    }
+  }
+}
