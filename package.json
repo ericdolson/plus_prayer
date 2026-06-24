@@ -8,7 +8,6 @@
     "deploy:dataconnect": "cd backend && firebase deploy --only dataconnect",
     "deploy:functions": "cd backend && firebase deploy --only functions",
     "deploy:rules": "cd backend && firebase deploy --only database,storage",
-    "emulators": "cd backend && firebase emulators:start",
-    "upgradefirebase": "curl -sL firebase.tools | upgrade=true bash"
+    "emulators": "cd backend && firebase emulators:start"
   }
 }

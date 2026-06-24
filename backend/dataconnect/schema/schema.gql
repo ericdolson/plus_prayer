@@ -25,12 +25,14 @@
 # Three "prayed for" counts a subject (e.g. "Mom") can show, all DERIVED:
 #
 #   TIER 1 — "I prayed for Mom N times" (personal, intimate)
-#     Derivation: count of this user's PrayerSubjectLink rows for Mom's subject.
-#     SEMANTICS STILL OPEN: is tier 1 "raw times I logged a prayer for her"
-#     (count of links — needs NOTHING) or "list cycles I prayed for her on"
-#     (needs Prayer.listContextNumber — see Prayer below). Personal prayers are
-#     NOT list-linked, so the cycle version requires that field. UNRESOLVED —
-#     do not add the field until this is decided.
+#     BOTH semantics are supported (decided):
+#       (a) raw "times I logged a prayer for her" = count of PrayerSubjectLink
+#           rows for Mom's subject across the user's prayers.
+#       (b) "list cycles I prayed for her on" = count of DISTINCT
+#           Prayer.listContextNumber among those prayers (the per-cycle view;
+#           also the basis for the per-subject streak).
+#     Prayer.listContextNumber (always set) is what makes (b) work even for
+#     personal-only prayers that aren't tied to the community list.
 #
 #   TIER 2 — "my group prayed for Mom N times" (later, with groups)
 #     Same shape as tier 3 but scoped to a bounded group context. Deferred.
@@ -68,15 +70,29 @@
 #     COMMUNITY list) is STORED on User — frequently read, and bestStreak is
 #     expensive to re-derive over all history each load. See User below.
 #   - PER-SUBJECT streak ("consecutive cycles I prayed for Mom") is DERIVED, not
-#     stored. It is only well-defined once personal prayers carry a list-cycle
-#     stamp (Prayer.listContextNumber) — which is the same OPEN decision as tier
-#     1. Until then, per-subject streak over COMMUNITY prayers is derivable, but
-#     personal-only prayers can't be placed on the axis. Denormalize a per-
-#     subject streak column ONLY if it becomes a constantly-rendered hot value.
+#     stored. Now well-defined because personal prayers carry a list-cycle stamp
+#     (Prayer.listContextNumber). Denormalize a per-subject streak column ONLY if
+#     it becomes a constantly-rendered hot value.
 # ============================================================================
 
 
 enum SubjectKind { SOUL INTENTION }
+
+# Subject lifecycle — single axis, three honest states (replaces soft-delete +
+# isRecoverable flags). Exactly one applies at a time:
+#   ACTIVE   — normal; shows in the main list; eligible for daily lists.
+#   ARCHIVED — hidden from the main view but RECOVERABLE; user can restore it
+#              from an "archived" view. History intact. (e.g. removed in grief,
+#              may want back.)
+#   PURGED   — user said "gone gone"; hidden EVERYWHERE incl. the archive view;
+#              not user-restorable. The ROW STILL PERSISTS underneath (frozen
+#              history) so derived counts / past PrayerListEntry / PrayerSubjectLink
+#              never break. NOTE: purged = UI-permanent, NOT data-erased. A true
+#              data-rights (GDPR) erase is a separate future feature with its own
+#              careful history handling — do not conflate the two.
+# Filtering: main list = ACTIVE; archive view = ARCHIVED; PURGED = nowhere.
+# The self-subject is forced ACTIVE and cannot be archived/purged (structural).
+enum SubjectStatus { ACTIVE ARCHIVED PURGED }
 
 
 # ----------------------------------------------------------------------------
@@ -153,10 +169,14 @@ type PrayerSubject @table {
   # The owner's own soul, auto-created at signup. ALWAYS carried on the list,
   # free, pinned to the top of the owner's entry, and NOT counted against
   # includeLimit. (Being carried is the dividend for participating, not a slot
-  # the user spends.) sortOrder is ignored for the self-subject.
+  # the user spends.) sortOrder is ignored for the self-subject. Forced ACTIVE —
+  # cannot be archived/purged.
   isSelf: Boolean! @default(value: false)
 
-  isActive: Boolean! @default(value: true)  # eligible to appear on daily lists
+  # Lifecycle (see SubjectStatus enum). ACTIVE = on main list & list-eligible;
+  # ARCHIVED = recoverable hide; PURGED = "gone gone" (UI-permanent, row persists
+  # for history integrity). Only ACTIVE subjects are eligible for daily lists.
+  status: SubjectStatus! @default(value: ACTIVE)
 
   # Governs the "above the fold" cutoff for NON-self subjects: the top
   # `includeLimit` active non-self subjects by sortOrder are carried on the next
@@ -185,6 +205,13 @@ type PrayerList @table {
   listDate: Date!
   status: String! @default(value: "draft")    # "draft" | "published" — review gate before printing
   publishedAt: Timestamp
+
+  # When the social VIDEO of this list went live. null while the list is current
+  # but its video is still being filmed/edited — the app shows a "the list is
+  # being filmed, available shortly" placeholder instead of the video. Set once
+  # the video is published. (Option C: a list can be CURRENT before its video is
+  # up; current flips at the ~6am cutoff, the video follows ~8am.)
+  videoPublishedAt: Timestamp
 
   # Denormalized counts (server-written). Counters are a standard read
   # optimization, not "un-relational."
@@ -263,25 +290,23 @@ type PrayerListEntry @table(key: ["list", "subject"]) {
 # the first time a user prays against the current list (the reciprocal mechanic);
 # null for a personal-only prayer (e.g. a user who already prayed the community
 # list today and is now logging a personal prayer just for their people).
-# Enforced in the mutation / app logic, not the schema.
+# Enforced in app UX now (optimistic client write); server-side reconciliation
+# deferred (accepted interim gap — a direct API caller could bypass the rule;
+# low stakes for a prayer app at launch).
 #
-# OPEN DECISION — listContextNumber:
-#   A personal-only prayer has communityList = null, so it is NOT placed on the
-#   list-number axis. IF tier-1 personal counts/streaks should be measured in
-#   "list cycles I prayed for X" (rather than raw event counts), add:
-#       listContextNumber: Int      # the list number current when this prayer
-#                                    # was logged; ALWAYS set, independent of
-#                                    # communityList. Pure metadata for
-#                                    # aggregation/streaks.
-#   This is UNRESOLVED. Not added yet — adding it is a clean additive change
-#   whenever tier-1 semantics are decided. (Tier-3 world-count does NOT need it.)
+# listContextNumber = the list number that was CURRENT when this prayer was
+# logged. ALWAYS set, independent of communityList. Pure metadata that places
+# EVERY prayer (including personal-only ones) on the list-cycle axis — this is
+# what powers tier-1 "list cycles I prayed for X" and the per-subject streak.
+# (Option C means current flips cleanly at cutoff, so this is unambiguous.)
 # ----------------------------------------------------------------------------
 type Prayer @table {
   user: User!
   prayedAt: Timestamp! @default(expr: "request.time")
   durationSeconds: Int!
   communityList: PrayerList                  # null = personal-only prayer
-  note: String                               # optional private reflection
+  listContextNumber: Int!                    # current list number at prayer time; always set
+  note: String                               # optional private reflection; editable later (note-only)
 
   # Consent-gated, optional. Primarily powers the user's OWN "where I prayed"
   # history/map now; can feed a coarse/fuzzed global view later. Store precise,
@@ -289,7 +314,7 @@ type Prayer @table {
   latitude: Float
   longitude: Float
 
-  # FUTURE/OPEN: listContextNumber: Int   (see OPEN DECISION note above)
+
 }
 
 

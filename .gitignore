@@ -33,10 +33,7 @@ app/.flutter-plugins
 app/.flutter-plugins-dependencies
 app/build/
 app/.pub-cache/
-app/ios/Pods/
-app/android/local.properties
-app/symbols/
-# pubspec.lock is intentionally committed for apps (reproducible builds)
+app/pubspec.lock
 
 # ---- SQL Connect generated SDK output (regenerated from schema) ----
 **/dataconnect-generated/

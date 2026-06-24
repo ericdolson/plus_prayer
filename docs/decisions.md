@@ -7,9 +7,81 @@ resolving silently.
 This file captures decisions. Verbose working-session summaries for agent
 ingestion live in `../seeds/`.
 
+## Operations & List Lifecycle
+
+### Decision: Gap dissolved via Option C — current flips at cutoff
+**Timestamp:** 2026-06-24
+The earlier "prayers close at 6am, list becomes current at 8am" created a 2-hour
+gap where praying for the current list would put you on the list AFTER next —
+violating the "pray for the current list, be on the next" promise. Resolved by
+flipping "current" at the cutoff itself: pray before cutoff → on N+1; pray after
+→ you're praying for N+1 (now current) → on N+2. No gap, promise literally true.
+A list can be CURRENT before its video is published; the app shows a "the list is
+being filmed, available shortly" placeholder until videoPublishedAt is set
+(on-brand anticipation, not an apology). Added videoPublishedAt to PrayerList.
+This SIMPLIFIED the schema — no prayersClosedAt gap-state needed.
+
+### Decision: logPrayer is an optimistic client write, not a gated function
+**Timestamp:** 2026-06-24
+Offline capability matters most exactly when it's most likely to fail — someone
+praying at a sentimental place without signal. So logPrayer writes Prayer +
+PrayerSubjectLink rows directly (offline-capable), UI-validated. The community-
+list rule is UI-enforced now; server-side reconciliation is DEFERRED. ACCEPTED
+INTERIM GAP: a determined actor hitting the mutation directly could bypass the
+rule (e.g. farm stats without a community prayer). Low stakes for a prayer app at
+launch; reconciliation added later when bad actors are real, with no migration
+(schema already supports the check). Logged here so it's a decision on record,
+not an oversight.
+
+### Decision: Subject lifecycle is a single status enum (ACTIVE/ARCHIVED/PURGED)
+**Timestamp:** 2026-06-24
+Replaces the proposed soft-delete + isRecoverable two-flag model (which allowed
+contradictory combinations). One axis, three honest states: ACTIVE (main list,
+list-eligible), ARCHIVED (recoverable hide — e.g. removed in grief, may want
+back), PURGED ("gone gone": hidden everywhere incl. archive, not user-restorable,
+but the ROW PERSISTS for history/count integrity). Lets a user truly clean up a
+troll/joke subject without it lurking forever, while derived counts never break.
+PURGED = UI-permanent, NOT data-erased — a real GDPR-style erase is a separate
+future feature. Self-subject forced ACTIVE, cannot be archived/purged.
+
+### Decision: listContextNumber added; tier-1 supports BOTH semantics
+**Timestamp:** 2026-06-24
+Prayer.listContextNumber (always set = current list number at prayer time)
+resolves the earlier open question. Tier-1 personal count now supports both raw
+("times I prayed for X" = link count) AND cycle ("list cycles I prayed for X" =
+distinct listContextNumber). The cycle view is also the per-subject streak basis.
+Works for personal-only prayers (communityList = null) because listContextNumber
+is independent of communityList.
+
+### Decision: signUp is an auth-trigger function, not a client mutation
+**Timestamp:** 2026-06-24
+onAuthUserCreated creates the User + self-PrayerSubject atomically, server-side,
+so it can't be skipped (a client-called signUp could be authenticated-but-never-
+called, leaving a user with no self-soul, breaking the core promise). Must detect
+anonymous→permanent LINKING and not create a second User row.
+
+### Decision: Prayer side-effects are reactions, not inside logPrayer
+**Timestamp:** 2026-06-24
+Count bump + RTDB mirror + streak update happen as onPrayerLogged reaction, not
+in the logPrayer write — keeps the write pure and offline-friendly. Wiring (true
+DB trigger vs. sequential function call) confirmed against current Data Connect
+capabilities at implementation; designed as separable units.
+
+### Cut for MVP: setSubjectActive / pause-a-subject
+**Timestamp:** 2026-06-24
+Pausing a subject from lists without archiving is deferred to avoid complexity
+creep. The status enum can gain a paused-equivalent later if user control demands
+it. updatePrayer is NOTE-ONLY; prayers are never hard-deleted.
+
+### Operation spec
+**Timestamp:** 2026-06-24
+Full screen→operation map at
+backend/dataconnect/connector/OPERATIONS.md — the spec the .gql connectors and
+Cloud Functions are built from.
+
 ---
 
-## Backend / Database
+
 
 ### Decision: SQL Connect (managed Postgres) over Firestore for the primary store
 **Timestamp:** 2026-06-23
@@ -108,6 +180,57 @@ A printed list does not change if the user later edits the subject.
 Primarily for the user's own "where I prayed" history/map now; coarse/fuzzed
 global view possible later. Store precise, fuzz on output. Impossible to
 backfill — capture from day one.
+
+### Decision: Counts & streaks are DERIVED on read, not stored (with two exceptions)
+**Timestamp:** 2026-06-23
+Principle: don't store derived data until a read is a measured bottleneck; a
+computed value is always correct, a stored one can drift. Three per-subject
+"prayed for" counts, all derived in one operation: Tier 1 "I prayed for Mom"
+(count of the user's PrayerSubjectLink rows for the subject), Tier 2 "my group
+prayed for Mom" (later, with groups), Tier 3 "the world prayed for Mom" =
+SUM(PrayerList.prayerCount) over the lists the subject appeared on
+(PrayerListEntry). Tier 3 works because the core mechanic credits everyone on a
+list with that list's prayers; it needs no cross-user identity (it's the
+subject's own entries). Per-subject streaks also derived. EXCEPTIONS that stay
+STORED: the USER participation streak on User (read on nearly every app open;
+bestStreak costly to re-derive over all history) and the denormalized list
+counts. Caution captured: never sum tier-3 across subjects into a headline
+number — every subject on a list is credited that list's full count, so summing
+multiply-counts. "Prayers the world offered" is a separate figure
+(PrayerList.prayerCount itself).
+
+### Decision: World-count derivation = sum of prayerCount over the subject's lists
+**Timestamp:** 2026-06-23
+"The world prayed for Mom N times" = SUM(PrayerList.prayerCount) for every list
+where Mom has a PrayerListEntry. Example: Mom on lists 1–4 at 1,000 each = 4,000.
+Honest and computable from existing tables; no identity resolution. Separately
+surfaced from "how many prayers the world offered" to avoid implying inflated
+multiples — handled by how each stat is worded in the UI.
+
+### Decision: Live world-count stitched client-side (static sqlc + live RTDB)
+**Timestamp:** 2026-06-23
+sqlc query returns the sum over the subject's CLOSED lists (current EXCLUDED)
+plus a boolean "is the subject on the current list". If true, the client adds the
+live current-list count from its existing RTDB subscription. sqlc never
+subscribes — reuses the RTDB live number already powering the list display. Rule
+preventing double-count: sqlc owns everything up to but not including the current
+list; RTDB owns the current list.
+
+### Decision: Settle-on-close — freeze a list's final count at transition
+**Timestamp:** 2026-06-23
+When a list stops being current (the manual ~8am transition opens the next one),
+the transition job freezes that list's final live prayerCount (from RTDB) into
+PrayerList.prayerCount as its permanent settled value. This makes the world-count
+historical sum read finalized numbers and lets the client safely add the live
+value for only the current list. Added to assembleNextList's responsibilities.
+
+### OPEN: Prayer.listContextNumber (tier-1 personal semantics undecided)
+**Timestamp:** 2026-06-23
+Personal-only prayers (communityList = null) aren't on the list-number axis. If
+tier-1 personal counts/streaks should read as "list cycles I prayed for X" rather
+than raw event counts, add a `listContextNumber: Int` (always set) to Prayer.
+UNRESOLVED — left undecided rather than silently chosen. Clean additive change
+whenever settled. Tier-3 world-count does NOT need it.
 
 ### Decision: Signup creates User + self-PrayerSubject in one transaction
 **Timestamp:** 2026-06-23
