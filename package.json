@@ -8,6 +8,7 @@
     "deploy:dataconnect": "cd backend && firebase deploy --only dataconnect",
     "deploy:functions": "cd backend && firebase deploy --only functions",
     "deploy:rules": "cd backend && firebase deploy --only database,storage",
-    "emulators": "cd backend && firebase emulators:start"
+    "emulators": "cd backend && firebase emulators:start",
+    "reset-git-auth": "ssh -O exit git@github-personal && ssh -Tv git@github-personal"
   }
 }
