@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const API_URL = 'https://www.namus.gov/api/CaseSets/NamUs/MissingPersons/Search';
-const TAKE = 10;
+const TAKE = 10000;
 
 async function fetchMissingChildren() {
   const res = await fetch(API_URL, {
@@ -73,8 +73,8 @@ function writePdf({ outputPath, listText, count, dateLabel }) {
 
     doc
       .font('Helvetica-Bold')
-      .fontSize(16)
-      .text('Missing Children Prayer List', { align: 'center' });
+      .fontSize(12)
+      .text('Missing Children', { align: 'center' });
 
     doc
       .font('Helvetica')
@@ -86,7 +86,7 @@ function writePdf({ outputPath, listText, count, dateLabel }) {
     doc
       .font('Helvetica')
       .fontSize(10)
-      .text(listText, { align: 'left', lineGap: 3 });
+      .text(listText, { align: 'justify', lineGap: 3 });
 
     doc.end();
     stream.on('finish', resolve);
