@@ -1,0 +1,16 @@
+postman request POST 'https://www.namus.gov/api/CaseSets/NamUs/MissingPersons/Search' \
+  --header 'Accept: application/json, text/plain, */*' \
+  --header 'Accept-Language: en-US,en;q=0.9,es;q=0.8' \
+  --header 'Connection: keep-alive' \
+  --header 'Content-Type: application/json;charset=UTF-8' \
+  --header 'Origin: https://www.namus.gov' \
+  --header 'Referer: https://www.namus.gov/MissingPersons/Search' \
+  --header 'Sec-Fetch-Dest: empty' \
+  --header 'Sec-Fetch-Mode: cors' \
+  --header 'Sec-Fetch-Site: same-origin' \
+  --header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36' \
+  --header 'sec-ch-ua: "Google Chrome";v="149", "Chromium";v="149", "Not)A;Brand";v="24"' \
+  --header 'sec-ch-ua-mobile: ?0' \
+  --header 'sec-ch-ua-platform: "macOS"' \
+  --header 'Cookie: www-namus-gov=8f803018f73c73d175656475ef359421; BIGipServerAtujtYVZJlNcTf/GKdr9dA=!w5Vo7R0Z0cdi00skgWr+f95rFGCfyhjA0P7lthnEn0dz2OIrnlJXZ9zoBKgpgEnSRKvn4SoWpr4got4MNmUU3yDZ1gnri8ASQGEg7TCh; _ga=GA1.1.452775813.1782497486; sessionExpiration=2026-06-26T18:41:55.220Z; _ga_JX21TT7T3F=GS2.1.s1782497485$o1$g1$t1782497525$j20$l0$h0; www-namus-gov=8f803018f73c73d175656475ef359421' \
+  --body '{"predicates":[{"field":"computedMissingMinAge","operator":"LessThanOrEqualTo","value":17}],"take":5000,"skip":0,"projections":["lastName","firstName","computedMissingMaxAge"],"orderSpecifications":[{"field":"dateOfLastContact","direction":"Descending"}],"documentFragments":["birthDate"]}'

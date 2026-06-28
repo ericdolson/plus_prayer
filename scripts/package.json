@@ -1,0 +1,12 @@
+{
+  "name": "plusprayer-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "missing-children": "node missing_children/generate.js"
+  },
+  "dependencies": {
+    "pdfkit": "^0.15.2"
+  }
+}
