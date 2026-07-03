@@ -261,6 +261,18 @@ Stated honestly, curation builds trust.
 
 ## Social / Publishing
 
+### Decision: 🙏 on any past post counts; old posts get a closed-state comment
+**Timestamp:** 2026-07-03
+When a new list goes live, the previous list's pinned comment is updated to a
+closed state: "List [N] is sealed. 🙏 here still counts — or find the current
+list at [link]." The aggregation pipeline scans ALL past posts nightly, not just
+the most recent — a 🙏 on any post carries the commenter onto the next list.
+Rationale: the algorithm surfaces old posts to new viewers; rejecting late
+participation would break the promise and frustrate people who had no way to
+know the post was old. The closed-state copy is honest about the seal while
+remaining generous. TikTok posts are left unchanged (no mechanic to close;
+caption already redirects to YouTube/Instagram).
+
 ### Decision: Social phase is SOULS-ONLY (no free-text intentions)
 **Timestamp:** 2026-06-23 (SUPERSEDES earlier "🙏 <intention>" social mechanic)
 Dropping the free social intention: (1) keeps social consistent with Model A —

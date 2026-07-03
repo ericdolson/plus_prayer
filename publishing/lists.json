@@ -8,9 +8,15 @@
       "notes": "Seed list — missing children from NamUs database",
       "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_1.mp4?alt=media&token=d857312f-0353-414e-ae24-afc827d99351",
       "published": {
-        "scheduled_for": "2026-07-03T16:00:00Z",
+        "intended_for": "2026-07-03T15:00:00Z",
+        "published_at": "2026-07-03T11:58:00Z",
+        "note": "Published immediately instead of at 09:00 MDT — Zernio connector stored the target wall-clock time tagged as UTC (past-due), firing on creation. Content correct; timing failed. Left live intentionally.",
         "platforms": {
-          "tiktok": { "post_id": "6a47a018efba0802e510c762", "status": "scheduled" }
+          "youtube":   { "post_id": "6a47a3c8b086875ea024e42a", "status": "posted" },
+          "instagram": { "post_id": "6a47a3d7ad61c2ebd16ca0f5", "status": "posted" },
+          "facebook":  { "post_id": "6a47a3dbad61c2ebd16ca13b", "status": "posted" },
+          "threads":   { "post_id": "6a47a3ec908ad802ed97c07e", "status": "posted" },
+          "tiktok":    { "post_id": "6a47a40c15f43c07a362f88b", "status": "posted" }
         }
       }
     }

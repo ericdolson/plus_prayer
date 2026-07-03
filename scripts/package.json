@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "missing-children": "node missing_children/generate.js"
+    "missing-children": "node missing_children/generate.js",
+    "collect-participants": "node publishing/collect_participants.js"
   },
   "dependencies": {
     "pdfkit": "^0.15.2"

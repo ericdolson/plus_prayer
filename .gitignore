@@ -10,6 +10,10 @@
 /shorts/
 publishing/shorts/
 
+# ---- Publishing video workspace (staging area — all binary, all gitignored) ----
+# Final exports live in Firebase Storage; Adobe project/preview/cache files stay local.
+publishing/videos/
+
 # ---- Secrets / credentials ----
 *.env
 .env*
