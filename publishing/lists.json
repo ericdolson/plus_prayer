@@ -1,12 +1,37 @@
 {
-  "lists": [
-    {
-      "list_number": 1,
+  "template": {
+    "soul_count": 0,
+    "intention_count": 0,
+    "notes": null,
+    "video_url": "",
+    "thumbnail_url": null
+  },
+  "lists": {
+    "2": {
+      "date": "2026-07-04",
+      "soul_count": 4630,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_2.mp4?alt=media&token=4c0c7a3c-13f8-43c6-a180-1608f9682b90",
+      "thumbnail_url": null,
+      "published": {
+        "scheduled_for": "2026-07-04T15:00:00Z",
+        "platforms": {
+          "youtube":   { "post_id": "6a48d951545d81fdef8feb05", "status": "scheduled" },
+          "facebook":  { "post_id": "6a48d954b1f2a2e94f3bc9e3", "status": "scheduled" },
+          "instagram": { "post_id": "6a48d958545d81fdef8febd2", "status": "scheduled" },
+          "threads":   { "post_id": "6a48d95ae60b8e90469ca312", "status": "scheduled" },
+          "tiktok":    { "post_id": "6a48d95ee60b8e90469ca345", "status": "scheduled" }
+        }
+      }
+    },
+    "1": {
       "date": "2026-07-03",
       "soul_count": 4604,
       "intention_count": 0,
       "notes": "Seed list — missing children from NamUs database",
       "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_1.mp4?alt=media&token=d857312f-0353-414e-ae24-afc827d99351",
+      "thumbnail_url": null,
       "published": {
         "intended_for": "2026-07-03T15:00:00Z",
         "published_at": "2026-07-03T11:58:00Z",
@@ -20,5 +45,5 @@
         }
       }
     }
-  ]
+  }
 }

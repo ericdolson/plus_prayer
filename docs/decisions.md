@@ -263,15 +263,18 @@ Stated honestly, curation builds trust.
 
 ### Decision: 🙏 on any past post counts; old posts get a closed-state comment
 **Timestamp:** 2026-07-03
-When a new list goes live, the previous list's pinned comment is updated to a
-closed state: "List [N] is sealed. 🙏 here still counts — or find the current
-list at [link]." The aggregation pipeline scans ALL past posts nightly, not just
-the most recent — a 🙏 on any post carries the commenter onto the next list.
-Rationale: the algorithm surfaces old posts to new viewers; rejecting late
-participation would break the promise and frustrate people who had no way to
-know the post was old. The closed-state copy is honest about the seal while
-remaining generous. TikTok posts are left unchanged (no mechanic to close;
-caption already redirects to YouTube/Instagram).
+When a new list goes live, the previous list's pinned comment is updated to point
+to the new current list: "A newer list is up now — but a 🙏 here still counts.
+Find today's list at [link]." (Wording revised 2026-07-04 — the earlier "List [N]
+is sealed" was dropped: "sealed" collides with the description, where sealing is
+what happens to the fresh current list, and "closed" would contradict the fact
+that a 🙏 still counts. Name the actual state instead: a newer list is up.) The
+aggregation pipeline scans ALL past posts nightly, not just the most recent — a
+🙏 on any post carries the commenter onto the next list. Rationale: the algorithm
+surfaces old posts to new viewers; rejecting late participation would break the
+promise and frustrate people who had no way to know the post was old. TikTok posts
+are left unchanged (no mechanic to close; caption already redirects to
+YouTube/Instagram).
 
 ### Decision: Brand voice evolves from "spare/direct" to "spare + subtle human warmth"
 **Timestamp:** 2026-07-03 (SUPERSEDES the earlier "no we / no instructed feeling" absolutes)
