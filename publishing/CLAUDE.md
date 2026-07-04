@@ -55,12 +55,21 @@ When told "publish list N at [time] [timezone]":
    zero — omit it entirely when zero.
 
 **Caption conventions (locked):**
+- **Description shape lives in `captions/list-caption-template.md`** — the locked
+  three-paragraph structure (define +Prayer + "the world plus prayer" pun → list
+  line + optional source note → ritual + CTA last). Voice = spare + subtle human
+  warmth (root CLAUDE.md). Follow the template for every list.
 - Use **souls**, not "names" — it's the brand word and carries more weight.
 - YouTube title format: `List N — [count] souls — +Prayer`
+- Description CTA phrasing: `Pray for those on it, and leave a 🙏 when you have — you'll be on the next.`
 - Pinned comment standard phrasing (YouTube, Facebook; adapt minimally for others):
   > Comment 🙏 to pray for this list. Your name goes on the next.
 - Instagram first comment directs to bio link (no tappable links in comments).
-- TikTok caption directs to YouTube/Instagram — do not reference the 🙏 mechanic there.
+- TikTok caption directs to YouTube/Instagram. It MAY carry a 🙏 for the eye-draw,
+  but anchored to those platforms ("head to YouTube or Instagram to leave a 🙏") —
+  never implying a 🙏 left on TikTok counts (comment aggregation is blocked there).
+- Do not use "retired" for the ritual — lists are kept, not destroyed; the current
+  one rests on the table until the next replaces it.
 5. Schedule the post on all platforms using the **reliable scheduling procedure
    below**, passing `video_url` as the media source.
 6. Write the result back into the `published` field of the list entry:

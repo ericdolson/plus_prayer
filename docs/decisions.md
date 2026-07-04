@@ -273,6 +273,23 @@ know the post was old. The closed-state copy is honest about the seal while
 remaining generous. TikTok posts are left unchanged (no mechanic to close;
 caption already redirects to YouTube/Instagram).
 
+### Decision: Brand voice evolves from "spare/direct" to "spare + subtle human warmth"
+**Timestamp:** 2026-07-03 (SUPERSEDES the earlier "no we / no instructed feeling" absolutes)
+The original voice banned any collective "we" and any instructed feeling. In
+practice that read as cold, and the opposite over-correction (fully warm drafts)
+read as fake. Resolved to a middle: mostly facts and restraint, but a quiet
+inclusive "we" ("Here, we hold each other") and at most ONE restrained emotional
+line per piece ("May they be found") are now allowed. Still banned: hype,
+urgency, spiritual-tourism phrases, performed/saccharine warmth, and piling on
+sentiment. Locked video-description shape (from List 2 on): (1) define +Prayer and
+state the mechanic generally, ending the paragraph on the "the world plus prayer"
+pun; (2) the list line + optional source note; (3) ritual + CTA, with the CTA the
+final piece. TikTok keeps a 🙏 in the CTA but anchored to YouTube/Instagram
+("head to YouTube or Instagram to leave a 🙏"), never implying a 🙏 left on
+TikTok counts (comment aggregation is blocked there). Template saved at
+publishing/captions/list-caption-template.md; brand-voice section in root
+CLAUDE.md updated to match.
+
 ### Decision: Social phase is SOULS-ONLY (no free-text intentions)
 **Timestamp:** 2026-06-23 (SUPERSEDES earlier "🙏 <intention>" social mechanic)
 Dropping the free social intention: (1) keeps social consistent with Model A —

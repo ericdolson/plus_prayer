@@ -30,25 +30,35 @@ into it.
 
 ## Brand Voice (MANDATORY — applies to ALL public-facing text)
 
-**Observational. Spare. Direct.**
+**Observational. Spare. Human.**
+
+Mostly facts, with restraint — but the voice may carry subtle, genuine warmth.
+The failure mode to avoid is *performed* warmth: the overly-warm drafts that
+sound fake. Aim for how a thoughtful person actually speaks, not a brand
+performing feeling. When in doubt, cut a sentence rather than add one.
 
 - State facts, leave space.
-- No emotional editorializing ("souls carried," "hearts from every tradition").
+- A quiet, inclusive "we" is allowed — the shared voice of the people who show
+  up ("Here, we hold each other"). Not a salesy or performed-community "we,"
+  and never "we" narrating how moved everyone is.
+- One restrained emotional touch is allowed when a list warrants it — a single
+  quiet line like "May they be found." One sentence, never a wind-up, never
+  piled on. Most copy carries none.
 - No urgency or hype language.
 - No spiritual tourism phrases ("every corner of the world," "held by strangers").
-- No "we" as a performed-community voice. The community speaks for itself in comments.
 - Numbers carry weight on their own. Do not editorialize them.
-- One clear CTA per section.
-- Let the community fill in meaning themselves.
+- End a section on its call to action.
+- Let the community fill in the rest of the meaning themselves.
 
 This voice applies to website copy, captions, FAQs, app copy, store listings,
-and all public-facing text. When in doubt, cut a sentence rather than add one.
+and all public-facing text.
 
 ### Quick self-check before shipping any copy
-- Did I instruct the reader to feel something? → Remove it.
-- Did I use "we" as a warm collective voice? → Rewrite.
+- Does the warmth sound performed or saccharine? → Rewrite it plainer.
+- Is more than one line asking the reader to feel something? → Cut back to at
+  most one, restrained.
 - Did I explain an algorithm or mechanic with hype? → State it plainly.
-- Could this sentence be cut without losing the fact? → Cut it.
+- Could this sentence be cut without losing the fact or the human tone? → Cut it.
 
 ---
 
