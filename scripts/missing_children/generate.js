@@ -1,7 +1,7 @@
-import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { writePdf, timestamp, dateLabel } from '../lib/print_list.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -50,48 +50,19 @@ async function generate() {
   console.log(`Retrieved ${data.results.length} of ${data.count} total records`);
 
   const entries = data.results.map(formatEntry);
-  const listText = entries.join(', ');
-
-  const now = new Date();
-  const timestamp = now.toISOString().replace(/:/g, '-').slice(0, 19);
-  const dateLabel = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   const outputDir = path.join(__dirname, 'output');
   fs.mkdirSync(outputDir, { recursive: true });
-  const outputPath = path.join(outputDir, `missing_children_${timestamp}.pdf`);
+  const outputPath = path.join(outputDir, `missing_children_${timestamp()}.pdf`);
 
-  await writePdf({ outputPath, listText, count: data.results.length, dateLabel });
+  await writePdf({
+    outputPath,
+    title: 'Missing Children',
+    subtitle: `${dateLabel()} · ${data.results.length} names`,
+    names: entries,
+  });
 
   console.log(`Saved: ${outputPath}`);
-}
-
-function writePdf({ outputPath, listText, count, dateLabel }) {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 72, size: 'LETTER' });
-    const stream = fs.createWriteStream(outputPath);
-    doc.pipe(stream);
-
-    doc
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('Missing Children', { align: 'center' });
-
-    doc
-      .font('Helvetica')
-      .fontSize(10)
-      .text(`${dateLabel} · ${count} names`, { align: 'center' });
-
-    doc.moveDown(1.5);
-
-    doc
-      .font('Helvetica')
-      .fontSize(10)
-      .text(listText, { align: 'justify', lineGap: 3 });
-
-    doc.end();
-    stream.on('finish', resolve);
-    stream.on('error', reject);
-  });
 }
 
 generate().catch(err => {

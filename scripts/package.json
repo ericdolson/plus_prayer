@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "missing-children": "node missing_children/generate.js",
-    "collect-participants": "node publishing/collect_participants.js"
+    "collect-participants": "node publishing/collect_participants.js",
+    "participants-pdf": "node publishing/participants_pdf.js"
   },
   "dependencies": {
     "pdfkit": "^0.15.2"

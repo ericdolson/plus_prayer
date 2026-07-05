@@ -33,8 +33,9 @@ list number as a string key (e.g. `"3"`), keeping the newest near the top. Fill 
 - `video_url` — paste the URL copied from Firebase Console (the full URL
   including `?alt=media&token=...`); this is also the URL passed to Zernio
 - `thumbnail_url` (optional) — public URL of the day's cover still (1080×1920
-  wax-color frame). Passed to Zernio to auto-set the TikTok and Instagram covers;
-  YouTube (Short) is set manually in Studio; Facebook/Threads ignore it.
+  wax-color frame). Passed to Zernio to auto-set the **Instagram** cover; the TikTok
+  cover via Zernio is unreliable (set manually in-app), YouTube (Short) is set
+  manually in Studio, and Facebook/Threads ignore it.
 - `soul_count` — number of names on the printed list
 - `notes` (optional) — context Claude needs for captions
 
@@ -58,12 +59,16 @@ When told "publish list N at [time] [timezone]":
    zero — omit it entirely when zero.
 
 **Caption conventions (locked):**
-- **Description shape lives in `captions/list-caption-template.md`** — the locked
-  three-paragraph structure (define +Prayer + "the world plus prayer" pun → list
-  line + optional source note → ritual + CTA last). Voice = spare + subtle human
-  warmth (root CLAUDE.md). Follow the template for every list.
+- **Description shape lives in `captions/list-caption-template.md`** — follow it for
+  every list. Structure: the **count line** placement differs by platform (see next
+  bullet), plus the "+Prayer … the world plus prayer" intro and the ritual + CTA
+  (CTA last). Voice = spare + subtle human warmth (root CLAUDE.md).
+- **Count line:** `List N — X souls[ & Y intentions]` — show souls/intentions only
+  when > 0 (join with " & "); never "& 0 intentions". On **YouTube** it's the video
+  TITLE (no "— +Prayer" suffix) and is left OUT of the description. On **every other
+  platform** it's the FIRST line of the description (source note appended if any).
 - Use **souls**, not "names" — it's the brand word and carries more weight.
-- YouTube title format: `List N — [count] souls — +Prayer`
+- YouTube title format: `List N — X souls[ & Y intentions]`
 - Description CTA phrasing: `Pray for those on it, and leave a 🙏 when you have — you'll be on the next.`
 - Pinned comment standard phrasing (YouTube, Facebook; adapt minimally for others):
   > Comment 🙏 to pray for this list. Your name goes on the next.
@@ -73,8 +78,9 @@ When told "publish list N at [time] [timezone]":
   never implying a 🙏 left on TikTok counts (comment aggregation is blocked there).
 - Do not use "retired" for the ritual — lists are kept, not destroyed; the current
   one rests on the table until the next replaces it.
-5. Schedule the post on all platforms using the **reliable scheduling procedure
-   below**, passing `video_url` as the media source.
+5. Schedule the post on all platforms using the **scheduling procedure below**
+   (`posts_create_post`), passing `video_url` as the media source and
+   `thumbnail_url` as the cover where supported.
 6. Write the result back into the `published` field of the list entry:
 ```json
 "published": {
@@ -91,27 +97,32 @@ When told "publish list N at [time] [timezone]":
 7. Commit the updated `lists.json`.
 8. Output a post-publish todo list (see below).
 
-### Reliable scheduling procedure (Zernio timezone bug — IMPORTANT)
+### Scheduling procedure — use `posts_create_post` (STANDARD)
 
-Zernio's `posts_create` `schedule_minutes` is **broken**: it computes the fire
-time from a naive *local* "now" (account tz = US Mountain) + minutes, then stores
-it tagged as UTC. Net effect: posts fire ~(local UTC offset) hours early — for a
-morning target this means they publish **immediately**. This shipped List 1 ~3h
-early across all 5 platforms on 2026-07-03. Do NOT trust the "Scheduled: HH:MM"
-confirmation from `posts_create`.
+Use **`posts_create_post`**, one call per platform. It takes `scheduled_for` (ISO
+UTC) directly and stores it **verbatim** (verified 2026-07-05, List 3), so it
+schedules at the exact instant AND sets covers in the same call — no park-and-update.
 
-`posts_update` with an explicit ISO `scheduled_for` is honored **verbatim** as
-true UTC (verified). So schedule every post this way:
+1. Convert the requested wall-clock time + timezone to the exact **UTC instant**,
+   DST-aware (e.g. 9am Mountain in July = 9am MDT = 15:00Z; January = 16:00Z).
+2. For each platform, call `posts_create_post` with `content` = that platform's
+   caption, `scheduled_for` = the target UTC ISO, media via `media_items`, plus:
+   - **YouTube** — `platforms:[{platform:"youtube", accountId, platformSpecificData:{title, visibility:"public"}}]`; cover goes on the media item (`media_items:[{type:"video", url, thumbnail}]`). Shorts ignore custom thumbnails, so also set it manually in Studio.
+   - **Instagram** — `platforms:[{platform:"instagram", accountId, platformSpecificData:{contentType:"reels", instagramThumbnail:<thumbnail_url>}}]`.
+   - **TikTok** — do NOT pass a cover. `tiktok_settings.video_cover_image_url` broke
+     List 3 (Zernio's ffmpeg cover-stitch timed out, and that attempt burned TikTok's
+     daily API quota, blocking retries). Post TikTok with **no cover** (reliable, like
+     Lists 1–2); set the TikTok cover manually in-app if wanted.
+   - **Facebook / Threads** — `platforms:[{platform, accountId}]` (no cover via API).
+3. **Verify:** the create response returns the persisted post with `scheduledFor`
+   and `status` — confirm `scheduledFor` equals the intended UTC and status is
+   `scheduled` (spot-check with `posts_get` if unsure).
 
-1. First convert the requested wall-clock time + timezone to the exact **UTC
-   instant**, accounting for DST (e.g. 9am Mountain in July = 9am MDT = 15:00Z;
-   in January = 9am MST = 16:00Z).
-2. `posts_create` (as **scheduled**, not draft — drafts can't be promoted) with
-   `schedule_minutes` >= 1440 to park the post safely in the future so the bug
-   can't fire it early. Scheduled posts require media (`video_url`).
-3. `posts_update` each post with `scheduled_for` = the exact target UTC ISO string.
-4. `posts_get` each post and **verify** `scheduled_for` equals the intended UTC
-   instant and status = `scheduled`. Only then is it correctly scheduled.
+**Do NOT use `posts_create` + `schedule_minutes`.** That path has a timezone bug:
+it computes the fire time from a naive *local* now + minutes and stores it tagged
+as UTC, so a morning target fires ~(UTC offset) hours early — effectively
+immediately (it shipped List 1 ~3h early on 2026-07-03). `posts_create_post` with
+an explicit `scheduled_for` avoids this entirely.
 
 **Caption dedup:** Zernio rejects identical content posted to the same workspace
 within 24h (409). Give each platform a distinct caption (a minor wording change
@@ -119,26 +130,50 @@ is enough) — don't reuse the exact same text across platforms.
 
 ### Post-publish todo list
 
-After every publish, output this checklist with the specific list number filled in:
+**Always output this checklist to Eric after scheduling, fully filled in and
+verbose — this is the list he actually follows.** Substitute [N], [N-1], [count],
+[time], and the exact copy; keep every step and its how-to. Omit the "close out
+List [N-1]" block only for List 1.
 
 ```
-✅ List [N] scheduled for [time] [tz]
+✅ List [N] — [count] souls — scheduled for [time] [tz] ([HH:MM] UTC)
+    Covers: Instagram + TikTok set automatically; YouTube (Short) is manual (below).
 
-Manual actions needed:
-- [ ] Instagram: pin the first comment manually (auto-pin unreliable)
-- [ ] Facebook: pin the first comment manually (no auto-pin)
-- [ ] YouTube: verify the first comment auto-pinned correctly
+── When List [N] goes live (~9am) ──
 
-When the previous list's posts go live (if applicable):
-- [ ] Update List [N-1] to point to the new list — YouTube, Instagram, Facebook: edit the pinned comment
-- [ ] Threads: the post can't be edited and has no pinned comment — REPLY to the original List [N-1] post with the update copy
+First comments (post, then pin):
+- [ ] YouTube — open the video's public WATCH PAGE (not Studio), signed in as the
+      channel. Comment:  Comment 🙏 to pray for this list. Your name goes on the next.
+      Then hover the comment → ⋮ → Pin. (Needs channel Advanced Features enabled.)
+- [ ] Facebook — as the Page, comment the same line, then ⋯ → Pin comment.
+      If the Pin option isn't on desktop, pin it in the app.
+- [ ] Instagram — comment the same line, then pin it IN THE APP (long-press → pin).
+- [ ] Threads — nothing to post (the 🙏 CTA is already in the caption).
+- [ ] TikTok — nothing required.
 
-Day of / after going live:
-- [ ] Aggregate 🙏 comments into `publishing/participants.json` (see Participant aggregation below)
-- [ ] Run `npm run participants-pdf` in `scripts/` to generate the printable list
+YouTube thumbnail:
+- [ ] Upload list_[N] thumbnail in Studio → Content → the Short → Thumbnail.
+      (Zernio can't set Short thumbnails; IG cover is already set; TikTok is posted
+      without a cover — set it manually in-app if wanted.)
+
+── Close out List [N-1] (skip for List 1) ──
+Point the old posts to the newest list:
+- [ ] YouTube — edit the pinned comment (⋮ → Edit) to:
+      List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our channel.
+- [ ] Facebook — edit the pinned comment (⋯ → Edit) to:
+      List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our Page.
+- [ ] Instagram — comments can't be edited: DELETE the old pinned comment, post a new
+      one, then re-pin it (app):
+      List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our profile.
+- [ ] Threads — REPLY to the original List [N-1] post, then pin the reply (⋮ → Pin reply):
+      List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our profile.
+- [ ] TikTok — leave unchanged.
+
+── Gather names for the next list ──
+- [ ] Ask Claude to harvest 🙏 comments since the watermark into participants.json
+      pending[[N+1]] (see Comment aggregation pipeline).
+- [ ] Run `npm run participants-pdf` in `scripts/` to generate the printable list.
 ```
-
-Omit the "previous list" block on List 1 (no prior list to close).
 
 ### First comment & pinning per platform (new video)
 
@@ -157,15 +192,20 @@ browser but pinning is often app-only; Instagram pinning is app-only.
 Covers CAN be set through the MCP — use **`posts_create_post`** (not the simplified
 `posts_create`) for video posts, passing a public thumbnail URL (host the still on
 Firebase Storage like the videos). Fields:
-- **TikTok** — `tiktok_settings: { video_cover_image_url: <url> }`. Fully supported.
-- **Instagram** — platform entry `platformSpecificData: { instagramThumbnail: <url> }`. Fully supported.
+- **TikTok** — `tiktok_settings.video_cover_image_url` exists but is **UNRELIABLE**:
+  on List 3 (2026-07-05) Zernio's ffmpeg cover-stitch timed out, and the failed
+  attempt consumed TikTok's low daily API quota, blocking retries. **Do not set the
+  TikTok cover via Zernio** — post without a cover (reliable) and set it manually
+  in-app if wanted.
+- **Instagram** — platform entry `platformSpecificData: { instagramThumbnail: <url> }`. Works (verified List 3).
 - **YouTube** — `media_items: [{ type:'video', url:<video>, thumbnail:<url> }]`, or
   `posts_update_post_metadata` `thumbnail_url` after publish. CAVEAT: Zernio custom
   thumbnails are **regular videos only, NOT Shorts** — vertical short-form posts as
   a Short, so set YouTube's thumbnail natively in Studio instead (see below).
 - **Facebook / Threads** — no reliable cover via API.
 
-So TikTok + Instagram covers can be automated at schedule time; YouTube stays a
+So only the **Instagram** cover can be safely automated at schedule time; the
+TikTok cover via Zernio is unreliable (set it manually in-app); YouTube stays a
 manual Studio step; Facebook/Threads use a default frame. Changing a cover never
 affects views or comments.
 
@@ -188,10 +228,11 @@ and Instagram covers at schedule time; upload the same still to YouTube manually
 Studio. Facebook and Threads will use a default/opening frame — keep the opening
 shot presentable so those still look fine.
 
-**Scheduling note:** `posts_create_post` also takes `scheduled_for` (ISO UTC) +
-`timezone` directly. Verify with a parked test whether it schedules at the correct
-time in one call — if so, it replaces the park-then-`posts_update` workaround AND
-sets covers in the same call.
+**Scheduling note:** the **Instagram** cover is set at schedule time by the
+standard `posts_create_post` flow (see the scheduling procedure above). Do NOT set
+the TikTok cover via Zernio — it broke List 3 (ffmpeg stitch timeout + burned the
+daily API quota); set it manually in-app. YouTube (Short) also needs a manual
+Studio upload.
 
 ### Firebase Storage — how the video URL works
 
@@ -239,26 +280,28 @@ on a schedule. (Supersedes the earlier 9:30pm/scheduled assumption.) Manual keep
 it flexible — life happens.
 
 When a new list goes live, edit the previous list's pinned comment to point to
-the new current list. Use Zernio MCP to update it. Do NOT say "sealed" or
-"closed" — "sealed" collides with the description (where sealing is what happens
-to the fresh, current list), and "closed" contradicts the mechanic that a 🙏 here
-still counts. Name the actual state: a newer list is up. Standard copy per platform:
+the new current list. Use Zernio MCP to update it. Use **"retired"** — the list is
+set aside and kept (not destroyed), which fits the ceremony and reads naturally
+before "but a 🙏 here still counts." Do NOT say "sealed" (collides with the ritual
+description, where sealing is what happens to the fresh current list) or "closed"
+(contradicts the 🙏-still-counts mechanic). Keep "retired" for this close-out
+status only — never in the ritual description. Standard copy per platform:
 
 Point people to the newest list generically (their newest post is the current
 list), using the right term per platform — no dated links to maintain.
 **Browser works for YouTube, Facebook, and Threads. Instagram must be done in the app.**
 
 **YouTube** (browser **watch page, NOT Studio** — hover the pinned comment → ⋮ → Edit → Save):
-> A newer list is up now — but a 🙏 here still counts. Find the newest list on our channel.
+> List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our channel.
 
 **Facebook** (browser — edit the pinned comment: ⋯ → Edit; editing keeps it pinned, no re-pin needed):
-> A newer list is up now — but a 🙏 here still counts. Find the newest list on our Page.
+> List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our Page.
 
 **Instagram** (APP ONLY — comments can't be edited on web, and only within 15 min in-app, so by the next day you must DELETE the old pinned comment, post this as a NEW comment, then re-pin it: long-press → pin):
-> A newer list is up now — but a 🙏 here still counts. Find the newest list on our profile.
+> List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our profile.
 
 **Threads** (browser — the post itself can't be edited after 15 min, so REPLY to the original post, then pin that reply: ⋮ → Pin reply):
-> A newer list is up now — but a 🙏 here still counts. Find the newest list on our profile.
+> List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our profile.
 
 **TikTok** — leave unchanged. The caption already directs people to YouTube/Instagram to participate; no mechanic to close.
 

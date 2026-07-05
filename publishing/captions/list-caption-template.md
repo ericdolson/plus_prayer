@@ -1,35 +1,49 @@
-# List caption template (locked 2026-07-03)
+# List caption template (locked; updated 2026-07-05)
 
-The standard description shape for a daily list, across all platforms. Voice:
-spare + subtle human warmth (see root CLAUDE.md Brand Voice). Fill the
-`{variables}` from the `lists.json` entry.
+The standard description shape for a daily list. Voice: spare + subtle human
+warmth (see root CLAUDE.md Brand Voice). Fill `{variables}` from the `lists.json`
+entry.
 
-## Structure (three paragraphs)
+## The count line
 
-1. **What +Prayer is** — define it and state the mechanic generally, ending on
-   the pun. This paragraph is the same on every list, every platform:
-   > +Prayer is a daily prayer list, filled by the people who showed up to pray
-   > for everyone on the list before. Here, we hold each other. Here is the world
-   > plus prayer.
+`List {N} — {X} souls[ & {Y} intentions]`
 
-2. **This list** — the count, plus an OPTIONAL source note (most lists have
-   none; include only when the list has a notable source, and keep any emotional
-   touch to one restrained line):
-   > List {N} — {count} souls[, filled entirely with {source}. {one optional
-   > quiet line, e.g. "May they be found."}]
+- Show souls and/or intentions **only when greater than zero**, joined by " & ".
+  Right now everything is souls-only.
+- Examples: `List 4 — 4,600 souls` · `List 12 — 4,600 souls & 37 intentions`
+- Never publish "& 0 intentions" or "0 souls".
 
-3. **Ritual + CTA** — what's on the table now, then the call to action LAST.
+## Building blocks
 
-## Per-platform paragraph 3
+- **Intro** (identical every list, every platform):
+  > +Prayer is a daily prayer list, filled by the people who showed up to pray
+  > for everyone on the list before. Here, we hold each other. Here is the world
+  > plus prayer.
+- **Optional source note** (most lists have none). One restrained line max,
+  appended to the count line:
+  > , filled entirely with {source}. {one optional quiet line, e.g. "May they be found."}
+- **Ritual + CTA** — per platform (below); the CTA is always LAST.
 
-- **YouTube / Facebook** (title: `List {N} — {count} souls — +Prayer`):
+## Where the count line goes
+
+- **YouTube** — the count line IS the video **title** (no "— +Prayer" suffix).
+  Do NOT repeat it in the description. Description = intro paragraph, then (only if
+  there's a source note) the source note on its own line, then ritual + CTA.
+- **Everyone else** (Instagram, Facebook, Threads, TikTok) — the count line is the
+  **first line** of the description (source note appended if present), then the
+  intro paragraph, then ritual + CTA. Leading with the number is the scroll-stopper
+  in the truncated preview.
+
+## Per-platform ritual + CTA
+
+- **YouTube / Facebook / Instagram:**
   > Each day's list is printed, sealed, and placed on the table, and the current
   > one is there now. Pray for those on it, and leave a 🙏 when you have — you'll
   > be on the next.
 
-- **Instagram** — same as YouTube. First comment: `How it works — link in bio.`
+  (Instagram first comment: `How it works — link in bio.`)
 
-- **Threads** (~500-char limit; trim paragraph 1 wording slightly if needed):
+- **Threads** (~500-char limit; trim the intro slightly if needed):
   > Printed, sealed, and set on the table each day; the current list is there
   > now. Pray for it, and leave a 🙏 when you have — you'll be on the next.
 
@@ -40,20 +54,32 @@ spare + subtle human warmth (see root CLAUDE.md Brand Voice). Fill the
 
 ## Conventions
 - Use **souls**, not "names."
+- Count line: souls/intentions shown only when > 0 (join with " & ").
 - Keep "the world plus prayer" un-commaed — don't over-wink at the pun.
-- Only mention `intention_count` if it is greater than zero.
-- Do not use "retired" for the ritual — lists are kept, not destroyed; the
-  current one rests on the table until the next replaces it.
+- Do not use "retired" for the ritual — lists are kept, not destroyed. ("Retired"
+  is only for the close-out status copy.)
+- Covers: Instagram is auto-set via `posts_create_post`; TikTok and YouTube covers
+  are manual (see root CLAUDE.md — do NOT set the TikTok cover via Zernio).
 
-## Worked example — List 1
+## Worked examples
 
-**YouTube / Facebook** (title `List 1 — 4,604 souls — +Prayer`):
+**Other platforms — List 1 (had a source note):**
+> List 1 — 4,604 souls, filled entirely with the names of missing children from
+> the NamUs database. May they be found.
+>
 > +Prayer is a daily prayer list, filled by the people who showed up to pray for
 > everyone on the list before. Here, we hold each other. Here is the world plus
 > prayer.
 >
-> List 1 — 4,604 souls, filled entirely with the names of missing children from
-> the NamUs database. May they be found.
+> Each day's list is printed, sealed, and placed on the table, and the current
+> one is there now. Pray for those on it, and leave a 🙏 when you have — you'll
+> be on the next.
+
+**YouTube — List 3 (no source note):**
+Title: `List 3 — 4,568 souls`
+> +Prayer is a daily prayer list, filled by the people who showed up to pray for
+> everyone on the list before. Here, we hold each other. Here is the world plus
+> prayer.
 >
 > Each day's list is printed, sealed, and placed on the table, and the current
 > one is there now. Pray for those on it, and leave a 🙏 when you have — you'll

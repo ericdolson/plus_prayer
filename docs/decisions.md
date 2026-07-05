@@ -264,11 +264,13 @@ Stated honestly, curation builds trust.
 ### Decision: 🙏 on any past post counts; old posts get a closed-state comment
 **Timestamp:** 2026-07-03
 When a new list goes live, the previous list's pinned comment is updated to point
-to the new current list: "A newer list is up now — but a 🙏 here still counts.
-Find today's list at [link]." (Wording revised 2026-07-04 — the earlier "List [N]
-is sealed" was dropped: "sealed" collides with the description, where sealing is
-what happens to the fresh current list, and "closed" would contradict the fact
-that a 🙏 still counts. Name the actual state instead: a newer list is up.) The
+to the new current list: "List [N-1] is retired — but a 🙏 here still counts. Find
+the newest list on our channel/Page/profile." (Wording history: "List [N] is
+sealed" was dropped 2026-07-04 — "sealed" collides with the ritual description and
+"closed" would contradict a 🙏 still counting. Briefly "a newer list is up now",
+then settled 2026-07-05 on "retired": the list is set aside and kept, not destroyed
+— dignified, and it reads naturally before "but a 🙏 here still counts". Kept for
+the close-out status only, never the ritual description.) The
 aggregation pipeline scans ALL past posts nightly, not just the most recent — a
 🙏 on any post carries the commenter onto the next list. Rationale: the algorithm
 surfaces old posts to new viewers; rejecting late participation would break the
