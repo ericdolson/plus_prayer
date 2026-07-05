@@ -1,0 +1,26 @@
+{
+  "last_aggregated_at": "2026-07-05T12:12:28Z",
+  "brand_accounts": {
+    "youtube": ["UCwVcRTUGUg_C3eQbA93wk3g", "UCD_ExEbqKc3cM7xEy3-6uDA"],
+    "instagram": ["17841441277607712"],
+    "facebook": ["1033072079891934"]
+  },
+  "pending": {
+    "3": [
+      {
+        "platform": "youtube",
+        "handle": "@Emmm-41",
+        "id": "UCq1Q84OPYStMkJRAse9fdZQ",
+        "at": "2026-07-04T15:10:24Z",
+        "comment_url": "https://www.youtube.com/watch?v=VMdCy7V2L8k&lc=UgwmxcuEA1nO4VBRR594AaABAg"
+      },
+      {
+        "platform": "youtube",
+        "handle": "@dillthemadpickle",
+        "id": "UCkPlCTVJGjGzEw847EA8B0Q",
+        "at": "2026-07-04T18:36:54Z",
+        "comment_url": "https://www.youtube.com/watch?v=s4ZnhAPj0Lc&lc=Ugx1FKwlc5C-jJzqTCt4AaABAg"
+      }
+    ]
+  }
+}

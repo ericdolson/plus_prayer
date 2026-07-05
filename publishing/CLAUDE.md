@@ -134,7 +134,8 @@ When the previous list's posts go live (if applicable):
 - [ ] Threads: the post can't be edited and has no pinned comment — REPLY to the original List [N-1] post with the update copy
 
 Day of / after going live:
-- [ ] Run `npm run collect-participants` in scripts/ to gather 🙏 comments for the next list
+- [ ] Aggregate 🙏 comments into `publishing/participants.json` (see Participant aggregation below)
+- [ ] Run `npm run participants-pdf` in `scripts/` to generate the printable list
 ```
 
 Omit the "previous list" block on List 1 (no prior list to close).
@@ -288,26 +289,39 @@ list), using the right term per platform — no dated links to maintain.
   comments). YouTube/Facebook/Threads use direct URLs.
 
 ## Comment aggregation pipeline
-Google Cloud Functions call the Zernio REST API nightly, aggregate 🙏 comments
-from Instagram/Facebook/YouTube, filter for the participation emoji, and output a
-markdown list. Claude's role is the summary/review layer on pre-processed data.
 
-**Scan all past posts, not just the most recent.** The algorithm surfaces old
-posts to new viewers; a 🙏 on any past list still counts toward the next list.
-This is intentional — generous to late arrivals and consistent with the promise.
-The closed-state copy on old posts confirms this explicitly.
+Harvest 🙏 comments across all posts and carry those commenters onto the next
+list. **Scan all past posts, not just the newest** — the algorithm surfaces old
+posts to new viewers, and a 🙏 on any past list still counts. State lives in
+`publishing/participants.json` (`last_aggregated_at`, `brand_accounts`, `pending`
+by target list number).
 
-The intended implementation is timestamp-based, not post-by-post:
-1. Fetch all comments across all posts since `last_aggregated_at`
-2. Filter for 🙏
-3. Deduplicate by commenter identity (someone may 🙏 multiple old posts)
-4. Output the participant list
-5. Advance `last_aggregated_at`
+**Verified against Zernio (2026-07-04 dry run):** there is no unified cross-post
+comment feed — use `comments_list_inbox_comments` (min_comments≥1) to find
+commented posts, then `comments_get_inbox_post_comments` (post_id + account_id)
+per post. Sources that actually return comments: **YouTube, Instagram, Facebook**.
+Threads returned an empty comment array despite a non-zero count (treat as
+unsupported for now — re-verify later); TikTok isn't queryable.
 
-**OPEN:** Verify that Zernio exposes a unified cross-post comment feed with
-timestamp filtering before implementing the Cloud Function. If only per-post
-endpoints exist, the function will need to iterate posts and paginate comments
-— more work but the same result.
+Harvest steps:
+1. Fetch comments across all posts; keep those with `createdTime` after
+   `last_aggregated_at`.
+2. Keep comments whose message contains 🙏 (U+1F64F), allowing a trailing skin-tone
+   modifier (e.g. `🙏🏻`, U+1F3FB–U+1F3FF).
+3. **Drop the brand's own comments** — this is the critical filter, because the
+   pinned CTA ("Comment 🙏…") and the close-out copy both contain 🙏. `isOwner:true`
+   catches channel-owned comments, but NOT secondary/wrong-login brand accounts
+   (e.g. `@PlusPrayer-m9v`, `UCD_ExEbqKc3cM7xEy3-6uDA`), so also exclude any
+   `from.id` in `participants.json` → `brand_accounts`.
+4. Deduplicate by `from.id`, per platform (YouTube/IG/FB IDs aren't cross-comparable).
+5. Append survivors to `pending[<next list number>]`.
+6. Advance `last_aggregated_at` to the harvest time.
+
+When a list is assembled, its `pending[N]` entries are the social-sourced names
+(strict name moderation applies — see root Core Principles), then clear `pending[N]`.
+
+Filter by **comment** time, not post time — that's what makes a same-day 🙏 on an
+old post count toward the next list.
 
 ## Tools
 - Publishing/comments: Zernio (cheapest paid tier suffices at one post/day)
