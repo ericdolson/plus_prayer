@@ -128,51 +128,66 @@ an explicit `scheduled_for` avoids this entirely.
 within 24h (409). Give each platform a distinct caption (a minor wording change
 is enough) — don't reuse the exact same text across platforms.
 
-### Post-publish todo list
+**Threads immediate-publish 409 — but it STILL POSTS (do not retry):** when
+publishing NOW, a Threads post may return `[409] ...already scheduled, publishing,
+or posted within 24h`. On List 4 the post **actually published anyway**, and
+retrying created a **duplicate** (two live Threads posts Eric had to prune). So on
+a Threads 409: **do NOT retry.** Verify first with `logs_list_logs platform=threads`
+(or open the Threads profile) — look for a `post.published` success; its
+`response_body` carries the real `{id, url}` and the Zernio `post_id` is in the log.
+Only post again if there's genuinely no published record. Scheduling all platforms
+together for a future time appears to avoid the 409 altogether.
 
-**Always output this checklist to Eric after scheduling, fully filled in and
-verbose — this is the list he actually follows.** Substitute [N], [N-1], [count],
-[time], and the exact copy; keep every step and its how-to. Omit the "close out
-List [N-1]" block only for List 1.
+### Post-publish todo list (CANONICAL — output every time)
+
+**After EVERY publish, output this exact checklist to Eric — same five sections,
+same order, all five platforms listed in each, every time.** Fill in [N], [N-1],
+[count][ & Y intentions], and the time. In "Publish status," mark each platform
+✅ posted or ⚠️ FAILED with its manual fix (e.g. Threads/TikTok manual post). Never
+drop a section or a platform; if a platform needs nothing in a section, write
+"nothing." Omit only the "Close out List [N-1]" section for List 1. **Every comment
+must be the COMPLETE text for that platform, ready to copy-paste — never abbreviate
+with "…" or "same as above."**
 
 ```
-✅ List [N] — [count] souls — scheduled for [time] [tz] ([HH:MM] UTC)
-    Covers: Instagram + TikTok set automatically; YouTube (Short) is manual (below).
+List [N] — [count] souls[ & [Y] intentions] — [published now | scheduled for [time] [tz] ([HH:MM]Z)]
 
-── When List [N] goes live (~9am) ──
+── 1. Publish status (confirm all five) ──
+- YouTube   — [✅ posted | ⚠️ FAILED: <reason> → <fix>]
+- Facebook  — [✅ posted | ⚠️ ...]
+- Instagram — [✅ posted (cover set) | ⚠️ ...]
+- Threads   — [✅ posted | ⚠️ FAILED → post manually (caption provided)]
+- TikTok    — [✅ posted | ⚠️ FAILED → post manually in-app (caption provided)]
 
-First comments (post, then pin):
-- [ ] YouTube — open the video's public WATCH PAGE (not Studio), signed in as the
-      channel. Comment:  Comment 🙏 to pray for this list. Your name goes on the next.
-      Then hover the comment → ⋮ → Pin. (Needs channel Advanced Features enabled.)
-- [ ] Facebook — as the Page, comment the same line, then ⋯ → Pin comment.
-      If the Pin option isn't on desktop, pin it in the app.
-- [ ] Instagram — comment the same line, then pin it IN THE APP (long-press → pin).
-- [ ] Threads — nothing to post (the 🙏 CTA is already in the caption).
-- [ ] TikTok — nothing required.
+── 2. First comment + pin (once live) ──
+- [ ] YouTube   — WATCH PAGE (not Studio), as the channel: comment
+      "Comment 🙏 to pray for this list. Your name goes on the next." → ⋮ → Pin
+- [ ] Facebook  — as the Page: same comment → ⋯ → Pin comment (or pin in app)
+- [ ] Instagram — same comment → pin IN THE APP (long-press → pin)
+- [ ] Threads   — nothing (the 🙏 CTA is already in the caption)
+- [ ] TikTok    — nothing
 
-YouTube thumbnail:
-- [ ] Upload list_[N] thumbnail in Studio → Content → the Short → Thumbnail.
-      (Zernio can't set Short thumbnails; IG cover is already set; TikTok is posted
-      without a cover — set it manually in-app if wanted.)
+── 3. Covers / thumbnail ──
+- [ ] YouTube   — upload list_[N]_thumbnail in Studio → Content → the Short → Thumbnail
+      (Zernio can't thumbnail a Short)
+- Instagram — cover auto-set ✅ (⚠️ set manually if the post was manual)
+- TikTok    — no cover (do NOT set via Zernio); set manually in-app if wanted
+- Facebook / Threads — default frame (nothing)
 
-── Close out List [N-1] (skip for List 1) ──
-Point the old posts to the newest list:
-- [ ] YouTube — edit the pinned comment (⋮ → Edit) to:
+── 4. Close out List [N-1] (skip for List 1) ──
+- [ ] YouTube   — edit pinned comment (⋮ → Edit) to:
       List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our channel.
-- [ ] Facebook — edit the pinned comment (⋯ → Edit) to:
+- [ ] Facebook  — edit pinned comment (⋯ → Edit) to:
       List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our Page.
-- [ ] Instagram — comments can't be edited: DELETE the old pinned comment, post a new
-      one, then re-pin it (app):
+- [ ] Instagram — can't edit: DELETE old pinned comment, post this new one, re-pin (app):
       List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our profile.
-- [ ] Threads — REPLY to the original List [N-1] post, then pin the reply (⋮ → Pin reply):
+- [ ] Threads   — REPLY to the List [N-1] post with this, then pin the reply (⋮ → Pin reply):
       List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our profile.
-- [ ] TikTok — leave unchanged.
+- [ ] TikTok    — leave unchanged
 
-── Gather names for the next list ──
-- [ ] Ask Claude to harvest 🙏 comments since the watermark into participants.json
-      pending[[N+1]] (see Comment aggregation pipeline).
-- [ ] Run `npm run participants-pdf` in `scripts/` to generate the printable list.
+── 5. Next list ──
+- [ ] Ask Claude to harvest 🙏 since the watermark into participants.json pending[[N+1]]
+- [ ] Run `npm run participants-pdf` in `scripts/` for the printable list
 ```
 
 ### First comment & pinning per platform (new video)

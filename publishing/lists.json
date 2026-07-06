@@ -7,6 +7,25 @@
     "thumbnail_url": null
   },
   "lists": {
+    "4": {
+      "date": "2026-07-06",
+      "soul_count": 4490,
+      "intention_count": 0,
+      "notes": "This list includes names of missing children from a public database and +Prayer community members who prayed for yesterday's list.",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_4.mp4?alt=media&token=877bf6b4-a220-4866-87d7-7ad8f0431d5c",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_4_thumbnail.png?alt=media&token=80113610-600b-4f08-9f09-38198f76469d",
+      "published": {
+        "published_at": "2026-07-06T14:28:00Z",
+        "method": "posts_create_post publish_now (immediate). New count-line format. IG cover set; no TikTok cover; TikTok published OK (daily quota reset). Threads returned 409 twice but BOTH actually published (Zernio 409-but-posts bug) — created a duplicate; Eric deleted one on Threads, kept the other.",
+        "platforms": {
+          "youtube":   { "post_id": "6a4bbb89af2f4dfe3c2fffe9", "status": "posted" },
+          "facebook":  { "post_id": "6a4bbb9ee52ae6f198d5e3c7", "status": "posted" },
+          "instagram": { "post_id": "6a4bbbb5af2f4dfe3c3009de", "status": "posted" },
+          "tiktok":    { "post_id": "6a4bbbe45963bed6d657b05d", "status": "posted" },
+          "threads":   { "post_id": "6a4bbbb9576749d38291ac48", "status": "posted", "url": "https://www.threads.com/@plusprayer/post/DadHWOrjbmh", "note": "Zernio 409'd but published anyway; a retry made a duplicate (Zernio ID 6a4bbc118e8b78be2c8ed824) which Eric deleted on Threads." }
+        }
+      }
+    },
     "3": {
       "date": "2026-07-05",
       "soul_count": 4568,
