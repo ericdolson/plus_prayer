@@ -128,15 +128,17 @@ an explicit `scheduled_for` avoids this entirely.
 within 24h (409). Give each platform a distinct caption (a minor wording change
 is enough) — don't reuse the exact same text across platforms.
 
-**Threads immediate-publish 409 — but it STILL POSTS (do not retry):** when
-publishing NOW, a Threads post may return `[409] ...already scheduled, publishing,
-or posted within 24h`. On List 4 the post **actually published anyway**, and
-retrying created a **duplicate** (two live Threads posts Eric had to prune). So on
-a Threads 409: **do NOT retry.** Verify first with `logs_list_logs platform=threads`
-(or open the Threads profile) — look for a `post.published` success; its
-`response_body` carries the real `{id, url}` and the Zernio `post_id` is in the log.
-Only post again if there's genuinely no published record. Scheduling all platforms
-together for a future time appears to avoid the 409 altogether.
+**Immediate Threads publishing returns a 409 but usually posts anyway — DELAYED.**
+Publishing NOW, Threads almost always returns `[409] ...already scheduled,
+publishing, or posted within 24h`, yet it typically **publishes anyway, a few
+minutes later** (async). Lists 4 and 5 both 409'd and then posted (~2–4 min after).
+So on a Threads 409: **do NOT retry** (retrying made a duplicate on List 4). **Wait
+a few minutes, THEN check** `logs_list_logs platform=threads` for a `post.published`
+success (its `response_body` has the real `{id, url}`; the Zernio `post_id` is on
+the log) — or just look at the Threads profile. A too-early log check shows nothing
+even though it's about to post (this happened on List 5). Only post manually if it's
+genuinely still absent after waiting. **Best fix: schedule the list a few minutes out
+instead of publishing immediately** — scheduled Threads posts go through cleanly, no 409.
 
 ### Post-publish todo list (CANONICAL — output every time)
 

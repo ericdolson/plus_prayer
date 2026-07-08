@@ -7,6 +7,44 @@
     "thumbnail_url": null
   },
   "lists": {
+    "6": {
+      "date": "2026-07-08",
+      "soul_count": 4570,
+      "intention_count": 0,
+      "notes": "Composed of names of missing children from a public database.",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_6.mp4?alt=media&token=f7c0abbd-5563-4804-80d6-2314522436d3",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_6_thumbnail.png?alt=media&token=bc3f0b5b-ba0b-4870-8280-ad4ca03ddc3b",
+      "published": {
+        "scheduled_for": "2026-07-08T15:02:00Z",
+        "method": "posts_create_post scheduled ~5 min out. All 5 scheduled cleanly — Threads NO 409 (scheduling avoids the immediate-publish 409). IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
+        "platforms": {
+          "youtube":   { "post_id": "6a4e659beee1288cd60dd612", "status": "scheduled" },
+          "facebook":  { "post_id": "6a4e659cffc24d74ca55724b", "status": "scheduled" },
+          "instagram": { "post_id": "6a4e659ec6373d061b0dca25", "status": "scheduled" },
+          "threads":   { "post_id": "6a4e659fb58a0f4d9a481285", "status": "scheduled" },
+          "tiktok":    { "post_id": "6a4e65a0b58a0f4d9a4812da", "status": "scheduled" }
+        }
+      }
+    },
+    "5": {
+      "date": "2026-07-07",
+      "soul_count": 4563,
+      "intention_count": 0,
+      "notes": "Composed of names of missing children from a public database.",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_5.mp4?alt=media&token=3ce43a80-2803-4851-a782-7a883a5ac146",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_5_thumbnail.png?alt=media&token=5edbc245-a83d-422d-b4ae-c38c14b5eae9",
+      "published": {
+        "published_at": "2026-07-07T14:10:00Z",
+        "method": "posts_create_post publish_now. All 5 posted (IG cover set; no TikTok cover). Threads returned 409 but published ~4 min later (async) — no retry, so no duplicate; the immediate log check was just too early.",
+        "platforms": {
+          "youtube":   { "post_id": "6a4d08b0b4ab93f2250622c2", "status": "posted" },
+          "facebook":  { "post_id": "6a4d08c7b4ab93f225062487", "status": "posted" },
+          "instagram": { "post_id": "6a4d0923de1e9362ecc14ba5", "status": "posted" },
+          "tiktok":    { "post_id": "6a4d08f99ceef296c6be3073", "status": "posted" },
+          "threads":   { "post_id": "6a4d08d9de99029ad44133f1", "status": "posted", "url": "https://www.threads.com/@plusprayer/post/Dafp-LNEt6a", "note": "Immediate 409'd but published ~4 min later (async); no retry, no duplicate." }
+        }
+      }
+    },
     "4": {
       "date": "2026-07-06",
       "soul_count": 4490,
