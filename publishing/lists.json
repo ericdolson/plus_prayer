@@ -7,6 +7,25 @@
     "thumbnail_url": null
   },
   "lists": {
+    "8": {
+      "date": "2026-07-10",
+      "soul_count": 4576,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_8.mp4?alt=media&token=31abb0a9-e059-4b94-82b2-59c3263c992a",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_8_thumbnail.png?alt=media&token=04daa9ab-a6ff-4bca-9964-622aeb477e8a",
+      "published": {
+        "scheduled_for": "2026-07-10T14:49:00Z",
+        "method": "posts_create_post scheduled ~5 min out. All 5 scheduled cleanly, Threads no 409. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
+        "platforms": {
+          "youtube":   { "post_id": "6a51059b80cb5bd6e9732f8e", "status": "scheduled" },
+          "facebook":  { "post_id": "6a51059c80cb5bd6e9733032", "status": "scheduled" },
+          "instagram": { "post_id": "6a51059d74eb8076bfcbbc03", "status": "scheduled" },
+          "threads":   { "post_id": "6a51059e74eb8076bfcbbc57", "status": "scheduled" },
+          "tiktok":    { "post_id": "6a5105a0dda20c214e9c9b78", "status": "scheduled" }
+        }
+      }
+    },
     "7": {
       "date": "2026-07-09",
       "soul_count": 4565,
