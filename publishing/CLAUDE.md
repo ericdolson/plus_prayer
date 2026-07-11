@@ -359,13 +359,20 @@ by target list number).
 **Verified against Zernio (2026-07-04 dry run):** there is no unified cross-post
 comment feed — use `comments_list_inbox_comments` (min_comments≥1) to find
 commented posts, then `comments_get_inbox_post_comments` (post_id + account_id)
-per post. Sources that actually return comments: **YouTube, Instagram, Facebook**.
-Threads returned an empty comment array despite a non-zero count (treat as
-unsupported for now — re-verify later); TikTok isn't queryable.
+per post. Sources that actually return comments: **YouTube, Instagram, Facebook,
+Threads** (Threads confirmed working 2026-07-11; some Threads `from` objects omit
+`id` entirely, so use `isOwner` for the brand filter there rather than relying on
+`from.id`). TikTok isn't queryable.
 
 Harvest steps:
-1. Fetch comments across all posts; keep those with `createdTime` after
-   `last_aggregated_at`.
+1. Fetch comments across **every** commented post returned above — not just posts
+   published since the last harvest, and not just posts whose comment count looks
+   like it grew (there's no reliable per-post history to compare against). Keep
+   those with `createdTime` after `last_aggregated_at`. Concretely: when a new list
+   goes live, the brand also drops a "List N is retired — but a 🙏 here still
+   counts" comment on the *previous* list's post — that comment is same-day and
+   contains 🙏, so skipping old posts both risks missing a real late 🙏 on an old
+   list and means this brand comment never gets the chance to be filtered by step 3.
 2. Keep comments whose message contains 🙏 (U+1F64F), allowing a trailing skin-tone
    modifier (e.g. `🙏🏻`, U+1F3FB–U+1F3FF).
 3. **Drop the brand's own comments** — this is the critical filter, because the

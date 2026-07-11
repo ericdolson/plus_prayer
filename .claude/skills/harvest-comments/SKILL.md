@@ -21,8 +21,14 @@ list **N** in `publishing/participants.json`.
    `brand_accounts`, `pending`.
 2. `comments_list_inbox_comments` (min_comments >= 1) → commented posts across
    YouTube / Instagram / Facebook / Threads (TikTok is not queryable).
-3. For each post that could have comments after the watermark (its count grew, or
-   it's a recent post), call `comments_get_inbox_post_comments` (post_id + account_id).
+3. For **every** commented post returned in step 2 — not just the newest ones —
+   call `comments_get_inbox_post_comments` (post_id + account_id). A 🙏 on an old
+   list's post still counts toward the next list, so old posts must be checked on
+   every harvest, not just when their count looks like it grew. In particular, the
+   brand posts a "List N is retired — but a 🙏 here still counts" comment on the
+   *previous* list's post shortly after each new list goes live — this itself
+   contains 🙏 and is brand-authored (`isOwner: true`), so it's excluded by the
+   filter below, but only if that post was actually checked.
 4. Keep a comment only if ALL of these hold:
    - the message contains 🙏 (U+1F64F), allowing a trailing skin-tone modifier
      (🙏🏻 🙏🏼 🙏🏽 🙏🏾 🙏🏿);
@@ -43,5 +49,7 @@ list **N** in `publishing/participants.json`.
   `UCD_ExEbqKc3cM7xEy3-6uDA`], instagram [`17841441277607712`], facebook
   [`1033072079891934`]. Add any new brand/secondary account you catch posting the CTA.
 - When list N is actually assembled/printed, clear `pending["N"]`.
-- Threads/TikTok comment retrieval is unreliable/blocked; effective sources are
-  YouTube, Instagram, Facebook.
+- TikTok comments aren't queryable. Threads comment retrieval does work (confirmed
+  2026-07-11) — some Threads comment `from` objects omit `id` entirely, so lean on
+  `isOwner` for the brand-comment filter there rather than assuming `from.id` is
+  always present.
