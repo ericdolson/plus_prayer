@@ -7,6 +7,25 @@
     "thumbnail_url": null
   },
   "lists": {
+    "9": {
+      "date": "2026-07-11",
+      "soul_count": 4587,
+      "intention_count": 0,
+      "notes": "Composed of names of missing children from a public database.",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_9.mp4?alt=media&token=182c3cd5-4b8b-4f08-a024-e1deec930bd3",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_9_thumbnail.png?alt=media&token=3bd6c5eb-1e9d-4126-b82c-2c6e2a2caa86",
+      "published": {
+        "scheduled_for": "2026-07-11T16:19:00Z",
+        "method": "posts_create_post scheduled ~5 min out. All 5 scheduled cleanly, Threads no 409. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
+        "platforms": {
+          "youtube":   { "post_id": "6a526bd42aaa63bae46b3af0", "status": "scheduled" },
+          "facebook":  { "post_id": "6a526bd6eedc62e0d75574fc", "status": "scheduled" },
+          "instagram": { "post_id": "6a526bdaeedc62e0d7557535", "status": "scheduled" },
+          "threads":   { "post_id": "6a526bdd1ca5104ed794ee8d", "status": "scheduled" },
+          "tiktok":    { "post_id": "6a526bdf120fdbe54b153f26", "status": "scheduled" }
+        }
+      }
+    },
     "8": {
       "date": "2026-07-10",
       "soul_count": 4576,
