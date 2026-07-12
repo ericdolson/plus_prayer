@@ -103,6 +103,17 @@ Use **`posts_create_post`**, one call per platform. It takes `scheduled_for` (IS
 UTC) directly and stores it **verbatim** (verified 2026-07-05, List 3), so it
 schedules at the exact instant AND sets covers in the same call — no park-and-update.
 
+**Finding the tool (as of 2026-07-12):** `posts_create_post` is no longer a
+top-level MCP tool — only the simplified `posts_create` (single platform,
+relative `schedule_minutes`, no `media_items`/`platformSpecificData`) and
+`posts_cross_post` are directly listed, and neither supports what this
+procedure needs. The full tool still exists in Zernio's larger auto-generated
+catalog: call `mcp__zernio__search_tools` (query e.g. "create post
+scheduled_for platforms media_items") to get its schema, then invoke it via
+`mcp__zernio__call_tool` with `name: "posts_create_post"` and the arguments
+below as `arguments`. Confirmed working 2026-07-12, List 10 — all five
+platforms scheduled correctly this way.
+
 1. Convert the requested wall-clock time + timezone to the exact **UTC instant**,
    DST-aware (e.g. 9am Mountain in July = 9am MDT = 15:00Z; January = 16:00Z).
 2. For each platform, call `posts_create_post` with `content` = that platform's
