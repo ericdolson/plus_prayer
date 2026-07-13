@@ -7,6 +7,25 @@
     "thumbnail_url": null
   },
   "lists": {
+    "11": {
+      "date": "2026-07-13",
+      "soul_count": 4577,
+      "intention_count": 0,
+      "notes": "Composed of names of missing children from a public database.",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0011.mp4?alt=media&token=8c19566c-3dd1-48bc-81a1-75a2cbada88b",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0011_thumbnail.png?alt=media&token=c22c3846-6835-4071-b185-ec077715d887",
+      "published": {
+        "scheduled_for": "2026-07-13T14:45:00Z",
+        "method": "posts_create_post via zernio call_tool passthrough. NOTE: intended a ~5-min-out schedule but the computed scheduled_for (12:50:00Z) was already elapsed by call time (actual ~14:35Z), so YouTube/Instagram/TikTok published immediately instead of after a delay. Facebook and Threads both hit content-dedup 409s on first attempt (FB shared identical text with IG; Threads collided against what looks like a phantom record from the mistimed first attempt) — both succeeded after a minor caption reword, scheduled ~3 min out for 14:45Z. All five effectively live within the same few-minute window.",
+        "platforms": {
+          "youtube":   { "post_id": "6a54f7afa0daa116d3fc3866", "status": "published", "url": "https://www.youtube.com/watch?v=LwMUnEuPGLo" },
+          "facebook":  { "post_id": "6a54f89c4a88c4f8c48ebea1", "status": "scheduled" },
+          "instagram": { "post_id": "6a54f7f8cd828dd45f889eb0", "status": "published" },
+          "threads":   { "post_id": "6a54f93cd4107735f61b0fc4", "status": "scheduled" },
+          "tiktok":    { "post_id": "6a54f82cb987ba2efe2b1de4", "status": "published" }
+        }
+      }
+    },
     "10": {
       "date": "2026-07-12",
       "soul_count": 4587,
