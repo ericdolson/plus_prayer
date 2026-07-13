@@ -16,12 +16,12 @@
       "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0011_thumbnail.png?alt=media&token=c22c3846-6835-4071-b185-ec077715d887",
       "published": {
         "scheduled_for": "2026-07-13T14:45:00Z",
-        "method": "posts_create_post via zernio call_tool passthrough. NOTE: intended a ~5-min-out schedule but the computed scheduled_for (12:50:00Z) was already elapsed by call time (actual ~14:35Z), so YouTube/Instagram/TikTok published immediately instead of after a delay. Facebook and Threads both hit content-dedup 409s on first attempt (FB shared identical text with IG; Threads collided against what looks like a phantom record from the mistimed first attempt) — both succeeded after a minor caption reword, scheduled ~3 min out for 14:45Z. All five effectively live within the same few-minute window.",
+        "method": "posts_create_post via zernio call_tool passthrough. NOTE: intended a ~5-min-out schedule but the computed scheduled_for (12:50:00Z) was already elapsed by call time (actual ~14:35Z), so YouTube/Instagram/TikTok published immediately instead of after a delay. Facebook and Threads both returned content-dedup 409s on their first attempt — Eric confirmed afterward that BOTH of those first attempts actually posted anyway despite the 409, so the reworded retries created DUPLICATES on Facebook and Threads (not phantom collisions as assumed at the time). Manual cleanup needed: on each of Facebook and Threads, delete one of the two live List 11 posts (keep whichever Eric decides), matching the List 4 precedent.",
         "platforms": {
           "youtube":   { "post_id": "6a54f7afa0daa116d3fc3866", "status": "published", "url": "https://www.youtube.com/watch?v=LwMUnEuPGLo" },
-          "facebook":  { "post_id": "6a54f89c4a88c4f8c48ebea1", "status": "scheduled" },
+          "facebook":  { "post_id": "6a54f89c4a88c4f8c48ebea1", "status": "duplicate_needs_cleanup", "note": "First attempt (identical text to Instagram) 409'd but posted anyway; this reworded retry created a second live post. Delete one manually." },
           "instagram": { "post_id": "6a54f7f8cd828dd45f889eb0", "status": "published" },
-          "threads":   { "post_id": "6a54f93cd4107735f61b0fc4", "status": "scheduled" },
+          "threads":   { "post_id": "6a54f93cd4107735f61b0fc4", "status": "duplicate_needs_cleanup", "note": "First attempt 409'd but posted anyway; this reworded retry created a second live post. Delete one manually." },
           "tiktok":    { "post_id": "6a54f82cb987ba2efe2b1de4", "status": "published" }
         }
       }
