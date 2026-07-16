@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-07-15T13:06:40Z",
+  "last_aggregated_at": "2026-07-16T12:49:00Z",
   "brand_accounts": {
     "youtube": ["UCwVcRTUGUg_C3eQbA93wk3g", "UCD_ExEbqKc3cM7xEy3-6uDA"],
     "instagram": ["17841441277607712"],
@@ -12,6 +12,16 @@
     "10": [],
     "11": [],
     "12": [],
-    "13": []
+    "13": [],
+    "14": [
+      {
+        "platform": "facebook",
+        "handle": "Doug Edgin",
+        "id": "27468281642853235",
+        "at": "2026-07-15T17:25:23Z",
+        "comment_url": "https://www.facebook.com/reel/1522887805476974/?comment_id=122124620618983291_2299904767416727",
+        "note": "Manual exception: commented \"Daf\" (likely meant \"Dad\", no 🙏) on the List 13 Facebook post. Added per Eric's judgment call — assumed to have missed the emoji mechanic rather than not wanted to participate."
+      }
+    ]
   }
 }
