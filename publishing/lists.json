@@ -7,6 +7,25 @@
     "thumbnail_url": null
   },
   "lists": {
+    "15": {
+      "date": "2026-07-17",
+      "soul_count": 4599,
+      "intention_count": 0,
+      "notes": "Composed of names of those who showed up to pray for the list before and missing children from a public database.",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0015.mp4?alt=media&token=ffe25cec-e878-44fb-a63a-eabc8bd61b44",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0015_thumbnail.png?alt=media&token=ff019915-189b-45a6-a188-235300a873fa",
+      "published": {
+        "scheduled_for": "2026-07-17T15:51:00Z",
+        "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly, no 409s (distinct caption per platform). New trimmed intro (no \"filled by the people who showed up to pray...\" clause) and no \"May they be found\" line, per Eric's request. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
+        "platforms": {
+          "youtube":   { "post_id": "6a5a4e5020e014fc9ce26038", "status": "scheduled" },
+          "facebook":  { "post_id": "6a5a4e5341f330c9388835f1", "status": "scheduled" },
+          "instagram": { "post_id": "6a5a4e599cd7c32be923e86e", "status": "scheduled" },
+          "threads":   { "post_id": "6a5a4e5c9cd7c32be923e90d", "status": "scheduled" },
+          "tiktok":    { "post_id": "6a5a4e5f9cd7c32be923e967", "status": "scheduled" }
+        }
+      }
+    },
     "14": {
       "date": "2026-07-16",
       "soul_count": 4597,
