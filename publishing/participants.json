@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-07-16T12:49:00Z",
+  "last_aggregated_at": "2026-07-17T13:45:00Z",
   "brand_accounts": {
     "youtube": ["UCwVcRTUGUg_C3eQbA93wk3g", "UCD_ExEbqKc3cM7xEy3-6uDA"],
     "instagram": ["17841441277607712"],
@@ -22,6 +22,7 @@
         "comment_url": "https://www.facebook.com/reel/1522887805476974/?comment_id=122124620618983291_2299904767416727",
         "note": "Manual exception: commented \"Daf\" (likely meant \"Dad\", no 🙏) on the List 13 Facebook post. Added per Eric's judgment call — assumed to have missed the emoji mechanic rather than not wanted to participate."
       }
-    ]
+    ],
+    "15": []
   }
 }
