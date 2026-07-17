@@ -15,9 +15,12 @@ entry.
 
 ## Building blocks
 
-- **Intro** (identical every list, every platform):
-  > +Prayer is a daily prayer list, filled by the people who showed up to pray
-  > for everyone on the list before. Here, we hold each other. Here is the world
+- **Intro** (identical every list, every platform; updated 2026-07-17 to drop the
+  "filled by the people who showed up to pray for everyone on the list before"
+  clause — it duplicated the source note on mixed-source lists like "those who
+  showed up to pray for the list before and missing children..." and the mechanic
+  is already implied by the CTA line):
+  > +Prayer is a daily prayer list. Here, we hold each other. Here is the world
   > plus prayer.
 - **Optional source note** (most lists have none). One restrained line max,
   appended to the count line:
@@ -43,7 +46,8 @@ entry.
 
   (Instagram first comment: `How it works — link in bio.`)
 
-- **Threads** (~500-char limit; trim the intro slightly if needed):
+- **Threads** (~500-char limit; trim the intro slightly if needed — the shortened
+  intro above usually fits without further trimming):
   > Printed, sealed, and set on the table each day; the current list is there
   > now. Pray for it, and leave a 🙏 when you have — you'll be on the next.
 
@@ -67,9 +71,8 @@ entry.
 > List 1 — 4,604 souls, filled entirely with the names of missing children from
 > the NamUs database. May they be found.
 >
-> +Prayer is a daily prayer list, filled by the people who showed up to pray for
-> everyone on the list before. Here, we hold each other. Here is the world plus
-> prayer.
+> +Prayer is a daily prayer list. Here, we hold each other. Here is the world
+> plus prayer.
 >
 > Each day's list is printed, sealed, and placed on the table, and the current
 > one is there now. Pray for those on it, and leave a 🙏 when you have — you'll
@@ -77,9 +80,8 @@ entry.
 
 **YouTube — List 3 (no source note):**
 Title: `List 3 — 4,568 souls`
-> +Prayer is a daily prayer list, filled by the people who showed up to pray for
-> everyone on the list before. Here, we hold each other. Here is the world plus
-> prayer.
+> +Prayer is a daily prayer list. Here, we hold each other. Here is the world
+> plus prayer.
 >
 > Each day's list is printed, sealed, and placed on the table, and the current
 > one is there now. Pray for those on it, and leave a 🙏 when you have — you'll
