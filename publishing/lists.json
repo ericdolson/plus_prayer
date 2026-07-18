@@ -4,9 +4,28 @@
     "intention_count": 0,
     "notes": null,
     "video_url": "",
-    "thumbnail_url": null
+    "thumbnail_url": ""
   },
   "lists": {
+    "16": {
+      "date": "2026-07-18",
+      "soul_count": 4593,
+      "intention_count": 0,
+      "notes": "Composed of names of those who showed up to pray for the list before and missing children from a public database.",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0016.mp4?alt=media&token=c71b1dd2-671c-4584-8403-caf3584a9c96",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0016_thumbnail.png?alt=media&token=45c55d47-d867-4865-83fb-01f373561204",
+      "published": {
+        "scheduled_for": "2026-07-18T15:46:00Z",
+        "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly (YouTube/Facebook calls were initially blocked by the local permission classifier and retried successfully; no duplicates). Distinct caption per platform. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
+        "platforms": {
+          "youtube":   { "post_id": "6a5b9f28999ec1fd0193f273", "status": "scheduled" },
+          "facebook":  { "post_id": "6a5b9f2fc1e45064eb8b18da", "status": "scheduled" },
+          "instagram": { "post_id": "6a5b9f0b6d5666145f97fe7a", "status": "scheduled" },
+          "threads":   { "post_id": "6a5b9f0c6d5666145f97fea4", "status": "scheduled" },
+          "tiktok":    { "post_id": "6a5b9f0d5c9ff4b10bf11432", "status": "scheduled" }
+        }
+      }
+    },
     "15": {
       "date": "2026-07-17",
       "soul_count": 4599,
