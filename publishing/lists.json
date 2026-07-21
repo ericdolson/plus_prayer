@@ -23,6 +23,11 @@
           "instagram": { "post_id": "6a5f80135adce8725d5a9534", "status": "scheduled" },
           "threads":   { "post_id": "6a5f8016b543f8fea3965a4f", "status": "scheduled" },
           "tiktok":    { "post_id": "6a5f80195adce8725d5a972d", "status": "scheduled" }
+        },
+        "comments": {
+          "youtube":   { "mechanic_id": "UgyJdLDs1-DBw9QeFwV4AaABAg", "mechanic_at": "2026-07-21T14:24:00Z", "closeout": "pending", "retired_id": null },
+          "facebook":  { "mechanic_id": "1032738642687284_994914143358050", "mechanic_at": "2026-07-21T14:24:00Z", "closeout": "pending", "retired_id": null },
+          "instagram": { "mechanic_id": "18109255229051834", "mechanic_at": "2026-07-21T14:29:00Z", "closeout": "pending", "retired_id": null }
         }
       }
     },
