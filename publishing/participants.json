@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-07-19T14:10:50Z",
+  "last_aggregated_at": "2026-07-21T12:16:39Z",
   "brand_accounts": {
     "youtube": ["UCwVcRTUGUg_C3eQbA93wk3g", "UCD_ExEbqKc3cM7xEy3-6uDA"],
     "instagram": ["17841441277607712"],
@@ -105,6 +105,16 @@
         "at": "2026-07-19T14:17:56Z",
         "comment_url": null,
         "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      }
+    ],
+    "18": [],
+    "19": [
+      {
+        "platform": "facebook",
+        "handle": "Aaron Hernandez",
+        "id": "38424655060467218",
+        "at": "2026-07-20T16:25:46Z",
+        "comment_url": "https://www.facebook.com/reel/1506175348193178/?comment_id=122125244258983291_1337180575285425"
       }
     ]
   }
