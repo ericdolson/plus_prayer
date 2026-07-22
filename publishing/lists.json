@@ -7,6 +7,25 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "20": {
+      "date": "2026-07-22",
+      "soul_count": 4593,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0020.mp4?alt=media&token=5548acb7-2653-40fe-bb52-348ace10d3c0",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0020_thumbnail.png?alt=media&token=52d23f43-b91d-45a4-9b2c-46ef240f8a51",
+      "published": {
+        "scheduled_for": "2026-07-22T22:45:00Z",
+        "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads reworded). IG cover set; no TikTok cover; YouTube (Short) thumbnail manual. Entry had been pasted at the top level of lists.json instead of inside \"lists\" — moved into place before publishing.",
+        "platforms": {
+          "youtube":   { "post_id": "6a614669a3416024a822f7ed", "status": "scheduled" },
+          "facebook":  { "post_id": "6a61466ca3416024a822f81d", "status": "scheduled" },
+          "instagram": { "post_id": "6a61467135251baf729a2150", "status": "scheduled" },
+          "threads":   { "post_id": "6a61467435251baf729a2188", "status": "scheduled" },
+          "tiktok":    { "post_id": "6a614677f88c63578fdbb96b", "status": "scheduled" }
+        }
+      }
+    },
     "19": {
       "date": "2026-07-21",
       "soul_count": 4592,
