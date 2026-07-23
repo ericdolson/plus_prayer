@@ -7,6 +7,25 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "21": {
+      "date": "2026-07-23",
+      "soul_count": 4591,
+      "intention_count": 0,
+      "notes": "Composed of names of those who showed up to pray for the list before and missing children from a public database.",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0021.mp4?alt=media&token=e28626d8-3df1-461f-8320-fa796e36b9fc",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0021_thumbnail.png?alt=media&token=89a8d465-2be9-4255-9e1f-67092595fa0d",
+      "published": {
+        "scheduled_for": "2026-07-23T14:22:00Z",
+        "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads reworded). Source note phrasing matched List 17 verbatim ('filled entirely with ...'), since the notes text is identical. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
+        "platforms": {
+          "youtube":   { "post_id": "6a6222619b19e33fb87992be", "status": "scheduled" },
+          "facebook":  { "post_id": "6a6222641f51f504a36ae75f", "status": "scheduled" },
+          "instagram": { "post_id": "6a6222698ed0995b586dfb86", "status": "scheduled" },
+          "threads":   { "post_id": "6a62226dedf149f7aad77ad9", "status": "scheduled" },
+          "tiktok":    { "post_id": "6a62226e9b19e33fb8799544", "status": "scheduled" }
+        }
+      }
+    },
     "20": {
       "date": "2026-07-22",
       "soul_count": 4593,
