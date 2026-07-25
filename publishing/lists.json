@@ -7,6 +7,25 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "23": {
+      "date": "2026-07-25",
+      "soul_count": 4623,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0023.mp4?alt=media&token=d25035e8-b071-4347-bcd4-18915572eeb2",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0023_thumbnail.png?alt=media&token=5694d147-9224-4a62-9792-01f9adfa1466",
+      "published": {
+        "published_at": "2026-07-25T15:24:00Z",
+        "method": "posts_create_post (via zernio call_tool passthrough). Intended a ~5-min-out schedule (target 15:23:00Z), but the calls executed at ~15:24Z so scheduled_for had already elapsed — all five PUBLISHED IMMEDIATELY instead of scheduling (same as List 11). YouTube/Facebook returned published inline; Instagram and TikTok returned processing and finalized to published within ~1-2 min (verified via posts_get). Threads returned the known immediate-publish [409] but posted anyway ~4 min later (async) — did NOT retry, so no duplicate; confirmed via logs_list_logs (post.published success, url DbOIt0FjZ1w). Distinct caption per platform (Threads shorter CTA; Instagram 'rests there now'). Souls-only, no source note. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
+        "platforms": {
+          "youtube":   { "post_id": "6a64d527bff305cc4ea7c344", "status": "posted", "url": "https://www.youtube.com/watch?v=9AnJJhSlnCE" },
+          "facebook":  { "post_id": "6a64d539f6caea0029b53ae5", "status": "posted", "url": "https://www.facebook.com/watch/?v=891272370705499" },
+          "instagram": { "post_id": "6a64d54bbff305cc4ea7c889", "status": "posted" },
+          "threads":   { "post_id": "6a64d5c4d67bb83c7c991bfa", "status": "posted", "url": "https://www.threads.com/@plusprayer/post/DbOIt0FjZ1w", "note": "Immediate 409'd but published ~4 min later (async); no retry, no duplicate." },
+          "tiktok":    { "post_id": "6a64d5e317ab36f1088d2f65", "status": "posted" }
+        }
+      }
+    },
     "22": {
       "date": "2026-07-24",
       "soul_count": 4602,
