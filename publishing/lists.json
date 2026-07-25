@@ -23,6 +23,11 @@
           "instagram": { "post_id": "6a64d54bbff305cc4ea7c889", "status": "posted" },
           "threads":   { "post_id": "6a64d5c4d67bb83c7c991bfa", "status": "posted", "url": "https://www.threads.com/@plusprayer/post/DbOIt0FjZ1w", "note": "Immediate 409'd but published ~4 min later (async); no retry, no duplicate." },
           "tiktok":    { "post_id": "6a64d5e317ab36f1088d2f65", "status": "posted" }
+        },
+        "comments": {
+          "youtube":   { "mechanic_id": "UgzTN6dr262xqgT49zV4AaABAg", "mechanic_at": "2026-07-25T15:32:00Z", "closeout": "pending", "retired_id": null },
+          "facebook":  { "mechanic_id": "891272370705499_1410109121036189", "mechanic_at": "2026-07-25T15:32:00Z", "closeout": "pending", "retired_id": null },
+          "instagram": { "mechanic_id": "17971658114921103", "mechanic_at": "2026-07-25T15:32:00Z", "closeout": "pending", "retired_id": null }
         }
       }
     },
@@ -44,9 +49,9 @@
           "tiktok":    { "post_id": "6a637e403e80beaf5933c7f8", "status": "scheduled" }
         },
         "comments": {
-          "youtube":   { "mechanic_id": "UgyfFyDiy7BeKP-pTQl4AaABAg", "mechanic_at": "2026-07-24T15:07:00Z", "closeout": "pending", "retired_id": null },
-          "facebook":  { "mechanic_id": "1709257986999822_895317030309294", "mechanic_at": "2026-07-24T15:07:00Z", "closeout": "pending", "retired_id": null },
-          "instagram": { "mechanic_id": "18137160532573979", "mechanic_at": "2026-07-24T15:07:00Z", "closeout": "pending", "retired_id": null }
+          "youtube":   { "mechanic_id": "UgyfFyDiy7BeKP-pTQl4AaABAg", "mechanic_at": "2026-07-24T15:07:00Z", "closeout": "done", "retired_id": "Ugz4CNDJnFnoyCVykGN4AaABAg" },
+          "facebook":  { "mechanic_id": "1709257986999822_895317030309294", "mechanic_at": "2026-07-24T15:07:00Z", "closeout": "done", "retired_id": "1709257986999822_4410340529243893" },
+          "instagram": { "mechanic_id": "18137160532573979", "mechanic_at": "2026-07-24T15:07:00Z", "closeout": "done", "retired_id": "18112921540942055" }
         }
       }
     },
