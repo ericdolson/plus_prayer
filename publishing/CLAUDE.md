@@ -361,11 +361,14 @@ list), using the right term per platform — no dated links to maintain.
 
 ## Comment aggregation pipeline
 
-Harvest 🙏 comments across all posts and carry those commenters onto the next
-list. **Scan all past posts, not just the newest** — the algorithm surfaces old
-posts to new viewers, and a 🙏 on any past list still counts. State lives in
+Harvest 🙏 comments and carry those commenters onto the next list. A 🙏 on any
+past list still counts, so old posts stay eligible — but the harvest no longer
+deep-fetches every post every run (that grew with the list count and always
+returned brand-only comments). Instead it enumerates all posts cheaply for their
+`commentCount` and only deep-fetches the two most-recent lists plus any post whose
+count changed since last run (see "Count-delta" below). State lives in
 `publishing/participants.json` (`last_aggregated_at`, `brand_accounts`, `pending`
-by target list number).
+by target list number, and `post_counts` = per-post `commentCount` history).
 
 **Verified against Zernio (2026-07-04 dry run):** there is no unified cross-post
 comment feed — use `comments_list_inbox_comments` (min_comments≥1) to find
@@ -376,14 +379,15 @@ Threads** (Threads confirmed working 2026-07-11; some Threads `from` objects omi
 `from.id`). TikTok isn't queryable.
 
 Harvest steps:
-1. Fetch comments across **every** commented post returned above — not just posts
-   published since the last harvest, and not just posts whose comment count looks
-   like it grew (there's no reliable per-post history to compare against). Keep
-   those with `createdTime` after `last_aggregated_at`. Concretely: when a new list
-   goes live, the brand also drops a "List N is retired — but a 🙏 here still
-   counts" comment on the *previous* list's post — that comment is same-day and
-   contains 🙏, so skipping old posts both risks missing a real late 🙏 on an old
-   list and means this brand comment never gets the chance to be filtered by step 3.
+1. Enumerate all commented posts (`comments_list_inbox_comments`, every page) with
+   their current `commentCount`. Deep-fetch (`comments_get_inbox_post_comments`) a
+   post only if it's one of the **two most-recent lists** (the current live list and
+   the just-retired one — the always-check floor), is **new** to `post_counts`, or
+   its count **changed** since last run. Skip the rest: an unchanged count off the
+   floor means no new comment (a real 🙏 bumps the count). The floor guarantees the
+   brand's same-day "List N-1 is retired — but a 🙏 here still counts" comment gets
+   fetched and filtered by step 3. Keep comments with `createdTime` after
+   `last_aggregated_at`.
 2. Keep comments whose message contains 🙏 (U+1F64F), allowing a trailing skin-tone
    modifier (e.g. `🙏🏻`, U+1F3FB–U+1F3FF).
 3. **Drop the brand's own comments** — this is the critical filter, because the
@@ -393,7 +397,17 @@ Harvest steps:
    `from.id` in `participants.json` → `brand_accounts`.
 4. Deduplicate by `from.id`, per platform (YouTube/IG/FB IDs aren't cross-comparable).
 5. Append survivors to `pending[<next list number>]`.
-6. Advance `last_aggregated_at` to the harvest time.
+6. Update `post_counts["<platform>:<postId>"]` to the current count for **every**
+   enumerated post (not just fetched ones), then advance `last_aggregated_at` to the
+   harvest time.
+
+**Count-delta:** `post_counts` (`{ "<platform>:<postId>": <int>, ... }`, keyed by the
+platform-native id, not the Zernio `_id`) is the per-post `commentCount` history that
+lets step 1 skip unchanged old posts. First run after this landed has an empty map, so
+everything is fetched once to seed it. Residual blind spot: a participant 🙏 on an old
+post (off the floor) coinciding with a deletion on that same post can net to no count
+change and be missed — negligible at this volume. The full-detail version of this
+lives in the `harvest-comments` skill.
 
 When a list is assembled, its `pending[N]` entries are the social-sourced names
 (strict name moderation applies — see root Core Principles), then clear `pending[N]`.
