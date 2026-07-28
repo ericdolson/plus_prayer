@@ -8,11 +8,23 @@
   },
   "lists": {
     "26": {
+      "date": "2026-07-28",
       "soul_count": 4572,
       "intention_count": 0,
       "notes": null,
       "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0026.mp4?alt=media&token=31124869-3fdf-428c-8019-35503830e6cf",
-      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0026_thumbnail.png?alt=media&token=d342496d-f965-4514-8528-c97c931ff6aa"
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0026_thumbnail.png?alt=media&token=d342496d-f965-4514-8528-c97c931ff6aa",
+      "published": {
+        "scheduled_for": "2026-07-28T14:42:00Z",
+        "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~7 min out. All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads shorter CTA; Instagram 'rests there now'). Souls-only, no source note. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
+        "platforms": {
+          "youtube":   { "post_id": "6a68be351bfcebf6c1f49d99", "status": "scheduled" },
+          "facebook":  { "post_id": "6a68be37cb1afe7f56b3c969", "status": "scheduled" },
+          "instagram": { "post_id": "6a68be3dcb1afe7f56b3cc46", "status": "scheduled" },
+          "threads":   { "post_id": "6a68be3f3fbf14fdd54dfd23", "status": "scheduled" },
+          "tiktok":    { "post_id": "6a68be428fae7eb974cd46e4", "status": "scheduled" }
+        }
+      }
     },
     "25": {
       "date": "2026-07-27",
