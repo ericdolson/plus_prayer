@@ -7,6 +7,40 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "27": {
+      "date": "2026-07-29",
+      "soul_count": 2563,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0027.mp4?alt=media&token=976591f0-dcd2-4234-9631-63874ab72747",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2Flist_0027_thumbnail.png?alt=media&token=4e6d3135-465d-4801-9016-6a2dcf079544",
+      "published": {
+        "scheduled_for": "2026-07-29T17:41:00Z",
+        "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~6 min out. All 5 scheduled cleanly on the first attempt, no 409s. Distinct caption per platform (Threads shorter CTA; Instagram 'rests there now'). Souls-only, no source note. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
+        "platforms": {
+          "youtube": {
+            "post_id": "6a6a39bae148f25065e3671a",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a6a39be5d688ff4a655267d",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a6a39c15d688ff4a65527f8",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a6a39ce5d688ff4a6552dc2",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a6a39d43c1787c1668d59ca",
+            "status": "scheduled"
+          }
+        }
+      }
+    },
     "26": {
       "date": "2026-07-28",
       "soul_count": 4572,
@@ -18,16 +52,46 @@
         "scheduled_for": "2026-07-28T14:42:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~7 min out. All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads shorter CTA; Instagram 'rests there now'). Souls-only, no source note. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a68be351bfcebf6c1f49d99", "status": "scheduled" },
-          "facebook":  { "post_id": "6a68be37cb1afe7f56b3c969", "status": "scheduled" },
-          "instagram": { "post_id": "6a68be3dcb1afe7f56b3cc46", "status": "scheduled" },
-          "threads":   { "post_id": "6a68be3f3fbf14fdd54dfd23", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a68be428fae7eb974cd46e4", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a68be351bfcebf6c1f49d99",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a68be37cb1afe7f56b3c969",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a68be3dcb1afe7f56b3cc46",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a68be3f3fbf14fdd54dfd23",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a68be428fae7eb974cd46e4",
+            "status": "scheduled"
+          }
         },
         "comments": {
-          "youtube":   { "mechanic_id": "Ugx0znpQ6cZNM2GlwiN4AaABAg", "mechanic_at": "2026-07-28T14:44:00Z", "closeout": "pending", "retired_id": null },
-          "facebook":  { "mechanic_id": "122126415560983291_1211964234411583", "mechanic_at": "2026-07-28T14:44:00Z", "closeout": "pending", "retired_id": null },
-          "instagram": { "mechanic_id": "18128493001567184", "mechanic_at": "2026-07-28T14:44:00Z", "closeout": "pending", "retired_id": null }
+          "youtube": {
+            "mechanic_id": "Ugx0znpQ6cZNM2GlwiN4AaABAg",
+            "mechanic_at": "2026-07-28T14:44:00Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122126415560983291_1211964234411583",
+            "mechanic_at": "2026-07-28T14:44:00Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "18128493001567184",
+            "mechanic_at": "2026-07-28T14:44:00Z",
+            "closeout": "pending",
+            "retired_id": null
+          }
         }
       }
     },
@@ -42,16 +106,46 @@
         "scheduled_for": "2026-07-27T21:26:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~7 min out (margin past the default 5 to avoid the elapsed-schedule immediate-publish seen on Lists 11/23). All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads shorter CTA; Instagram 'rests there now'). Souls-only, no source note. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a67cb62b73fe238e72af9a0", "status": "scheduled" },
-          "facebook":  { "post_id": "6a67cb64b73fe238e72afaf3", "status": "scheduled" },
-          "instagram": { "post_id": "6a67cb69b73fe238e72afd4c", "status": "scheduled" },
-          "threads":   { "post_id": "6a67cb6cd77779ecd27102e8", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a67cb6fa9508d68a87c1179", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a67cb62b73fe238e72af9a0",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a67cb64b73fe238e72afaf3",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a67cb69b73fe238e72afd4c",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a67cb6cd77779ecd27102e8",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a67cb6fa9508d68a87c1179",
+            "status": "scheduled"
+          }
         },
         "comments": {
-          "youtube":   { "mechanic_id": "Ugz9qEQdGVNvnfA37LF4AaABAg", "mechanic_at": "2026-07-28T13:01:00Z", "closeout": "done", "retired_id": "UgxVDFLC1GnhpafpRr54AaABAg" },
-          "facebook":  { "mechanic_id": "122126322656983291_3176106012593538", "mechanic_at": "2026-07-28T13:01:00Z", "closeout": "done", "retired_id": "122126322656983291_1711799276538094" },
-          "instagram": { "mechanic_id": "18060169274749399", "mechanic_at": "2026-07-28T13:01:00Z", "closeout": "done", "retired_id": "17962157759964101" }
+          "youtube": {
+            "mechanic_id": "Ugz9qEQdGVNvnfA37LF4AaABAg",
+            "mechanic_at": "2026-07-28T13:01:00Z",
+            "closeout": "done",
+            "retired_id": "UgxVDFLC1GnhpafpRr54AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "122126322656983291_3176106012593538",
+            "mechanic_at": "2026-07-28T13:01:00Z",
+            "closeout": "done",
+            "retired_id": "122126322656983291_1711799276538094"
+          },
+          "instagram": {
+            "mechanic_id": "18060169274749399",
+            "mechanic_at": "2026-07-28T13:01:00Z",
+            "closeout": "done",
+            "retired_id": "17962157759964101"
+          }
         }
       }
     },
@@ -66,16 +160,49 @@
         "scheduled_for": "2026-07-27T05:02:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~6.5 min out (pushed past the default 5 min because now+5-rounded left <5 min of margin, which is what published List 23 immediately). All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads shorter CTA; Instagram 'rests there now'). Souls-only, no source note. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a66e4d2ad899870afcf160f", "status": "scheduled" },
-          "facebook":  { "post_id": "6a66e4d55c46ea9de8d58082", "status": "scheduled" },
-          "instagram": { "post_id": "6a66e4daad899870afcf17f2", "status": "scheduled" },
-          "threads":   { "post_id": "6a66e4dd5c46ea9de8d583c9", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a66e4e02c34be666b3625b8", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a66e4d2ad899870afcf160f",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a66e4d55c46ea9de8d58082",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a66e4daad899870afcf17f2",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a66e4dd5c46ea9de8d583c9",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a66e4e02c34be666b3625b8",
+            "status": "scheduled"
+          }
         },
         "comments": {
-          "youtube":   { "mechanic_id": "UgydcokGMXArK7aQ0wF4AaABAg", "mechanic_at": "2026-07-27T05:00:00Z", "closeout": "done", "retired_id": "UgwdE46HL5c3HujyvpV4AaABAg", "note": "Mechanic was deleted during an interrupted finalize-25 pass; retired notice posted when finalize-25 was completed 2026-07-28." },
-          "facebook":  { "mechanic_id": "2279059456246188_1771421914283479", "mechanic_at": "2026-07-27T05:00:00Z", "closeout": "done", "retired_id": "122126192510983291_1270528308362010", "note": "Mechanic was deleted during an interrupted finalize-25 pass; retired notice posted when finalize-25 was completed 2026-07-28." },
-          "instagram": { "mechanic_id": "18114150928927903", "mechanic_at": "2026-07-27T05:00:00Z", "closeout": "done", "retired_id": "18105151036896885", "note": "Mechanic was deleted during an interrupted finalize-25 pass; retired notice posted when finalize-25 was completed 2026-07-28." }
+          "youtube": {
+            "mechanic_id": "UgydcokGMXArK7aQ0wF4AaABAg",
+            "mechanic_at": "2026-07-27T05:00:00Z",
+            "closeout": "done",
+            "retired_id": "UgwdE46HL5c3HujyvpV4AaABAg",
+            "note": "Mechanic was deleted during an interrupted finalize-25 pass; retired notice posted when finalize-25 was completed 2026-07-28."
+          },
+          "facebook": {
+            "mechanic_id": "2279059456246188_1771421914283479",
+            "mechanic_at": "2026-07-27T05:00:00Z",
+            "closeout": "done",
+            "retired_id": "122126192510983291_1270528308362010",
+            "note": "Mechanic was deleted during an interrupted finalize-25 pass; retired notice posted when finalize-25 was completed 2026-07-28."
+          },
+          "instagram": {
+            "mechanic_id": "18114150928927903",
+            "mechanic_at": "2026-07-27T05:00:00Z",
+            "closeout": "done",
+            "retired_id": "18105151036896885",
+            "note": "Mechanic was deleted during an interrupted finalize-25 pass; retired notice posted when finalize-25 was completed 2026-07-28."
+          }
         }
       }
     },
@@ -90,16 +217,50 @@
         "published_at": "2026-07-25T15:24:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough). Intended a ~5-min-out schedule (target 15:23:00Z), but the calls executed at ~15:24Z so scheduled_for had already elapsed — all five PUBLISHED IMMEDIATELY instead of scheduling (same as List 11). YouTube/Facebook returned published inline; Instagram and TikTok returned processing and finalized to published within ~1-2 min (verified via posts_get). Threads returned the known immediate-publish [409] but posted anyway ~4 min later (async) — did NOT retry, so no duplicate; confirmed via logs_list_logs (post.published success, url DbOIt0FjZ1w). Distinct caption per platform (Threads shorter CTA; Instagram 'rests there now'). Souls-only, no source note. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a64d527bff305cc4ea7c344", "status": "posted", "url": "https://www.youtube.com/watch?v=9AnJJhSlnCE" },
-          "facebook":  { "post_id": "6a64d539f6caea0029b53ae5", "status": "posted", "url": "https://www.facebook.com/watch/?v=891272370705499" },
-          "instagram": { "post_id": "6a64d54bbff305cc4ea7c889", "status": "posted" },
-          "threads":   { "post_id": "6a64d5c4d67bb83c7c991bfa", "status": "posted", "url": "https://www.threads.com/@plusprayer/post/DbOIt0FjZ1w", "note": "Immediate 409'd but published ~4 min later (async); no retry, no duplicate." },
-          "tiktok":    { "post_id": "6a64d5e317ab36f1088d2f65", "status": "posted" }
+          "youtube": {
+            "post_id": "6a64d527bff305cc4ea7c344",
+            "status": "posted",
+            "url": "https://www.youtube.com/watch?v=9AnJJhSlnCE"
+          },
+          "facebook": {
+            "post_id": "6a64d539f6caea0029b53ae5",
+            "status": "posted",
+            "url": "https://www.facebook.com/watch/?v=891272370705499"
+          },
+          "instagram": {
+            "post_id": "6a64d54bbff305cc4ea7c889",
+            "status": "posted"
+          },
+          "threads": {
+            "post_id": "6a64d5c4d67bb83c7c991bfa",
+            "status": "posted",
+            "url": "https://www.threads.com/@plusprayer/post/DbOIt0FjZ1w",
+            "note": "Immediate 409'd but published ~4 min later (async); no retry, no duplicate."
+          },
+          "tiktok": {
+            "post_id": "6a64d5e317ab36f1088d2f65",
+            "status": "posted"
+          }
         },
         "comments": {
-          "youtube":   { "mechanic_id": "UgzTN6dr262xqgT49zV4AaABAg", "mechanic_at": "2026-07-25T15:32:00Z", "closeout": "done", "retired_id": "UgxSsNn3SSO6Nfjo6iV4AaABAg" },
-          "facebook":  { "mechanic_id": "891272370705499_1410109121036189", "mechanic_at": "2026-07-25T15:32:00Z", "closeout": "done", "retired_id": "891272370705499_3590816081085223" },
-          "instagram": { "mechanic_id": "17971658114921103", "mechanic_at": "2026-07-25T15:32:00Z", "closeout": "done", "retired_id": "17883421191674291" }
+          "youtube": {
+            "mechanic_id": "UgzTN6dr262xqgT49zV4AaABAg",
+            "mechanic_at": "2026-07-25T15:32:00Z",
+            "closeout": "done",
+            "retired_id": "UgxSsNn3SSO6Nfjo6iV4AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "891272370705499_1410109121036189",
+            "mechanic_at": "2026-07-25T15:32:00Z",
+            "closeout": "done",
+            "retired_id": "891272370705499_3590816081085223"
+          },
+          "instagram": {
+            "mechanic_id": "17971658114921103",
+            "mechanic_at": "2026-07-25T15:32:00Z",
+            "closeout": "done",
+            "retired_id": "17883421191674291"
+          }
         }
       }
     },
@@ -114,16 +275,46 @@
         "scheduled_for": "2026-07-24T15:05:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads reworded to its shorter CTA; Instagram ritual line lightly reworded — 'the current one rests there now' — to stay distinct from Facebook). Souls-only, no source note (notes null). IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a637e1c835a913c5c51f5ff", "status": "scheduled" },
-          "facebook":  { "post_id": "6a637e236f8f40a3927ae814", "status": "scheduled" },
-          "instagram": { "post_id": "6a637e26726c8e043ccf3ac2", "status": "scheduled" },
-          "threads":   { "post_id": "6a637e3d2bd270bb5df660be", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a637e403e80beaf5933c7f8", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a637e1c835a913c5c51f5ff",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a637e236f8f40a3927ae814",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a637e26726c8e043ccf3ac2",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a637e3d2bd270bb5df660be",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a637e403e80beaf5933c7f8",
+            "status": "scheduled"
+          }
         },
         "comments": {
-          "youtube":   { "mechanic_id": "UgyfFyDiy7BeKP-pTQl4AaABAg", "mechanic_at": "2026-07-24T15:07:00Z", "closeout": "done", "retired_id": "Ugz4CNDJnFnoyCVykGN4AaABAg" },
-          "facebook":  { "mechanic_id": "1709257986999822_895317030309294", "mechanic_at": "2026-07-24T15:07:00Z", "closeout": "done", "retired_id": "1709257986999822_4410340529243893" },
-          "instagram": { "mechanic_id": "18137160532573979", "mechanic_at": "2026-07-24T15:07:00Z", "closeout": "done", "retired_id": "18112921540942055" }
+          "youtube": {
+            "mechanic_id": "UgyfFyDiy7BeKP-pTQl4AaABAg",
+            "mechanic_at": "2026-07-24T15:07:00Z",
+            "closeout": "done",
+            "retired_id": "Ugz4CNDJnFnoyCVykGN4AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "1709257986999822_895317030309294",
+            "mechanic_at": "2026-07-24T15:07:00Z",
+            "closeout": "done",
+            "retired_id": "1709257986999822_4410340529243893"
+          },
+          "instagram": {
+            "mechanic_id": "18137160532573979",
+            "mechanic_at": "2026-07-24T15:07:00Z",
+            "closeout": "done",
+            "retired_id": "18112921540942055"
+          }
         }
       }
     },
@@ -138,16 +329,46 @@
         "scheduled_for": "2026-07-23T14:22:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads reworded). Source note phrasing matched List 17 verbatim ('filled entirely with ...'), since the notes text is identical. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a6222619b19e33fb87992be", "status": "scheduled" },
-          "facebook":  { "post_id": "6a6222641f51f504a36ae75f", "status": "scheduled" },
-          "instagram": { "post_id": "6a6222698ed0995b586dfb86", "status": "scheduled" },
-          "threads":   { "post_id": "6a62226dedf149f7aad77ad9", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a62226e9b19e33fb8799544", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a6222619b19e33fb87992be",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a6222641f51f504a36ae75f",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a6222698ed0995b586dfb86",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a62226dedf149f7aad77ad9",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a62226e9b19e33fb8799544",
+            "status": "scheduled"
+          }
         },
         "comments": {
-          "youtube":   { "mechanic_id": "UgzjEbKoSLBuOwn9jOZ4AaABAg", "mechanic_at": "2026-07-23T14:29:00Z", "closeout": "done", "retired_id": "UgxwoNDoYi_8YnnDWWx4AaABAg" },
-          "facebook":  { "mechanic_id": "2114327342796942_1333616362217951", "mechanic_at": "2026-07-23T14:29:00Z", "closeout": "done", "retired_id": "2114327342796942_1218297864703488" },
-          "instagram": { "mechanic_id": "18101377309919884", "mechanic_at": "2026-07-23T14:29:00Z", "closeout": "done", "retired_id": "18573010609066609" }
+          "youtube": {
+            "mechanic_id": "UgzjEbKoSLBuOwn9jOZ4AaABAg",
+            "mechanic_at": "2026-07-23T14:29:00Z",
+            "closeout": "done",
+            "retired_id": "UgxwoNDoYi_8YnnDWWx4AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "2114327342796942_1333616362217951",
+            "mechanic_at": "2026-07-23T14:29:00Z",
+            "closeout": "done",
+            "retired_id": "2114327342796942_1218297864703488"
+          },
+          "instagram": {
+            "mechanic_id": "18101377309919884",
+            "mechanic_at": "2026-07-23T14:29:00Z",
+            "closeout": "done",
+            "retired_id": "18573010609066609"
+          }
         }
       }
     },
@@ -162,16 +383,46 @@
         "scheduled_for": "2026-07-22T22:45:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads reworded). IG cover set; no TikTok cover; YouTube (Short) thumbnail manual. Entry had been pasted at the top level of lists.json instead of inside \"lists\" — moved into place before publishing.",
         "platforms": {
-          "youtube":   { "post_id": "6a614669a3416024a822f7ed", "status": "scheduled" },
-          "facebook":  { "post_id": "6a61466ca3416024a822f81d", "status": "scheduled" },
-          "instagram": { "post_id": "6a61467135251baf729a2150", "status": "scheduled" },
-          "threads":   { "post_id": "6a61467435251baf729a2188", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a614677f88c63578fdbb96b", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a614669a3416024a822f7ed",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a61466ca3416024a822f81d",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a61467135251baf729a2150",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a61467435251baf729a2188",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a614677f88c63578fdbb96b",
+            "status": "scheduled"
+          }
         },
         "comments": {
-          "youtube":   { "mechanic_id": "UgyxrP1u4KWvgDqYVH14AaABAg", "mechanic_at": "2026-07-22T22:53:00Z", "closeout": "done", "retired_id": "UgxGxJozBIZ497IYhUt4AaABAg" },
-          "facebook":  { "mechanic_id": "1349109983390036_2249866269159723", "mechanic_at": "2026-07-22T22:53:00Z", "closeout": "done", "retired_id": "1349109983390036_1482887150275457" },
-          "instagram": { "mechanic_id": "18475858171109479", "mechanic_at": "2026-07-22T22:53:00Z", "closeout": "done", "retired_id": "18172307770431369" }
+          "youtube": {
+            "mechanic_id": "UgyxrP1u4KWvgDqYVH14AaABAg",
+            "mechanic_at": "2026-07-22T22:53:00Z",
+            "closeout": "done",
+            "retired_id": "UgxGxJozBIZ497IYhUt4AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "1349109983390036_2249866269159723",
+            "mechanic_at": "2026-07-22T22:53:00Z",
+            "closeout": "done",
+            "retired_id": "1349109983390036_1482887150275457"
+          },
+          "instagram": {
+            "mechanic_id": "18475858171109479",
+            "mechanic_at": "2026-07-22T22:53:00Z",
+            "closeout": "done",
+            "retired_id": "18172307770431369"
+          }
         }
       }
     },
@@ -186,16 +437,46 @@
         "scheduled_for": "2026-07-21T14:25:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads reworded). IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a5f800d5adce8725d5a9366", "status": "scheduled" },
-          "facebook":  { "post_id": "6a5f800f5adce8725d5a940c", "status": "scheduled" },
-          "instagram": { "post_id": "6a5f80135adce8725d5a9534", "status": "scheduled" },
-          "threads":   { "post_id": "6a5f8016b543f8fea3965a4f", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a5f80195adce8725d5a972d", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a5f800d5adce8725d5a9366",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a5f800f5adce8725d5a940c",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a5f80135adce8725d5a9534",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a5f8016b543f8fea3965a4f",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a5f80195adce8725d5a972d",
+            "status": "scheduled"
+          }
         },
         "comments": {
-          "youtube":   { "mechanic_id": "UgyJdLDs1-DBw9QeFwV4AaABAg", "mechanic_at": "2026-07-21T14:24:00Z", "closeout": "done", "retired_id": "Ugzc8oO_StIi-Lgp6Kd4AaABAg" },
-          "facebook":  { "mechanic_id": "1032738642687284_994914143358050", "mechanic_at": "2026-07-21T14:24:00Z", "closeout": "done", "retired_id": "1032738642687284_1087928390566708" },
-          "instagram": { "mechanic_id": "18109255229051834", "mechanic_at": "2026-07-21T14:29:00Z", "closeout": "done", "retired_id": "18091150256084256" }
+          "youtube": {
+            "mechanic_id": "UgyJdLDs1-DBw9QeFwV4AaABAg",
+            "mechanic_at": "2026-07-21T14:24:00Z",
+            "closeout": "done",
+            "retired_id": "Ugzc8oO_StIi-Lgp6Kd4AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "1032738642687284_994914143358050",
+            "mechanic_at": "2026-07-21T14:24:00Z",
+            "closeout": "done",
+            "retired_id": "1032738642687284_1087928390566708"
+          },
+          "instagram": {
+            "mechanic_id": "18109255229051834",
+            "mechanic_at": "2026-07-21T14:29:00Z",
+            "closeout": "done",
+            "retired_id": "18091150256084256"
+          }
         }
       }
     },
@@ -210,11 +491,26 @@
         "scheduled_for": "2026-07-20T13:56:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform (Threads reworded). IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a5e27f91dbaff120bb5a57e", "status": "scheduled" },
-          "facebook":  { "post_id": "6a5e27fa1dbaff120bb5a5c1", "status": "scheduled" },
-          "instagram": { "post_id": "6a5e27fc1dbaff120bb5a5e9", "status": "scheduled" },
-          "threads":   { "post_id": "6a5e27fdde7e50d791ac82e7", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a5e27ff22efe33c555fb2ae", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a5e27f91dbaff120bb5a57e",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a5e27fa1dbaff120bb5a5c1",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a5e27fc1dbaff120bb5a5e9",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a5e27fdde7e50d791ac82e7",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a5e27ff22efe33c555fb2ae",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -229,11 +525,26 @@
         "scheduled_for": "2026-07-19T15:51:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly on the first attempt, no 409s, no permission blocks. Distinct caption per platform. Note: soul_count/intention_count were swapped in this entry when found (0/4593) — corrected to 4593/0 (souls-only, matching every prior list) per Eric's confirmation before publishing. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a5cf1681462e51af350dd22", "status": "scheduled" },
-          "facebook":  { "post_id": "6a5cf16a14dc7ed4a6e0a618", "status": "scheduled" },
-          "instagram": { "post_id": "6a5cf16e90406bffff68afe6", "status": "scheduled" },
-          "threads":   { "post_id": "6a5cf1700dcf8d8139964828", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a5cf1720dcf8d813996488d", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a5cf1681462e51af350dd22",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a5cf16a14dc7ed4a6e0a618",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a5cf16e90406bffff68afe6",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a5cf1700dcf8d8139964828",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a5cf1720dcf8d813996488d",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -248,11 +559,26 @@
         "scheduled_for": "2026-07-18T15:46:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly (YouTube/Facebook calls were initially blocked by the local permission classifier and retried successfully; no duplicates). Distinct caption per platform. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a5b9f28999ec1fd0193f273", "status": "scheduled" },
-          "facebook":  { "post_id": "6a5b9f2fc1e45064eb8b18da", "status": "scheduled" },
-          "instagram": { "post_id": "6a5b9f0b6d5666145f97fe7a", "status": "scheduled" },
-          "threads":   { "post_id": "6a5b9f0c6d5666145f97fea4", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a5b9f0d5c9ff4b10bf11432", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a5b9f28999ec1fd0193f273",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a5b9f2fc1e45064eb8b18da",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a5b9f0b6d5666145f97fe7a",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a5b9f0c6d5666145f97fea4",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a5b9f0d5c9ff4b10bf11432",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -267,11 +593,26 @@
         "scheduled_for": "2026-07-17T15:51:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly, no 409s (distinct caption per platform). New trimmed intro (no \"filled by the people who showed up to pray...\" clause) and no \"May they be found\" line, per Eric's request. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a5a4e5020e014fc9ce26038", "status": "scheduled" },
-          "facebook":  { "post_id": "6a5a4e5341f330c9388835f1", "status": "scheduled" },
-          "instagram": { "post_id": "6a5a4e599cd7c32be923e86e", "status": "scheduled" },
-          "threads":   { "post_id": "6a5a4e5c9cd7c32be923e90d", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a5a4e5f9cd7c32be923e967", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a5a4e5020e014fc9ce26038",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a5a4e5341f330c9388835f1",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a5a4e599cd7c32be923e86e",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a5a4e5c9cd7c32be923e90d",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a5a4e5f9cd7c32be923e967",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -286,11 +627,26 @@
         "scheduled_for": "2026-07-16T14:33:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly, no 409s (distinct caption per platform). IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a58ea9cc80f83c6e5288fae", "status": "scheduled" },
-          "facebook":  { "post_id": "6a58eaaec80f83c6e52892f7", "status": "scheduled" },
-          "instagram": { "post_id": "6a58eab9ff687b76e1fa107a", "status": "scheduled" },
-          "threads":   { "post_id": "6a58eac3c80f83c6e528976c", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a58eacbd858dc9bc9d5915d", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a58ea9cc80f83c6e5288fae",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a58eaaec80f83c6e52892f7",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a58eab9ff687b76e1fa107a",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a58eac3c80f83c6e528976c",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a58eacbd858dc9bc9d5915d",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -305,11 +661,26 @@
         "scheduled_for": "2026-07-15T14:45:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly, no 409s (distinct caption per platform). IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a579bf9d116bb2b3ccfb39e", "status": "scheduled" },
-          "facebook":  { "post_id": "6a579c27ce46636e016d8ea1", "status": "scheduled" },
-          "instagram": { "post_id": "6a579c0cb4365fbaf49765e1", "status": "scheduled" },
-          "threads":   { "post_id": "6a579c330db6c1c425b06dc5", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a579c427acc594e4a74f57b", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a579bf9d116bb2b3ccfb39e",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a579c27ce46636e016d8ea1",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a579c0cb4365fbaf49765e1",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a579c330db6c1c425b06dc5",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a579c427acc594e4a74f57b",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -324,11 +695,26 @@
         "scheduled_for": "2026-07-14T13:19:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~5 min out. All 5 scheduled cleanly, no 409s (distinct caption per platform). IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a56367cfaee7bb6b172487b", "status": "scheduled" },
-          "facebook":  { "post_id": "6a56368778f86c9d0ad79b42", "status": "scheduled" },
-          "instagram": { "post_id": "6a563692c5ea00c700fcdda0", "status": "scheduled" },
-          "threads":   { "post_id": "6a5636a28646251f39704206", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a5636bdb01db86d69c80c48", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a56367cfaee7bb6b172487b",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a56368778f86c9d0ad79b42",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a563692c5ea00c700fcdda0",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a5636a28646251f39704206",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a5636bdb01db86d69c80c48",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -343,11 +729,29 @@
         "scheduled_for": "2026-07-13T14:45:00Z",
         "method": "posts_create_post via zernio call_tool passthrough. NOTE: intended a ~5-min-out schedule but the computed scheduled_for (12:50:00Z) was already elapsed by call time (actual ~14:35Z), so YouTube/Instagram/TikTok published immediately instead of after a delay. Facebook and Threads both returned content-dedup 409s on their first attempt — Eric confirmed afterward that BOTH of those first attempts actually posted anyway despite the 409, so the reworded retries created DUPLICATES on Facebook and Threads (not phantom collisions as assumed at the time). Manual cleanup needed: on each of Facebook and Threads, delete one of the two live List 11 posts (keep whichever Eric decides), matching the List 4 precedent.",
         "platforms": {
-          "youtube":   { "post_id": "6a54f7afa0daa116d3fc3866", "status": "published", "url": "https://www.youtube.com/watch?v=LwMUnEuPGLo" },
-          "facebook":  { "post_id": "6a54f89c4a88c4f8c48ebea1", "status": "duplicate_needs_cleanup", "note": "First attempt (identical text to Instagram) 409'd but posted anyway; this reworded retry created a second live post. Delete one manually." },
-          "instagram": { "post_id": "6a54f7f8cd828dd45f889eb0", "status": "published" },
-          "threads":   { "post_id": "6a54f93cd4107735f61b0fc4", "status": "duplicate_needs_cleanup", "note": "First attempt 409'd but posted anyway; this reworded retry created a second live post. Delete one manually." },
-          "tiktok":    { "post_id": "6a54f82cb987ba2efe2b1de4", "status": "published" }
+          "youtube": {
+            "post_id": "6a54f7afa0daa116d3fc3866",
+            "status": "published",
+            "url": "https://www.youtube.com/watch?v=LwMUnEuPGLo"
+          },
+          "facebook": {
+            "post_id": "6a54f89c4a88c4f8c48ebea1",
+            "status": "duplicate_needs_cleanup",
+            "note": "First attempt (identical text to Instagram) 409'd but posted anyway; this reworded retry created a second live post. Delete one manually."
+          },
+          "instagram": {
+            "post_id": "6a54f7f8cd828dd45f889eb0",
+            "status": "published"
+          },
+          "threads": {
+            "post_id": "6a54f93cd4107735f61b0fc4",
+            "status": "duplicate_needs_cleanup",
+            "note": "First attempt 409'd but posted anyway; this reworded retry created a second live post. Delete one manually."
+          },
+          "tiktok": {
+            "post_id": "6a54f82cb987ba2efe2b1de4",
+            "status": "published"
+          }
         }
       }
     },
@@ -362,11 +766,26 @@
         "scheduled_for": "2026-07-12T15:59:00Z",
         "method": "posts_create_post (via zernio call_tool passthrough — the direct posts_create_post MCP tool is no longer exposed top-level; found via zernio search_tools/call_tool instead) scheduled ~5 min out. All 5 scheduled cleanly, Threads no 409. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a53b965cabdfa282adbdb83", "status": "scheduled" },
-          "facebook":  { "post_id": "6a53b96d8256130d697f946a", "status": "scheduled" },
-          "instagram": { "post_id": "6a53b970cabdfa282adbdc73", "status": "scheduled" },
-          "threads":   { "post_id": "6a53b975cabdfa282adbdce1", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a53b98245ac6119dc348005", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a53b965cabdfa282adbdb83",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a53b96d8256130d697f946a",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a53b970cabdfa282adbdc73",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a53b975cabdfa282adbdce1",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a53b98245ac6119dc348005",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -381,11 +800,26 @@
         "scheduled_for": "2026-07-11T16:19:00Z",
         "method": "posts_create_post scheduled ~5 min out. All 5 scheduled cleanly, Threads no 409. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a526bd42aaa63bae46b3af0", "status": "scheduled" },
-          "facebook":  { "post_id": "6a526bd6eedc62e0d75574fc", "status": "scheduled" },
-          "instagram": { "post_id": "6a526bdaeedc62e0d7557535", "status": "scheduled" },
-          "threads":   { "post_id": "6a526bdd1ca5104ed794ee8d", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a526bdf120fdbe54b153f26", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a526bd42aaa63bae46b3af0",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a526bd6eedc62e0d75574fc",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a526bdaeedc62e0d7557535",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a526bdd1ca5104ed794ee8d",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a526bdf120fdbe54b153f26",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -400,11 +834,26 @@
         "scheduled_for": "2026-07-10T14:49:00Z",
         "method": "posts_create_post scheduled ~5 min out. All 5 scheduled cleanly, Threads no 409. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a51059b80cb5bd6e9732f8e", "status": "scheduled" },
-          "facebook":  { "post_id": "6a51059c80cb5bd6e9733032", "status": "scheduled" },
-          "instagram": { "post_id": "6a51059d74eb8076bfcbbc03", "status": "scheduled" },
-          "threads":   { "post_id": "6a51059e74eb8076bfcbbc57", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a5105a0dda20c214e9c9b78", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a51059b80cb5bd6e9732f8e",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a51059c80cb5bd6e9733032",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a51059d74eb8076bfcbbc03",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a51059e74eb8076bfcbbc57",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a5105a0dda20c214e9c9b78",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -419,11 +868,26 @@
         "scheduled_for": "2026-07-09T14:01:00Z",
         "method": "posts_create_post scheduled ~5 min out. All 5 scheduled cleanly, Threads no 409. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a4fa89ddd8e73542d039f99", "status": "scheduled" },
-          "facebook":  { "post_id": "6a4fa89feab941cc3d045540", "status": "scheduled" },
-          "instagram": { "post_id": "6a4fa8a0835a6175d0f581ee", "status": "scheduled" },
-          "threads":   { "post_id": "6a4fa8a1dd8e73542d03a124", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a4fa8a2835a6175d0f5832f", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a4fa89ddd8e73542d039f99",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a4fa89feab941cc3d045540",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a4fa8a0835a6175d0f581ee",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a4fa8a1dd8e73542d03a124",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a4fa8a2835a6175d0f5832f",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -438,11 +902,26 @@
         "scheduled_for": "2026-07-08T15:02:00Z",
         "method": "posts_create_post scheduled ~5 min out. All 5 scheduled cleanly — Threads NO 409 (scheduling avoids the immediate-publish 409). IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
         "platforms": {
-          "youtube":   { "post_id": "6a4e659beee1288cd60dd612", "status": "scheduled" },
-          "facebook":  { "post_id": "6a4e659cffc24d74ca55724b", "status": "scheduled" },
-          "instagram": { "post_id": "6a4e659ec6373d061b0dca25", "status": "scheduled" },
-          "threads":   { "post_id": "6a4e659fb58a0f4d9a481285", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a4e65a0b58a0f4d9a4812da", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a4e659beee1288cd60dd612",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a4e659cffc24d74ca55724b",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a4e659ec6373d061b0dca25",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a4e659fb58a0f4d9a481285",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a4e65a0b58a0f4d9a4812da",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -457,11 +936,28 @@
         "published_at": "2026-07-07T14:10:00Z",
         "method": "posts_create_post publish_now. All 5 posted (IG cover set; no TikTok cover). Threads returned 409 but published ~4 min later (async) — no retry, so no duplicate; the immediate log check was just too early.",
         "platforms": {
-          "youtube":   { "post_id": "6a4d08b0b4ab93f2250622c2", "status": "posted" },
-          "facebook":  { "post_id": "6a4d08c7b4ab93f225062487", "status": "posted" },
-          "instagram": { "post_id": "6a4d0923de1e9362ecc14ba5", "status": "posted" },
-          "tiktok":    { "post_id": "6a4d08f99ceef296c6be3073", "status": "posted" },
-          "threads":   { "post_id": "6a4d08d9de99029ad44133f1", "status": "posted", "url": "https://www.threads.com/@plusprayer/post/Dafp-LNEt6a", "note": "Immediate 409'd but published ~4 min later (async); no retry, no duplicate." }
+          "youtube": {
+            "post_id": "6a4d08b0b4ab93f2250622c2",
+            "status": "posted"
+          },
+          "facebook": {
+            "post_id": "6a4d08c7b4ab93f225062487",
+            "status": "posted"
+          },
+          "instagram": {
+            "post_id": "6a4d0923de1e9362ecc14ba5",
+            "status": "posted"
+          },
+          "tiktok": {
+            "post_id": "6a4d08f99ceef296c6be3073",
+            "status": "posted"
+          },
+          "threads": {
+            "post_id": "6a4d08d9de99029ad44133f1",
+            "status": "posted",
+            "url": "https://www.threads.com/@plusprayer/post/Dafp-LNEt6a",
+            "note": "Immediate 409'd but published ~4 min later (async); no retry, no duplicate."
+          }
         }
       }
     },
@@ -476,11 +972,28 @@
         "published_at": "2026-07-06T14:28:00Z",
         "method": "posts_create_post publish_now (immediate). New count-line format. IG cover set; no TikTok cover; TikTok published OK (daily quota reset). Threads returned 409 twice but BOTH actually published (Zernio 409-but-posts bug) — created a duplicate; Eric deleted one on Threads, kept the other.",
         "platforms": {
-          "youtube":   { "post_id": "6a4bbb89af2f4dfe3c2fffe9", "status": "posted" },
-          "facebook":  { "post_id": "6a4bbb9ee52ae6f198d5e3c7", "status": "posted" },
-          "instagram": { "post_id": "6a4bbbb5af2f4dfe3c3009de", "status": "posted" },
-          "tiktok":    { "post_id": "6a4bbbe45963bed6d657b05d", "status": "posted" },
-          "threads":   { "post_id": "6a4bbbb9576749d38291ac48", "status": "posted", "url": "https://www.threads.com/@plusprayer/post/DadHWOrjbmh", "note": "Zernio 409'd but published anyway; a retry made a duplicate (Zernio ID 6a4bbc118e8b78be2c8ed824) which Eric deleted on Threads." }
+          "youtube": {
+            "post_id": "6a4bbb89af2f4dfe3c2fffe9",
+            "status": "posted"
+          },
+          "facebook": {
+            "post_id": "6a4bbb9ee52ae6f198d5e3c7",
+            "status": "posted"
+          },
+          "instagram": {
+            "post_id": "6a4bbbb5af2f4dfe3c3009de",
+            "status": "posted"
+          },
+          "tiktok": {
+            "post_id": "6a4bbbe45963bed6d657b05d",
+            "status": "posted"
+          },
+          "threads": {
+            "post_id": "6a4bbbb9576749d38291ac48",
+            "status": "posted",
+            "url": "https://www.threads.com/@plusprayer/post/DadHWOrjbmh",
+            "note": "Zernio 409'd but published anyway; a retry made a duplicate (Zernio ID 6a4bbc118e8b78be2c8ed824) which Eric deleted on Threads."
+          }
         }
       }
     },
@@ -495,11 +1008,27 @@
         "scheduled_for": "2026-07-05T15:00:00Z",
         "method": "posts_create_post (single-call, scheduled_for honored verbatim). IG cover set via instagramThumbnail. TikTok cover via video_cover_image_url FAILED: Zernio ffmpeg cover-stitch timed out and burned TikTok's daily API quota, so the retry (no cover) was rejected too — TikTok posted manually in-app. YouTube thumbnail is a Short → set manually in Studio.",
         "platforms": {
-          "youtube":   { "post_id": "6a4a69e07a3f2a58792d96c9", "status": "posted" },
-          "facebook":  { "post_id": "6a4a69e209730dd13e54a8cb", "status": "posted" },
-          "instagram": { "post_id": "6a4a69e7cb4eb010c38be844", "status": "posted" },
-          "threads":   { "post_id": "6a4a69e9cb4eb010c38be8b8", "status": "posted" },
-          "tiktok":    { "post_id": null, "status": "failed_post_manually", "note": "Zernio cover-stitch timeout + TikTok daily API quota; post manually in the TikTok app." }
+          "youtube": {
+            "post_id": "6a4a69e07a3f2a58792d96c9",
+            "status": "posted"
+          },
+          "facebook": {
+            "post_id": "6a4a69e209730dd13e54a8cb",
+            "status": "posted"
+          },
+          "instagram": {
+            "post_id": "6a4a69e7cb4eb010c38be844",
+            "status": "posted"
+          },
+          "threads": {
+            "post_id": "6a4a69e9cb4eb010c38be8b8",
+            "status": "posted"
+          },
+          "tiktok": {
+            "post_id": null,
+            "status": "failed_post_manually",
+            "note": "Zernio cover-stitch timeout + TikTok daily API quota; post manually in the TikTok app."
+          }
         }
       }
     },
@@ -513,11 +1042,26 @@
       "published": {
         "scheduled_for": "2026-07-04T15:00:00Z",
         "platforms": {
-          "youtube":   { "post_id": "6a48d951545d81fdef8feb05", "status": "scheduled" },
-          "facebook":  { "post_id": "6a48d954b1f2a2e94f3bc9e3", "status": "scheduled" },
-          "instagram": { "post_id": "6a48d958545d81fdef8febd2", "status": "scheduled" },
-          "threads":   { "post_id": "6a48d95ae60b8e90469ca312", "status": "scheduled" },
-          "tiktok":    { "post_id": "6a48d95ee60b8e90469ca345", "status": "scheduled" }
+          "youtube": {
+            "post_id": "6a48d951545d81fdef8feb05",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a48d954b1f2a2e94f3bc9e3",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a48d958545d81fdef8febd2",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a48d95ae60b8e90469ca312",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a48d95ee60b8e90469ca345",
+            "status": "scheduled"
+          }
         }
       }
     },
@@ -533,11 +1077,26 @@
         "published_at": "2026-07-03T11:58:00Z",
         "note": "Published immediately instead of at 09:00 MDT — Zernio connector stored the target wall-clock time tagged as UTC (past-due), firing on creation. Content correct; timing failed. Left live intentionally.",
         "platforms": {
-          "youtube":   { "post_id": "6a47a3c8b086875ea024e42a", "status": "posted" },
-          "instagram": { "post_id": "6a47a3d7ad61c2ebd16ca0f5", "status": "posted" },
-          "facebook":  { "post_id": "6a47a3dbad61c2ebd16ca13b", "status": "posted" },
-          "threads":   { "post_id": "6a47a3ec908ad802ed97c07e", "status": "posted" },
-          "tiktok":    { "post_id": "6a47a40c15f43c07a362f88b", "status": "posted" }
+          "youtube": {
+            "post_id": "6a47a3c8b086875ea024e42a",
+            "status": "posted"
+          },
+          "instagram": {
+            "post_id": "6a47a3d7ad61c2ebd16ca0f5",
+            "status": "posted"
+          },
+          "facebook": {
+            "post_id": "6a47a3dbad61c2ebd16ca13b",
+            "status": "posted"
+          },
+          "threads": {
+            "post_id": "6a47a3ec908ad802ed97c07e",
+            "status": "posted"
+          },
+          "tiktok": {
+            "post_id": "6a47a40c15f43c07a362f88b",
+            "status": "posted"
+          }
         }
       }
     }
