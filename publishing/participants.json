@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-07-30T13:21:00Z",
+  "last_aggregated_at": "2026-07-31T14:44:00Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -13,6 +13,9 @@
     ]
   },
   "post_counts": {
+    "instagram:17895601503377628": 1,
+    "facebook:1033072079891934_122126677682983291": 1,
+    "youtube:Ql3a75QKRNk": 1,
     "instagram:18042716630609187": 1,
     "facebook:1033072079891934_122126567360983291": 1,
     "youtube:BNZJ7DbM76w": 1,
@@ -233,6 +236,7 @@
     "25": [],
     "26": [],
     "27": [],
-    "28": []
+    "28": [],
+    "29": []
   }
 }
