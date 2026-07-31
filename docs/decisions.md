@@ -306,6 +306,23 @@ can't reliably classify soul vs intention). "Add intentions and the people you
 love" becomes the app's opening value proposition, making the app feel like a
 gain over social, not a downgrade.
 
+### Decision: Default publish lead time cut from ~5 min to ~2 min
+**Timestamp:** 2026-07-31 (SUPERSEDES the ~5-minute default set when the Threads 409 was found)
+Measured `post.published` log timestamps against `scheduled_for` for Lists 21–29.
+Two findings drove the change. (1) **YouTube ignores `scheduled_for`** — it publishes
+~1–2 min after the create call regardless of the target (List 28: created ~15:47 for
+a 15:55 target, live at 15:47:42), so the lead time is exactly how early YouTube
+lands ahead of the other four (FB ≈ +1, TikTok ≈ +1, IG ≈ +2, Threads ≈ +3–5 min
+after target). A 5-min lead strung the five posts across ~10 minutes and staggered
+the pinning work; ~2 min lands them within about a minute of each other. (2) The
+**Threads 409 is strictly an artifact of the immediate-publish path**, not a
+too-soon-schedule problem — any future-dated instant routes through the scheduler,
+which polls sub-minute (Facebook fires +0.8–1.4 min every list). So the lead exists
+only as slack for the five create calls, not for the queue. Guard rails, since 2 min
+leaves ~75s of slack: compute the target right before the first create (not at the
+start of the run), and push it out a minute if it drifts within ~60s of now — a past
+`scheduled_for` falls back to immediate publishing and reintroduces the 409.
+
 ---
 
 ## Project Structure

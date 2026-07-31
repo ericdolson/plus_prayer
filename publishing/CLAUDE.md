@@ -103,6 +103,13 @@ Use **`posts_create_post`**, one call per platform. It takes `scheduled_for` (IS
 UTC) directly and stores it **verbatim** (verified 2026-07-05, List 3), so it
 schedules at the exact instant AND sets covers in the same call — no park-and-update.
 
+**Default lead time: ~2 minutes out** (changed 2026-07-31 from ~5 min). Any
+future-dated instant routes through the scheduler and so avoids the Threads 409 —
+the lead is not there to satisfy the queue (which polls sub-minute), it's slack for
+the five create calls. Compute the target immediately before the first create, not
+at the start of the run, and if it drifts within ~60s of now, push it out a minute.
+A past `scheduled_for` falls back to immediate publishing.
+
 **Finding the tool (as of 2026-07-12):** `posts_create_post` is no longer a
 top-level MCP tool — only the simplified `posts_create` (single platform,
 relative `schedule_minutes`, no `media_items`/`platformSpecificData`) and
@@ -129,6 +136,29 @@ platforms scheduled correctly this way.
    and `status` — confirm `scheduledFor` equals the intended UTC and status is
    `scheduled` (spot-check with `posts_get` if unsure).
 
+**When each platform actually fires (measured across Lists 21–29, `logs_list_logs`
+`post.published` timestamps vs. `scheduled_for`):**
+
+| platform  | actual publish time vs. target |
+|-----------|--------------------------------|
+| YouTube   | **ignores the target** — ~1–2 min after the CREATE call |
+| Facebook  | +0.8 to +1.4 min |
+| TikTok    | +0.9 to +3.9 min |
+| Instagram | +2.0 to +3.2 min |
+| Threads   | +2.6 to +5.0 min |
+
+**YouTube does not wait for `scheduledFor`.** It publishes shortly after creation
+every time — List 28 was created ~15:47 for a 15:55 target and went live 15:47:42
+(7.3 min early); List 29 was created 22:22:26 for 22:28 and went live 22:24:08. The
+lead time is exactly how early YouTube lands, which is the other reason the default
+lead is short: at ~2 min all five land within about a minute of each other, so the
+first-comment and pinning work isn't strung out. Never schedule a list hours ahead
+expecting YouTube to hold it — it won't.
+
+The +1 to +5 min lags on the other four are queue pickup plus per-platform video
+processing, not lead-time-dependent. They're normal; a post sitting in `publishing`
+status a few minutes after the target is on track, not stuck.
+
 **Do NOT use `posts_create` + `schedule_minutes`.** That path has a timezone bug:
 it computes the fire time from a naive *local* now + minutes and stores it tagged
 as UTC, so a morning target fires ~(UTC offset) hours early — effectively
@@ -148,8 +178,10 @@ a few minutes, THEN check** `logs_list_logs platform=threads` for a `post.publis
 success (its `response_body` has the real `{id, url}`; the Zernio `post_id` is on
 the log) — or just look at the Threads profile. A too-early log check shows nothing
 even though it's about to post (this happened on List 5). Only post manually if it's
-genuinely still absent after waiting. **Best fix: schedule the list a few minutes out
-instead of publishing immediately** — scheduled Threads posts go through cleanly, no 409.
+genuinely still absent after waiting. **Best fix: schedule the list a couple of minutes
+out instead of publishing immediately** — scheduled Threads posts go through cleanly,
+no 409. The 409 is strictly an artifact of the immediate path, so *any* future-dated
+`scheduled_for` clears it; ~2 min is enough (see the default lead time above).
 
 ### Post-publish todo list (CANONICAL — output every time)
 
