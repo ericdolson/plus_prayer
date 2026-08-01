@@ -10,7 +10,8 @@ description: >-
 
 # Finalize comments for a list
 
-Runs **once list N's posts are live**. In one idempotent pass it:
+Runs as soon as **any** of list N's posts is live — usually invoked automatically by
+`publish-list`'s wake cycle. In one idempotent pass, for each platform that is live:
 
 - **Half A — closes out list N‑1**: deletes the logged mechanic comment on
   YouTube/Facebook/Instagram and posts the "List N‑1 is retired…" notice.
@@ -32,12 +33,21 @@ pin (or re-pin) by hand. That's expected, not a failure.
 - **N** — the list number that was just published (required). The previous list
   is **N‑1**.
 
-## Precondition — list N must be LIVE
-For each of youtube/facebook/instagram in `lists["N"].published.platforms`, call
-`posts_get` on the `post_id` and confirm `status: published`. Instagram is the
-usual laggard (it sits at `publishing` for a few minutes). If any of the three is
-not yet `published`, STOP and tell the user to re-run in a couple of minutes —
-don't do a partial pass. (List N‑1 is already long-live, so Half A has no wait.)
+## Per-platform gate — finalize each platform as IT goes live
+Do NOT wait for all three. For each of youtube/facebook/instagram, call `posts_get`
+on `lists["N"].published.platforms[platform].post_id`:
+
+- `status: published` → do **both halves for that platform** in this pass.
+- anything else (usually `publishing` — Instagram is the usual laggard) → skip that
+  platform silently and leave it for a later pass.
+
+Each platform is gated on its **own** list-N post, never on another's. The retired
+copy says "find the newest list on our channel / Page / profile", so posting it on
+YouTube while list N isn't live on YouTube yet points people at nothing.
+
+A partial pass is normal, not a failure. The idempotency rules in Gotchas mean a
+later pass picks up exactly what was skipped, and re-running is always safe.
+(List N‑1 is already long-live, so Half A never waits on anything of its own.)
 
 ## Account IDs
 | platform  | accountId |
@@ -51,7 +61,8 @@ don't do a partial pass. (List N‑1 is already long-live, so Half A has no wait
 ## Steps
 
 ### Half A — close out list N‑1
-Read `lists["N-1"]`. For each of **youtube, facebook, instagram**:
+Read `lists["N-1"]`. For each of **youtube, facebook, instagram that passed the
+per-platform gate above**:
 1. Look at `lists["N-1"].published.comments[platform]`. If `closeout` is already
    `"done"`, skip this platform (idempotent re-run).
 2. If a `mechanic_id` is logged, **delete** it:
@@ -70,7 +81,8 @@ Threads and TikTok: do **not** call the API (both fail — see Gotchas). Add the
 the manual checklist output.
 
 ### Half B — seed list N
-Read `lists["N"]`. For each of **youtube, facebook, instagram**:
+Read `lists["N"]`. For each of **youtube, facebook, instagram that passed the
+per-platform gate above**:
 1. If `lists["N"].published.comments[platform].mechanic_id` is already present,
    skip (idempotent).
 2. **Post** the mechanic comment with `comments_reply_to_inbox_post` (`post_id` =
@@ -83,7 +95,13 @@ Threads and TikTok: nothing (Threads' CTA is in the caption; TikTok directs to
 YT/IG in its caption).
 
 ### Finish
-Commit `lists.json`, then output the manual checklist (below).
+Commit `lists.json`, then output:
+
+1. One line naming what this pass did, e.g.
+   `Finalized: youtube, facebook · Still publishing: instagram` — so the caller
+   knows whether another pass is needed.
+2. The manual checklist (below), unchanged and in full. It is short, every item on
+   it is still owed, and a later pass reprinting it is harmless.
 
 ## Comment copy (locked)
 
@@ -164,6 +182,7 @@ Finalize comments — List [N] live, List [N-1] retired
 
 ## Related
 - Runs after `publish-list` (which schedules the posts and writes
-  `published.platforms`). A future enhancement will let `publish-list` wait for
-  the posts to go live and call this skill automatically ("publish and walk
-  away"); for now invoke it manually once the posts are live.
+  `published.platforms`). `publish-list` now invokes this skill automatically from
+  its wake cycle at ~+5 min, re-running as later platforms go live — "publish and
+  walk away." Invoking it by hand still works and is the recovery path if the
+  session ended before the cycle finished.
