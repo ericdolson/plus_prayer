@@ -3,19 +3,21 @@ name: publish-list
 description: >-
   Publish or schedule a +Prayer daily prayer list across all five social
   platforms (YouTube, Facebook, Instagram, Threads, TikTok) via the Zernio MCP,
-  then record results and output the post-publish checklist. Use when the user
-  says "publish list N", "post list N", "schedule list N", "publish list N at
-  9am", "publish list N in 5 minutes", or "publish list N now".
+  record the result, then auto-run finalize-comments on a timer once the posts
+  go live. Use when the user says "publish list N", "post list N", "schedule
+  list N", "publish list N at 9am", "publish list N in 5 minutes", or "publish
+  list N now".
 ---
 
 # Publish a +Prayer list
 
 Publishes list **N** to all five platforms with the Zernio MCP, records the result
-in `publishing/lists.json`, and outputs the canonical post-publish checklist.
+in `publishing/lists.json`, and then finalizes the comments by itself — a background
+timer wakes Claude a few minutes later to run `finalize-comments` for list N.
 
 ## Read these for exact copy (do not paraphrase)
-- `publishing/CLAUDE.md` — brand voice, count-line rules, the canonical post-publish
-  checklist, and all the platform gotchas.
+- `publishing/CLAUDE.md` — brand voice, count-line rules, and all the platform
+  gotchas.
 - `publishing/captions/list-caption-template.md` — the locked caption structure.
 
 ## Inputs
@@ -74,8 +76,44 @@ in `publishing/lists.json`, and outputs the canonical post-publish checklist.
 6. Write `lists["N"].published`: `scheduled_for` (or `published_at`), `date`
    (scheduled/publish day YYYY-MM-DD), and `platforms` with each Zernio `_id` as
    `post_id` + status. Commit `lists.json`.
-7. Output the canonical 5-section post-publish checklist from `publishing/CLAUDE.md`,
-   filled in for N and N-1, with complete copy-paste comment text per platform.
+7. Arm the auto-finalize timer, then STOP:
+   - Launch `sleep 300` with Bash `run_in_background: true`. It is a bare timer —
+     do NOT try to check post status from the shell (Zernio is MCP-only, there is no
+     API key in the environment).
+   - Tell Eric in one line: all five scheduled for <time>, finalize-comments will
+     run itself at ~+5 min, and the YouTube Short thumbnail still needs a manual
+     Studio upload (the only manual step publishing owes).
+   - End the turn. Do NOT print a post-publish checklist — `finalize-comments`
+     produces the only list of things left to do by hand.
+
+## Auto-finalize wake cycle
+
+The background timer's exit re-invokes you. On each wake, for list N:
+
+1. `posts_get` the youtube, facebook, and instagram `post_id`s from
+   `lists["N"].published.platforms`.
+2. Invoke the `finalize-comments` skill with N. It finalizes every platform that is
+   `published` and silently skips the rest — partial passes are safe and expected.
+3. If all three are finalized, report what landed and stop. Otherwise arm the next
+   timer from the schedule and repeat.
+
+| wake | timer to arm | lands at    |
+|------|--------------|-------------|
+| 1    | `sleep 300`  | ~+5 min     |
+| 2    | `sleep 180`  | ~+8 min     |
+| 3    | `sleep 240`  | ~+12 min    |
+| 4    | `sleep 480`  | ~+20 min    |
+
+Normally wake 1 finds all three live and the cycle ends in one pass: against a
+~2-minute publish lead, YouTube is live ~1.5 min after the create call, Facebook
+~3 min, Instagram ~4–5 min. The later wakes exist for a slow Instagram transcode.
+
+**After wake 4, stop.** Report any platform still not `published` with its post id
+and current status. Do not arm a fifth timer — at +20 min it is a real failure, not
+a lag.
+
+If the session ends mid-cycle the pending timer dies with it. Nothing is corrupted;
+`/finalize-comments N` by hand completes whatever the cycle did not.
 
 ## Gotchas (verified over Lists 1–7)
 - **Scheduling:** always `posts_create_post` + `scheduled_for` (stored verbatim, and
@@ -99,7 +137,8 @@ in `publishing/lists.json`, and outputs the canonical post-publish checklist.
   scheduler.
 - **TikTok cover:** never set via Zernio (ffmpeg stitch times out and burns TikTok's
   daily API quota). **YouTube thumbnail:** the video posts as a Short, so Zernio can't
-  set it — list it as a manual Studio step in the checklist. **Instagram cover:**
-  works via `instagramThumbnail`.
+  set it — name it in the one-line report (step 7) as the one manual step publishing
+  still owes; nothing else surfaces it now that the checklist is gone.
+  **Instagram cover:** works via `instagramThumbnail`.
 - **Site URLs:** after go-live, `posts_get_post` returns each `platformPostUrl` and the
   raw `platformPostId` if the user wants links for the website.
