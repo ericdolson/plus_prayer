@@ -40,15 +40,21 @@ list N‑1's mechanic comment live and pointing at a retired list, and list N wi
 
 Step 7 (the canonical 5-section post-publish checklist) is removed from the skill.
 
-`publishing/CLAUDE.md` holds that checklist under a heading that currently reads
+`publishing/CLAUDE.md` holds the same checklist under a heading that reads
 "Post-publish todo list (CANONICAL — output every time)" and mandates printing it
 after every publish. Left alone it would contradict the skill and any agent reading
-the workstream context would keep emitting it. So that section is demoted, not
-deleted: the mandate language ("output every time", "Never drop a section or a
-platform") is removed and the section is reframed as the record of what the manual
-close-out process covers — with a pointer to `finalize-comments`, which now does
-the automatable parts. Keeping the text preserves the per-platform copy and the
-pinning gotchas it documents.
+the workstream context would keep emitting it. **That section is deleted outright.**
+
+Everything in it is documented elsewhere in the same file and survives the deletion:
+the per-platform close-out copy lives in "Daily transition timing", the pinning
+mechanics in "First comment & pinning per platform", and the cover/thumbnail steps
+in "Thumbnails / covers per platform".
+
+One exception — `npm run participants-pdf` (section 5 of the checklist) is the only
+prose mention of the printable-list step anywhere in the repo outside
+`scripts/package.json`. That single line moves into the "Comment aggregation
+pipeline" section, at the end, where the rest of the participants workflow already
+lives. Nothing else is relocated.
 
 The new final step, after `lists.json` is committed:
 
