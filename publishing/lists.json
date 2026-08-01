@@ -38,6 +38,26 @@
             "post_id": "6a6e436c9190c53ddbe7c9f2",
             "status": "scheduled"
           }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "Ugz8MmLawj2KsZW5MWV4AaABAg",
+            "mechanic_at": "2026-08-01T19:12:06Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122126916380983291_1028357343397870",
+            "mechanic_at": "2026-08-01T19:12:06Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "18108571904086745",
+            "mechanic_at": "2026-08-01T19:12:06Z",
+            "closeout": "pending",
+            "retired_id": null
+          }
         }
       }
     },
@@ -77,20 +97,20 @@
           "youtube": {
             "mechanic_id": "Ugy4axaJ5hZXGX5yYst4AaABAg",
             "mechanic_at": "2026-08-01T17:41:23Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "UgxE3pGYOYAnfxo_sJl4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122126823236983291_1644225377137097",
             "mechanic_at": "2026-08-01T17:41:23Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122126823236983291_2890456271289721"
           },
           "instagram": {
             "mechanic_id": "18384350980161359",
             "mechanic_at": "2026-08-01T17:41:23Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "17903968491532622"
           }
         }
       }
