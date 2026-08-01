@@ -95,7 +95,10 @@ When told "publish list N at [time] [timezone]":
 }
 ```
 7. Commit the updated `lists.json`.
-8. Output a post-publish todo list (see below).
+8. Arm the auto-finalize timer (`sleep 300`, backgrounded) and stop. The
+   `finalize-comments` skill runs itself at ~+5 min and handles each platform as it
+   goes live; its output is the only list of remaining manual steps. Do NOT print a
+   post-publish checklist.
 
 ### Scheduling procedure — use `posts_create_post` (STANDARD)
 
@@ -182,58 +185,6 @@ genuinely still absent after waiting. **Best fix: schedule the list a couple of 
 out instead of publishing immediately** — scheduled Threads posts go through cleanly,
 no 409. The 409 is strictly an artifact of the immediate path, so *any* future-dated
 `scheduled_for` clears it; ~2 min is enough (see the default lead time above).
-
-### Post-publish todo list (CANONICAL — output every time)
-
-**After EVERY publish, output this exact checklist to Eric — same five sections,
-same order, all five platforms listed in each, every time.** Fill in [N], [N-1],
-[count][ & Y intentions], and the time. In "Publish status," mark each platform
-✅ posted or ⚠️ FAILED with its manual fix (e.g. Threads/TikTok manual post). Never
-drop a section or a platform; if a platform needs nothing in a section, write
-"nothing." Omit only the "Close out List [N-1]" section for List 1. **Every comment
-must be the COMPLETE text for that platform, ready to copy-paste — never abbreviate
-with "…" or "same as above."**
-
-```
-List [N] — [count] souls[ & [Y] intentions] — [published now | scheduled for [time] [tz] ([HH:MM]Z)]
-
-── 1. Publish status (confirm all five) ──
-- YouTube   — [✅ posted | ⚠️ FAILED: <reason> → <fix>]
-- Facebook  — [✅ posted | ⚠️ ...]
-- Instagram — [✅ posted (cover set) | ⚠️ ...]
-- Threads   — [✅ posted | ⚠️ FAILED → post manually (caption provided)]
-- TikTok    — [✅ posted | ⚠️ FAILED → post manually in-app (caption provided)]
-
-── 2. First comment + pin (once live) ──
-- [ ] YouTube   — WATCH PAGE (not Studio), as the channel: comment
-      "Comment 🙏 to pray for this list. Your name goes on the next." → ⋮ → Pin
-- [ ] Facebook  — as the Page: same comment → ⋯ → Pin comment (or pin in app)
-- [ ] Instagram — same comment → pin IN THE APP (long-press → pin)
-- [ ] Threads   — nothing (the 🙏 CTA is already in the caption)
-- [ ] TikTok    — nothing
-
-── 3. Covers / thumbnail ──
-- [ ] YouTube   — upload list_[N]_thumbnail in Studio → Content → the Short → Thumbnail
-      (Zernio can't thumbnail a Short)
-- Instagram — cover auto-set ✅ (⚠️ set manually if the post was manual)
-- TikTok    — no cover (do NOT set via Zernio); set manually in-app if wanted
-- Facebook / Threads — default frame (nothing)
-
-── 4. Close out List [N-1] (skip for List 1) ──
-- [ ] YouTube   — edit pinned comment (⋮ → Edit) to:
-      List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our channel.
-- [ ] Facebook  — edit pinned comment (⋯ → Edit) to:
-      List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our Page.
-- [ ] Instagram — can't edit: DELETE old pinned comment, post this new one, re-pin (app):
-      List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our profile.
-- [ ] Threads   — REPLY to the List [N-1] post with this, then pin the reply (⋮ → Pin reply):
-      List [N-1] is retired — but a 🙏 here still counts. Find the newest list on our profile.
-- [ ] TikTok    — leave unchanged
-
-── 5. Next list ──
-- [ ] Ask Claude to harvest 🙏 since the watermark into participants.json pending[[N+1]]
-- [ ] Run `npm run participants-pdf` in `scripts/` for the printable list
-```
 
 ### First comment & pinning per platform (new video)
 
@@ -446,6 +397,9 @@ When a list is assembled, its `pending[N]` entries are the social-sourced names
 
 Filter by **comment** time, not post time — that's what makes a same-day 🙏 on an
 old post count toward the next list.
+
+Once a list's participants are harvested, run `npm run participants-pdf` in
+`scripts/` to turn `pending[N]` into the printable list.
 
 ## Tools
 - Publishing/comments: Zernio (cheapest paid tier suffices at one post/day)
