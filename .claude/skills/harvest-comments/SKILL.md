@@ -26,6 +26,25 @@ list **N** in `publishing/participants.json`.
    Threads (TikTok is not queryable) with each post's **current `commentCount`**.
    Always do this enumeration in full — it's the cheap part (50 posts/page, a couple
    of calls) and it's how we detect which posts changed. Do NOT deep-fetch yet.
+
+   **Every page must land on disk before analysis — never retype post data into the
+   analysis script.** A full page (~50 posts) exceeds the tool output limit and the
+   harness auto-saves it to a file; record that path. The LAST page is short and comes
+   back INLINE — when that happens, immediately `Write` the response's `result` string
+   verbatim to `<scratchpad>/enum-page-<n>.json` and analyze that file. Copy the whole
+   payload, unedited; do not hand-pick `id`/`commentCount`/`content` fields into a
+   Python literal. A bad verbatim copy fails loudly at parse time; a bad hand-picked
+   field silently corrupts the skip/fetch decision — that's the whole point.
+
+   Then assert, in the analysis script itself:
+   - the number of pages parsed equals the number of calls made;
+   - only the final page has `pagination.hasMore == False`, and every other page has
+     `hasMore == True` with the cursor that was actually used for the next call;
+   - the total post count equals the sum of each page's `len(data)`.
+
+   Page composition shifts between runs — new posts push older ones onto later pages,
+   so the final page's contents are different every time (List 31's run: 8 posts where
+   the prior run had 6). Nothing may depend on a page's contents being stable.
 3. Decide which posts to deep-fetch with `comments_get_inbox_post_comments`
    (`post_id` + `account_id`). Deep-fetch a post if **any** of these is true:
    - it belongs to one of the **two most-recently-published lists** — the current
