@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-08-01T17:47:00Z",
+  "last_aggregated_at": "2026-08-02T17:37:05Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -42,11 +42,13 @@
     "facebook:1033072079891934_122126567360983291": 1,
     "facebook:1033072079891934_122126677682983291": 1,
     "facebook:1033072079891934_122126823236983291": 1,
+    "facebook:1033072079891934_122126916380983291": 1,
     "instagram:17872344792544581": 1,
     "instagram:17889801402395535": 1,
     "instagram:17891260101589721": 1,
     "instagram:17895601503377628": 1,
     "instagram:17901769353463428": 1,
+    "instagram:18007988849756578": 1,
     "instagram:18021169112895868": 1,
     "instagram:18030912398828241": 1,
     "instagram:18042716630609187": 1,
@@ -111,6 +113,7 @@
     "youtube:YD8oTfX8R5E": 1,
     "youtube:eRzx_I4LcYM": 1,
     "youtube:jr_Zy1VLWfI": 1,
+    "youtube:lBivkkqVUps": 1,
     "youtube:lGXBoovZDv4": 1,
     "youtube:mjT9R05X9No": 1,
     "youtube:oQLD9CJm_6o": 1,
@@ -241,6 +244,7 @@
     "27": [],
     "28": [],
     "29": [],
-    "30": []
+    "30": [],
+    "31": []
   }
 }
