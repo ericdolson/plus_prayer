@@ -27,24 +27,36 @@ list **N** in `publishing/participants.json`.
    Always do this enumeration in full — it's the cheap part (50 posts/page, a couple
    of calls) and it's how we detect which posts changed. Do NOT deep-fetch yet.
 
-   **Every page must land on disk before analysis — never retype post data into the
-   analysis script.** A full page (~50 posts) exceeds the tool output limit and the
-   harness auto-saves it to a file; record that path. The LAST page is short and comes
-   back INLINE — when that happens, immediately `Write` the response's `result` string
-   verbatim to `<scratchpad>/enum-page-<n>.json` and analyze that file. Copy the whole
-   payload, unedited; do not hand-pick `id`/`commentCount`/`content` fields into a
-   Python literal. A bad verbatim copy fails loudly at parse time; a bad hand-picked
-   field silently corrupts the skip/fetch decision — that's the whole point.
+   **Every response must land on disk as a file — never retype post data into the
+   analysis script.** A response of ~50+ posts exceeds the tool output limit and the
+   harness auto-saves it; a short response comes back INLINE and would have to be
+   hand-copied. Straight pagination always ends in a short inline tail page, so don't
+   paginate straight through — use overlapping windows instead.
 
-   Then assert, in the analysis script itself:
-   - the number of pages parsed equals the number of calls made;
-   - only the final page has `pagination.hasMore == False`, and every other page has
-     `hasMore == True` with the cursor that was actually used for the next call;
-   - the total post count equals the sum of each page's `len(data)`.
+   **Overlapping-window recipe** (verified 2026-08-03 at ~111 posts):
+   1. `limit=100`, no cursor → **window A** (posts 1–100), auto-saved to a file.
+   2. `limit=50`, no cursor → its `nextCursor` is the cursor sitting after post 50.
+      (Also a file; you only need the cursor out of it.)
+   3. `limit=100` with THAT cursor → **window B** (posts 51–end), auto-saved so long
+      as the tail is ≳50 posts.
+   4. Merge A and B keyed by `"<platform>:<id>"`. The overlap is the safety net.
 
-   Page composition shifts between runs — new posts push older ones onto later pages,
-   so the final page's contents are different every time (List 31's run: 8 posts where
-   the prior run had 6). Nothing may depend on a page's contents being stable.
+   **`limit` is clamped server-side to 100.** Asking for 200 silently returns 100
+   with `hasMore: true` — it LOOKS like one call got everything. Never assume it did.
+
+   Assert these in the analysis script itself; each one has silently hidden posts:
+   - `meta.accountsFailed == 0` on every window — a failed account shrinks the
+     enumeration without any error surfacing;
+   - the LAST window has `pagination.hasMore == False` — otherwise the tail was never
+     reached (this is what caught the limit=200 clamp);
+   - the windows OVERLAP by ≥1 post AND every overlapping row agrees on
+     `commentCount` — zero overlap means a possible gap between the windows;
+   - no duplicate `"<platform>:<id>"` inside a single window.
+
+   Once the archive passes ~150 posts the tail stops being big enough for one window;
+   add a third overlapping window rather than accepting an inline page. Page
+   composition shifts every run as new posts push old ones down, so nothing may depend
+   on a given window's contents being stable.
 3. Decide which posts to deep-fetch with `comments_get_inbox_post_comments`
    (`post_id` + `account_id`). Deep-fetch a post if **any** of these is true:
    - it belongs to one of the **two most-recently-published lists** — the current
@@ -61,6 +73,14 @@ list **N** in `publishing/participants.json`.
    **Skip** every other post: an unchanged count that isn't in the floor means no
    new comment arrived (a real 🙏 would have bumped the count). This is what keeps
    the harvest from growing with the number of lists.
+
+   **A deep-fetch that ERRORS is not "no comments."** `comments_get_inbox_post_comments`
+   returns transient failures — `[500] Failed to fetch comments` on an Instagram post,
+   2026-08-03, which succeeded on an immediate retry. Retry a failed post once or
+   twice. If it still fails, **STOP**: report that post as unharvested and do NOT
+   advance `last_aggregated_at`. Letting an error fall through to "0 comments found"
+   drops a real participant and then moves the watermark past them, so the next run
+   can never recover it.
 4. Among the comments on the deep-fetched posts, keep one only if ALL of these hold:
    - the message contains 🙏 (U+1F64F), allowing a trailing skin-tone modifier
      (🙏🏻 🙏🏼 🙏🏽 🙏🏾 🙏🏿);
