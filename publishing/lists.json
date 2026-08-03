@@ -7,6 +7,40 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "32": {
+      "date": "2026-08-03",
+      "soul_count": 4575,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F32.mp4?alt=media&token=7651ce2d-d258-4a57-9593-f83f4a64bff2",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F32_thumbnail.png?alt=media&token=3084e7e9-e8a7-4bb2-8a48-2c61c8a76a41",
+      "published": {
+        "scheduled_for": "2026-08-03T14:18:00Z",
+        "method": "posts_create_post (via zernio call_tool passthrough) scheduled ~2 min out. Target computed immediately before the first create; creates finished 14:16:16Z, ~104s of margin. All 5 scheduled cleanly, no 409s. Distinct caption per platform. Souls-only, no source note. IG cover set; no TikTok cover; YouTube (Short) thumbnail manual.",
+        "platforms": {
+          "youtube": {
+            "post_id": "6a70a2a97b4996ad4bdf0fd1",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a70a2ab7b4996ad4bdf101d",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a70a2ac7b4996ad4bdf1081",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a70a2adb9f5fe910a065542",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a70a2af7b4996ad4bdf1131",
+            "status": "scheduled"
+          }
+        }
+      }
+    },
     "31": {
       "date": "2026-08-02",
       "soul_count": 4560,
