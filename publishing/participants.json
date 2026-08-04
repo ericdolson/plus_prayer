@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-08-03T13:07:39Z",
+  "last_aggregated_at": "2026-08-04T13:18:57Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -44,6 +44,7 @@
     "facebook:1033072079891934_122126823236983291": 1,
     "facebook:1033072079891934_122126916380983291": 1,
     "facebook:1033072079891934_122127024794983291": 1,
+    "facebook:1033072079891934_122127142670983291": 1,
     "instagram:17872344792544581": 1,
     "instagram:17889801402395535": 1,
     "instagram:17891260101589721": 1,
@@ -68,6 +69,7 @@
     "instagram:18107059544037393": 1,
     "instagram:18109658086807281": 1,
     "instagram:18109753642945450": 1,
+    "instagram:18116368624895990": 1,
     "instagram:18116638450910611": 1,
     "instagram:18118139501503589": 1,
     "instagram:18128538547634913": 1,
@@ -93,6 +95,7 @@
     "threads:18138610651563913": 1,
     "threads:18187649380387264": 1,
     "threads:18210109225354411": 1,
+    "youtube:0wMrWeQascU": 1,
     "youtube:1TgMDp3ERIY": 1,
     "youtube:2ZbX5QxeA0M": 1,
     "youtube:6qnFRta7Jko": 1,
@@ -249,6 +252,96 @@
     "29": [],
     "30": [],
     "31": [],
-    "32": []
+    "32": [],
+    "33": [
+      {
+        "platform": "manual",
+        "handle": "Caden West",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Jaxson Homer",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Myles West",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Eric Olson",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Melanie Hill",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Hyrum",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Cadence Olson",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Allie Olson",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Eli Olson",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Nathan Baker",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Judy Baker",
+        "id": null,
+        "at": "2026-08-04T13:18:57Z",
+        "comment_url": null,
+        "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
+      }
+    ]
   }
 }
