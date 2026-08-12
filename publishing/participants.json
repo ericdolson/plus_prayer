@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-08-04T13:18:57Z",
+  "last_aggregated_at": "2026-08-12T13:19:24Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -45,10 +45,12 @@
     "facebook:1033072079891934_122126916380983291": 1,
     "facebook:1033072079891934_122127024794983291": 1,
     "facebook:1033072079891934_122127142670983291": 1,
+    "facebook:1033072079891934_122127279950983291": 1,
     "instagram:17872344792544581": 1,
     "instagram:17889801402395535": 1,
     "instagram:17891260101589721": 1,
     "instagram:17895601503377628": 1,
+    "instagram:17900556717543992": 1,
     "instagram:17901769353463428": 1,
     "instagram:18005802434767931": 1,
     "instagram:18007988849756578": 1,
@@ -77,12 +79,12 @@
     "instagram:18201524608334962": 1,
     "instagram:18271509685289161": 1,
     "instagram:18610370899042603": 1,
-    "threads:17864144901638141": 2,
+    "threads:17864144901638141": 1,
     "threads:17889424023678556": 1,
     "threads:17903962317456173": 1,
     "threads:17955152568173859": 1,
     "threads:17970295203101991": 1,
-    "threads:17974235661064085": 1,
+    "threads:17974235661064085": 0,
     "threads:18060304256757969": 1,
     "threads:18080106404300545": 1,
     "threads:18086813936396838": 1,
@@ -113,6 +115,7 @@
     "youtube:Rr1D41aZe9I": 2,
     "youtube:TFScW3-PJ5w": 1,
     "youtube:VMdCy7V2L8k": 3,
+    "youtube:VPPtcVRZ-UI": 1,
     "youtube:Xa_ugEFq9H0": 1,
     "youtube:XakNeCooOAU": 1,
     "youtube:YD8oTfX8R5E": 1,
@@ -342,6 +345,7 @@
         "comment_url": null,
         "note": "Added directly by Eric — personal request, not sourced from a social 🙏 comment."
       }
-    ]
+    ],
+    "34": []
   }
 }
