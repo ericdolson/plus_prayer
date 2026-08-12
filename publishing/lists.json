@@ -19,23 +19,24 @@
         "platforms": {
           "youtube": {
             "post_id": "6a7c91a7276af0e9f4ac4f95",
-            "status": "scheduled"
+            "status": "published"
           },
           "facebook": {
             "post_id": "6a7c91a903e9e6a89b14d15f",
-            "status": "scheduled"
+            "status": "published"
           },
           "instagram": {
             "post_id": "6a7c91ae276af0e9f4ac5343",
-            "status": "scheduled"
+            "status": "published"
           },
           "threads": {
             "post_id": "6a7c91b1276af0e9f4ac55be",
-            "status": "scheduled"
+            "status": "published"
           },
           "tiktok": {
             "post_id": "6a7c91b403e9e6a89b14d653",
-            "status": "scheduled"
+            "status": "failed",
+            "error": "Daily active user quota reached. (TikTok API, 2026-08-12T15:34:02Z)"
           }
         },
         "comments": {
