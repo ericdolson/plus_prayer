@@ -33,9 +33,29 @@ pin (or re-pin) by hand. That's expected, not a failure.
 - **N** — the list number that was just published (required). The previous list
   is **N‑1**.
 
+## Status sweep — check all five, every pass
+Before either half, `posts_get` **every** `post_id` in
+`lists["N"].published.platforms` — youtube, facebook, instagram, threads, and
+tiktok. Threads and TikTok take no comments, but they fail like any other platform
+and this is the only step in the pipeline that looks at them; a silent TikTok
+failure otherwise hides behind a report that says the list is live.
+
+For any platform that comes back `failed`, pull the reason with
+`logs_list_logs type=publishing platform=<platform> days=1` (newest entry for that
+`post_id` → `error_message`), write `status: "failed"` and an `error` string into
+`lists["N"].published.platforms[<platform>]`, and put it in the **Needs attention**
+block of the output. Do not retry on your own — that's Eric's call.
+
+Two ways a healthy post looks broken here: `posts_get` on a published **TikTok**
+post can throw `platformPostUrl … Input should be a valid URL, input is empty`
+(client strictness — TikTok returns no share URL), and Threads/TikTok often sit in
+`publishing` for several minutes. Fall back to `logs_list_logs` for the real status
+before calling anything a failure.
+
 ## Per-platform gate — finalize each platform as IT goes live
-Do NOT wait for all three. For each of youtube/facebook/instagram, call `posts_get`
-on `lists["N"].published.platforms[platform].post_id`:
+Do NOT wait for all three. For each of youtube/facebook/instagram, use its status
+from the sweep above (`posts_get` on
+`lists["N"].published.platforms[platform].post_id`):
 
 - `status: published` → do **both halves for that platform** in this pass.
 - anything else (usually `publishing` — Instagram is the usual laggard) → skip that
@@ -100,7 +120,16 @@ Commit `lists.json`, then output:
 1. One line naming what this pass did, e.g.
    `Finalized: youtube, facebook · Still publishing: instagram` — so the caller
    knows whether another pass is needed.
-2. The manual checklist (below), unchanged and in full. It is short, every item on
+2. One line covering the other two, e.g. `Threads live · TikTok still publishing` —
+   they never appear in the finalized/skipped line above, so without this they go
+   unmentioned entirely.
+3. **Needs attention** — only when the sweep found a `failed` platform. Name the
+   platform, quote the `error_message` verbatim, and give the two ways out: a
+   `posts_retry` on that `post_id`, or posting by hand with the caption ready to
+   paste (read it from the failed post's `content`). Put this ABOVE the checklist —
+   it's the one item that isn't routine. Omit the block entirely when all five are
+   fine; do not print "no issues."
+4. The manual checklist (below), unchanged and in full. It is short, every item on
    it is still owed, and a later pass reprinting it is harmless.
 
 ## Comment copy (locked)

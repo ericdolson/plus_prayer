@@ -90,12 +90,19 @@ timer wakes Claude a few minutes later to run `finalize-comments` for list N.
 
 The background timer's exit re-invokes you. On each wake, for list N:
 
-1. `posts_get` the youtube, facebook, and instagram `post_id`s from
-   `lists["N"].published.platforms`.
-2. Invoke the `finalize-comments` skill with N. It finalizes every platform that is
+1. **Sweep all five** — `posts_get` every `post_id` in `lists["N"].published.platforms`,
+   not just the three that take comments. Threads and TikTok get no comment work, but
+   they fail like anything else and nothing else in the pipeline looks at them.
+   Classify each: `published` · in-flight (`scheduled`/`pending`/`publishing`) ·
+   `failed`.
+2. **Resolve every `failed` before moving on** (see "Handling a failed platform"
+   below) — pull the error, write it into `lists.json`, and carry it into the report.
+3. Invoke the `finalize-comments` skill with N. It finalizes every platform that is
    `published` and silently skips the rest — partial passes are safe and expected.
-3. If all three are finalized, report what landed and stop. Otherwise arm the next
-   timer from the schedule and repeat.
+4. Stop when the three comment platforms are finalized **and** Threads/TikTok are each
+   either `published` or a reported failure. Otherwise arm the next timer from the
+   schedule and repeat. Report what landed on all five — never report "all five
+   scheduled" as if it were "all five live."
 
 | wake | timer to arm | lands at    |
 |------|--------------|-------------|
@@ -114,6 +121,33 @@ a lag.
 
 If the session ends mid-cycle the pending timer dies with it. Nothing is corrupted;
 `/finalize-comments N` by hand completes whatever the cycle did not.
+
+### Handling a failed platform
+
+A `failed` status is the one thing in this pipeline that needs Eric, so surface it in
+the same breath as the good news — never let it sit unmentioned behind a "published"
+summary of the other four.
+
+1. Get the reason: `logs_list_logs type=publishing platform=<platform> days=1`. The
+   newest entry for that `post_id` carries `error_message`, and a successful retry
+   later shows up in the same feed as `status: success` with a `platform_post_id`.
+2. Record it in `lists["N"].published.platforms[<platform>]`: `status: "failed"` plus
+   an `error` string with the message and its UTC timestamp. Commit.
+3. Report to Eric: which platform, the verbatim error, that the other four are fine,
+   and the two ways out — a `posts_retry` on that `post_id`, or posting by hand (the
+   caption is already in the create call, so hand it to him ready to paste).
+4. **Do not retry automatically.** Retry only when Eric says to, then confirm with
+   `logs_list_logs` rather than assuming the queued retry worked.
+
+**TikTok `Daily active user quota reached.`** — measured on List 34 (2026-08-12):
+failed 15:34:02Z, a single `posts_retry` succeeded 15:49:32Z. It is a short-window
+ceiling, not the daily quota being spent, so ~15 min and one retry usually clears it.
+Still Eric's call, and still one retry at a time.
+
+**`posts_get` can throw on a healthy TikTok post.** After TikTok publishes, the MCP
+client rejects the response with `platformPostUrl … Input should be a valid URL,
+input is empty` because TikTok returns no share URL. That is client strictness, not a
+publish failure — fall back to `logs_list_logs` for that platform's real status.
 
 ## Gotchas (verified over Lists 1–7)
 - **Scheduling:** always `posts_create_post` + `scheduled_for` (stored verbatim, and
