@@ -132,8 +132,8 @@ platforms scheduled correctly this way.
    - **Instagram** — `platforms:[{platform:"instagram", accountId, platformSpecificData:{contentType:"reels", instagramThumbnail:<thumbnail_url>}}]`.
    - **TikTok** — do NOT pass a cover. `tiktok_settings.video_cover_image_url` broke
      List 3 (Zernio's ffmpeg cover-stitch timed out, and that attempt burned TikTok's
-     daily API quota, blocking retries). Post TikTok with **no cover** (reliable, like
-     Lists 1–2); set the TikTok cover manually in-app if wanted.
+     API quota for long enough to block same-hour retries). Post TikTok with **no
+     cover** (reliable, like Lists 1–2); set the TikTok cover manually in-app if wanted.
    - **Facebook / Threads** — `platforms:[{platform, accountId}]` (no cover via API).
 3. **Verify:** the create response returns the persisted post with `scheduledFor`
    and `status` — confirm `scheduledFor` equals the intended UTC and status is
@@ -186,6 +186,34 @@ out instead of publishing immediately** — scheduled Threads posts go through c
 no 409. The 409 is strictly an artifact of the immediate path, so *any* future-dated
 `scheduled_for` clears it; ~2 min is enough (see the default lead time above).
 
+**TikTok publish failures: `Daily active user quota reached.` is transient.**
+Measured on List 34 (2026-08-12): the scheduled TikTok post failed at 15:34:02Z with
+that message while the other four published normally; a single `posts_retry` on the
+same Zernio post id succeeded at 15:49:32Z. Despite the wording it is a short-window
+rate ceiling on the app doing the posting, **not** the day's quota being spent — it
+does not hold until the 00:00 UTC reset, and it does not require a manual upload.
+
+- Wait ~10–15 min, run **one** `posts_retry`, then confirm with
+  `logs_list_logs type=publishing platform=tiktok days=1` — a success shows
+  `status: success` with a `platform_post_id`. Don't retry in a loop, and don't
+  assume a queued retry worked (same discipline as the Threads 409 above).
+- Go manual only if that retry also fails. The caption is on the failed post's
+  `content`, ready to paste into the app.
+- Nothing about the video or the account is wrong when this fires — the request
+  never reaches TikTok's publish step, so there's no partial post to clean up.
+
+**A published TikTok post can break `posts_get`.** The MCP client rejects the
+response with `platformPostUrl … Input should be a valid URL, input is empty`
+because TikTok returns no share URL. That's client strictness, not a failed
+publish — read the real status from `logs_list_logs`.
+
+**Check all five statuses, not just the three that take comments.** Threads and
+TikTok have no comment work, so nothing else in the pipeline looks at them; a TikTok
+failure otherwise hides behind a report that says the list is live (this is exactly
+how List 34's failure surfaced — Eric noticed the missing video). Both the
+`publish-list` wake cycle and `finalize-comments` now sweep all five and record
+`status: "failed"` plus an `error` string into the platform's entry in `lists.json`.
+
 ### First comment & pinning per platform (new video)
 
 Zernio can't reliably post or pin these, so do them by hand once the video is
@@ -205,9 +233,10 @@ Covers CAN be set through the MCP — use **`posts_create_post`** (not the simpl
 Firebase Storage like the videos). Fields:
 - **TikTok** — `tiktok_settings.video_cover_image_url` exists but is **UNRELIABLE**:
   on List 3 (2026-07-05) Zernio's ffmpeg cover-stitch timed out, and the failed
-  attempt consumed TikTok's low daily API quota, blocking retries. **Do not set the
-  TikTok cover via Zernio** — post without a cover (reliable) and set it manually
-  in-app if wanted.
+  attempt consumed TikTok's low API quota, blocking retries for a while (see
+  "TikTok publish failures" above — the ceiling is short-window, not all day).
+  **Do not set the TikTok cover via Zernio** — post without a cover (reliable) and
+  set it manually in-app if wanted.
 - **Instagram** — platform entry `platformSpecificData: { instagramThumbnail: <url> }`. Works (verified List 3).
 - **YouTube** — `media_items: [{ type:'video', url:<video>, thumbnail:<url> }]`, or
   `posts_update_post_metadata` `thumbnail_url` after publish. CAVEAT: Zernio custom
