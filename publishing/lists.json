@@ -19,15 +19,15 @@
         "platforms": {
           "youtube": {
             "post_id": "6a7fa7e2e8458525cfc24b81",
-            "status": "scheduled"
+            "status": "published"
           },
           "facebook": {
             "post_id": "6a7fa7e560976b6fa0b25426",
-            "status": "scheduled"
+            "status": "published"
           },
           "instagram": {
             "post_id": "6a7fa7ea9062140632f89170",
-            "status": "scheduled"
+            "status": "published"
           },
           "threads": {
             "post_id": "6a7fa7eec3273483cfd4a5c2",
@@ -35,7 +35,28 @@
           },
           "tiktok": {
             "post_id": "6a7fa7f09062140632f89300",
-            "status": "scheduled"
+            "status": "published",
+            "platform_post_id": "v_pub_url~v2-1.7674037352256440334"
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "UgzQzQUAP6oGH0slDM94AaABAg",
+            "mechanic_at": "2026-08-14T23:49:03Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122129047214983291_1565246472067769",
+            "mechanic_at": "2026-08-14T23:49:03Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "17967744780131107",
+            "mechanic_at": "2026-08-14T23:49:03Z",
+            "closeout": "pending",
+            "retired_id": null
           }
         }
       }
@@ -76,20 +97,20 @@
           "youtube": {
             "mechanic_id": "UgxsTHdbiSD5FxVq30t4AaABAg",
             "mechanic_at": "2026-08-13T15:51:58Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "Ugx5Ue3DNYQ40R69VTd4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122128738580983291_29004677805786360",
             "mechanic_at": "2026-08-13T15:51:58Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122128738580983291_1005527609190831"
           },
           "instagram": {
             "mechanic_id": "18123473317752495",
             "mechanic_at": "2026-08-13T15:51:58Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "17878759314686849"
           }
         }
       }
