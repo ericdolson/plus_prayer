@@ -14,62 +14,90 @@
       "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F38.mp4?alt=media&token=fe528b75-0ea8-4e15-8be8-d3076cb1a77d",
       "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F38_thumbnail.png?alt=media&token=2a97341e-6e07-4872-bb8b-f5dcbd2a4ade",
       "date": "2026-08-16",
+      "published_superseded": [
+        {
+          "scheduled_for": "2026-08-16T18:25:00Z",
+          "platforms": {
+            "youtube": {
+              "post_id": "6a81ffd5393b7373efabfc60",
+              "status": "deleted",
+              "platform_post_id": "CJMbcac4qQA",
+              "platform_post_url": "https://www.youtube.com/watch?v=CJMbcac4qQA",
+              "deleted_at": "2026-08-16T18:37:54Z",
+              "deleted_via": "zernio posts_unpublish_post"
+            },
+            "facebook": {
+              "post_id": "6a81ffd99385e5277d8c3dd3",
+              "status": "deleted",
+              "platform_post_id": "1666952705093774",
+              "platform_post_url": "https://www.facebook.com/watch/?v=1666952705093774",
+              "deleted_at": "2026-08-16T18:37:54Z",
+              "deleted_via": "zernio posts_unpublish_post"
+            },
+            "instagram": {
+              "post_id": "6a81ffdec4901506f1367948",
+              "status": "pending_manual_delete",
+              "platform_post_id": "18005245916974715",
+              "platform_post_url": "https://www.instagram.com/reel/DcHGyFHCfXS/",
+              "note": "platform refuses API deletion — must be deleted in-app"
+            },
+            "threads": {
+              "post_id": "6a81ffe19385e5277d8c400c",
+              "status": "deleted",
+              "platform_post_id": "18124751554774886",
+              "platform_post_url": "https://www.threads.com/@plusprayer/post/DcHHA7kkub_",
+              "deleted_at": "2026-08-16T18:37:54Z",
+              "deleted_via": "zernio posts_unpublish_post"
+            },
+            "tiktok": {
+              "post_id": "6a81ffe3393b7373efabfe8d",
+              "status": "pending_manual_delete",
+              "platform_post_id": "v_pub_url~v2-1.7674697317752277006",
+              "note": "platform refuses API deletion — must be deleted in-app"
+            }
+          },
+          "comments": {
+            "youtube": {
+              "mechanic_id": "UgyUZysCGTJehzAGtaN4AaABAg",
+              "mechanic_at": "2026-08-16T18:29:21Z",
+              "closeout": "pending",
+              "retired_id": null
+            },
+            "facebook": {
+              "mechanic_id": "122129346470983291_1521724612613458",
+              "mechanic_at": "2026-08-16T18:29:21Z",
+              "closeout": "pending",
+              "retired_id": null
+            }
+          },
+          "superseded_reason": "wrong video cut published; new video_url uploaded — List 38 to be republished"
+        }
+      ],
       "published": {
-        "scheduled_for": "2026-08-16T18:25:00Z",
+        "scheduled_for": "2026-08-16T18:43:00Z",
+        "note": "republish #1 — original cut deleted, new video_url token fe528b75; captions use the alternate \"rests there now\" ritual line to clear the 24h dedup",
         "platforms": {
           "youtube": {
-            "post_id": "6a81ffd5393b7373efabfc60",
-            "status": "deleted",
-            "platform_post_id": "CJMbcac4qQA",
-            "platform_post_url": "https://www.youtube.com/watch?v=CJMbcac4qQA",
-            "deleted_at": "2026-08-16T18:37:54Z",
-            "deleted_via": "zernio posts_unpublish_post"
+            "post_id": "6a82043a9b34443a4580e101",
+            "status": "scheduled"
           },
           "facebook": {
-            "post_id": "6a81ffd99385e5277d8c3dd3",
-            "status": "deleted",
-            "platform_post_id": "1666952705093774",
-            "platform_post_url": "https://www.facebook.com/watch/?v=1666952705093774",
-            "deleted_at": "2026-08-16T18:37:54Z",
-            "deleted_via": "zernio posts_unpublish_post"
+            "post_id": "6a82043d3b5a1b82ddd0c541",
+            "status": "scheduled"
           },
           "instagram": {
-            "post_id": "6a81ffdec4901506f1367948",
-            "status": "pending_manual_delete",
-            "platform_post_id": "18005245916974715",
-            "platform_post_url": "https://www.instagram.com/reel/DcHGyFHCfXS/",
-            "note": "platform refuses API deletion — must be deleted in-app"
+            "post_id": "6a8204419f8196c3e781c60a",
+            "status": "scheduled"
           },
           "threads": {
-            "post_id": "6a81ffe19385e5277d8c400c",
-            "status": "deleted",
-            "platform_post_id": "18124751554774886",
-            "platform_post_url": "https://www.threads.com/@plusprayer/post/DcHHA7kkub_",
-            "deleted_at": "2026-08-16T18:37:54Z",
-            "deleted_via": "zernio posts_unpublish_post"
+            "post_id": "6a8204459f8196c3e781c794",
+            "status": "scheduled"
           },
           "tiktok": {
-            "post_id": "6a81ffe3393b7373efabfe8d",
-            "status": "pending_manual_delete",
-            "platform_post_id": "v_pub_url~v2-1.7674697317752277006",
-            "note": "platform refuses API deletion — must be deleted in-app"
+            "post_id": "6a8204479f8196c3e781c905",
+            "status": "scheduled"
           }
-        },
-        "comments": {
-          "youtube": {
-            "mechanic_id": "UgyUZysCGTJehzAGtaN4AaABAg",
-            "mechanic_at": "2026-08-16T18:29:21Z",
-            "closeout": "pending",
-            "retired_id": null
-          },
-          "facebook": {
-            "mechanic_id": "122129346470983291_1521724612613458",
-            "mechanic_at": "2026-08-16T18:29:21Z",
-            "closeout": "pending",
-            "retired_id": null
-          }
-        },
-        "superseded_reason": "wrong video cut published; new video_url uploaded — List 38 to be republished"
+        }
       }
     },
     "37": {
