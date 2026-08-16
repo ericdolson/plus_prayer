@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-08-15T20:04:53Z",
+  "last_aggregated_at": "2026-08-16T16:54:52Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -138,7 +138,10 @@
     "youtube:WAos1jXUZoI": 1,
     "instagram:18456325519137116": 1,
     "facebook:1033072079891934_122129047214983291": 1,
-    "youtube:_dQtOhnU8yk": 1
+    "youtube:_dQtOhnU8yk": 1,
+    "instagram:17982172523881661": 1,
+    "facebook:1033072079891934_122129253506983291": 2,
+    "youtube:oJZYUMFFe6M": 1
   },
   "pending": {
     "7": [],
@@ -358,6 +361,17 @@
     "34": [],
     "35": [],
     "36": [],
-    "37": []
+    "37": [],
+    "38": [
+      {
+        "platform": "facebook",
+        "handle": "Jodi MaJodi Savarese",
+        "id": "27958930337062983",
+        "at": "2026-08-15T22:57:38Z",
+        "comment_url": "https://www.facebook.com/reel/2920465608289610/?comment_id=122129253506983291_4397444820504828",
+        "message": "Jodi",
+        "note": "any-comment harvest (no 🙏) — Eric directive 2026-08-16"
+      }
+    ]
   }
 }
