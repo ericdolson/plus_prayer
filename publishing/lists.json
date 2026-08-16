@@ -19,32 +19,40 @@
         "platforms": {
           "youtube": {
             "post_id": "6a81ffd5393b7373efabfc60",
-            "status": "published",
+            "status": "deleted",
             "platform_post_id": "CJMbcac4qQA",
-            "platform_post_url": "https://www.youtube.com/watch?v=CJMbcac4qQA"
+            "platform_post_url": "https://www.youtube.com/watch?v=CJMbcac4qQA",
+            "deleted_at": "2026-08-16T18:37:54Z",
+            "deleted_via": "zernio posts_unpublish_post"
           },
           "facebook": {
             "post_id": "6a81ffd99385e5277d8c3dd3",
-            "status": "published",
+            "status": "deleted",
             "platform_post_id": "1666952705093774",
-            "platform_post_url": "https://www.facebook.com/watch/?v=1666952705093774"
+            "platform_post_url": "https://www.facebook.com/watch/?v=1666952705093774",
+            "deleted_at": "2026-08-16T18:37:54Z",
+            "deleted_via": "zernio posts_unpublish_post"
           },
           "instagram": {
             "post_id": "6a81ffdec4901506f1367948",
-            "status": "published",
+            "status": "pending_manual_delete",
             "platform_post_id": "18005245916974715",
-            "platform_post_url": "https://www.instagram.com/reel/DcHGyFHCfXS/"
+            "platform_post_url": "https://www.instagram.com/reel/DcHGyFHCfXS/",
+            "note": "platform refuses API deletion — must be deleted in-app"
           },
           "threads": {
             "post_id": "6a81ffe19385e5277d8c400c",
-            "status": "published",
+            "status": "deleted",
             "platform_post_id": "18124751554774886",
-            "platform_post_url": "https://www.threads.com/@plusprayer/post/DcHHA7kkub_"
+            "platform_post_url": "https://www.threads.com/@plusprayer/post/DcHHA7kkub_",
+            "deleted_at": "2026-08-16T18:37:54Z",
+            "deleted_via": "zernio posts_unpublish_post"
           },
           "tiktok": {
             "post_id": "6a81ffe3393b7373efabfe8d",
-            "status": "published",
-            "platform_post_id": "v_pub_url~v2-1.7674697317752277006"
+            "status": "pending_manual_delete",
+            "platform_post_id": "v_pub_url~v2-1.7674697317752277006",
+            "note": "platform refuses API deletion — must be deleted in-app"
           }
         },
         "comments": {
@@ -60,7 +68,8 @@
             "closeout": "pending",
             "retired_id": null
           }
-        }
+        },
+        "superseded_reason": "wrong video cut published; new video_url uploaded — List 38 to be republished"
       }
     },
     "37": {
