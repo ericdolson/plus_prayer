@@ -365,12 +365,13 @@
     "38": [
       {
         "platform": "facebook",
-        "handle": "Jodi MaJodi Savarese",
+        "handle": "Jodi",
+        "source_handle": "Jodi MaJodi Savarese",
         "id": "27958930337062983",
         "at": "2026-08-15T22:57:38Z",
         "comment_url": "https://www.facebook.com/reel/2920465608289610/?comment_id=122129253506983291_4397444820504828",
         "message": "Jodi",
-        "note": "any-comment harvest (no 🙏) — Eric directive 2026-08-16"
+        "note": "any-comment harvest (no 🙏) — Eric directive 2026-08-16; printed name \"Jodi\" chosen by Eric over the FB handle"
       }
     ]
   }
