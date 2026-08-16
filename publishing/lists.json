@@ -11,7 +11,7 @@
       "soul_count": 4580,
       "intention_count": 0,
       "notes": null,
-      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F38.mp4?alt=media&token=eeed4096-3801-4043-bfe0-cbf95bbabb55",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F38.mp4?alt=media&token=fe528b75-0ea8-4e15-8be8-d3076cb1a77d",
       "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F38_thumbnail.png?alt=media&token=2a97341e-6e07-4872-bb8b-f5dcbd2a4ade",
       "date": "2026-08-16",
       "published": {
@@ -19,19 +19,27 @@
         "platforms": {
           "youtube": {
             "post_id": "6a81ffd5393b7373efabfc60",
-            "status": "published"
+            "status": "published",
+            "platform_post_id": "CJMbcac4qQA",
+            "platform_post_url": "https://www.youtube.com/watch?v=CJMbcac4qQA"
           },
           "facebook": {
             "post_id": "6a81ffd99385e5277d8c3dd3",
-            "status": "published"
+            "status": "published",
+            "platform_post_id": "1666952705093774",
+            "platform_post_url": "https://www.facebook.com/watch/?v=1666952705093774"
           },
           "instagram": {
             "post_id": "6a81ffdec4901506f1367948",
-            "status": "scheduled"
+            "status": "published",
+            "platform_post_id": "18005245916974715",
+            "platform_post_url": "https://www.instagram.com/reel/DcHGyFHCfXS/"
           },
           "threads": {
             "post_id": "6a81ffe19385e5277d8c400c",
-            "status": "scheduled"
+            "status": "published",
+            "platform_post_id": "18124751554774886",
+            "platform_post_url": "https://www.threads.com/@plusprayer/post/DcHHA7kkub_"
           },
           "tiktok": {
             "post_id": "6a81ffe3393b7373efabfe8d",
