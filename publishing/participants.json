@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-08-16T16:54:52Z",
+  "last_aggregated_at": "2026-08-17T13:47:29Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -141,7 +141,10 @@
     "youtube:_dQtOhnU8yk": 1,
     "instagram:17982172523881661": 1,
     "facebook:1033072079891934_122129253506983291": 2,
-    "youtube:oJZYUMFFe6M": 1
+    "youtube:oJZYUMFFe6M": 1,
+    "instagram:18112568525278145": 1,
+    "facebook:1033072079891934_122129348006983291": 1,
+    "youtube:bGhG33RbftQ": 1
   },
   "pending": {
     "7": [],
@@ -373,6 +376,7 @@
         "message": "Jodi",
         "note": "any-comment harvest (no 🙏) — Eric directive 2026-08-16; printed name \"Jodi\" chosen by Eric over the FB handle"
       }
-    ]
+    ],
+    "39": []
   }
 }
