@@ -35,8 +35,9 @@
           },
           "tiktok": {
             "post_id": "6a8481051658cc0eb912605e",
-            "status": "failed",
-            "error": "Daily active user quota reached. (TikTok API, 2026-08-18T16:04:06Z)"
+            "status": "published",
+            "platform_post_id": "v_pub_url~v2-1.7675406473518286862",
+            "note": "failed 16:04:06Z (TikTok \"Daily active user quota reached.\"); posts_retry succeeded 16:17:42Z"
           }
         },
         "comments": {
