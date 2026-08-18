@@ -124,25 +124,37 @@ If the session ends mid-cycle the pending timer dies with it. Nothing is corrupt
 
 ### Handling a failed platform
 
-A `failed` status is the one thing in this pipeline that needs Eric, so surface it in
+A `failed` platform is auto-retried **once**, then reported either way. Surface it in
 the same breath as the good news — never let it sit unmentioned behind a "published"
 summary of the other four.
 
 1. Get the reason: `logs_list_logs type=publishing platform=<platform> days=1`. The
-   newest entry for that `post_id` carries `error_message`, and a successful retry
-   later shows up in the same feed as `status: success` with a `platform_post_id`.
+   newest entry for that `post_id` carries `error_message`, and a successful publish
+   shows as `status: success` with a `platform_post_id`.
 2. Record it in `lists["N"].published.platforms[<platform>]`: `status: "failed"` plus
    an `error` string with the message and its UTC timestamp. Commit.
-3. Report to Eric: which platform, the verbatim error, that the other four are fine,
-   and the two ways out — a `posts_retry` on that `post_id`, or posting by hand (the
-   caption is already in the create call, so hand it to him ready to paste).
-4. **Do not retry automatically.** Retry only when Eric says to, then confirm with
-   `logs_list_logs` rather than assuming the queued retry worked.
+3. **Wait 3 minutes, then retry once** — launch `sleep 180` with Bash
+   `run_in_background: true` and do the retry on the wake. One retry per platform per
+   list, ever. Before firing it, re-read `logs_list_logs` for that `post_id`: **if a
+   `status: success` entry has appeared, do NOT retry** — the platform published
+   asynchronously and a retry would duplicate it (this is exactly how List 4 got a
+   duplicate on Threads). Only retry when the newest log entry for that post is still
+   the failure.
+4. Confirm the retry from `logs_list_logs`, never from the fact that it was queued
+   (`posts_retry` returns "queued for retry" regardless of outcome). On success,
+   write `status: "published"`, drop the `error`, and record `platform_post_id` plus a
+   `note` naming the original failure and the retry time. Commit.
+5. If the retry also fails, **stop** — do not retry a second time. Report the
+   platform, the verbatim error, that the retry was already spent, and hand Eric the
+   caption ready to paste for a manual post.
 
-**TikTok `Daily active user quota reached.`** — measured on List 34 (2026-08-12):
-failed 15:34:02Z, a single `posts_retry` succeeded 15:49:32Z. It is a short-window
-ceiling, not the daily quota being spent, so ~15 min and one retry usually clears it.
-Still Eric's call, and still one retry at a time.
+**TikTok `Daily active user quota reached.`** — seen on List 34 (failed 15:34:02Z,
+retry succeeded 15:49:32Z) and List 40 (failed 16:04:06Z, retry succeeded 16:17:42Z).
+It is a short-window ceiling on the shared app, not our own volume: List 40 hit it on
+a clean first attempt with no earlier publish that day. **Both recoveries took 13–16
+minutes, so the 3-minute retry above will probably still fail on this specific error.**
+When it does, follow step 5 — report it — and note that a further retry ~15 min out is
+the move Eric has taken twice; ask rather than firing it.
 
 **`posts_get` can throw on a healthy TikTok post.** After TikTok publishes, the MCP
 client rejects the response with `platformPostUrl … Input should be a valid URL,

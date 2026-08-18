@@ -44,7 +44,12 @@ For any platform that comes back `failed`, pull the reason with
 `logs_list_logs type=publishing platform=<platform> days=1` (newest entry for that
 `post_id` → `error_message`), write `status: "failed"` and an `error` string into
 `lists["N"].published.platforms[<platform>]`, and put it in the **Needs attention**
-block of the output. Do not retry on your own — that's Eric's call.
+block of the output. A failed platform gets **one** automatic retry: 3 minutes
+later, and only after re-reading the logs to confirm no `status: success` has
+appeared for that `post_id` in the meantime (a retry over an async success is how
+List 4 got a duplicate on Threads). When `publish-list`'s wake cycle invoked this
+skill, that cycle owns the retry — just report. Standalone runs do it here. One
+retry per platform per list, ever; if it fails again, report and stop.
 
 Two ways a healthy post looks broken here: `posts_get` on a published **TikTok**
 post can throw `platformPostUrl … Input should be a valid URL, input is empty`
@@ -124,11 +129,12 @@ Commit `lists.json`, then output:
    they never appear in the finalized/skipped line above, so without this they go
    unmentioned entirely.
 3. **Needs attention** — only when the sweep found a `failed` platform. Name the
-   platform, quote the `error_message` verbatim, and give the two ways out: a
-   `posts_retry` on that `post_id`, or posting by hand with the caption ready to
-   paste (read it from the failed post's `content`). Put this ABOVE the checklist —
-   it's the one item that isn't routine. Omit the block entirely when all five are
-   fine; do not print "no issues."
+   platform, quote the `error_message` verbatim, and say where the automatic retry
+   got to: still pending, succeeded (with the retry time), or spent and failed again.
+   When it's spent, the remaining way out is a manual post — hand over the caption
+   ready to paste (read it from the failed post's `content`). Put this ABOVE the
+   checklist — it's the one item that isn't routine. Omit the block entirely when all
+   five are fine; do not print "no issues."
 4. The manual checklist (below), unchanged and in full. It is short, every item on
    it is still owed, and a later pass reprinting it is harmless.
 
