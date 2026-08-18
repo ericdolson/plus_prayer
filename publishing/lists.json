@@ -7,6 +7,39 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "40": {
+      "soul_count": 4532,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F40.mp4?alt=media&token=8efbce2e-ea2e-4380-9e7c-bd0a4b09744e",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F40_thumbnail.png?alt=media&token=ceae2215-6f61-4617-b06a-6babf347d607",
+      "date": "2026-08-18",
+      "published": {
+        "scheduled_for": "2026-08-18T16:00:00Z",
+        "platforms": {
+          "youtube": {
+            "post_id": "6a8480f77f6847413d2eb158",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6a8480faaa4e1fe5ecdc7bc8",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6a8480fe157668961dd71fb0",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6a848102157668961dd7201d",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6a8481051658cc0eb912605e",
+            "status": "scheduled"
+          }
+        }
+      }
+    },
     "39": {
       "soul_count": 4576,
       "intention_count": 0,
