@@ -19,7 +19,7 @@
         "platforms": {
           "youtube": {
             "post_id": "6a8480f77f6847413d2eb158",
-            "status": "scheduled"
+            "status": "published"
           },
           "facebook": {
             "post_id": "6a8480faaa4e1fe5ecdc7bc8",
@@ -35,7 +35,8 @@
           },
           "tiktok": {
             "post_id": "6a8481051658cc0eb912605e",
-            "status": "scheduled"
+            "status": "failed",
+            "error": "Daily active user quota reached. (TikTok API, 2026-08-18T16:04:06Z)"
           }
         }
       }
