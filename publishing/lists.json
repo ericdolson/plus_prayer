@@ -38,6 +38,14 @@
             "status": "failed",
             "error": "Daily active user quota reached. (TikTok API, 2026-08-18T16:04:06Z)"
           }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "Ugx_cbqB17MmXwIG3pB4AaABAg",
+            "mechanic_at": "2026-08-18T16:06:10Z",
+            "closeout": "pending",
+            "retired_id": null
+          }
         }
       }
     },
@@ -77,8 +85,8 @@
           "youtube": {
             "mechanic_id": "UgyMZPDOPbClL6y_Vj94AaABAg",
             "mechanic_at": "2026-08-17T15:36:25Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "UgwWCm2IPzZ_qP9PGoh4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122129473376983291_1605695861096544",
