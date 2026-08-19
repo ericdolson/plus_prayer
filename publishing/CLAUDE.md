@@ -214,6 +214,48 @@ how List 34's failure surfaced — Eric noticed the missing video). Both the
 `publish-list` wake cycle and `finalize-comments` now sweep all five and record
 `status: "failed"` plus an `error` string into the platform's entry in `lists.json`.
 
+### Replacing a published video (wrong cut) — delete + repost, never edit
+
+**Media on a published post cannot be replaced on any platform.** Zernio's docs are
+explicit: *"Media edits are not supported on any platform."* The edit endpoint touches
+text only, and only on X/Discord/Facebook/Reddit — Facebook's entry says outright
+*"Media cannot be swapped, only the message text."* So a wrong cut has exactly two
+outcomes: delete and repost, or live with it. Decide fast — at ~15 min old the views
+are still ~0, and every hour makes the redo cost more (verified List 38, 2026-08-16).
+
+**Deleting: use `posts_unpublish_post`, not `posts_delete_post`.**
+- `posts_delete_post` refuses anything already live: `[400] Published posts cannot be
+  deleted (invalid_resource_state)`. It only handles scheduled/draft posts.
+- `posts_unpublish_post` (args: `post_id` + `platform`) DOES remove the live post.
+  Verified working on **YouTube, Facebook, Threads**.
+- **Instagram and TikTok refuse it**: `[400] <platform> does not support post deletion
+  via API. Please delete the post manually from <platform>.` Those two are always a
+  manual in-app delete, so a full five-platform retraction can never be fully
+  automated.
+
+**Before deleting anything**, write each platform's `platformPostId` and
+`platformPostUrl` into `lists.json` (from `posts_get_post`). If a delete path ever
+removes the Zernio record, the live posts still need to be findable.
+
+**Reposting the same list the same day:**
+- **Vary every caption** or the 24h dedup 409s the create. Deleted posts don't reliably
+  free their `contentHash`, and Instagram/TikTok records stay `published` in Zernio
+  after a manual delete. Use the alternate ritual line that has already shipped —
+  `; the current one rests there now` (Lists 25–32) — rather than inventing new copy
+  against the locked template.
+- **Clear `published.comments`** on the new block. The logged `mechanic_id`s point at
+  comments that died with the deleted posts, and `finalize-comments` skips any platform
+  that already has one — so leaving them means the mechanic never gets re-seeded.
+- **Preserve the old block** as `published_superseded` (an array) with the platform
+  ids, deletion timestamps, and method, plus a `superseded_reason`. Don't overwrite the
+  record of what happened.
+- The previous list's close-out comments stay valid — their copy points generically at
+  "the newest list", so nothing needs redoing there.
+- **YouTube gets a new video id**, so its URL changes and the Short thumbnail must be
+  re-uploaded in Studio.
+- TikTok will be its second publish that day; the quota error is likelier (it did NOT
+  fire on List 38's repost, but plan for it).
+
 ### First comment & pinning per platform (new video)
 
 Zernio can't reliably post or pin these, so do them by hand once the video is
