@@ -44,12 +44,14 @@ For any platform that comes back `failed`, pull the reason with
 `logs_list_logs type=publishing platform=<platform> days=1` (newest entry for that
 `post_id` → `error_message`), write `status: "failed"` and an `error` string into
 `lists["N"].published.platforms[<platform>]`, and put it in the **Needs attention**
-block of the output. A failed platform gets **one** automatic retry: 3 minutes
-later, and only after re-reading the logs to confirm no `status: success` has
-appeared for that `post_id` in the meantime (a retry over an async success is how
-List 4 got a duplicate on Threads). When `publish-list`'s wake cycle invoked this
-skill, that cycle owns the retry — just report. Standalone runs do it here. One
-retry per platform per list, ever; if it fails again, report and stop.
+block of the output. A failed platform gets **one** automatic retry, after a wait
+chosen by the error: **15 min** for TikTok's `Daily active user quota reached.`
+(measured recoveries are 13–16 min), **3 min** for anything else. Fire it only after
+re-reading the logs to confirm no `status: success` has appeared for that `post_id`
+in the meantime (a retry over an async success is how List 4 got a duplicate on
+Threads). When `publish-list`'s wake cycle invoked this skill, that cycle owns the
+retry — just report. Standalone runs do it here. One retry per platform per list,
+ever; if it fails again, report and stop.
 
 Two ways a healthy post looks broken here: `posts_get` on a published **TikTok**
 post can throw `platformPostUrl … Input should be a valid URL, input is empty`

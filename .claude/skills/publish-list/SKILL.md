@@ -99,10 +99,12 @@ The background timer's exit re-invokes you. On each wake, for list N:
    below) — pull the error, write it into `lists.json`, and carry it into the report.
 3. Invoke the `finalize-comments` skill with N. It finalizes every platform that is
    `published` and silently skips the rest — partial passes are safe and expected.
-4. Stop when the three comment platforms are finalized **and** Threads/TikTok are each
-   either `published` or a reported failure. Otherwise arm the next timer from the
-   schedule and repeat. Report what landed on all five — never report "all five
-   scheduled" as if it were "all five live."
+4. Stop when the three comment platforms are finalized **and** every platform is
+   either `published` or a failure whose one retry has been spent. A failure with a
+   retry still pending is NOT a stopping state — the retry timer runs on its own and
+   re-invokes you; report the interim status, then finish the retry when it wakes.
+   Otherwise arm the next timer from the schedule and repeat. Report what landed on
+   all five — never report "all five scheduled" as if it were "all five live."
 
 | wake | timer to arm | lands at    |
 |------|--------------|-------------|
@@ -133,13 +135,19 @@ summary of the other four.
    shows as `status: success` with a `platform_post_id`.
 2. Record it in `lists["N"].published.platforms[<platform>]`: `status: "failed"` plus
    an `error` string with the message and its UTC timestamp. Commit.
-3. **Wait 3 minutes, then retry once** — launch `sleep 180` with Bash
-   `run_in_background: true` and do the retry on the wake. One retry per platform per
-   list, ever. Before firing it, re-read `logs_list_logs` for that `post_id`: **if a
-   `status: success` entry has appeared, do NOT retry** — the platform published
-   asynchronously and a retry would duplicate it (this is exactly how List 4 got a
-   duplicate on Threads). Only retry when the newest log entry for that post is still
-   the failure.
+3. **Wait, then retry once** — launch the wait with Bash `run_in_background: true`
+   and do the retry on the wake. **Pick the wait from the error message:**
+
+   | `error_message` contains | wait | why |
+   |--------------------------|------|-----|
+   | `Daily active user quota reached.` | `sleep 900` (15 min) | measured recoveries are 13–16 min; 3 min is reliably too early |
+   | anything else | `sleep 180` (3 min) | default |
+
+   One retry per platform per list, ever. Before firing it, re-read `logs_list_logs`
+   for that `post_id`: **if a `status: success` entry has appeared, do NOT retry** —
+   the platform published asynchronously and a retry would duplicate it (this is
+   exactly how List 4 got a duplicate on Threads). Only retry when the newest log
+   entry for that post is still the failure.
 4. Confirm the retry from `logs_list_logs`, never from the fact that it was queued
    (`posts_retry` returns "queued for retry" regardless of outcome). On success,
    write `status: "published"`, drop the `error`, and record `platform_post_id` plus a
@@ -148,13 +156,14 @@ summary of the other four.
    platform, the verbatim error, that the retry was already spent, and hand Eric the
    caption ready to paste for a manual post.
 
-**TikTok `Daily active user quota reached.`** — seen on List 34 (failed 15:34:02Z,
-retry succeeded 15:49:32Z) and List 40 (failed 16:04:06Z, retry succeeded 16:17:42Z).
-It is a short-window ceiling on the shared app, not our own volume: List 40 hit it on
-a clean first attempt with no earlier publish that day. **Both recoveries took 13–16
-minutes, so the 3-minute retry above will probably still fail on this specific error.**
-When it does, follow step 5 — report it — and note that a further retry ~15 min out is
-the move Eric has taken twice; ask rather than firing it.
+**TikTok `Daily active user quota reached.`** — the reason that error gets the 15-min
+wait in step 3. Seen on List 34 (failed 15:34:02Z, retry succeeded 15:49:32Z — 15.5
+min) and List 40 (failed 16:04:06Z, retry succeeded 16:17:42Z — 13.6 min). It is a
+short-window ceiling on the shared app, not our own volume: List 40 hit it on a clean
+first attempt with no earlier publish that day. The 15-min wait means the whole
+recovery lands ~17 min after the original target — later than a normal list, but
+unattended. If a third occurrence recovers well outside 13–16 min, re-measure and move
+the number rather than adding a second retry.
 
 **`posts_get` can throw on a healthy TikTok post.** After TikTok publishes, the MCP
 client rejects the response with `platformPostUrl … Input should be a valid URL,
