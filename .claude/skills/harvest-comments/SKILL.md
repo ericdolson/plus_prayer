@@ -44,21 +44,39 @@ list **N** in `publishing/participants.json`.
    **`limit` is clamped server-side to 100.** Asking for 200 silently returns 100
    with `hasMore: true` — it LOOKS like one call got everything. Never assume it did.
 
-   Assert these in the analysis script itself; each one has silently hidden posts:
+   **Merge and assert with the committed script — do not hand-roll it each run:**
+
+   ```
+   python3 scripts/publishing/merge_harvest_windows.py <windowA> <windowB> [<windowC> ...] \
+       --out <scratchpad dir>
+   ```
+   (or `npm run harvest-merge -- ...` from `scripts/`). Pass the auto-saved window
+   files **in page order**. It writes `merged.json` and `fetchlist.json` into `--out`
+   and prints the deep-fetch decision, reading `post_counts` from
+   `publishing/participants.json` itself.
+
+   It asserts the four properties that have each silently hidden posts before, and
+   **exits non-zero** if any fails — a failed assert means the enumeration may be
+   incomplete, so do NOT deep-fetch or advance the watermark on it; fix the windows
+   and re-run:
    - `meta.accountsFailed == 0` on every window — a failed account shrinks the
      enumeration without any error surfacing;
    - the LAST window has `pagination.hasMore == False` — otherwise the tail was never
      reached (this is what caught the limit=200 clamp);
-   - the windows OVERLAP by ≥1 post AND every overlapping row agrees on
-     `commentCount` — zero overlap means a possible gap between the windows;
+   - each consecutive pair of windows OVERLAPS by ≥1 post AND every overlapping row
+     agrees on `commentCount` — zero overlap means a possible gap;
    - no duplicate `"<platform>:<id>"` inside a single window.
 
    Once the archive passes ~150 posts the tail stops being big enough for one window;
-   add a third overlapping window rather than accepting an inline page. Page
-   composition shifts every run as new posts push old ones down, so nothing may depend
-   on a given window's contents being stable.
-3. Decide which posts to deep-fetch with `comments_get_inbox_post_comments`
-   (`post_id` + `account_id`). Deep-fetch a post if **any** of these is true:
+   add a THIRD overlapping window rather than accepting an inline page — the script
+   takes any number of windows, so that is one more path argument, not a code change.
+   Page composition shifts every run as new posts push old ones down, so nothing may
+   depend on a given window's contents being stable.
+
+3. Deep-fetch with `comments_get_inbox_post_comments` (`post_id` + `account_id`).
+   **The script already made this decision** — `fetchlist.json` holds the rows to
+   fetch as `[key, accountId, postId, platform]`. The rules it applies, kept here
+   because they explain the why: deep-fetch a post if **any** of these is true:
    - it belongs to one of the **two most-recently-published lists** — the current
      live list (`N-1`) and the just-retired list (`N-2`), identified by the
      `List <number>` token in the post `content`. This is the always-check floor:

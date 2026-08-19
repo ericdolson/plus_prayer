@@ -6,7 +6,8 @@
   "scripts": {
     "missing-children": "node missing_children/generate.js",
     "collect-participants": "node publishing/collect_participants.js",
-    "participants-pdf": "node publishing/participants_pdf.js"
+    "participants-pdf": "node publishing/participants_pdf.js",
+    "harvest-merge": "python3 publishing/merge_harvest_windows.py"
   },
   "dependencies": {
     "pdfkit": "^0.15.2"
