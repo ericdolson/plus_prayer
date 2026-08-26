@@ -31,12 +31,14 @@
           },
           "threads": {
             "post_id": "6a8efb58a2af64c094f6a332",
-            "status": "publishing"
+            "status": "published"
           },
           "tiktok": {
             "post_id": "6a8efb5aa2af64c094f6a406",
-            "status": "failed",
-            "error": "2026-08-26T14:46:52Z attempt 1 — TikTok direct posting failed: Chunk 1 upload failed: 503 first byte timeout (Varnish Error 54113, cache-iad-kjyo7100059-IAD). Transient upload failure, NOT the daily-quota ceiling; taking the 3-min retry per the error table."
+            "status": "published",
+            "platform_post_id": "v_pub_url~v2-1.7678353046983985165",
+            "published_at": "2026-08-26T15:01:52Z",
+            "note": "failed 14:46:52Z (chunked-upload 503 first byte timeout, Varnish 54113 — not the daily-quota ceiling); single posts_retry succeeded 15:01:52Z"
           }
         },
         "comments": {
