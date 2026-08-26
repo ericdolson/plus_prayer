@@ -38,6 +38,26 @@
             "status": "failed",
             "error": "2026-08-26T14:46:52Z attempt 1 — TikTok direct posting failed: Chunk 1 upload failed: 503 first byte timeout (Varnish Error 54113, cache-iad-kjyo7100059-IAD). Transient upload failure, NOT the daily-quota ceiling; taking the 3-min retry per the error table."
           }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "UgxyL9TUnP1Gi_1FbLp4AaABAg",
+            "mechanic_at": "2026-08-26T14:49:54Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122130859172983291_1767913431330824",
+            "mechanic_at": "2026-08-26T14:49:54Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "18416151982146710",
+            "mechanic_at": "2026-08-26T14:49:54Z",
+            "closeout": "pending",
+            "retired_id": null
+          }
         }
       }
     },
@@ -80,20 +100,20 @@
           "youtube": {
             "mechanic_id": "Ugx_cbqB17MmXwIG3pB4AaABAg",
             "mechanic_at": "2026-08-18T16:06:10Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "UgxEs1B_NI_8cYfW2ld4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122129605418983291_1038450482305976",
             "mechanic_at": "2026-08-18T16:14:51Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122129605418983291_1803746814117652"
           },
           "instagram": {
             "mechanic_id": "18073580657401033",
             "mechanic_at": "2026-08-18T16:14:51Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "18080670932701956"
           }
         }
       },
