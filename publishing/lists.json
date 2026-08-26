@@ -7,6 +7,13 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "41": {
+      "soul_count": 4538,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "",
+      "thumbnail_url": ""
+    },
     "40": {
       "soul_count": 4532,
       "intention_count": 0,
@@ -34,10 +41,12 @@
             "status": "published"
           },
           "tiktok": {
-            "post_id": "6a8481051658cc0eb912605e",
+            "post_id": "6a8eecbbfb45d3cc6750259a",
             "status": "published",
-            "platform_post_id": "v_pub_url~v2-1.7675406473518286862",
-            "note": "failed 16:04:06Z (TikTok \"Daily active user quota reached.\"); posts_retry succeeded 16:17:42Z"
+            "platform_post_id": "v_pub_url~v2-1.7678335306781444109",
+            "scheduled_for": "2026-08-26T13:43:00Z",
+            "published_at": "2026-08-26T13:43:46Z",
+            "note": "repost of the 2026-08-18 TikTok post (see published_superseded); published on attempt 1, no quota error. No cover set via Zernio per the List 3 rule — set manually in-app."
           }
         },
         "comments": {
@@ -60,7 +69,19 @@
             "retired_id": null
           }
         }
-      }
+      },
+      "published_superseded": [
+        {
+          "platform": "tiktok",
+          "post_id": "6a8481051658cc0eb912605e",
+          "platform_post_id": "v_pub_url~v2-1.7675406473518286862",
+          "original_scheduled_for": "2026-08-18T16:00:00Z",
+          "deleted_at_reported": "2026-08-26T13:39Z (Eric confirmed the manual delete in session; exact in-app time not recorded)",
+          "deletion_method": "manual in-app (TikTok refuses posts_unpublish_post: [400] does not support post deletion via API)",
+          "superseded_reason": "cover image was never set in-app and the ~7-day TikTok cover-edit window had expired; deleted and reposted to restore grid cover consistency",
+          "note": "failed 16:04:06Z (TikTok \"Daily active user quota reached.\"); posts_retry succeeded 16:17:42Z"
+        }
+      ]
     },
     "39": {
       "soul_count": 4576,
