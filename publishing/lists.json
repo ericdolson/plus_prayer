@@ -19,23 +19,24 @@
         "platforms": {
           "youtube": {
             "post_id": "6a8efb4e0f55fc7bccfe8e32",
-            "status": "scheduled"
+            "status": "published"
           },
           "facebook": {
             "post_id": "6a8efb5065e49a7e000c3301",
-            "status": "scheduled"
+            "status": "published"
           },
           "instagram": {
             "post_id": "6a8efb550f55fc7bccfe913a",
-            "status": "scheduled"
+            "status": "published"
           },
           "threads": {
             "post_id": "6a8efb58a2af64c094f6a332",
-            "status": "scheduled"
+            "status": "publishing"
           },
           "tiktok": {
             "post_id": "6a8efb5aa2af64c094f6a406",
-            "status": "scheduled"
+            "status": "failed",
+            "error": "2026-08-26T14:46:52Z attempt 1 — TikTok direct posting failed: Chunk 1 upload failed: 503 first byte timeout (Varnish Error 54113, cache-iad-kjyo7100059-IAD). Transient upload failure, NOT the daily-quota ceiling; taking the 3-min retry per the error table."
           }
         }
       }
