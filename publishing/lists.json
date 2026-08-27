@@ -19,23 +19,45 @@
         "platforms": {
           "youtube": {
             "post_id": "6a9056c41defab0383fb7f8b",
-            "status": "scheduled"
+            "status": "published"
           },
           "facebook": {
             "post_id": "6a9056c8d099da2b56b78b0a",
-            "status": "scheduled"
+            "status": "published"
           },
           "instagram": {
             "post_id": "6a9056cc1defab0383fb82b9",
-            "status": "scheduled"
+            "status": "published"
           },
           "threads": {
             "post_id": "6a9056d603834eeccdf35823",
-            "status": "scheduled"
+            "status": "publishing"
           },
           "tiktok": {
             "post_id": "6a9056da65a681a317f96986",
-            "status": "scheduled"
+            "status": "unconfirmed",
+            "platform_publish_handle": "v_pub_url~v2-1.7678733669594646541",
+            "note": "Zernio logged status:success 2026-08-27T15:28:51Z but only with the async publish handle, so publication is NOT yet proven. Analytics (lastSync 15:29:38Z) still shows totalPosts:1 — however List 41's known-good manual upload 7678731944976272654 is ALSO missing from that view, so absence is sync lag, not evidence of failure. Re-check analytics for a numeric platformPostId before calling this published or failed."
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "Ugzex0g8dV1boCXxeb54AaABAg",
+            "mechanic_at": "2026-08-27T15:32:32Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122131130528983291_1368814808185685",
+            "mechanic_at": "2026-08-27T15:32:32Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "18374420518232838",
+            "mechanic_at": "2026-08-27T15:32:32Z",
+            "closeout": "pending",
+            "retired_id": null
           }
         }
       }
@@ -82,20 +104,20 @@
           "youtube": {
             "mechanic_id": "UgxyL9TUnP1Gi_1FbLp4AaABAg",
             "mechanic_at": "2026-08-26T14:49:54Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "Ugw5CGIgzH6LvLrkwUF4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122130859172983291_1767913431330824",
             "mechanic_at": "2026-08-26T14:49:54Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122130859172983291_1219970043647890"
           },
           "instagram": {
             "mechanic_id": "18416151982146710",
             "mechanic_at": "2026-08-26T14:49:54Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "18141136189572641"
           }
         }
       }
