@@ -207,6 +207,25 @@ response with `platformPostUrl … Input should be a valid URL, input is empty`
 because TikTok returns no share URL. That's client strictness, not a failed
 publish — read the real status from `logs_list_logs`.
 
+**But a TikTok `logs_list_logs` `success` does NOT prove the video is live.**
+TikTok publishing is async. Zernio hands over the video, gets a **publish handle**
+back, and logs `status: success` / `200` — meaning TikTok accepted the upload
+request, not that a post exists. TikTok can fail during its own processing
+afterwards and nothing more is logged. Read `platform_post_id` to tell which you
+have: `v_pub_url~v2-1.7678353046983985165` is a handle (**unconfirmed**);
+`7678335543020719373` is a real video id (live). Confirm a handle with
+`analytics_get_analytics account_id=<tiktok accountId> platform=tiktok`, which reads
+TikTok's own `video.list` — match the row whose `latePostId` is the Zernio post id
+and take its numeric `platformPostId` + `platformPostUrl`. No row = not on TikTok.
+
+This bit List 41 (2026-08-26): a chunked-upload 503 was retried, the retry logged
+`success` with a handle, the run reported all five live, and the video was never on
+TikTok — found only when Eric noticed it missing the next day. The retry also sat in
+`publishing` for ~9 min against a normal ~46 s, which was the tell. Recovery is a
+fresh `posts_create_post` (or a manual in-app upload), never `posts_retry` — the
+Zernio post is marked `published`, so retry refuses it. Record `platform_post_id`,
+`platform_publish_handle`, and `platform_post_url` on every confirmed TikTok publish.
+
 **Check all five statuses, not just the three that take comments.** Threads and
 TikTok have no comment work, so nothing else in the pipeline looks at them; a TikTok
 failure otherwise hides behind a report that says the list is live (this is exactly

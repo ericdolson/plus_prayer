@@ -94,7 +94,9 @@ The background timer's exit re-invokes you. On each wake, for list N:
    not just the three that take comments. Threads and TikTok get no comment work, but
    they fail like anything else and nothing else in the pipeline looks at them.
    Classify each: `published` · in-flight (`scheduled`/`pending`/`publishing`) ·
-   `failed`.
+   `failed`. **TikTok reading `published` is provisional** — it is only confirmed once
+   a numeric `platformPostId` shows up in analytics (see "A TikTok `success` is not
+   proof of publication"). Treat an unconfirmed TikTok as in-flight, not done.
 2. **Resolve every `failed` before moving on** (see "Handling a failed platform"
    below) — pull the error, write it into `lists.json`, and carry it into the report.
 3. Invoke the `finalize-comments` skill with N. It finalizes every platform that is
@@ -132,7 +134,9 @@ summary of the other four.
 
 1. Get the reason: `logs_list_logs type=publishing platform=<platform> days=1`. The
    newest entry for that `post_id` carries `error_message`, and a successful publish
-   shows as `status: success` with a `platform_post_id`.
+   shows as `status: success` with a `platform_post_id`. **On TikTok, read that
+   `platform_post_id` before believing the `success` — see "A TikTok `success` is not
+   proof of publication" below.**
 2. Record it in `lists["N"].published.platforms[<platform>]`: `status: "failed"` plus
    an `error` string with the message and its UTC timestamp. Commit.
 3. **Wait, then retry once** — launch the wait with Bash `run_in_background: true`
@@ -152,6 +156,8 @@ summary of the other four.
    (`posts_retry` returns "queued for retry" regardless of outcome). On success,
    write `status: "published"`, drop the `error`, and record `platform_post_id` plus a
    `note` naming the original failure and the retry time. Commit.
+   **On TikTok, a `success` row is not enough** — resolve the real video id first
+   (next section) and only then write `published`.
 5. If the retry also fails, **stop** — do not retry a second time. Report the
    platform, the verbatim error, that the retry was already spent, and hand Eric the
    caption ready to paste for a manual post.
@@ -169,6 +175,49 @@ the number rather than adding a second retry.
 client rejects the response with `platformPostUrl … Input should be a valid URL,
 input is empty` because TikTok returns no share URL. That is client strictness, not a
 publish failure — fall back to `logs_list_logs` for that platform's real status.
+
+### A TikTok `success` is not proof of publication (List 41, 2026-08-26)
+
+**This is the one place where `logs_list_logs` lies.** TikTok publishing is async:
+Zernio hands TikTok the video and gets back a **publish handle**, then logs
+`status: success` / `status_code: 200`. The handle means *TikTok accepted the upload
+request* — NOT that a video exists. TikTok can still fail during its own processing,
+and nothing is logged when it does.
+
+Tell them apart by the shape of `platform_post_id`:
+
+| value | meaning |
+|-------|---------|
+| `v_pub_url~v2-1.7678353046983985165` | **publish handle** — UNCONFIRMED, may never become a post |
+| `7678335543020719373` (numeric) | **real video id** — genuinely live |
+
+**So on TikTok, never write `status: "published"` off a log row whose
+`platform_post_id` starts with `v_pub_url~`.** Resolve it:
+
+```
+analytics_get_analytics account_id=<tiktok accountId> platform=tiktok from_date=<today>
+```
+
+That reads TikTok's own `video.list`. Find the row whose `latePostId` is the Zernio
+post id, and take its `platforms[0].platformPostId` (numeric) and `platformPostUrl`.
+If the Zernio post id has **no row there**, the video is not on TikTok — record
+`status: "failed"` with the evidence and report it, however cheerful the log was.
+Analytics syncs on a delay, so if the row is absent within a few minutes of the
+`success`, re-check once before concluding; `overview.totalPosts` is the account's
+whole published count and is a fast sanity check.
+
+**What this cost on List 41:** the 14:46:52Z chunked-upload 503 was retried, the retry
+logged `success` at 15:01:52Z with handle `v_pub_url~v2-1.7678353046983985165`, and the
+run reported all five platforms live. The video was never on TikTok — caught only when
+Eric noticed it missing a day later. **A retry that sits in `publishing` far longer
+than a normal publish (9 min vs ~46 s) is a warning sign, not just slowness.**
+
+Record both when you do confirm a TikTok publish: `platform_post_id` (numeric),
+`platform_publish_handle` (the `v_pub_url~…`), and `platform_post_url`.
+
+**Recovery is a fresh `posts_create_post`, not `posts_retry`** — the Zernio post is
+already marked `published`, so `posts_retry` refuses it ("Only works on posts with
+'failed' status").
 
 ## Gotchas (verified over Lists 1–7)
 - **Scheduling:** always `posts_create_post` + `scheduled_for` (stored verbatim, and

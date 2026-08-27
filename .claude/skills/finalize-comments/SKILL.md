@@ -59,6 +59,19 @@ post can throw `platformPostUrl … Input should be a valid URL, input is empty`
 `publishing` for several minutes. Fall back to `logs_list_logs` for the real status
 before calling anything a failure.
 
+**And one way a broken TikTok post looks healthy — check this before reporting
+TikTok live.** TikTok publishing is async, so `logs_list_logs` shows
+`status: success` as soon as TikTok *accepts the upload*, with a **publish handle**
+(`platform_post_id` like `v_pub_url~v2-1.7678353046983985165`) rather than a video
+id. The video can still never materialise, and nothing further is logged. A numeric
+`platform_post_id` (`7678335543020719373`) is a real post; a `v_pub_url~…` one is
+unconfirmed. Resolve it with
+`analytics_get_analytics account_id=<tiktok accountId> platform=tiktok` and match the
+row whose `latePostId` is the Zernio post id — no row means it is not on TikTok, so
+record `failed` and put it in **Needs attention**. This is exactly how List 41
+(2026-08-26) was reported live while absent from TikTok for a day. See publish-list's
+"A TikTok `success` is not proof of publication" for the full write-up.
+
 ## Per-platform gate — finalize each platform as IT goes live
 Do NOT wait for all three. For each of youtube/facebook/instagram, use its status
 from the sweep above (`posts_get` on
