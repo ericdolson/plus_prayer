@@ -7,6 +7,13 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "42": {
+      "soul_count": 4559,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F42_thumbnail.png?alt=media&token=03f9a715-0003-4925-85e5-638b6d0a831d"
+    },
     "41": {
       "soul_count": 4538,
       "intention_count": 0,
@@ -35,10 +42,9 @@
           },
           "tiktok": {
             "post_id": "6a8efb5aa2af64c094f6a406",
-            "status": "published",
-            "platform_post_id": "v_pub_url~v2-1.7678353046983985165",
-            "published_at": "2026-08-26T15:01:52Z",
-            "note": "failed 14:46:52Z (chunked-upload 503 first byte timeout, Varnish 54113 — not the daily-quota ceiling); single posts_retry succeeded 15:01:52Z"
+            "status": "failed",
+            "error": "NOT PUBLISHED. Zernio logged status:success at 2026-08-26T15:01:52Z with platform_post_id 'v_pub_url~v2-1.7678353046983985165', but that is TikTok's async PUBLISH HANDLE, not a video id. It never resolved into a live post: TikTok's own video.list (via analytics, synced 2026-08-27T14:55Z) reports totalPosts:1 for the account, and that one post is List 40's repost. Original failure 2026-08-26T14:46:52Z was a chunked-upload 503; the retry's 'success' was false.",
+            "note": "Zernio post is marked published, so posts_retry will refuse it — a fresh posts_create_post is required to actually publish List 41 to TikTok."
           }
         },
         "comments": {
@@ -92,10 +98,12 @@
           "tiktok": {
             "post_id": "6a8eecbbfb45d3cc6750259a",
             "status": "published",
-            "platform_post_id": "v_pub_url~v2-1.7678335306781444109",
+            "platform_post_id": "7678335543020719373",
             "scheduled_for": "2026-08-26T13:43:00Z",
             "published_at": "2026-08-26T13:43:46Z",
-            "note": "repost of the 2026-08-18 TikTok post (see published_superseded); published on attempt 1, no quota error. No cover set via Zernio per the List 3 rule — set manually in-app."
+            "note": "repost of the 2026-08-18 TikTok post (see published_superseded); published on attempt 1, no quota error. No cover set via Zernio per the List 3 rule — set manually in-app.",
+            "platform_publish_handle": "v_pub_url~v2-1.7678335306781444109",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7678335543020719373"
           }
         },
         "comments": {
