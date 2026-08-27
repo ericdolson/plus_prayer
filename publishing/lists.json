@@ -31,13 +31,13 @@
           },
           "threads": {
             "post_id": "6a9056d603834eeccdf35823",
-            "status": "publishing"
+            "status": "published"
           },
           "tiktok": {
             "post_id": "6a9056da65a681a317f96986",
             "status": "unconfirmed",
             "platform_publish_handle": "v_pub_url~v2-1.7678733669594646541",
-            "note": "Zernio logged status:success 2026-08-27T15:28:51Z but only with the async publish handle, so publication is NOT yet proven. Analytics (lastSync 15:29:38Z) still shows totalPosts:1 — however List 41's known-good manual upload 7678731944976272654 is ALSO missing from that view, so absence is sync lag, not evidence of failure. Re-check analytics for a numeric platformPostId before calling this published or failed."
+            "note": "Zernio logged status:success 2026-08-27T15:28:51Z with only the async publish handle 'v_pub_url~v2-1.7678733669594646541', so publication is NOT proven. Analytics could not resolve it: video.list lastSync stuck at 15:29:38Z across repeated reads (totalPosts:1), analytics_get_post_timeline returned an empty timeline, and List 41's known-good manual upload 7678731944976272654 is ALSO absent from that view hours after going live. So the analytics lag is hours, not minutes, and absence there proves nothing either way. Resolve by looking at the TikTok profile, or re-check analytics on the next run."
           }
         },
         "comments": {
