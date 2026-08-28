@@ -216,7 +216,15 @@ have: `v_pub_url~v2-1.7678353046983985165` is a handle (**unconfirmed**);
 `7678335543020719373` is a real video id (live). Confirm a handle with
 `analytics_get_analytics account_id=<tiktok accountId> platform=tiktok`, which reads
 TikTok's own `video.list` — match the row whose `latePostId` is the Zernio post id
-and take its numeric `platformPostId` + `platformPostUrl`. No row = not on TikTok.
+and take its numeric `platformPostId` + `platformPostUrl`.
+
+**That analytics view lags by about a day, so an absent row is not proof of failure.**
+Measured on Lists 41/42: List 42 published 2026-08-27T15:28:39Z, was still missing at
+15:35Z with `lastSync` frozen and an empty post timeline, and appeared by
+2026-08-28T16:33Z with 54 views. List 41's known-live manual upload was equally
+invisible in that window. Practical rule: **TikTok is `unconfirmed` for the whole
+publish run** — don't wait on it or spend wakes — and gets confirmed on the next day's
+run. Conclude `failed` only after more than a day, or from Eric checking the profile.
 
 This bit List 41 (2026-08-26): a chunked-upload 503 was retried, the retry logged
 `success` with a handle, the run reported all five live, and the video was never on

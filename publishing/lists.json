@@ -35,9 +35,13 @@
           },
           "tiktok": {
             "post_id": "6a9056da65a681a317f96986",
-            "status": "unconfirmed",
+            "status": "published",
+            "platform_post_id": "7678733724082654478",
             "platform_publish_handle": "v_pub_url~v2-1.7678733669594646541",
-            "note": "Zernio logged status:success 2026-08-27T15:28:51Z with only the async publish handle 'v_pub_url~v2-1.7678733669594646541', so publication is NOT proven. Analytics could not resolve it: video.list lastSync stuck at 15:29:38Z across repeated reads (totalPosts:1), analytics_get_post_timeline returned an empty timeline, and List 41's known-good manual upload 7678731944976272654 is ALSO absent from that view hours after going live. So the analytics lag is hours, not minutes, and absence there proves nothing either way. Resolve by looking at the TikTok profile, or re-check analytics on the next run."
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7678733724082654478",
+            "published_at": "2026-08-27T15:28:39Z",
+            "analytics_confirmed": true,
+            "note": "Handle resolved to a real video id, confirmed via analytics 2026-08-28T16:33Z — ~25h after publish. Within the publish run itself it was correctly held as 'unconfirmed'."
           }
         },
         "comments": {
@@ -97,7 +101,8 @@
             "published_at_reported": "2026-08-27 (Eric supplied the URL in session; exact upload time not recorded)",
             "zernio_post_id_abandoned": "6a8efb5aa2af64c094f6a406",
             "note": "The Zernio post 6a8efb5aa2af64c094f6a406 is ABANDONED and must not be retried or counted: it failed 2026-08-26T14:46:52Z (chunked-upload 503), its retry logged a false status:success at 15:01:52Z carrying only the async publish handle 'v_pub_url~v2-1.7678353046983985165', and no video ever reached TikTok. Zernio still shows that post as published. This list's TikTok presence is the manual upload above.",
-            "analytics_confirmed": false
+            "analytics_confirmed": true,
+            "analytics_confirmed_at": "2026-08-28T16:33Z"
           }
         },
         "comments": {

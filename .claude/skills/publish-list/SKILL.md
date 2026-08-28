@@ -200,11 +200,25 @@ analytics_get_analytics account_id=<tiktok accountId> platform=tiktok from_date=
 
 That reads TikTok's own `video.list`. Find the row whose `latePostId` is the Zernio
 post id, and take its `platforms[0].platformPostId` (numeric) and `platformPostUrl`.
-If the Zernio post id has **no row there**, the video is not on TikTok — record
-`status: "failed"` with the evidence and report it, however cheerful the log was.
-Analytics syncs on a delay, so if the row is absent within a few minutes of the
-`success`, re-check once before concluding; `overview.totalPosts` is the account's
-whole published count and is a fast sanity check.
+`overview.totalPosts` is the account's whole published count and is a fast sanity check.
+
+**An absent row does NOT mean failure — the sync lag is ~a day, not minutes**
+(measured on Lists 41/42, 2026-08-27→28). List 42 published 15:28:39Z and was still
+missing from analytics at 15:35Z that day, with `lastSync` frozen at 15:29:38Z across
+repeated reads and `analytics_get_post_timeline` returning an empty timeline; it
+appeared by 16:33Z the **next** day with id `7678733724082654478` and 54 views. List
+41's *manual* upload — known live, its URL working — was invisible in exactly the same
+window. So:
+
+- **Within a publish run, TikTok can only ever be `unconfirmed`.** Do not wait for
+  analytics during the wake cycle, and do not arm extra wakes for it: the data will
+  not arrive inside +20 min. Record `status: "unconfirmed"` with the handle, say so in
+  the report, and stop.
+- **Confirm on the next day's run** (the harvest is the natural place): re-read
+  analytics, and flip to `published` with the numeric id or to `failed` if it is still
+  absent a day later.
+- Only conclude `failed` from an absent row once **more than a day** has passed, or
+  from Eric looking at the profile — which is instant and beats the API every time.
 
 **What this cost on List 41:** the 14:46:52Z chunked-upload 503 was retried, the retry
 logged `success` at 15:01:52Z with handle `v_pub_url~v2-1.7678353046983985165`, and the
