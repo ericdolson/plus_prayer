@@ -19,23 +19,45 @@
         "platforms": {
           "youtube": {
             "post_id": "6a91e08e6c769a90dde4c9ad",
-            "status": "scheduled"
+            "status": "published"
           },
           "facebook": {
             "post_id": "6a91e091cab3e6e0a78ef544",
-            "status": "scheduled"
+            "status": "published"
           },
           "instagram": {
             "post_id": "6a91e095cab3e6e0a78ef6df",
-            "status": "scheduled"
+            "status": "published"
           },
           "threads": {
             "post_id": "6a91e09924437059bfd097a9",
-            "status": "scheduled"
+            "status": "publishing"
           },
           "tiktok": {
             "post_id": "6a91e09bd721573570e7117c",
-            "status": "scheduled"
+            "status": "unconfirmed",
+            "platform_publish_handle": "v_pub_url~v2-1.7679166535231571982",
+            "note": "Zernio logged status:success 2026-08-28T19:29:01Z on attempt 1 (61s after target — the healthy pattern), but with the async publish handle only. Analytics lags ~a day, so confirmation is deferred to the next run per the measured rule; do NOT treat an absent analytics row as failure before then."
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "Ugwp-qfTnOTlZhkEp_V4AaABAg",
+            "mechanic_at": "2026-08-28T19:32:02Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122131396550983291_1038334222352945",
+            "mechanic_at": "2026-08-28T19:32:02Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "18555108262078270",
+            "mechanic_at": "2026-08-28T19:32:02Z",
+            "closeout": "pending",
+            "retired_id": null
           }
         }
       }
@@ -81,20 +103,20 @@
           "youtube": {
             "mechanic_id": "Ugzex0g8dV1boCXxeb54AaABAg",
             "mechanic_at": "2026-08-27T15:32:32Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "Ugys8NZk91GeTcJVZFl4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122131130528983291_1368814808185685",
             "mechanic_at": "2026-08-27T15:32:32Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122131130528983291_1046797058259102"
           },
           "instagram": {
             "mechanic_id": "18374420518232838",
             "mechanic_at": "2026-08-27T15:32:32Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "18171100381454508"
           }
         }
       }
