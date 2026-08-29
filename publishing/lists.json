@@ -19,23 +19,25 @@
         "platforms": {
           "youtube": {
             "post_id": "6a934332ed3e0e0e70f19c06",
-            "status": "scheduled"
+            "status": "published"
           },
           "facebook": {
             "post_id": "6a934334db2f6ede81a46385",
-            "status": "scheduled"
+            "status": "published"
           },
           "instagram": {
             "post_id": "6a934339db2f6ede81a464f3",
-            "status": "scheduled"
+            "status": "published"
           },
           "threads": {
             "post_id": "6a93433ddb2f6ede81a4668f",
-            "status": "scheduled"
+            "status": "published"
           },
           "tiktok": {
             "post_id": "6a93433fdb2f6ede81a46792",
-            "status": "scheduled"
+            "status": "unconfirmed",
+            "platform_publish_handle": "v_pub_url~v2-1.7679556147015239693",
+            "note": "logs_list_logs success 2026-08-29T20:40:57Z with publish handle only; confirm on next run"
           }
         }
       }
@@ -68,9 +70,11 @@
           },
           "tiktok": {
             "post_id": "6a91e09bd721573570e7117c",
-            "status": "unconfirmed",
+            "status": "published",
             "platform_publish_handle": "v_pub_url~v2-1.7679166535231571982",
-            "note": "Zernio logged status:success 2026-08-28T19:29:01Z on attempt 1 (61s after target — the healthy pattern), but with the async publish handle only. Analytics lags ~a day, so confirmation is deferred to the next run per the measured rule; do NOT treat an absent analytics row as failure before then."
+            "note": "confirmed 2026-08-29 via analytics_get_analytics (54 views); handle resolved to numeric video id",
+            "platform_post_id": "7679166699374955790",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7679166699374955790"
           }
         },
         "comments": {
