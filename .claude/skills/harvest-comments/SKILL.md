@@ -33,13 +33,25 @@ list **N** in `publishing/participants.json`.
    hand-copied. Straight pagination always ends in a short inline tail page, so don't
    paginate straight through — use overlapping windows instead.
 
-   **Overlapping-window recipe** (verified 2026-08-03 at ~111 posts):
+   **Overlapping-window recipe** (verified 2026-08-03 at ~111 posts; cursor built
+   locally since 2026-08-30):
    1. `limit=100`, no cursor → **window A** (posts 1–100), auto-saved to a file.
-   2. `limit=50`, no cursor → its `nextCursor` is the cursor sitting after post 50.
-      (Also a file; you only need the cursor out of it.)
+   2. **Build the mid-point cursor from window A's own 50th row** — this listing's
+      cursor is exactly `"<createdTime>_<accountId>_<id>"` of the row it sits after,
+      so read row 50 out of the window A file and join those three fields. No second
+      enumeration call.
    3. `limit=100` with THAT cursor → **window B** (posts 51–end), auto-saved so long
       as the tail is ≳50 posts.
    4. Merge A and B keyed by `"<platform>:<id>"`. The overlap is the safety net.
+
+   Verified 2026-08-30: the constructed cursor returned a window B whose first 50
+   rows were identical, in order, to window A's last 50 — and the same construction
+   reproduces the `nextCursor` the server returns for that boundary. The old step 2
+   (a throwaway `limit=50` call, taking its `nextCursor`) is the **fallback**: use it
+   if the constructed cursor is ever rejected or the contiguity assert below fires.
+
+   A third window's cursor comes from the **previous window's 50th row** the same
+   way, which keeps every overlap at 50 posts.
 
    **`limit` is clamped server-side to 100.** Asking for 200 silently returns 100
    with `hasMore: true` — it LOOKS like one call got everything. Never assume it did.
@@ -63,8 +75,12 @@ list **N** in `publishing/participants.json`.
      enumeration without any error surfacing;
    - the LAST window has `pagination.hasMore == False` — otherwise the tail was never
      reached (this is what caught the limit=200 clamp);
-   - each consecutive pair of windows OVERLAPS by ≥1 post AND every overlapping row
-     agrees on `commentCount` — zero overlap means a possible gap;
+   - each consecutive pair of windows is CONTIGUOUS — the later window's first post
+     must appear in the earlier one, and from there the earlier window's tail must
+     match the later window's head row-for-row, in order, with every overlapping row
+     agreeing on `commentCount`. This is the check that makes the locally-built
+     cursor safe: a cursor landing anywhere but the intended boundary breaks the
+     alignment instead of silently skipping posts;
    - no duplicate `"<platform>:<id>"` inside a single window.
 
    Once the archive passes ~150 posts the tail stops being big enough for one window;

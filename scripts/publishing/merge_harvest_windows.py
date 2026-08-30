@@ -59,15 +59,30 @@ def main():
     assert last["pagination"]["hasMore"] is False, \
         f"window {last_name}: hasMore is True — the tail was never reached"
 
-    # consecutive windows must overlap and agree
+    # consecutive windows must be CONTIGUOUS, not merely overlapping: the later
+    # window has to resume exactly where the earlier one still had rows, and the
+    # shared run must line up position-for-position. A cursor that lands anywhere
+    # but the intended boundary then breaks the alignment instead of silently
+    # skipping the posts in between — which is what makes building the cursor
+    # locally (from the previous window's 50th row) safe.
+    seqs = [(n, [key(p) for p in w["data"]]) for n, w in wins]
     maps = [(n, {key(p): p for p in w["data"]}) for n, w in wins]
-    for (n1, m1), (n2, m2) in zip(maps, maps[1:]):
-        ov = set(m1) & set(m2)
-        assert ov, f"windows {n1}/{n2} do not overlap — possible gap between them"
-        for k in ov:
+    for ((n1, s1), (n2, s2)), ((_, m1), (_, m2)) in zip(zip(seqs, seqs[1:]), zip(maps, maps[1:])):
+        assert s2[0] in s1, \
+            f"windows {n1}/{n2} do not overlap — {n2} starts at {s2[0]}, which {n1} never returned"
+        start = s1.index(s2[0])
+        tail, head = s1[start:], s2[:len(s1) - start]
+        assert tail == head, (
+            f"windows {n1}/{n2} are not contiguous — {n1}'s tail from {s2[0]} does not "
+            f"match {n2}'s head row-for-row (first divergence at offset "
+            f"{next(i for i, (x, y) in enumerate(zip(tail, head)) if x != y)})"
+            if len(tail) == len(head) else
+            f"windows {n1}/{n2} are not contiguous — {n1} has {len(tail)} rows from "
+            f"{s2[0]} but {n2} returned only {len(head)}")
+        for k in tail:
             assert m1[k]["commentCount"] == m2[k]["commentCount"], \
                 f"windows {n1}/{n2} disagree on commentCount for {k}"
-        print(f"overlap {n1}/{n2}: {len(ov)}")
+        print(f"overlap {n1}/{n2}: {len(tail)} (contiguous from {n1}[{start}])")
 
     merged = {}
     for _, m in maps:
