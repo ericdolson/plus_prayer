@@ -35,9 +35,11 @@
           },
           "tiktok": {
             "post_id": "6a946c761103c389d6f6203f",
-            "status": "unconfirmed",
+            "status": "published",
             "platform_publish_handle": "v_pub_url~v2-1.7679882848077662222",
-            "note": "logs_list_logs success 2026-08-30T17:48:56Z with publish handle only; confirm on next run"
+            "note": "confirmed 2026-08-31 via analytics_get_analytics (61 views); handle resolved to numeric video id",
+            "platform_post_id": "7679883039220059406",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7679883039220059406"
           }
         },
         "comments": {

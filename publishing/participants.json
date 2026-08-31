@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-08-30T16:28:43Z",
+  "last_aggregated_at": "2026-08-31T13:23:09Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -57,6 +57,7 @@
     "facebook:1033072079891934_122131130528983291": 1,
     "facebook:1033072079891934_122131396550983291": 1,
     "facebook:1033072079891934_122131669304983291": 1,
+    "facebook:1033072079891934_122131873796983291": 2,
     "instagram:17872344792544581": 1,
     "instagram:17889801402395535": 1,
     "instagram:17891260101589721": 1,
@@ -95,6 +96,7 @@
     "instagram:18116638450910611": 1,
     "instagram:18118139501503589": 1,
     "instagram:18123347830878909": 1,
+    "instagram:18125604601771904": 1,
     "instagram:18128538547634913": 1,
     "instagram:18186371701400740": 1,
     "instagram:18201524608334962": 1,
@@ -128,6 +130,7 @@
     "youtube:9tGcZQWKmXg": 1,
     "youtube:B4wseIzwsfM": 1,
     "youtube:BNZJ7DbM76w": 1,
+    "youtube:DxlihfF7-z4": 1,
     "youtube:EQBpBo4tgm0": 1,
     "youtube:GyDVuIf5DGw": 1,
     "youtube:LDwvAWkGQOs": 1,
@@ -401,6 +404,15 @@
     "42": [],
     "43": [],
     "44": [],
-    "45": []
+    "45": [],
+    "46": [
+      {
+        "platform": "facebook",
+        "handle": "Shane Paul Ferguson",
+        "id": "28401601096100477",
+        "at": "2026-08-30T19:55:20Z",
+        "comment_url": "https://www.facebook.com/reel/1652661076415222/?comment_id=122131873796983291_1376033541362954"
+      }
+    ]
   }
 }
