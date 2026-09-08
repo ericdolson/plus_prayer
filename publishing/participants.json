@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-08-31T13:23:09Z",
+  "last_aggregated_at": "2026-09-08T22:27:47Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -57,7 +57,7 @@
     "facebook:1033072079891934_122131130528983291": 1,
     "facebook:1033072079891934_122131396550983291": 1,
     "facebook:1033072079891934_122131669304983291": 1,
-    "facebook:1033072079891934_122131873796983291": 2,
+    "facebook:1033072079891934_122131873796983291": 3,
     "instagram:17872344792544581": 1,
     "instagram:17889801402395535": 1,
     "instagram:17891260101589721": 1,
@@ -165,7 +165,10 @@
     "youtube:s4ZnhAPj0Lc": 3,
     "youtube:xXTpw4bKRMg": 1,
     "youtube:xarKzJErMX0": 1,
-    "youtube:xlJkIbrsieM": 1
+    "youtube:xlJkIbrsieM": 1,
+    "facebook:1033072079891934_122132056964983291": 1,
+    "instagram:17907138087535827": 1,
+    "youtube:GTNtKkmAVSE": 1
   },
   "pending": {
     "7": [],
@@ -413,6 +416,7 @@
         "at": "2026-08-30T19:55:20Z",
         "comment_url": "https://www.facebook.com/reel/1652661076415222/?comment_id=122131873796983291_1376033541362954"
       }
-    ]
+    ],
+    "47": []
   }
 }
