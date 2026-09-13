@@ -79,6 +79,23 @@ Full screen→operation map at
 backend/dataconnect/connector/OPERATIONS.md — the spec the .gql connectors and
 Cloud Functions are built from.
 
+### Decision: A missing-children database is the default base set for daily lists
+**Timestamp:** 2026-09-13
+Lists are seeded from a missing children's database as a standing base set of
+souls to be prayed for, independent of social participation. Consequence for
+tooling and reporting: `soul_count` in `publishing/lists.json` is NOT a function
+of `pending[N]` in `publishing/participants.json`. The base set can raise the
+count on a day when the 🙏 harvest returns zero new participants — List 47
+shipped at 4,562 souls against List 46's 4,560 with a 0-participant harvest, which
+is what prompted writing this down. A `soul_count` that outruns the harvest is
+normal and is NOT evidence of a harvest bug or a dropped participant; only the
+reverse (harvested participants missing from the count) warrants investigation.
+Caption rule is unchanged and is the thing most likely to be got wrong: the source
+note ("filled entirely with the names of missing children from the NamUs database.
+May they be found.") belongs only to lists filled ENTIRELY from that source, as
+List 1 was. Routine base-set additions carry NO source note — Lists 45, 46 and 47
+all shipped without one. See publishing/captions/list-caption-template.md.
+
 ---
 
 
