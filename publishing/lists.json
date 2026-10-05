@@ -7,6 +7,98 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "51": {
+      "soul_count": 4543,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F51.mp4?alt=media&token=b4d4f93d-3c0d-4294-9bb2-4ffb143ef965",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F51_thumbnail.png?alt=media&token=d89860eb-1878-4f44-b583-7a2791d3e6ee",
+      "date": "2026-10-05",
+      "published": {
+        "scheduled_for": "2026-10-05T14:54:00Z",
+        "date": "2026-10-05",
+        "platforms": {
+          "youtube": {
+            "post_id": "6ac3b99c8798365a67d15f34",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6ac3b9a0c48bd9c05abcd668",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6ac3b9a38798365a67d15f3c",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6ac3b9a7c48bd9c05abcd699",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6ac3b9aa5c6263905024c6a9",
+            "status": "scheduled"
+          }
+        }
+      }
+    },
+    "50": {
+      "soul_count": 4541,
+      "intention_count": 0,
+      "notes": "This list also contains the names of missing children. May they be found.",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F50.mp4?alt=media&token=aa13b53d-e1e3-4a84-bd76-44b52a28c897",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F50_thumbnail.png?alt=media&token=d626d7d3-8572-40c1-b9e8-b37ee7b8d34f",
+      "date": "2026-10-04",
+      "published": {
+        "scheduled_for": "2026-10-04T18:51:00Z",
+        "date": "2026-10-04",
+        "platforms": {
+          "youtube": {
+            "post_id": "6ac29f6c174e828e5ecacf27",
+            "status": "published"
+          },
+          "facebook": {
+            "post_id": "6ac29f6f0ac594ea8c947447",
+            "status": "published"
+          },
+          "instagram": {
+            "post_id": "6ac29f7307366f25f7eb0066",
+            "status": "published"
+          },
+          "threads": {
+            "post_id": "6ac29f77174e828e5ecacf53",
+            "status": "published"
+          },
+          "tiktok": {
+            "post_id": "6ac29f7a174e828e5ecacf64",
+            "status": "published",
+            "platform_publish_handle": "v_pub_url~v2-1.7692887201243432973",
+            "note": "published 2026-10-04T18:52:22Z; confirmed via analytics 2026-10-05",
+            "platform_post_id": "7692887445100072205",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7692887445100072205"
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "Ugz6XigLF2Gg5ttXIZh4AaABAg",
+            "mechanic_at": "2026-10-04T18:54:01Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122138562332983291_2503571663458073",
+            "mechanic_at": "2026-10-04T18:54:01Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "18116659847091091",
+            "mechanic_at": "2026-10-04T18:57:24Z",
+            "closeout": "pending",
+            "retired_id": null
+          }
+        }
+      }
+    },
     "49": {
       "soul_count": 4538,
       "intention_count": 0,
@@ -36,29 +128,31 @@
           },
           "tiktok": {
             "post_id": "6ac14d93230bf80819c1e1a3",
-            "status": "unconfirmed",
+            "status": "published",
             "platform_publish_handle": "v_pub_url~v2-1.7692515719489177614",
-            "note": "upload accepted 2026-10-03T18:50:43Z; confirm via analytics on the next day's run"
+            "note": "published 2026-10-03T18:50:24Z; confirmed via analytics 2026-10-04",
+            "platform_post_id": "7692515885159845133",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7692515885159845133"
           }
         },
         "comments": {
           "youtube": {
             "mechanic_id": "UgxHS3PySoa7GKeAbrB4AaABAg",
             "mechanic_at": "2026-10-03T18:52:35Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "Ugyirfwt-HEBk6XXIU94AaABAg"
           },
           "facebook": {
             "mechanic_id": "122138404658983291_3462459587258791",
             "mechanic_at": "2026-10-03T18:52:35Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122138404658983291_1098400769219473"
           },
           "instagram": {
             "mechanic_id": "18630217609005440",
             "mechanic_at": "2026-10-03T18:52:35Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "18390875020204653"
           }
         }
       }
