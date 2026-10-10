@@ -340,6 +340,16 @@ leaves ~75s of slack: compute the target right before the first create (not at t
 start of the run), and push it out a minute if it drifts within ~60s of now — a past
 `scheduled_for` falls back to immediate publishing and reintroduces the 409.
 
+### Decision: A brand 🙏🏻 follows the mechanic comment on each new list
+**Timestamp:** 2026-10-09
+Eric holds a prayer while each list is published. `finalize-comments` now posts a
+bare `🙏🏻` (no text) as a second comment right after the mechanic comment on
+YouTube, Facebook, and Instagram — so the first prayer under the instruction is
+ours, and people can see that we pray here too. It is logged as `prayer_id` in
+`lists.json`, is never pinned, and is NOT deleted at close-out (only the mechanic
+is). It posts from the brand account, so the harvest's brand filter excludes it.
+Threads and TikTok get none: the API can't comment on either.
+
 ---
 
 ## Project Structure

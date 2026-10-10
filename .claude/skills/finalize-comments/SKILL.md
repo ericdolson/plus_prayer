@@ -2,8 +2,8 @@
 name: finalize-comments
 description: >-
   After a +Prayer list is live, close out the previous list's posts and add the
-  mechanic comment to the new list's posts via the Zernio MCP, logging comment
-  ids to lists.json. Use when the user says "finalize comments for list N",
+  mechanic comment plus a 🙏🏻 prayer comment to the new list's posts via the Zernio
+  MCP, logging comment ids to lists.json. Use when the user says "finalize comments for list N",
   "finalize list N comments", "close out and comment list N", "do the comments
   for list N", or "run finalize-comments N".
 ---
@@ -16,13 +16,15 @@ Runs as soon as **any** of list N's posts is live — usually invoked automatica
 - **Half A — closes out list N‑1**: deletes the logged mechanic comment on
   YouTube/Facebook/Instagram and posts the "List N‑1 is retired…" notice.
 - **Half B — seeds list N**: posts the mechanic comment on
-  YouTube/Facebook/Instagram and logs each comment id.
+  YouTube/Facebook/Instagram, then a bare 🙏🏻 prayer comment under it, and logs
+  each comment id.
 
 Threads and TikTok can't take these via the API — the skill prints their exact
 copy as a manual checklist instead (see Gotchas).
 
-Zernio **cannot pin** — so every comment this skill posts is left for the user to
-pin (or re-pin) by hand. That's expected, not a failure.
+Zernio **cannot pin** — so the mechanic and retired comments this skill posts are
+left for the user to pin (or re-pin) by hand. That's expected, not a failure. The
+🙏🏻 prayer comment is never pinned.
 
 ## Read these for exact copy (do not paraphrase)
 - `publishing/CLAUDE.md` — brand voice, the close-out copy per platform, and the
@@ -117,19 +119,32 @@ per-platform gate above**:
 4. Write back into `lists["N-1"].published.comments[platform]`: `retired_id` =
    the returned id, `closeout` = `"done"`.
 
+**Leave the 🙏🏻 prayer comment (`prayer_id`) alone.** Close-out deletes the mechanic
+only — the prayer was said for that list and stays on its post.
+
 Threads and TikTok: do **not** call the API (both fail — see Gotchas). Add them to
 the manual checklist output.
 
 ### Half B — seed list N
 Read `lists["N"]`. For each of **youtube, facebook, instagram that passed the
 per-platform gate above**:
-1. If `lists["N"].published.comments[platform].mechanic_id` is already present,
-   skip (idempotent).
-2. **Post** the mechanic comment with `comments_reply_to_inbox_post` (`post_id` =
+1. **Mechanic.** If `lists["N"].published.comments[platform].mechanic_id` is already
+   present, skip to step 3 (idempotent). Otherwise **post** the mechanic comment
+   with `comments_reply_to_inbox_post` (`post_id` =
    `lists["N"].published.platforms[platform].post_id`, `account_id`, `message` =
    the mechanic copy below). Capture the returned `commentId`.
-3. Write `lists["N"].published.comments[platform]` = `{ "mechanic_id": <id>,
+2. Write `lists["N"].published.comments[platform]` = `{ "mechanic_id": <id>,
    "mechanic_at": <now UTC ISO>, "closeout": "pending", "retired_id": null }`.
+3. **Prayer.** If `prayer_id` is already present, skip (idempotent). Otherwise
+   **post** the prayer comment — the same `comments_reply_to_inbox_post` call, a
+   top-level comment (no `comment_id`), `message` = the prayer copy below, exactly
+   and with nothing else. Capture the returned `commentId` and add `prayer_id` and
+   `prayer_at` to that platform's entry.
+
+Always mechanic first, prayer second, so the prayer reads as the first 🙏 under the
+instruction. The two are checked independently: if the prayer call errors (YouTube's
+intermittent 401, say) the mechanic is already logged, and the next pass posts only
+the missing prayer. Never post the prayer on a platform whose mechanic isn't up yet.
 
 Threads and TikTok: nothing (Threads' CTA is in the caption; TikTok directs to
 YT/IG in its caption).
@@ -158,6 +173,14 @@ Commit `lists.json`, then output:
 **Mechanic (YouTube / Facebook / Instagram — Half B):**
 > Comment 🙏 to pray for this list. Your name goes on the next.
 
+**Prayer (YouTube / Facebook / Instagram — Half B, posted right after the mechanic):**
+> 🙏🏻
+
+That is the whole comment: U+1F64F with the light skin-tone modifier U+1F3FB, no
+text. Eric holds a prayer while the list is published; this is that prayer, left
+where people can see that we pray here too. It posts from the brand account (the
+only account the API can comment as).
+
 **Retired notice (Half A + the manual platforms), fill in {N-1}:**
 - YouTube:   `List {N-1} is retired — but a 🙏 here still counts. Find the newest list on our channel.`
 - Facebook:  `List {N-1} is retired — but a 🙏 here still counts. Find the newest list on our Page.`
@@ -174,15 +197,18 @@ automatable platform:
   "...": "...",
   "platforms": { "youtube": { "post_id": "...", "status": "..." }, "...": "..." },
   "comments": {
-    "youtube":   { "mechanic_id": "Ugx…", "mechanic_at": "2026-07-21T14:26:00Z", "closeout": "done", "retired_id": "Ugy…" },
-    "facebook":  { "mechanic_id": "…_…",  "mechanic_at": "…",                    "closeout": "pending", "retired_id": null },
-    "instagram": { "mechanic_id": "18…",  "mechanic_at": "…",                    "closeout": "pending", "retired_id": null }
+    "youtube":   { "mechanic_id": "Ugx…", "mechanic_at": "2026-07-21T14:26:00Z", "prayer_id": "Ugz…", "prayer_at": "2026-07-21T14:26:05Z", "closeout": "done", "retired_id": "Ugy…" },
+    "facebook":  { "mechanic_id": "…_…",  "mechanic_at": "…", "prayer_id": "…_…", "prayer_at": "…", "closeout": "pending", "retired_id": null },
+    "instagram": { "mechanic_id": "18…",  "mechanic_at": "…", "prayer_id": "17…", "prayer_at": "…", "closeout": "pending", "retired_id": null }
   }
 }
 ```
 - `mechanic_id` — the platform comment id returned when Half B posts the CTA on
   THIS list. Half A of the NEXT run reads it to delete exactly that comment
   (never touching other comments left on the post).
+- `prayer_id` / `prayer_at` — the 🙏🏻 prayer comment Half B posts after the
+  mechanic. Logged so a re-run doesn't post a second one; never deleted. Absent on
+  lists published before 2026-10-09.
 - `closeout` — `pending` until this list is retired, then `done`.
 - Only youtube/facebook/instagram appear here; Threads/TikTok are manual.
 
@@ -210,8 +236,9 @@ Finalize comments — List [N] live, List [N-1] retired
 ```
 
 ## Gotchas
-- **Idempotent by design.** Half B skips any platform whose `mechanic_id` is
-  already logged; Half A skips any platform already `closeout: done`. So a partial
+- **Idempotent by design.** Half B skips the mechanic on any platform whose
+  `mechanic_id` is already logged and the prayer on any whose `prayer_id` is; Half A
+  skips any platform already `closeout: done`. So a partial
   run (Instagram still publishing, a transient error) is safe to just re-run.
 - **YouTube can't hide or edit via Zernio** (`canHide: false`; `comments_edit…`
   is Reddit-only) — that's why close-out DELETES the old mechanic (our own
@@ -224,6 +251,10 @@ Finalize comments — List [N] live, List [N-1] retired
   `[400] TikTok API does not support posting comments (PLATFORM_LIMITATION)`. TikTok
   close-out is manual, and uses the redirect wording (no "🙏 here still counts",
   because TikTok 🙏s aren't aggregated).
+- **The prayer comment is brand-owned, so the harvest ignores it.** It contains 🙏
+  but comes back `isOwner: true` from a `brand_accounts` id, which the
+  harvest-comments filter drops. It does raise the live post's `commentCount` to 2
+  (mechanic + prayer), and the retired post stays at 2 (retired notice + prayer).
 - **Pinning is never automated** — Zernio can't pin on any platform. Everything
   this skill posts must be pinned/re-pinned by hand (checklist above).
 - **Deleting our own comment is safe** — `canDelete: true` on brand-owned

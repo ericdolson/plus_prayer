@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-10-05T13:32:41Z",
+  "last_aggregated_at": "2026-10-10T16:19:18Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -180,7 +180,19 @@
     "youtube:HDi7_RFDgkk": 1,
     "instagram:18067951979769496": 1,
     "facebook:1033072079891934_122138562332983291": 1,
-    "youtube:ZQ1cL4g_jio": 1
+    "youtube:ZQ1cL4g_jio": 1,
+    "instagram:18638649472058605": 1,
+    "facebook:1033072079891934_122138660852983291": 1,
+    "youtube:K9giPQjjI4U": 3,
+    "instagram:18085998206507197": 1,
+    "facebook:1033072079891934_122138971352983291": 1,
+    "youtube:f15mW4PLjJc": 1,
+    "instagram:18346376080270875": 2,
+    "facebook:1033072079891934_122139076928983291": 2,
+    "youtube:uP_r_DBU2zQ": 2,
+    "instagram:17995037354842604": 2,
+    "facebook:1033072079891934_122139215276983291": 2,
+    "youtube:2I-fQyMMIA8": 2
   },
   "pending": {
     "7": [],
@@ -433,6 +445,18 @@
     "48": [],
     "49": [],
     "50": [],
-    "51": []
+    "51": [],
+    "52": [],
+    "53": [],
+    "54": [
+      {
+        "platform": "youtube",
+        "handle": "@superd2627",
+        "id": "UCYc8tLVYuy5HvzbMOKzl3Rw",
+        "at": "2026-10-08T20:32:22Z",
+        "comment_url": "https://www.youtube.com/watch?v=K9giPQjjI4U&lc=Ugyq5jQQRIgB6XQv5Qh4AaABAg"
+      }
+    ],
+    "55": []
   }
 }
