@@ -49,3 +49,8 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 *.swp
+
+# ---- SQL Connect emulator output (generated) ----
+.dataconnect/
+dataconnect-debug.log
+pglite-debug.log
