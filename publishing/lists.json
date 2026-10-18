@@ -7,6 +7,257 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "59": {
+      "soul_count": 4520,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F59.mp4?alt=media&token=6a7a9591-349c-47e2-91a3-19c4a531e8d1",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F59_thumbnail.png?alt=media&token=4d053bae-5587-4ebe-8d21-dda31bc06308",
+      "date": "2026-10-18",
+      "published": {
+        "scheduled_for": "2026-10-18T22:10:00Z",
+        "date": "2026-10-18",
+        "platforms": {
+          "youtube": {
+            "post_id": "6ad54345ce633f5f9abc10aa",
+            "status": "published"
+          },
+          "facebook": {
+            "post_id": "6ad543499ce519d2fd2b81d8",
+            "status": "published"
+          },
+          "instagram": {
+            "post_id": "6ad5434f9ce519d2fd2b81f5",
+            "status": "published"
+          },
+          "threads": {
+            "post_id": "6ad5435310cfe9362869d9ec",
+            "status": "published"
+          },
+          "tiktok": {
+            "post_id": "6ad54356ce633f5f9abc10f0",
+            "status": "unconfirmed",
+            "platform_publish_handle": "v_pub_url~v2-1.7698133606305122317",
+            "note": "upload accepted 2026-10-18T22:11:19Z; confirm via analytics on the next day's run"
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "Ugx2t8Q1ABSoybDu7wh4AaABAg",
+            "mechanic_at": "2026-10-18T22:14:31Z",
+            "prayer_id": "Ugwobksym7VGKodIHf54AaABAg",
+            "prayer_at": "2026-10-18T22:14:31Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122140197242983291_1553168969964660",
+            "mechanic_at": "2026-10-18T22:14:31Z",
+            "prayer_id": "122140197242983291_4483344488583091",
+            "prayer_at": "2026-10-18T22:14:31Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "17977298772130713",
+            "mechanic_at": "2026-10-18T22:14:31Z",
+            "prayer_id": "18028100237857197",
+            "prayer_at": "2026-10-18T22:14:31Z",
+            "closeout": "pending",
+            "retired_id": null
+          }
+        }
+      }
+    },
+    "58": {
+      "soul_count": 4525,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F58.mp4?alt=media&token=5d08dfa2-9995-4f39-955a-52e1df018db4",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F58_thumbnail.png?alt=media&token=3990cee8-f603-4bd9-82d5-737874a1fb5a",
+      "date": "2026-10-17",
+      "published": {
+        "scheduled_for": "2026-10-17T19:35:00Z",
+        "date": "2026-10-17",
+        "platforms": {
+          "youtube": {
+            "post_id": "6ad3cd800c80076dc1609492",
+            "status": "published"
+          },
+          "facebook": {
+            "post_id": "6ad3cd84813d3b819c314c13",
+            "status": "published"
+          },
+          "instagram": {
+            "post_id": "6ad3cd8a440e4f3be3afd4b2",
+            "status": "published"
+          },
+          "threads": {
+            "post_id": "6ad3cd8f31519568a3de7a77",
+            "status": "published"
+          },
+          "tiktok": {
+            "post_id": "6ad3cd937ce35a2d12716df7",
+            "status": "published",
+            "platform_publish_handle": "v_pub_url~v2-1.7697722624453281805",
+            "platform_post_id": "7697722810306776334",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7697722810306776334"
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "Ugxl9xlw3fqEBXCH-dV4AaABAg",
+            "mechanic_at": "2026-10-17T19:39:55Z",
+            "prayer_id": "UgxgMU9xZnTcBaaAObF4AaABAg",
+            "prayer_at": "2026-10-17T19:39:55Z",
+            "closeout": "done",
+            "retired_id": "Ugwwg-oz1qN4Ib1TG_x4AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "122140095758983291_2124425798437494",
+            "mechanic_at": "2026-10-17T19:39:55Z",
+            "prayer_id": "122140095758983291_1103592848934996",
+            "prayer_at": "2026-10-17T19:39:55Z",
+            "closeout": "done",
+            "retired_id": "122140095758983291_2950031015383550"
+          },
+          "instagram": {
+            "mechanic_id": "18186718138373631",
+            "mechanic_at": "2026-10-17T19:39:55Z",
+            "prayer_id": "18011341058770473",
+            "prayer_at": "2026-10-17T19:39:55Z",
+            "closeout": "done",
+            "retired_id": "18135248518736566"
+          }
+        }
+      }
+    },
+    "57": {
+      "soul_count": 4524,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F57.mp4?alt=media&token=86e42e36-5003-4476-a50b-3845bb36d0b5",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F57_thumbnail.png?alt=media&token=14478491-4e45-4c2e-8268-31d164486767",
+      "date": "2026-10-14",
+      "published": {
+        "scheduled_for": "2026-10-14T17:46:00Z",
+        "date": "2026-10-14",
+        "platforms": {
+          "youtube": {
+            "post_id": "6acfbf6a3c6d9a3304cc01ee",
+            "status": "published"
+          },
+          "facebook": {
+            "post_id": "6acfbf6d945790e1faa44d8e",
+            "status": "published"
+          },
+          "instagram": {
+            "post_id": "6acfbf71eb784ac9e227c4dc",
+            "status": "published"
+          },
+          "threads": {
+            "post_id": "6acfbf7442da21fff7f3d18a",
+            "status": "published"
+          },
+          "tiktok": {
+            "post_id": "6acfbf76eb784ac9e227c4e5",
+            "status": "published",
+            "platform_publish_handle": "v_pub_url~v2-1.7696581238777382925",
+            "platform_post_id": "7696581486639598861",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7696581486639598861"
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "UgyKp_5QYP7p8cV7AG54AaABAg",
+            "mechanic_at": "2026-10-14T17:50:30Z",
+            "prayer_id": "UgzIxfFs6S1ghkdqAL94AaABAg",
+            "prayer_at": "2026-10-14T17:50:30Z",
+            "closeout": "done",
+            "retired_id": "UgyfQ2iWmpJ77UoHhGt4AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "122139834908983291_1720571612733481",
+            "mechanic_at": "2026-10-14T17:50:30Z",
+            "prayer_id": "122139834908983291_1735401717561059",
+            "prayer_at": "2026-10-14T17:50:30Z",
+            "closeout": "done",
+            "retired_id": "122139834908983291_1824525928858041"
+          },
+          "instagram": {
+            "mechanic_id": "17905194441667886",
+            "mechanic_at": "2026-10-14T17:50:30Z",
+            "prayer_id": "18134794249731690",
+            "prayer_at": "2026-10-14T17:50:30Z",
+            "closeout": "done",
+            "retired_id": "18148082644561485"
+          }
+        }
+      }
+    },
+    "56": {
+      "soul_count": 4573,
+      "intention_count": 0,
+      "notes": null,
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F56.mp4?alt=media&token=8e3c7eca-ba53-4779-b852-2f4cb9cf2de5",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F56_thumbnail.png?alt=media&token=5f6400ce-978f-4ee3-8ff6-7837f47e5772",
+      "date": "2026-10-11",
+      "published": {
+        "scheduled_for": "2026-10-11T19:39:00Z",
+        "date": "2026-10-11",
+        "platforms": {
+          "youtube": {
+            "post_id": "6acbe53a941220ef94138c9a",
+            "status": "published"
+          },
+          "facebook": {
+            "post_id": "6acbe53d8f682deeab7d3e52",
+            "status": "published"
+          },
+          "instagram": {
+            "post_id": "6acbe541439f0f2bdfef9adc",
+            "status": "published"
+          },
+          "threads": {
+            "post_id": "6acbe544f5405afed21b78e4",
+            "status": "published"
+          },
+          "tiktok": {
+            "post_id": "6acbe547ec8344f48b4d9d2a",
+            "status": "published",
+            "platform_publish_handle": "v_pub_url~v2-1.7695497173043480590",
+            "platform_post_id": "7695497234120494349",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7695497234120494349"
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "UgzP3Au4Pl3IqFC2KbV4AaABAg",
+            "mechanic_at": "2026-10-11T19:42:37Z",
+            "prayer_id": "UgwS0V-YEkHOmuh2PwZ4AaABAg",
+            "prayer_at": "2026-10-11T19:42:37Z",
+            "closeout": "done",
+            "retired_id": "UgyLYtqz0Rf_yqTE1nx4AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "122139494924983291_1713818523041907",
+            "mechanic_at": "2026-10-11T19:42:37Z",
+            "prayer_id": "122139494924983291_4640633082872373",
+            "prayer_at": "2026-10-11T19:42:37Z",
+            "closeout": "done",
+            "retired_id": "122139494924983291_1661898432233158"
+          },
+          "instagram": {
+            "mechanic_id": "18108374038898324",
+            "mechanic_at": "2026-10-11T19:42:37Z",
+            "prayer_id": "18119477770935885",
+            "prayer_at": "2026-10-11T19:42:37Z",
+            "closeout": "done",
+            "retired_id": "17911543500502284"
+          }
+        }
+      }
+    },
     "55": {
       "soul_count": 4555,
       "intention_count": 0,
@@ -36,9 +287,10 @@
           },
           "tiktok": {
             "post_id": "6aca9ea9affd127c9ae40015",
-            "status": "unconfirmed",
+            "status": "published",
             "platform_publish_handle": "v_pub_url~v2-1.7695137822097393678",
-            "note": "upload accepted 2026-10-10T20:25:58Z; confirm via analytics on the next day's run"
+            "platform_post_id": "7695137984907152654",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7695137984907152654"
           }
         },
         "comments": {
@@ -47,24 +299,24 @@
             "mechanic_at": "2026-10-10T20:29:06Z",
             "prayer_id": "UgwtOlrA1BYqdn4LCBx4AaABAg",
             "prayer_at": "2026-10-10T20:29:06Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "UgxugOhxfMSS_81b_oB4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122139323690983291_4771880773137480",
             "mechanic_at": "2026-10-10T20:29:06Z",
             "prayer_id": "122139323690983291_2309975483113206",
             "prayer_at": "2026-10-10T20:29:06Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122139323690983291_2001401263763470"
           },
           "instagram": {
             "mechanic_id": "17910577749556682",
             "mechanic_at": "2026-10-10T20:29:06Z",
             "prayer_id": "17999593200036888",
             "prayer_at": "2026-10-10T20:29:06Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "18153694594525504"
           }
         }
       }

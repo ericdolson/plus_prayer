@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-10-10T16:19:18Z",
+  "last_aggregated_at": "2026-10-18T20:18:58Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -192,7 +192,19 @@
     "youtube:uP_r_DBU2zQ": 2,
     "instagram:17995037354842604": 2,
     "facebook:1033072079891934_122139215276983291": 2,
-    "youtube:2I-fQyMMIA8": 2
+    "youtube:2I-fQyMMIA8": 2,
+    "instagram:18218458849354785": 2,
+    "facebook:1033072079891934_122139323690983291": 2,
+    "youtube:qtaN7M1v-QY": 2,
+    "instagram:18067159778759648": 2,
+    "facebook:1033072079891934_122139494924983291": 2,
+    "youtube:-IEFX5BOwCk": 2,
+    "instagram:18117957086081824": 2,
+    "facebook:1033072079891934_122139834908983291": 2,
+    "youtube:01iEc2hSn0g": 2,
+    "facebook:1033072079891934_122140095758983291": 2,
+    "instagram:17979146262138930": 2,
+    "youtube:cdc4mqTnbyc": 2
   },
   "pending": {
     "7": [],
@@ -457,6 +469,10 @@
         "comment_url": "https://www.youtube.com/watch?v=K9giPQjjI4U&lc=Ugyq5jQQRIgB6XQv5Qh4AaABAg"
       }
     ],
-    "55": []
+    "55": [],
+    "56": [],
+    "57": [],
+    "58": [],
+    "59": []
   }
 }
