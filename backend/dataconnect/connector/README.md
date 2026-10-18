@@ -4,7 +4,11 @@ This folder holds the deployable operations — the API surface the app calls vi
 the generated typed SDK. Each operation declares its own `@auth` level; this is
 the security model (a client can only run operations defined here).
 
-## Status: NOT YET DESIGNED
+## Status: DESIGNED — see OPERATIONS.md (authoritative)
+
+The list below is the original June draft and is SUPERSEDED: `signUp` →
+`onAuthUserCreated` trigger; `setSubjectActive` → cut (status enum);
+`linkAnonymousAccount` → Firebase linking handled in `onAuthUserCreated`.
 
 The schema is locked (`../schema/schema.gql`). Operations are the next design
 step. Do not hand-write these ad hoc — design them deliberately (with Claude,

@@ -66,6 +66,9 @@
 #     prayerCount, so the historical sum always reads finalized values.
 #
 # STREAKS:
+#   !! 2026-10-17: user streak basis CHANGED to local calendar days (see
+#   !! docs/product/streaks-reminders.md). Fields below still reflect the old
+#   !! list-number design; schema update pending confirmation of details.
 #   - USER participation streak (consecutive list numbers the user prayed the
 #     COMMUNITY list) is STORED on User — frequently read, and bestStreak is
 #     expensive to re-derive over all history each load. See User below.

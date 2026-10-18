@@ -370,3 +370,248 @@ Named "backend" not "firebase" because Firebase usage also spans the app. The
 app keeps its own Firebase CLIENT config (firebase_options.dart, etc.) at its
 required paths. FCM is not its own folder (it's functions code + app code);
 storage in-repo is only storage.rules.
+
+---
+
+## Process & Product (2026-10)
+
+### Decision: Current-state product spec lives in docs/product/
+**Timestamp:** 2026-10-17
+Product, UX, and architecture decisions are consolidated into `docs/product/`,
+one current-state file per feature, indexed by `docs/product/README.md`. This log
+stays the append-only WHY. Not split by `app/` vs `backend/` because nearly every
+feature (auth, streaks, presence) crosses both — split copies would drift.
+Subfolder CLAUDE.md files hold build rules only and link to the specs.
+Unresolved items are tracked in `docs/product/open-questions.md`.
+
+### Decision: Streaks count calendar days in the user's local timezone
+**Timestamp:** 2026-10-17 (SUPERSEDES 2026-06-23 "Streaks = consecutive list numbers")
+Duolingo-style day streaks with a "last call" reminder. The list rollover is
+manual and follows no user's timezone, so a list-number streak has no clean
+deadline to remind against. Details (what counts toward the day, `localDate`
+on Prayer, grace/freeze) are PROPOSED/OPEN in docs/product/streaks-reminders.md.
+Schema change pending confirmation of those details.
+
+### Decision: A prayer holds the list and/or subjects, or neither
+**Timestamp:** 2026-10-17 (SUPERSEDES 2026-06-24 UI rule "community prayer before personal prayers")
+Main screen is the user's personal prayer list with today's list pinned as the
+top row. Starting a prayer, the user chooses what it holds: the current list,
+any of their souls/intentions, both, or nothing (a general prayer). Only prayers
+that include the current list earn a place on the next list. Tapping into a
+row's detail lets the user start a prayer with that item already included.
+Removes the ordering rule and its interim gap; schema already supports it
+(communityList nullable, zero-or-more PrayerSubjectLinks).
+
+### Decision: In-prayer UX happens in place (Option B)
+**Timestamp:** 2026-10-17
+Chosen over a separate quiet screen. Same view, so search/filters persist; halo
++ removed nav mark the mode; rows' `>` becomes a check meaning "holding this one
+now", with a subtle sparkle so the act carries weight. Pray FAB gains a ~5s
+decaying ring, then becomes Amen; ✕ anytime. The list is NOT pre-checked —
+instead, ending a prayer that didn't include the current list opens a quiet,
+standalone invitation to hold today's list. Rows: title + one secondary line;
+the pinned list row's secondary line shows who will be carried on the next list.
+Details marked PROPOSED in docs/product/prayer-flow.md.
+
+### Decision: Intentions are printed as text on the physical list
+**Timestamp:** 2026-10-17
+Intentions appear on the printed list alongside souls' names, not as a count.
+Names and intentions are character-capped; font size shrinks to accommodate
+large lists. Raises intention-text moderation at assembly (open).
+
+### Decision: Free tier, reverse trial, and intentions nested under names
+**Timestamp:** 2026-10-17 (SUPERSEDES "non-premium intentions are never on the global list")
+- Free app prints you + one intention of your own. Social prints only you
+  (comment text ignored by design so carrying others is the app's value).
+- New users get a ~14-day reverse trial of premium: no card, no auto-renew,
+  heads-up before it ends, then settle to free with a gentle invitation.
+  Judged generous enough that the end-of-trial change won't feel like a wound,
+  provided it is communicated early. Trial history stays visible forever.
+- Intentions always live under a name (person, group, or cause — user's choice
+  of naming). One level. Add-intention defaults to "For: Me".
+- Selection: intention implies its name; name doesn't imply intentions;
+  partial state on names.
+- Names print together with their intentions; the app previews "your portion"
+  exactly as printed. Single copy, never shared — privacy/terms statement needed.
+- Character caps: 40 (name), 80 (intention). App user's social 🙏 carries only them.
+
+### Decision: Premium = pool of carried names/intentions; trial-end and over-limit flows
+**Timestamp:** 2026-10-17
+Paid capacity is a pool counted per name or intention (not "lines" — printing
+word-wraps). Managed on a "your portion" screen with an illustrative preview.
+Over-selecting is allowed (e.g. 17/15 + upgrade mark); saving invites upgrade.
+Reverse trial = 14 days, heads-up ~day 10; at the end, invite to subscribe
+first, then trim-to-free selection, with a second invitation if still over.
+
+### Decision: No silent carry choices; auto-carry while room remains
+**Timestamp:** 2026-10-17
+Over-limit save + declined upgrade → save blocked, user trims. New items are
+auto-carried while the pool has room; once full, new items are private-only and
+visibly marked as not on the list.
+
+### Decision: Answered vs Release; answered intentions are not list-eligible
+**Timestamp:** 2026-10-17
+Resolving an intention: Answered (leaves the global list, stays on the user's
+main view for gratitude prayers until archived) or Release (no gratitude
+implied, auto-archived). An anonymous answered count may appear on the list and
+in captions once numbers are meaningful.
+
+### Decision: Onboarding is anonymous-first with a personal "What's your name?"
+**Timestamp:** 2026-10-17
+Flow: splash → plain mechanic line → "What's your name?" (becomes the
+self-subject "Me", with helper text that their name will be carried by the
+world) → optional "who else do you hold?" → main screen → after first Amen:
+carried confirmation, reminder choice, notification permission. Trial starts at
+first prayer. Sign-in prompts after first prayer, ~3-day streak, before trial
+end. Account deletion is immediate; past entries lose name/owner, counts stay.
+Names are never legible in recordings.
+
+### Decision: Pay before sign-in; self-name edit limit; aliases
+**Timestamp:** 2026-10-17
+Purchasing never requires sign-in; a sign-in prompt follows purchase. Self-name
+edits are free until first printed, then once per 7 days. One name field for the
+user. Every name has an optional owner-only alias (self = "Me"); the real name is
+printed and is what future group members see.
+
+### Decision: ExternalPerson for non-app names; backfill and pre-launch cutover
+**Timestamp:** 2026-10-17
+Social 🙏 commenters and the NamUs base set are `ExternalPerson` rows; list
+entries reference a subject or an external person (exactly one). List history
+is backfilled from publishing JSON so numbering is continuous, and the
+harvest/publish pipeline moves to the DB before launch. Resolved NamUs cases
+leave the base set quietly.
+
+### Decision: Presence via a throttled public counter
+**Timestamp:** 2026-10-18
+One "praying now" number for any prayer, count only. Live count shown at ≥10,
+otherwise a time-window count; never show 0. Raw `/presence/{uid}` is private;
+a server process aggregates and republishes one small public RTDB node about
+every 5s (plus the last-hour prayer count) so presence churn doesn't fan out to
+every client.
+
+### Decision: Streak rules
+**Timestamp:** 2026-10-18
+Any prayer ≥5s counts for the user's local day (`Prayer.localDate`). One grace
+day is earned per 7 consecutive days, max one held, auto-used on a miss, never
+sold. A strict-streak setting disables grace, with a one-time explainer.
+Last call ~8pm local if not prayed. Quiet milestones at 7/30/100/365.
+
+### Decision: Grace days are offered, accepted, and banked (up to 3)
+**Timestamp:** 2026-10-18 (SUPERSEDES earlier same-day "one grace day + strict setting")
+Every 7 actually-prayed days the user is offered a grace day; accepted ones bank
+up to 3. No strict setting — declining offers "Don't offer again". Bridged days
+don't earn grace; each missed day consumes one; streak breaks when the bank runs
+out. Never sold. Stays close to Duolingo's proven pattern.
+
+### Decision: Grace bank cap starts at 2
+**Timestamp:** 2026-10-18 (refines "banked up to 3")
+Start at 2, close to Duolingo's market-tested cap; raising to 3 later is
+generous, lowering would feel like a takeaway. Cap and interval live in Remote
+Config. Full bank still gets a quiet 7-day acknowledgement.
+
+### Decision: MVP notifications and self-hosted video
+**Timestamp:** 2026-10-18
+Only server push at MVP is an opt-in "Today's list is live". Reminders, last call
+(only if not prayed at all that day), and the trial notice are local. List video
+is self-hosted on Firebase Storage to start and plays full-bleed on the list
+detail page; optimize hosting later if egress grows.
+
+### Decision: Wax seal as the list row avatar; sealVariant stored
+**Timestamp:** 2026-10-18
+The pinned list row uses the day's wax-stamp vector (unsealed until published).
+`PrayerList.sealVariant` is stored and set at publish from the current
+weekday→color mapping, so changing the rotation later costs nothing.
+
+### Decision: Morning admin flow and moderation
+**Timestamp:** 2026-10-18
+Assemble → review flagged → print → publish, via admin-only Cloud Functions
+called by existing Claude skills (no console at MVP). Auto-flags: profanity,
+PII/links, frequent self-name changes (not all-caps, not new accounts). Users
+see "Held for review" / "Not printed". The skill keeps generating the print PDF,
+now from DB data; server-side PDF later so others can help.
+
+### Decision: Faith positioning — open brand, familiar ritual words
+**Timestamp:** 2026-10-18
+Brand and store stay faith-agnostic ("One list. Everyone. Every day." everywhere,
+retiring the "Every faith" store variant). In-app ritual language keeps familiar,
+widely used Christian-rooted words (Amen, grace day). No explicit Christian lean.
+
+### Decision: Printed-list privacy and account age
+**Timestamp:** 2026-10-18
+Retired lists are kept forever, sealed, in a locked filing cabinet at the office.
+Helpers may handle lists later under a confidentiality agreement. Accounts are
+13+; child accounts possibly later. Policy leads with a plain-language summary,
+drafted via a generator and reviewed by a lawyer before launch.
+
+### Milestone: Staged roadmap drafted
+**Timestamp:** 2026-10-18
+docs/product/roadmap.md now holds Stages 0–4 with a tagged checklist built from
+the 2026-10-17/18 product meetings.
+
+### Decision: Notes yes, location later, manual order, keep list videos
+**Timestamp:** 2026-10-18 (location SUPERSEDES 2026-06-23 "capture from day one")
+Optional private prayer note after Amen at MVP. Location capture deferred past
+MVP (accepting no early data). Main list order is manual drag (names and
+intentions within a name); filters handle "unprayed". Past list videos are kept.
+
+### Decision: Last call at 8pm; guided prayer post-MVP
+**Timestamp:** 2026-10-18
+Last call ~8pm local (less intrusive than the seed's 9pm). Guided prayer ("Help
+me pray") is a post-MVP premium feature; schema seams (`Prayer.mode`,
+`User.prayerVoice`) added now.
+
+### Decision: List gate = since last flip OR within ~30 hours
+**Timestamp:** 2026-10-18 (supersedes seed 2026-10-11 "48h rolling window" proposal)
+Carried if the user prayed with the list since the last flip, or within ~30h of
+assembly. Covers manual flip variance and near-flip pray-ers without letting
+every-other-day prayer keep someone on every list. Streaks stay independent of
+being carried.
+
+### Decision: Bead-strand history; streak in the header
+**Timestamp:** 2026-10-18 (SUPERSEDES seed 2026-10-11 v3 line timeline and outcome recording)
+Detail-page history is a strand of beads — one per list the item was on, in that
+list's wax color — with neutral "Off the list · N days" gaps and counts-only
+personal prayers, plus note/answered hints on period rows. Built entirely from
+existing tables; no per-assembly outcome records. The streak badge sits beside
+the header avatar; "carried on N lists" lives on Today's list page.
+
+### Decision: In-progress prayer drafts live in RTDB; prayer time shown plainly
+**Timestamp:** 2026-10-18
+Drafts (per device) live in the RTDB presence node with a heartbeat; the Prayer
+row is written once at Amen, or by a 6h auto-save job with an estimated duration
+(last foreground + ≤30 min, 4h cap, `endedBy = AUTO`, shown with "~"). Back
+within ~30 min resumes quietly; later asks. Prayer time appears per prayer and
+in the History header, never on detail pages, never ranked.
+
+### Decision: The streak counts days with the world
+**Timestamp:** 2026-10-18 (SUPERSEDES same-day "any prayer ≥5s counts for the day")
+The single streak counts local days on which the user prayed with the list. The
+community is +Prayer's offering; streaking any prayer would make it like every
+other app. This restores "keep your streak = stay carried" and aligns the habit
+with what premium sells. Personal-only days are acknowledged with hollow marks
+and a "Days in prayer this month" count — not a second streak. Last call fires
+only if the user hasn't prayed with the list today (two wordings).
+
+### Decision: Badge states, avatar clusters, notification privacy
+**Timestamp:** 2026-10-18
+Streak badge is always visible (muted when not yet today; no number at zero) so
+the sheet is always reachable. A shared avatar-cluster component names who's on
+the list wherever "the list" appears. Notifications may show names/aliases by
+default but never intention text (except moment reminders' own words); a
+"Show names in notifications" setting (default on) allows blank reminders.
+
+### Decision: Language, future groups shape, list scope, analytics
+**Timestamp:** 2026-10-18 (groups part SUPERSEDES 2026-06-23 "nullable groupId on subjects")
+UI follows device language with override; `User.locale` stored; caps count
+visible characters; print fonts cover all scripts. Future groups use a share
+table (one item → many groups or PUBLIC), families/churches/denominations are
+group types, prayers may link to others' shared items with op-level permission.
+`PrayerList.scope` (GLOBAL default) added as a cheap seam. Analytics events and
+a minimum-app-version flag ship from day one. "In memory" state noted for later.
+
+### Decision: Personal practice is free at any size
+**Timestamp:** 2026-10-18 (reconfirms 2026-06-23 "unlimited personal prayer always free")
+No private limit on names or intentions. Growth matters most; private names are
+the pipeline for paid carrying, and a private cap would read as charging to
+remember people. Only a ~500-name abuse safety cap exists. Large personal lists
+(e.g. pastors) point to the future group/organization product.

@@ -1,6 +1,7 @@
 # backend/ — Server-Side Context
 
-Inherits all brand-wide truths from the root CLAUDE.md. This file covers the
+Inherits all brand-wide truths from the root CLAUDE.md. Product behavior lives
+in docs/product/ (read the README there first); this file is build rules only. This file covers the
 backend: SQL Connect schema/operations, Cloud Functions, and security rules.
 
 ---
@@ -85,9 +86,10 @@ fan-out billing is the newest, least-proven surface).
 - **streak update** — on a community prayer commit, update currentStreak /
   bestStreak / lastPrayedListNumber.
 
-### Daily transition timing (UPDATED)
-The daily list transition runs **manually, kicked off by Eric, around 8am his
-time** — NOT on a schedule. Life happens; the manual trigger preserves
+### Daily transition timing (UPDATED 2026-06-24, Option C)
+The daily list transition runs **manually, kicked off by Eric, at the ~6am MT
+cutoff** — NOT on a schedule. The new list becomes current at that moment; its
+video follows ~8am (publishListVideo sets videoPublishedAt). Life happens; the manual trigger preserves
 flexibility. (This supersedes any earlier 9:30pm/scheduled-cron assumption.)
 Because a human kicks off the transition, the moderation review checkpoint fits
 naturally into that same step.
@@ -125,13 +127,11 @@ Full detail in `dataconnect/schema/schema.gql` header. Summary:
   two halves from overlapping/double-counting.
 - **User participation streak is STORED** on User (frequently read; bestStreak
   costly to re-derive). **Per-subject streaks are DERIVED** and only fully
-  well-defined once the OPEN listContextNumber decision is made (personal-only
-  prayers aren't on the list axis without it). Denormalize per-subject streak
+  defined via listContextNumber (decided). User streak basis changed to local
+  calendar days on 2026-10-17 — see docs/product/streaks-reminders.md. Denormalize per-subject streak
   only if it becomes a hot read.
 
-### OPEN decision: Prayer.listContextNumber
-Personal-only prayers (communityList = null) aren't placed on the list-number
-axis. If tier-1 personal counts/streaks should read as "list cycles I prayed for
-X" rather than raw event counts, add a `listContextNumber: Int` (always set) to
-Prayer. UNRESOLVED — clean additive change whenever decided. Tier-3 does NOT
-need it.
+### DECIDED (2026-06-24): Prayer.listContextNumber
+Always set to the current list number at prayer time. Supports tier-1 cycle
+counts. NOTE: user streaks moved to local calendar days on 2026-10-17 — see
+docs/product/streaks-reminders.md.

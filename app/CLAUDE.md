@@ -1,6 +1,7 @@
 # app/ — Flutter App Context
 
-Inherits all brand-wide truths from the root CLAUDE.md. The app is the long-term
+Inherits all brand-wide truths from the root CLAUDE.md. Product behavior lives
+in docs/product/ (read the README there first); this file is build rules only. The app is the long-term
 product and the sole meaningful revenue vehicle (freemium subscription).
 
 ## Status
@@ -65,7 +66,8 @@ flutter pub run icons_launcher:create
 - **Anonymous → permanent linking:** when an anon user signs in, LINK the
   account so souls/history carry over. Critical: the anon user is themselves a
   soul on the list.
-- **Streaks:** consecutive list numbers prayed for (not calendar days).
+- **Streaks:** calendar days in the user's local timezone (changed 2026-10-17;
+  see docs/product/streaks-reminders.md).
 - **Name + nickname:** subjects have publicName (printed/shown) and an optional
   personalLabel (owner-only, intimate).
 
@@ -77,7 +79,8 @@ users to pick a handle.
 ## Store copy reconciliation TODO
 App-store tagline historically drafted as "One list. Every faith. Every day."
 Web tagline (more recent, preferred) is "One list. Everyone. Every day."
-Reconcile to "Everyone" during app development. Splash line: "Your name,
+RESOLVED 2026-10-18: use "Everyone" in the store too (faith-agnostic brand,
+familiar ritual words like Amen/grace kept in-app). Splash line: "Your name,
 carried by the world."
 
 ## Legacy prototype code

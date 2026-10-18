@@ -83,7 +83,8 @@ and all public-facing text.
 ```
 plusprayer/
   CLAUDE.md            ← this file (brand-wide truths)
-  docs/decisions.md    ← canonical running decision log
+  docs/product/        ← CURRENT-STATE product spec, one file per feature (start here)
+  docs/decisions.md    ← canonical running decision log (the why)
   seeds/               ← verbose agent-readable summaries for ingestion
   backend/             ← all server-side deploy artifacts (one Firebase config)
     CLAUDE.md
@@ -114,6 +115,12 @@ plusprayer/
   cadences (app = slow store review; functions = continuous; social = daily).
 
 ---
+
+## Product Spec (READ BEFORE FEATURE WORK)
+
+`docs/product/README.md` is the index of current-state product, UX, and
+architecture decisions, one file per feature. App and backend work both start
+there. Open questions live in `docs/product/open-questions.md`.
 
 ## Decision Log Protocol
 
