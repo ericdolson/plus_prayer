@@ -114,6 +114,7 @@ _Last updated: 2026-10-17_
   before assembly runs; later arrivals fall to the 30h rule. The next list's
   `currentFrom = closesAt`. In-app only: a quiet "List 52 closes in 5 minutes"
   banner (tap to pray) for anyone who hasn't prayed with the list; no push.
+  `closesAt` is mirrored to RTDB `/lists/current` so open apps react live.
 - **Gate qualification (precise):** (a) `communityList` = the closing list
   (started before `closesAt`) OR (b) the prayer **ended** within 30h of assembly.
 - **Enums:** `source` APP | SOCIAL | BASE_SET; `moderationStatus` APPROVED | HELD |

@@ -60,7 +60,7 @@ its per-assembly outcome recording (§5). Applies to names, intentions, and "Me"
   that list) are **incremented on write** by `onPrayerLogged` and frozen at
   settle. They are never recomputed from Prayer rows, so an account deleted
   before or after settle doesn't reduce them.
-- **`DailyStats`** (date, prayers, prayerSeconds, peoplePraying) covers ALL
+- **`DailyStats`** (UTC date, prayers, prayerSeconds, peoplePraying) covers ALL
   prayers incl. personal; also incremented on write (a scheduled function may
   finalize/roll the day, but never recounts from rows). No identities.
 

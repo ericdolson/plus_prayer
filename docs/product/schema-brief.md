@@ -51,8 +51,10 @@ reminders (cap 5–7) are later but the table supports them. — notifications
 | `groupId` / `visibility` | **DO NOT ADD** — groups will use a Share table (§4) | roadmap |
 
 Effective carry: an intention is carried only if `isCarried && parent.isCarried`;
-the pool counts effective items. Archive/restore/purge cascade from a name to
-its intentions.
+the pool counts effective items. Archive/purge cascade from a name to its
+intentions; ADD `archivedByCascade: Boolean` on intentions. **Restore** brings
+back only intentions with `archivedByCascade = true` — never Released ones or
+ones the user archived on their own.
 
 Constraints: self-subject forced ACTIVE, not carried-toggleable, not resolvable.
 Resolved items are never list-eligible. Soft abuse cap ~500 subjects per user
@@ -70,8 +72,10 @@ Resolved items are never list-eligible. Soft abuse cap ~500 subjects per user
 | `status`, `publishedAt`, `videoPublishedAt`, counts | keep; `prayerCount` still settles on close | list-lifecycle |
 
 ### DailyStats — NEW
-`date`, `prayers`, `prayerSeconds`, `peoplePraying` — all prayers incl.
-personal; incremented on write, never recounted from rows. — stats-history
+`date` (**UTC day** of the prayer's end), `prayers`, `prayerSeconds`,
+`peoplePraying` — all prayers incl. personal; incremented on write, never
+recounted from rows. `peoplePraying` uses `User.lastStatsDate` (UTC): if it
+differs from today, increment and set it. — stats-history
 
 ### ExternalPerson — NEW
 `source` (SOCIAL | BASE_SET), `platform` (non-null; base set = "namus"), `externalId` (platform user id or
@@ -131,7 +135,9 @@ month" · "carried on N lists" · answered running total · prayer time per pray
 - `/stats/live` (server-write, public-read): `prayingNow` (people, not devices),
   `prayedLastHour`, `prayedToday`, `updatedAt` — republished ≥5s apart + 1-min
   reconcile. Clients subscribe only while foregrounded.
-- `/lists/current` (server-write, public-read): `listNumber`, live `prayerCount`.
+- `/lists/current` (server-write, public-read): `listNumber`, live `prayerCount`,
+  **`closesAt`** (mirrored when Eric sets it, so open apps show the 5-minute
+  banner without re-fetching).
 
 ## 4. Future seams (not built now — keep compatible)
 `Group` (type FAMILY | CIRCLE | CONGREGATION | ORGANIZATION, `parentGroup?`),
@@ -203,5 +209,8 @@ computed as free; trial-end soft landing ≤7 days. 7. Account deletion deletes
 entries; aggregates are increment-on-write (`prayerCount`, `prayerSeconds`,
 `DailyStats`) and never recounted. 8. `setSelfName` creates the self;
 state-based onboarding resume; `mergeAccounts`. 9. `platform = "namus"`.
-10. Gate per §6 using `closesAt`. 11. "First printed" = first APPROVED entry on a
+10. Gate per §6 using `closesAt`.
+Follow-ups: `DailyStats.date` = UTC day (`User.lastStatsDate` for
+`peoplePraying`); restore only restores `archivedByCascade` intentions; `closesAt`
+mirrored to RTDB `/lists/current`. 11. "First printed" = first APPROVED entry on a
 PUBLISHED list. 12. Effective carry + cascade. 13. Enums as listed.
