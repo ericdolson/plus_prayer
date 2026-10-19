@@ -40,6 +40,7 @@ every feature crosses that boundary.
 | [privacy.md](privacy.md) | Printed-list privacy, retention, age, data | Decided; legal text pending |
 | [screens.md](screens.md) | Navigation, screen map, add sheet, settings | Decided |
 | [schema-brief.md](schema-brief.md) | Handoff: every table/field/function change from the meetings | Ready for backend |
+| [app-brief.md](app-brief.md) | Handoff: screens, components, flows, states, copy for the Flutter app | Ready for app |
 | [roadmap.md](roadmap.md) | Stages 0–4 with task checklist | Drafted 2026-10-18 |
 | [open-questions.md](open-questions.md) | Everything unresolved, in one place | Living |
 
