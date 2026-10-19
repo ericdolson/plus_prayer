@@ -212,5 +212,7 @@ state-based onboarding resume; `mergeAccounts`. 9. `platform = "namus"`.
 10. Gate per §6 using `closesAt`.
 Follow-ups: `DailyStats.date` = UTC day (`User.lastStatsDate` for
 `peoplePraying`); restore only restores `archivedByCascade` intentions; `closesAt`
-mirrored to RTDB `/lists/current`. 11. "First printed" = first APPROVED entry on a
+mirrored to RTDB `/lists/current`. The ≤7-day soft landing applies to ANY
+entitlement end (trial or lapsed subscription), detected as "no active
+entitlement and carried > free limit" — no `trialEndChoiceAt` field. 11. "First printed" = first APPROVED entry on a
 PUBLISHED list. 12. Effective carry + cascade. 13. Enums as listed.
