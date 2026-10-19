@@ -86,7 +86,7 @@ describe("N+1 is created at closesAt", () => {
     const owners = await sql<{ owner_id: string }>(
       "SELECT owner_id FROM prayer_list_entry WHERE list_id = $1::uuid ORDER BY owner_id", [next],
     );
-    assert.deepEqual(owners.map((o) => o.owner_id), ["early", "late"], "early via (a), late via (b)");
+    assert.deepEqual(owners.map((o) => o.owner_id), ["early"], "late prayed for N+1, so it earns N+2, not N+1");
     assert.deepEqual(deps.live.currentList, { listId: next, listNumber: 2, prayerCount: 1, closesAt: null });
 
     // N is settled now: a late offline prayer for it changes nothing.
@@ -103,5 +103,38 @@ describe("N+1 is created at closesAt", () => {
     await closeList(deps, 0);
     deps.clock.now = new Date(Date.now() + 1000);
     await assert.rejects(closeList(deps, 5), /run assembleNextList/);
+  });
+});
+
+describe("one prayer earns exactly one list (schema-brief §10)", () => {
+  beforeEach(resetDb);
+
+  it("a prayer after N's cutoff is carried on N+2 only — never on N+1 too", async () => {
+    const deps = makeDeps();
+    const n = await addList(1, { currentFrom: Date.now() - DAY });
+    await createUser("one");
+
+    const closedN = await closeList(deps, 0);
+    const next = closedN.nextListId!;
+    const cutoff = Date.parse(closedN.closesAt);
+    // The only prayer: for N+1, right after N's cutoff (well within 30h of it).
+    const id = await logPrayer("one", { listId: next, startedAt: cutoff + 1000, durationSeconds: 20 });
+    await processPrayer(deps, id);
+
+    deps.clock.now = new Date(cutoff + 2000);
+    await assembleNextList(deps, {}); // fills N+1
+    deps.clock.now = new Date(cutoff + 60_000);
+    const closedNext = await closeList(deps, 0); // N+1's cutoff, after the prayer started
+    deps.clock.now = new Date(Date.parse(closedNext.closesAt) + 1000);
+    const n2 = await assembleNextList(deps, {}); // fills N+2
+
+    const carried = await sql<{ list_number: number }>(
+      `SELECT l.list_number FROM prayer_list_entry e JOIN prayer_list l ON l.id = e.list_id
+       WHERE e.owner_id = $1 ORDER BY l.list_number`, ["one"],
+    );
+    assert.deepEqual(carried.map((c) => c.list_number), [3], "carried once, on N+2");
+    assert.equal(n2.listNumber, 3);
+    assert.deepEqual(await counts(next), { prayer_count: 1, prayer_seconds: 20 }, "and it counted toward N+1");
+    assert.deepEqual(await counts(n), { prayer_count: 0, prayer_seconds: 0 });
   });
 });

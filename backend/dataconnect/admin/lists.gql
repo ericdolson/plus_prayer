@@ -101,10 +101,11 @@ mutation CloseList(
 # by the function). People are upserted into ExternalPerson (latest display
 # name) and entered once each.
 #
-# GATE (schema-brief §6): a user qualifies with a prayer that included the
-# list and either (a) communityList = the closing list and started before its
-# closesAt (and is committed now, i.e. before assembly), or (b) ended within
-# $gateHours of assembly.
+# GATE (schema-brief §6, §10): a user qualifies with a prayer that included
+# the list and either (a) communityList = the closing list and started before
+# its closesAt (and is committed now, i.e. before assembly), or (b) ended in
+# the $gateHours before closesAt. A prayer after the cutoff belongs to N+1
+# only, so one prayer never earns two lists.
 #
 # PER USER: the self name always; then effectively carried items (an
 # intention only if its name is carried or is the self), ACTIVE, unresolved,
@@ -196,7 +197,8 @@ mutation AssembleList(
       SELECT DISTINCT p.user_id FROM prayer p
       WHERE p.community_list_id IS NOT NULL
         AND ((p.community_list_id = $1::uuid AND p.started_at < $2::timestamptz)
-          OR p.prayed_at >= $3::timestamptz - make_interval(hours => $4::int))
+          OR (p.prayed_at >= $2::timestamptz - make_interval(hours => $4::int)
+            AND p.prayed_at < $2::timestamptz))
     ), u AS (
       SELECT usr.id, usr.include_limit, usr.self_name_changed_at, usr.entitlement_expires_at,
         COALESCE(usr.entitlement_expires_at > $3::timestamptz, false) AS active

@@ -1,7 +1,7 @@
-// The list gate (list-lifecycle.md, schema-brief §6): at assembly a user is
-// carried if they have a prayer that included the list and either
+// The list gate (list-lifecycle.md, schema-brief §6, §10): at assembly a user
+// is carried if they have a prayer that included the list and either
 //   (a) its communityList is the closing list and it started before closesAt, or
-//   (b) it ended within the last 30h.
+//   (b) it ended in the 30h before closesAt.
 
 import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
@@ -19,7 +19,7 @@ async function carriedOwners(listId: string): Promise<string[]> {
 describe("list gate", () => {
   beforeEach(resetDb);
 
-  it("carries (a) prayers for the closing list started before closesAt and (b) list prayers ended within 30h", async () => {
+  it("carries (a) prayers for the closing list started before closesAt and (b) list prayers ended in the 30h before it", async () => {
     const deps = makeDeps();
     const older = await addList(1, { currentFrom: Date.now() - 4 * DAY, closesAt: Date.now() - 3 * DAY, settled: true });
     const closing = await addList(2, { currentFrom: Date.now() - 3 * DAY });
@@ -38,12 +38,12 @@ describe("list gate", () => {
 
     const closed = await closeList(deps, 0); // cutoff = now
     deps.clock.now = new Date(Date.parse(closed.closesAt) + 1000);
-    // f: started after the cutoff, before assembly → not (a); (b) carries it
+    // f: a stale client logged List 2 after the cutoff → neither rule (it's after closesAt)
     await logPrayer("f", { listId: closing, startedAt: Date.parse(closed.closesAt) + 200, durationSeconds: 5 });
 
     const res = await assembleNextList(deps, {});
     assert.equal(res.listNumber, 3);
-    assert.deepEqual(await carriedOwners(res.listId), ["a", "b", "e", "f"]);
+    assert.deepEqual(await carriedOwners(res.listId), ["a", "b", "e"]);
   });
 
   it("praying every other day is not enough (a two-day-old list prayer for an older list)", async () => {

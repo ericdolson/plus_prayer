@@ -5,7 +5,7 @@
 import clientDefaults from "../config/client-config.json";
 
 export interface ServerConfig {
-  /** List gate: a list prayer that ENDED within this many hours qualifies. */
+  /** List gate (b): a list prayer that ENDED in this many hours before closesAt qualifies. */
   gateHours: number;
   /** Free tier: one intention under "Me". */
   freeLimit: number;
