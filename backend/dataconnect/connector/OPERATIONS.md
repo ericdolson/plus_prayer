@@ -1,7 +1,7 @@
 # +Prayer — Screen → Operation Map (MVP operation spec)
 
-_Updated 2026-10-18 from `docs/product/schema-brief.md` §6 and the feature
-files it cites. Schema: `../schema/schema.gql`._
+_Updated 2026-10-18 from `docs/product/schema-brief.md` §6 and §8 (review
+answers) and the feature files it cites. Schema: `../schema/schema.gql`._
 
 Operations are designed from what each screen needs in ONE round trip. This maps
 every MVP surface to the operation(s) that feed it, plus the write operations
@@ -35,22 +35,39 @@ service/connector/operation, region must match `us-central1`.
 "Current list" everywhere = the GLOBAL-scope `PrayerList` with the latest
 non-null `currentFrom`. It may still be `draft`.
 
+Two computed rules used throughout (never swept by a job):
+- **Effective carry** — an intention is carried only if `isCarried &&
+  parent.isCarried`; the pool counts only effectively carried items beyond the
+  self name.
+- **Effective entitlement** — `includeLimit` while `entitlementExpiresAt` is in
+  the future (or a subscription is active); otherwise the free limit (1, an
+  intention under "Me"). Trial and base tier both grant `basePremiumPool`
+  (server config, 10).
+
 ---
 
 ## A. Reads (connector queries)
 
 ### Screen: Home (personal list + pinned today's-list row)
 - **getCurrentListMeta** (ANON) — current PrayerList: id, listNumber, listDate,
-  status, currentFrom, videoPublishedAt (null → "being filmed" placeholder),
+  status, currentFrom, closesAt (initial value; open apps get it live from
+  RTDB `/lists/current` → in-app "List N closes in 5 minutes" banner for
+  anyone who hasn't prayed with the list; no push),
+  videoPublishedAt (null → "being filmed" placeholder),
   videoPath, sealVariant (null → unsealed state), soulCount, intentionCount,
   prayerCount (static seed; the live value comes from RTDB `/lists/current`
   and is stitched client-side). Never the roster of names (ADMIN only).
 - **getMyHeader** (OWNER) — User: displayName, locale, timezone, planTier,
   includeLimit, trialStartedAt, entitlementExpiresAt, currentStreak,
   bestStreak, lastListLocalDate, graceDays, graceOfferPending,
-  graceOffersEnabled, notification settings. "Prayed with the list today" =
-  `lastListLocalDate == device local date` (client-side; drives the badge, the
-  row text, and the local last-call cancel).
+  graceOffersEnabled, notification settings. Also drives state-based
+  onboarding resume: no User / displayName null (no self subject yet) →
+  "What's your name?"; otherwise → main screen.
+  Client-side from these fields: "prayed with the list today" =
+  `lastListLocalDate == device local date` (badge, row text, local last-call
+  cancel), and the EFFECTIVE streak — stored streak, or 0 once the missed days
+  since lastListLocalDate exceed graceDays — so a break shows before the next
+  write.
 - **getMySubjects** (OWNER) — subjects WHERE status = ACTIVE (Answered
   intentions stay ACTIVE until archived): id, kind, parent { id }, publicName,
   personalLabel, isSelf, isCarried, sortOrder, avatarTone, avatarPath,
@@ -77,11 +94,14 @@ non-null `currentFrom`. It may still be `draft`.
 
 ### Screen: Your portion
 - **getMyPortion** (OWNER) — the self subject + every ACTIVE, unresolved
-  subject with its isCarried flag, nested and ordered as on Home; the user's
-  entitlement (includeLimit, planTier, entitlementExpiresAt) for the meter
-  (e.g. "17 / 15"); and my entries on the newest list with their
+  subject with its isCarried flag, nested and ordered as on Home (client
+  applies effective carry); the user's entitlement (includeLimit, planTier,
+  entitlementExpiresAt, trialStartedAt) for the meter (e.g. "17 / 15", against
+  the effective entitlement); and my entries on the newest list with their
   moderationStatus ("Held for review" / "Not printed · {reasonCategory}").
-  The illustrative print preview is rendered client-side from this.
+  No active entitlement (trial ended or subscription lapsed) + effective carry
+  still over the free limit = "Waiting for your choice" (the soft landing). The illustrative print preview is rendered
+  client-side from this.
 
 ### Screen: Name / Intention detail (one page for both)
 - **getSubjectDetail** (OWNER) — ONE operation (stats-history.md):
@@ -137,31 +157,33 @@ streak, grace, isSelf, status transitions not listed here) are never in an
   step + `@check`); SOUL has no parent; cap 40 / 80 grapheme clusters (client
   validates; see implementation choices for the server check); appended to
   the bottom (sortOrder = max + 1 in its level); `isCarried` auto-set true
-  while the pool has room, else false and clearly marked as not on the list;
-  rejected past the ~500-subject abuse cap ("contact us"). Kind is decided by
-  where the user added it — there is no type change later.
+  while the pool (effective carry vs. effective entitlement) has room, else
+  false and clearly marked as not on the list; rejected past the ~500-subject
+  abuse cap ("contact us"). Kind is decided by where the user added it —
+  there is no type change later.
 - **updateSubject** (OWNER) — publicName, personalLabel, note, avatarTone
   (avatarPath later). Not kind, not parent. Not for the self subject's
-  publicName (use updateSelfName).
-- **updateSelfName** (OWNER) — sets the self subject's publicName AND
-  `User.displayName` together, and `selfNameChangedAt`. Free until the self
-  name is first printed; then once per 7 days (`@check` against
-  `selfNameChangedAt`), with the next-available date returned for display.
+  publicName (use the setSelfName callable, D).
 - **setCarriedItems** (OWNER) — saves the "your portion" selection (list of
-  subject ids to carry; all others → false). Blocked if over the entitlement
-  (the client shows the paywall; declining returns to trim, never a silent
-  choice). Self is always carried and is not counted; resolved items don't
-  count toward the pool; free entitlement = 1 intention under "Me" only; an
-  intention needs its name carried.
+  subject ids to carry; all others → false). Blocked if the EFFECTIVE carry
+  exceeds the effective entitlement (the client shows the paywall; declining
+  returns to trim, never a silent choice). Self is always carried and is not
+  counted; resolved items don't count; free = 1 intention under "Me" only.
+  Uncarrying a name leaves its intentions' own flags intact (they stop
+  counting); re-carrying it brings them back and re-runs the limit check.
 - **reorderSubjects** (OWNER) — set sortOrder for names, or for intentions
   within one name. Self ignored/pinned.
 - **resolveIntention** (OWNER, `resolution`) — intentions only, never self.
   ANSWERED → resolvedAt + resolution (stays ACTIVE; frees its place
   immediately). RELEASED → resolvedAt + resolution + status ARCHIVED.
-- **archiveSubject** (OWNER) — status → ARCHIVED. Blocked for isSelf.
-- **restoreSubject** (OWNER) — status ARCHIVED → ACTIVE.
-- **purgeSubject** (OWNER) — status → PURGED ("gone gone"; row persists).
-  Blocked for isSelf.
+- **archiveSubject** (OWNER) — status → ARCHIVED. On a name, its ACTIVE
+  intentions are archived too, with `archivedByCascade = true`. Blocked for
+  isSelf.
+- **restoreSubject** (OWNER) — status ARCHIVED → ACTIVE. On a name, brings
+  back ONLY its intentions with `archivedByCascade = true` (and clears the
+  flag) — never Released ones or ones the user archived on their own.
+- **purgeSubject** (OWNER) — status → PURGED ("gone gone"; row persists); on a
+  name, cascades to all its intentions. Blocked for isSelf.
 - **updatePrayerNote** (OWNER) — NOTE ONLY. Edit Prayer.note; nothing else
   (duration, subjects, list are immutable historical fact). No deletion.
 - **updateMySettings** (OWNER) — locale, timezone, listLiveOptIn,
@@ -171,8 +193,9 @@ streak, grace, isSelf, status transitions not listed here) are never in an
   may repeat up to the cap (5–7, later).
 
 NOTE: logPrayer is a client mutation too, but has its own contract — see C.
-Grace-offer answers change server-owned streak state, so they are a function
-(D), not a connector mutation.
+setSelfName (creates/edits the self subject), mergeAccounts, and grace-offer
+answers touch server-owned state, so they are callables (D), not connector
+mutations.
 
 ---
 
@@ -207,47 +230,84 @@ and offline-friendly): see onPrayerLogged.
 
 ## D. Reactions & server/admin (Cloud Functions — ADMIN / event-driven)
 
-- **onAuthUserCreated** (auth trigger) — create User + self PrayerSubject
-  (kind SOUL, isSelf, personalLabel "Me", isCarried true) in one transaction.
-  MUST detect anonymous → permanent LINKING and NOT create a second User.
-  The self name is collected on the "What's your name?" step and written via
-  updateSelfName (free, not yet printed).
+- **onAuthUserCreated** (auth trigger) — create the User ONLY (displayName
+  null). MUST detect anonymous → permanent LINKING and NOT create a second
+  User.
+- **setSelfName(name)** (callable, owner, idempotent) — first call (the
+  "What's your name?" step, required before the main screen) creates the self
+  PrayerSubject (kind SOUL, isSelf, personalLabel "Me", isCarried true) and
+  sets User.displayName; a retry with the self already present is a no-op
+  edit. Later calls are self-name edits: publicName + displayName +
+  selfNameChangedAt together; free until the self's first APPROVED entry on a
+  PUBLISHED list, then once per 7 days, returning the next-available date.
+  40-grapheme cap.
+- **mergeAccounts(anonIdToken)** (callable, the signed-in existing user) —
+  after a credential-in-use conflict where both accounts have data and the
+  user chose [Merge both] (an empty anon account just switches silently).
+  Verifies the anon token, then in ONE transaction: reassign the anon's
+  non-self subjects (sortOrder appended); re-parent the anon self's
+  intentions to the existing self; re-point the anon self's links and entries
+  to the existing self (drop the anon entry where both selves are on the same
+  list); reassign prayers; recompute the streak from the merged list days,
+  bestStreak = max, graceDays = max (capped), trialStartedAt = earliest, keep
+  the active entitlement, keep the existing user's reminder prefs. Then delete
+  the anon User + Auth user and move its RTDB nodes. The UI warns that
+  duplicates may need cleanup.
 - **onPrayerLogged** (`onMutationExecuted`, filter operation = logPrayer; the
   auto-save job calls the same handler directly). Must not trigger on its own
-  writes. Does:
+  writes. All counters are increment-on-write and never recounted from rows.
+  Does:
   - add any missing parent-name links;
-  - if communityList is set: bump that list's prayerCount and mirror to RTDB
-    `/lists/current`; update currentStreak / bestStreak / lastListLocalDate
-    from `localDate` (list days only — personal-only prayers never extend it);
-    grace: consume banked days for consecutive missed days, break the streak
-    if misses exceed the bank (bank unchanged), and every 7 real list days set
-    graceOfferPending (or the "grace days are full" acknowledgement) unless
-    graceOffersEnabled = false;
-  - on the user's first prayer: set trialStartedAt and the trial entitlement
-    (14 days);
+  - always: on the DailyStats row for the UTC day of the prayer's END
+    (`prayedAt`), increment prayers / prayerSeconds; if `User.lastStatsDate`
+    differs from that day, increment peoplePraying and set lastStatsDate;
+  - if communityList is set: increment that list's prayerCount and
+    prayerSeconds and mirror the count to RTDB `/lists/current`; update
+    currentStreak / bestStreak / lastListLocalDate from `localDate` (list days
+    only — personal-only prayers never extend it). Grace is consumed LAZILY
+    here: missed days since lastListLocalDate ≤ graceDays → consume that many
+    and continue; else reset the streak (bank unchanged). Every 7 real list
+    days set graceOfferPending (or the "grace days are full"
+    acknowledgement) unless graceOffersEnabled = false;
+  - on the user's first prayer: set trialStartedAt, entitlementExpiresAt =
+    +14 days, includeLimit = basePremiumPool;
   - feed last-hour / today counts for `/stats/live`.
 - **answerGraceOffer** (callable, owner) — accept → graceDays + 1 (≤ cap) and
   clear graceOfferPending; decline → clear; "Don't offer again" → also
   graceOffersEnabled = false.
-- **assembleNextList** (ADMIN callable, manual ~6am MT) — one command:
-  1. settle list N: freeze the final RTDB count into `PrayerList.prayerCount`;
+- **closeList** (ADMIN callable) — Eric's skill sets the current list's
+  `closesAt = now + 5 min` shortly before the morning routine (the exact
+  cutoff) and mirrors it to RTDB `/lists/current.closesAt`, so open apps show
+  the banner without re-fetching.
+- **assembleNextList** (ADMIN callable, manual ~6am MT, after closesAt) — one
+  command:
+  1. settle list N: freeze the final RTDB count into `PrayerList.prayerCount`
+     (prayerSeconds is already final from increment-on-write);
   2. ingest the 🙏 harvest as ExternalPerson (SOCIAL) rows;
-  3. create N+1 as draft with `currentFrom = now` (N+1 is current from here);
+  3. create N+1 as draft with `currentFrom = N.closesAt` (N+1 is current from
+     here);
   4. draft N+1 entries with set-based native SQL (`_execute` INSERT … SELECT,
-     names never leave Postgres): users passing the gate (prayed with the
-     list since N's `currentFrom` OR within the last 30h — server param) →
-     self + isCarried, ACTIVE, unresolved items up to the entitlement (free:
-     intentions under Me only; an intention only if its name is carried),
-     with `parentEntry` linking intentions to their name's entry; + social
-     ExternalPersons from the harvest; + active base set (activeUntil null or
-     future). Freeze publicName/kind; source app | social | base_set; exactly
-     one of subject / externalPerson per row;
-  5. auto-flag (moderationStatus held + reasonCategory): profanity/blocklist,
-     phone/email/URL, frequent self-name changes. Not flagged: all-caps,
-     brand-new accounts;
+     names never leave Postgres). GATE — a user qualifies if they have a
+     prayer with (a) `communityList` = N, started before `N.closesAt` and
+     committed before assembly runs, OR (b) the list included and ended
+     (`prayedAt`) within 30h of assembly (server param). Per qualifying user:
+     self + effectively carried, ACTIVE, unresolved items up to the EFFECTIVE
+     entitlement (free: intentions under Me only), with `parentEntry` linking
+     intentions to their name's entry. SOFT LANDING (any entitlement end —
+     trial or lapsed subscription): no active entitlement and the effective
+     carry still over the free limit (= the choice not yet made) → keep
+     carrying the full portion for up to 7 days after entitlementExpiresAt;
+     after that only the self name until they choose. Store billing grace
+     periods count as active, so the 7 days start after them. Plus social ExternalPersons from the
+     harvest and the active base set (activeUntil null or future). Freeze
+     publicName/kind; source APP | SOCIAL | BASE_SET; exactly one of subject /
+     externalPerson per row;
+  5. auto-flag (moderationStatus HELD + reasonCategory): profanity/blocklist
+     → LANGUAGE; phone/email/URL → CONTACT_OR_LINK; frequent self-name changes
+     → NAME_CHANGES. Not flagged: all-caps, brand-new accounts;
   6. update soulCount / intentionCount.
-- **moderateEntry** (ADMIN) — held → approved / excluded, set heldReason +
-  reasonCategory.
+- **moderateEntry** (ADMIN) — HELD → APPROVED / EXCLUDED, set heldReason +
+  reasonCategory (OTHER = "Didn't meet list guidelines").
 - **publishList** (ADMIN) — status draft → published, publishedAt,
   sealVariant (weekday → wax mapping).
 - **publishListVideo** (ADMIN, ~8am) — videoPublishedAt, videoPath (Storage
@@ -262,12 +322,14 @@ and offline-friendly): see onPrayerLogged.
   schedule) — aggregate private `/presence/{uid}/{deviceId}` into public
   `/stats/live` (prayingNow counts people, not devices), republished ≥5s apart.
 - **setEntitlement** (ADMIN) — planTier / includeLimit / entitlementExpiresAt
-  from a verified billing event. Never client-writable.
+  from a verified billing event. Never client-writable. entitlementExpiresAt
+  is written THROUGH any store billing grace period (the entitlement stays
+  active during it), so the soft landing starts only after grace ends.
 - **deleteAccount** (callable, owner) — immediate after one confirmation:
-  strip publicName from the user's past PrayerListEntry rows (owner and
-  subject are SET NULL by the FK when the user and subjects are deleted;
-  counts remain), then delete the User (cascades to subjects, prayers, links,
-  reminders) and the Auth user.
+  delete the user's PrayerListEntry rows, then the User (cascades to
+  subjects, prayers, links, reminders), then the Auth user and RTDB nodes.
+  Stored list counts, prayerSeconds and DailyStats are unaffected
+  (increment-on-write, never recounted).
 
 ### Data & migration (admin scripts, run once / as needed)
 - Backfill lists 1..N + participants from `publishing/lists.json` /
@@ -284,16 +346,17 @@ and offline-friendly): see onPrayerLogged.
 - ANON (metadata only): getCurrentListMeta, getPastLists, post links — counts,
   numbers, seals, video; never names.
 - ADMIN/NO_ACCESS: the full roster (PrayerListEntry beyond the user's own),
-  ExternalPerson, assembly, moderation, publish, entitlement, streak/grace
-  writes, user creation.
+  ExternalPerson, DailyStats, closeList, assembly, moderation, publish,
+  entitlement, streak/grace writes, user creation, self-subject creation
+  (setSelfName), mergeAccounts.
 - Anonymous users get the full OWNER/ANON surface. Use `USER_ANON`, never
   `USER` (which excludes anonymous accounts).
 
 ## Open implementation choices (decide against real query ergonomics)
 - Rule enforcement in connector mutations vs. callables: the pool limit
-  (setCarriedItems, addSubject auto-carry), the ~500 cap, the self-name rate
-  limit, and server-side grapheme caps are awkward in CEL `@check`s. Fallback:
-  make those writes callables using the Admin SDK.
+  (setCarriedItems, addSubject auto-carry — effective carry vs. effective
+  entitlement), the ~500 cap, and server-side grapheme caps are awkward in CEL
+  `@check`s. Fallback: make those writes callables using the Admin SDK.
 - getMySubjects per-row "last prayed": inline nested aggregate vs. a
   companion `_select` keyed by user.
 - Search: `prayerSubjects_search` (full-text over publicName + personalLabel,
