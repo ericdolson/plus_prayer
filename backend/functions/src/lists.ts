@@ -214,9 +214,9 @@ export async function publishList(deps: Deps, listId: string) {
   return { listId, listNumber: res.prayerList.listNumber, sealVariant };
 }
 
-/** schema-brief §9.12: "List 52 is up · 4,345 people, including you." */
+/** schema-brief §10: "List 52 is up · 4,345 people." (one broadcast to all opted-in users) */
 export function listLiveCopy(listNumber: number, people: number): string {
-  return `List ${listNumber} is up · ${people.toLocaleString("en-US")} people, including you.`;
+  return `List ${listNumber} is up · ${people.toLocaleString("en-US")} people.`;
 }
 
 export interface PostLink {

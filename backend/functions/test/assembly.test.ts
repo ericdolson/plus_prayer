@@ -240,6 +240,16 @@ describe("§9 follow-ups: harvest names, the seeded blocklist, the live push", (
     assert.equal(person.display_name, row.public_name);
   });
 
+  it("the bundled seed leaves out words that are also given names", async () => {
+    const deps = makeDeps();
+    const res = await setupAndAssemble(deps, [], [
+      { platform: "youtube", externalId: "n1", displayName: "Dick Smith" },
+      { platform: "youtube", externalId: "n2", displayName: "Regina Mona" },
+      { platform: "youtube", externalId: "n3", displayName: "Anita Concha" },
+    ]);
+    assert.deepEqual((await entries(res.listId)).map((r) => r.moderation_status), ["APPROVED", "APPROVED", "APPROVED"]);
+  });
+
   it("uses the bundled LDNOOBW seed when no editable list is set", async () => {
     const deps = makeDeps(); // deps.live.blocklist is null → bundled seed
     const res = await setupAndAssemble(deps, [], [
@@ -264,7 +274,7 @@ describe("§9 follow-ups: harvest names, the seeded blocklist, the live push", (
     ]);
     await publishList(deps, res.listId);
     await publishListVideo(deps, { listId: res.listId, videoPath: "videos/2.mp4", posts: [] });
-    assert.deepEqual(deps.sent, [{ topic: "list-live", body: "List 2 is up · 3 people, including you." }]);
-    assert.equal(listLiveCopy(52, 4345), "List 52 is up · 4,345 people, including you.");
+    assert.deepEqual(deps.sent, [{ topic: "list-live", body: "List 2 is up · 3 people." }]);
+    assert.equal(listLiveCopy(52, 4345), "List 52 is up · 4,345 people.");
   });
 });

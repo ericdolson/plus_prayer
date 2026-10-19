@@ -59,17 +59,24 @@ function seedDir(): string | null {
   return null;
 }
 
-/** The bundled seed: config/blocklist/ldnoobw/*.txt (CC BY 4.0, see README). */
+const lines = (path: string) =>
+  readFileSync(path, "utf8").split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+
+/**
+ * The bundled seed: config/blocklist/ldnoobw/*.txt (CC BY 4.0, see README),
+ * minus name-exclusions.txt (words that are also given names / nicknames).
+ */
 export function seedBlocklist(): string[] {
   const dir = seedDir();
   if (!dir) return [];
   const src = join(dir, "ldnoobw");
+  const excludeFile = join(dir, "name-exclusions.txt");
+  const excluded = new Set(existsSync(excludeFile) ? lines(excludeFile).map(normalizeTerm) : []);
   return readdirSync(src)
     .filter((f) => f.endsWith(".txt"))
     .sort()
-    .flatMap((f) => readFileSync(join(src, f), "utf8").split(/\r?\n/))
-    .map((l) => l.trim())
-    .filter(Boolean);
+    .flatMap((f) => lines(join(src, f)))
+    .filter((t) => !excluded.has(normalizeTerm(t)));
 }
 
 /** The editable list (RTDB /moderation/blocklist), else the bundled seed. */

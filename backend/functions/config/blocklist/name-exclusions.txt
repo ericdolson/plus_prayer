@@ -1,0 +1,23 @@
+# Terms removed from the LDNOOBW seed because they are also common given
+# names or nicknames (schema-brief §10). Matching is case-insensitive.
+# Surnames that are also slurs are kept (a match only holds for review).
+
+# en
+dick
+lolita
+skeet
+# es — Concha (Concepción)
+concha
+# pt — Amador; Pau (Catalan Paul)
+amador
+pau
+# it
+regina
+mona
+# nl — Griet (Margriet); Del
+anita
+johny
+griet
+del
+# fil
+bobo

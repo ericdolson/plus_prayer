@@ -11,6 +11,11 @@ https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words
 **CC BY 4.0** (`ldnoobw/LICENSE`). Languages: en, es, pt, fr, de, it, nl, pl, ru,
 tr, ar, hi, zh, ja, ko, fil.
 
+**Changes made by +Prayer:** the terms in `name-exclusions.txt` — words that
+are also common given names or nicknames (e.g. "dick", "regina", "anita") —
+are removed from the seed when it is loaded. The upstream files are kept
+unmodified so the change stays auditable.
+
 ## Editing
 The live list is RTDB `/moderation/blocklist` (server-only; no client access).
 `npm run seed:config` writes these seed terms there if the node is empty, and

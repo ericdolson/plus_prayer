@@ -320,7 +320,9 @@ and offline-friendly): see onPrayerLogged.
      "already assembled"). GATE — a user qualifies if they have a
      prayer with (a) `communityList` = N, started before `N.closesAt` and
      committed before assembly runs, OR (b) the list included and ended
-     (`prayedAt`) within 30h of assembly (server param). Per qualifying user:
+     (`prayedAt`) in the 30h before `N.closesAt` (server param). A prayer
+     after the cutoff belongs to N+1 only — one prayer never earns two
+     lists. Per qualifying user:
      self + effectively carried, ACTIVE, unresolved items up to the EFFECTIVE
      entitlement (free: intentions under Me only), with `parentEntry` linking
      intentions to their name's entry. SOFT LANDING (any entitlement end —
@@ -333,7 +335,8 @@ and offline-friendly): see onPrayerLogged.
      publicName/kind; source APP | SOCIAL | BASE_SET; exactly one of subject /
      externalPerson per row;
   5. auto-flag (moderationStatus HELD + reasonCategory): blocklist → LANGUAGE
-     (editable RTDB `/moderation/blocklist`, seeded from LDNOOBW CC BY 4.0 —
+     (editable RTDB `/moderation/blocklist`, seeded from LDNOOBW CC BY 4.0
+     minus words that are also given names / nicknames —
      `functions/config/blocklist`; whole words / phrases, case-insensitive;
      Han/Kana/Hangul/Thai terms of 2+ characters as substrings);
      phone/email/URL → CONTACT_OR_LINK; the self name changed since it was
@@ -352,7 +355,7 @@ and offline-friendly): see onPrayerLogged.
   ritual/CLAUDE.md rotation); recounts APPROVED only.
 - **publishListVideo** (ADMIN, ~8am) — videoPublishedAt, videoPath (Storage
   `videos/…`), PrayerListPost rows; sends the opt-in FCM push "List 52 is up
-  · 4,345 people, including you." (people = the published soulCount) to the
+  · 4,345 people." (people = the published soulCount; one broadcast) to the
   `list-live` topic (the app subscribes/unsubscribes alongside
   User.listLiveOptIn — no device tokens are stored).
 - **autoSavePrayerDrafts** (scheduled) — finalize RTDB drafts idle > 6h as a
