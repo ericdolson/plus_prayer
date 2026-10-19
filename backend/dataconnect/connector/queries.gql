@@ -94,7 +94,9 @@ query GetMyHeader @auth(level: USER_ANON) {
 # Home: the personal list. Answered intentions stay ACTIVE until archived.
 # The client nests intentions under `parent` and orders each level by
 # sortOrder (self pinned top). `lastPrayed` = the user's latest prayer that
-# held this item (filtered by who prayed, never by subject owner).
+# held this item (filtered by who prayed, never by subject owner). Read
+# through the join table: `prayers_via_PrayerSubjectLink(where: { prayer })`
+# compiles but generates invalid SQL in this engine version.
 query GetMySubjects @auth(level: USER_ANON) {
   prayerSubjects(
     where: { owner: { id: { eq_expr: "auth.uid" } }, status: { eq: ACTIVE } }
@@ -114,12 +116,12 @@ query GetMySubjects @auth(level: USER_ANON) {
     resolution
     resolvedAt
     createdAt
-    lastPrayed: prayers_via_PrayerSubjectLink(
+    lastPrayed: prayerSubjectLinks_on_subject(
       where: { prayer: { user: { id: { eq_expr: "auth.uid" } } } }
       orderBy: [{ prayer: { localDate: DESC } }]
       limit: 1
     ) {
-      localDate
+      prayer { localDate }
     }
   }
 }
@@ -268,20 +270,22 @@ query GetSubjectDetail($id: UUID!, $prayerLimit: Int = 500, $prayerOffset: Int =
         prayerCount
       }
     }
-    prayers: prayers_via_PrayerSubjectLink(
+    prayers: prayerSubjectLinks_on_subject(
       where: { prayer: { user: { id: { eq_expr: "auth.uid" } } } }
       orderBy: [{ prayer: { prayedAt: DESC } }]
       limit: $prayerLimit
       offset: $prayerOffset
     ) {
-      id
-      startedAt
-      prayedAt
-      localDate
-      durationSeconds
-      endedBy
-      listContextNumber
-      note
+      prayer {
+        id
+        startedAt
+        prayedAt
+        localDate
+        durationSeconds
+        endedBy
+        listContextNumber
+        note
+      }
     }
   }
 }
