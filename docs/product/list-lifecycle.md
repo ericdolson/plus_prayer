@@ -108,6 +108,19 @@ _Last updated: 2026-10-17_
   the flip time. Praying every other day is not enough. User-facing rule: "Pray
   for the list each day, and you're carried." Same for every tier. Window length
   is a server-side config value (tunable after beta).
+- **Flip warning + exact cutoff** (2026-10-18): Eric's skill sets
+  `PrayerList.closesAt = now + 5 min` shortly before the morning routine. A prayer
+  counts for the closing list if it **started before `closesAt`** and was committed
+  before assembly runs; later arrivals fall to the 30h rule. The next list's
+  `currentFrom = closesAt`. In-app only: a quiet "List 52 closes in 5 minutes"
+  banner (tap to pray) for anyone who hasn't prayed with the list; no push.
+- **Gate qualification (precise):** (a) `communityList` = the closing list
+  (started before `closesAt`) OR (b) the prayer **ended** within 30h of assembly.
+- **Enums:** `source` APP | SOCIAL | BASE_SET; `moderationStatus` APPROVED | HELD |
+  EXCLUDED; `reasonCategory` LANGUAGE | CONTACT_OR_LINK | NAME_CHANGES | OTHER →
+  shown as "Not printed · Language / Contact info or links / Frequent name
+  changes / Didn't meet list guidelines".
+- **Base-set rows** use `platform = "namus"` (platform never null).
 - **Streak and carry align** (2026-10-18, revised same day): the streak counts
   local days prayed with the list, which always satisfies the gate — so keeping
   the streak keeps you carried.

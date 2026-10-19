@@ -55,6 +55,15 @@ its per-assembly outcome recording (§5). Applies to names, intentions, and "Me"
 - Lifetime "carried on N lists" lives on Today's list page; never show a
   list-number sequence beside the streak.
 
+## Anonymous aggregates that survive deletion (2026-10-18)
+- `PrayerList.prayerCount` and **`PrayerList.prayerSeconds`** (time prayed with
+  that list) are **incremented on write** by `onPrayerLogged` and frozen at
+  settle. They are never recomputed from Prayer rows, so an account deleted
+  before or after settle doesn't reduce them.
+- **`DailyStats`** (date, prayers, prayerSeconds, peoplePraying) covers ALL
+  prayers incl. personal; also incremented on write (a scheduled function may
+  finalize/roll the day, but never recounts from rows). No identities.
+
 ## Prayer time (2026-10-18)
 - Each prayer in History shows time + duration ("7:42 am · 12 min"; auto-saved
   shown as "~38 min").

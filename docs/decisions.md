@@ -615,3 +615,17 @@ No private limit on names or intentions. Growth matters most; private names are
 the pipeline for paid carrying, and a private cap would read as charging to
 remember people. Only a ~500-name abuse safety cap exists. Large personal lists
 (e.g. pastors) point to the future group/organization product.
+
+### Decision: Answers to the first backend schema review
+**Timestamp:** 2026-10-18
+Streak fields stored on User (`lastListLocalDate`), prayers dated by local start,
+grace consumed lazily, display computes effective streak. Free = 1; pool = all
+carried beyond self; `basePremiumPool = 10` shared by trial and base tier;
+expired entitlement computed as free with a ≤7-day trial-end soft landing.
+`PrayerList.closesAt` (set ~5 min ahead by Eric, in-app banner, no push) makes the
+cutoff exact: prayers started before it count. Aggregates (`prayerCount`,
+`prayerSeconds`, `DailyStats`) are incremented on write so deletions never reduce
+them; account deletion removes entries. `setSelfName` creates the self subject;
+onboarding resumes by state; `mergeAccounts` offered on link conflicts with a
+duplicates warning. Effective carry = intention && parent; cascades on archive.
+Moderation fields become enums with four user-facing reason categories.

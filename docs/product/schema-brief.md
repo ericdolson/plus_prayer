@@ -1,6 +1,7 @@
 # Schema Brief — handoff for the backend session
 
-_Written 2026-10-18 from the product meetings of 2026-10-17/18._
+_Written 2026-10-18 from the product meetings of 2026-10-17/18. Revised
+2026-10-18 with answers to the backend session's first review (§8)._
 **Audience:** an agent updating `backend/dataconnect/schema/schema.gql`,
 `connector/OPERATIONS.md`, functions, and RTDB rules. Every change below names
 the spec file that justifies it — read that file if a rule is unclear. Exact
@@ -17,19 +18,19 @@ per-operation `@auth`; names are never public.
 ### User — changes
 | Field | Change | Why / spec |
 |---|---|---|
-| `displayName` | keep; mirrors the self-subject's `publicName` (one name field) | auth-onboarding |
+| `displayName` | keep, **nullable** until `setSelfName`; then mirrors the self-subject's `publicName` | auth-onboarding |
 | `locale: String` | ADD — effective UI language (device or override) | screens (Language) |
 | `timezone: String` | ADD — IANA, updated from device | streaks-reminders |
 | `includeLimit: Int` | REDEFINE — size of the carried pool **beyond the self name**. Free = 1, restricted to intentions under the self name ("Me"). Premium = N names/intentions | monetization |
 | `trialStartedAt`, `entitlementExpiresAt: Timestamp` | ADD — 14-day no-card reverse trial, starts at first prayer | monetization |
 | `currentStreak`, `bestStreak` | keep — streak = **local days prayed WITH THE LIST** | streaks-reminders |
-| `lastPrayedListNumber` | REMOVE → `lastListLocalDate: Date` | streaks-reminders |
+| `lastPrayedListNumber` | REMOVE → `lastListLocalDate: Date` (stored; app shows an *effective* streak from stored fields + today) | streaks-reminders |
 | `graceDays: Int` (0–cap), `graceOfferPending: Boolean`, `graceOffersEnabled: Boolean` | ADD | streaks-reminders |
 | `selfNameChangedAt: Timestamp` | ADD — free edits until first printed, then 1 / 7 days | auth-onboarding |
 | `listLiveOptIn: Boolean` (default false), `showNamesInNotifications: Boolean` (default true) | ADD | notifications |
 | `prayerVoice: String`, `prayerVoiceConsentAt: Timestamp` | ADD (nullable seam, unused at MVP) — religion is special-category data | prayer-flow (guided) |
 
-### ReminderPreference — NEW
+### ReminderPreference — NEW (decided: own table, not fields on User)
 `user`, `slot` (MORNING | MIDDAY | EVENING | CUSTOM), `enabled`, `localTime`,
 `label?`. Synced server-side, scheduled on device. Default: Morning on. Custom
 reminders (cap 5–7) are later but the table supports them. — notifications
@@ -49,6 +50,10 @@ reminders (cap 5–7) are later but the table supports them. — notifications
 | `status` | keep ACTIVE \| ARCHIVED \| PURGED. RELEASE also sets ARCHIVED | subjects |
 | `groupId` / `visibility` | **DO NOT ADD** — groups will use a Share table (§4) | roadmap |
 
+Effective carry: an intention is carried only if `isCarried && parent.isCarried`;
+the pool counts effective items. Archive/restore/purge cascade from a name to
+its intentions.
+
 Constraints: self-subject forced ACTIVE, not carried-toggleable, not resolvable.
 Resolved items are never list-eligible. Soft abuse cap ~500 subjects per user
 (server check, not a paywall).
@@ -57,13 +62,19 @@ Resolved items are never list-eligible. Soft abuse cap ~500 subjects per user
 | Field | Change | Why / spec |
 |---|---|---|
 | `scope` enum | ADD, default GLOBAL; uniqueness becomes **(scope, listNumber)** | roadmap (future church lists) |
-| `currentFrom: Timestamp` | ADD — moment this list became current (the flip). Needed by the gate rule "since the last flip" | list-lifecycle |
+| `closesAt: Timestamp` | ADD — set by Eric's skill ~5 min before assembly; the exact cutoff (prayer counts if it **started** before it) | list-lifecycle |
+| `currentFrom: Timestamp` | ADD — = previous list's `closesAt` | list-lifecycle |
+| `prayerSeconds: Int` | ADD — incremented on write, frozen at settle (survives account deletion) | stats-history |
 | `sealVariant: Int` (0–6) | ADD — set at publish from the weekday→wax mapping | list-lifecycle |
 | `videoPath: String` | ADD — Firebase Storage object for the self-hosted video | list-lifecycle |
 | `status`, `publishedAt`, `videoPublishedAt`, counts | keep; `prayerCount` still settles on close | list-lifecycle |
 
+### DailyStats — NEW
+`date`, `prayers`, `prayerSeconds`, `peoplePraying` — all prayers incl.
+personal; incremented on write, never recounted from rows. — stats-history
+
 ### ExternalPerson — NEW
-`source` (SOCIAL | BASE_SET), `platform?`, `externalId` (platform user id or
+`source` (SOCIAL | BASE_SET), `platform` (non-null; base set = "namus"), `externalId` (platform user id or
 NamUs case id), `displayName`, `firstSeen`, `activeFrom?`, `activeUntil?`.
 Unique (source, platform, externalId). Social: public display name + id only.
 Resolved NamUs cases: set `activeUntil` (removed quietly). — list-lifecycle
@@ -75,8 +86,9 @@ Resolved NamUs cases: set `activeUntil` (removed quietly). — list-lifecycle
 | `subject?` / `externalPerson?` | exactly one set (DB check). Unique (list, subject) and (list, externalPerson) |
 | `owner?` | nullable (null for external) |
 | `parentEntry: PrayerListEntry?` | ADD — groups an intention under its name so print honors "your portion" |
-| `source` | app \| social \| base_set |
-| `moderationStatus`, `heldReason` | keep; ADD `reasonCategory` (shown to users as "Not printed · {category}") |
+| `source` | enum APP \| SOCIAL \| BASE_SET |
+| `moderationStatus` | enum APPROVED \| HELD \| EXCLUDED; keep `heldReason` |
+| `reasonCategory` | ADD enum LANGUAGE \| CONTACT_OR_LINK \| NAME_CHANGES \| OTHER |
 | `publicName`, `kind` | keep — frozen snapshots |
 
 This table is also the **bead strand** source (with `PrayerList.sealVariant`).
@@ -139,12 +151,24 @@ separate Entitlement table for family/gift plans, scoped lists.
 | Subject abuse cap | server | ~500 |
 
 ## 6. Functions & operations to add/revise (update OPERATIONS.md)
-- **onAuthUserCreated** — User + self subject ("Me" alias), handle anon linking.
+- **onAuthUserCreated** — User only (nullable displayName). **setSelfName(name)**
+  (idempotent callable) creates the self subject ("Me").
+- **mergeAccounts(anonIdToken)** — called by the signed-in existing user after a
+  credential-in-use conflict; verifies the anon token. One transaction: reassign
+  non-self subjects (sortOrder appended), re-parent the anon self's intentions
+  and re-point its links/entries to the existing self (drop an entry if both
+  selves are on the same list), reassign prayers; recompute streak from merged
+  list days, bestStreak = max, graceDays = max (capped), trialStartedAt =
+  earliest, keep the active entitlement; keep existing reminder prefs; delete
+  anon User + auth user; move RTDB nodes. UI warns duplicates may need cleanup.
 - **logPrayer** (client mutation) — idempotent by client id; writes Prayer + links
-  (intention ⇒ parent link). **onPrayerLogged** — list count, streak (list days
-  only), grace earning/use/offers, trial start on first prayer.
+  (intention ⇒ parent link). **onPrayerLogged** — increments list `prayerCount`/
+  `prayerSeconds` and `DailyStats`; streak (list days only, lazy grace use), grace
+  offers, trial start on first prayer.
 - **assembleNextList** (admin) — settle N; set N+1 `currentFrom`; gate =
-  prayed with list since last flip OR within 30h; per user: self + carried,
+  prayed with list — (a) `communityList` = closing list (started before
+  `closesAt`) and committed before assembly, OR (b) ended within 30h; effective
+  entitlement (expired ⇒ free; trial-end soft landing ≤7 days); per user: self + carried,
   ACTIVE, unresolved items up to entitlement (free: intentions under Me only;
   intention requires its name carried); + social ExternalPersons from harvest +
   active base set; freeze names; auto-flag (profanity/blocklist, phone/email/URL,
@@ -153,8 +177,9 @@ separate Entitlement table for family/gift plans, scoped lists.
 - **presencePublisher** + reconcile.
 - **publishList / publishListVideo** (admin) — status, `videoPublishedAt`,
   `videoPath`, `sealVariant`, post rows.
-- **moderateEntry**, **setEntitlement** (admin); **deleteAccount** (strip
-  names/owner from past entries, keep counts).
+- **moderateEntry**, **setEntitlement** (admin); **deleteAccount** (delete the
+  user's PrayerListEntry rows and personal data; stored list counts,
+  `prayerSeconds` and `DailyStats` are unaffected).
 - Client ops: subject CRUD incl. `parent`, `isCarried` (blocked over limit),
   reorder, resolve (Answered/Release), archive/restore/purge, self-name edit
   (rate-limited), reminder/notification prefs, detail-page query (subject +
@@ -167,3 +192,16 @@ separate Entitlement table for family/gift plans, scoped lists.
 - Import NamUs base set as ExternalPerson (BASE_SET).
 - Harvest/publish skills cut over to admin functions **before launch**.
 - Existing deployed data: none yet — schema can change freely.
+
+## 8. Answers to the first backend review (2026-10-18)
+1. Field name: `lastListLocalDate`. 2. A prayer counts for the local date of its
+**start**. 3. Streak fields stored; the app displays an effective streak; grace
+consumed lazily at the next list prayer. 4. Free = 1 (an intention under Me).
+5. Reminders in their own table. 6. Pool = everything beyond the self name;
+`basePremiumPool = 10` for both trial and base tier; expired entitlement is
+computed as free; trial-end soft landing ≤7 days. 7. Account deletion deletes
+entries; aggregates are increment-on-write (`prayerCount`, `prayerSeconds`,
+`DailyStats`) and never recounted. 8. `setSelfName` creates the self;
+state-based onboarding resume; `mergeAccounts`. 9. `platform = "namus"`.
+10. Gate per §6 using `closesAt`. 11. "First printed" = first APPROVED entry on a
+PUBLISHED list. 12. Effective carry + cascade. 13. Enums as listed.

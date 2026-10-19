@@ -49,6 +49,21 @@ _Last updated: 2026-10-17_
   app's greeting (first word). Maps to the self-subject's `publicName`;
   `User.displayName` mirrors it.
 
+- **Self subject creation** (2026-10-18): `onAuthUserCreated` creates the User
+  only (nullable `displayName`); an idempotent server callable `setSelfName(name)`
+  creates the self subject ("Me"). Onboarding requires it before the main screen.
+- **Onboarding resume is state-based:** User without a self name → "What's your
+  name?"; name exists → main screen ("Who else" was optional; ＋ covers it).
+- **First launch offline:** a quiet "Connect to begin" screen (anon sign-in needs
+  network); offline works after that.
+- **Fresh install, existing account signs in:** skip onboarding, load their list.
+- **Linking conflict** (anon → Google/Apple account that already has data): if
+  the anonymous account is empty, switch silently; if both have data, offer
+  [Use my existing account] or [Merge both] with a warning that duplicates may
+  need cleanup. Merge = server `mergeAccounts` (see schema-brief §6).
+- **First printed** (for the self-name edit limit) = first entry APPROVED on a
+  PUBLISHED list.
+
 ## OPEN
 - Greeting edge cases when the first word isn't a first name ("Mr. Smith") —
   minor; fall back to no name in the greeting.

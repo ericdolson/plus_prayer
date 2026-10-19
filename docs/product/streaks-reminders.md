@@ -22,10 +22,17 @@ _Last updated: 2026-10-17_
   marks in the streak sheet and a gentle count — "Days in prayer this month: 26"
   (a count, not a second streak: no run, no grace, no milestones). They count
   everywhere else (History, detail pages, prayer time).
-- **Local day:** each Prayer stores the device's local calendar date at
-  completion (`Prayer.localDate: Date!`, offline-safe); `User.timezone` (IANA)
-  updated from the device; `User.lastPrayedLocalDate` replaces
-  `lastPrayedListNumber`. Server computes the streak from `localDate`.
+- **Local day:** each Prayer stores the device's local calendar date at the
+  **start** of the prayer (`Prayer.localDate: Date!`, offline-safe; 11:58pm–12:03am
+  counts for the earlier day); `User.timezone` (IANA) updated from the device;
+  `User.lastListLocalDate` (last local day prayed with the list) replaces
+  `lastPrayedListNumber`.
+- **Stored, displayed live** (2026-10-18): `currentStreak`/`bestStreak`/
+  `lastListLocalDate`/`graceDays` are stored on User and updated by
+  `onPrayerLogged`. Grace is consumed lazily at the next list prayer (missed days
+  ≤ graceDays → consume; else reset). Between prayers the app computes the
+  *effective* streak from the stored fields + today's date, so missed days show
+  correctly before the next write.
   Travel: use the device's current zone; accept a skipped/doubled day, no penalty.
 - **Grace days — offered, accepted, banked** (2026-10-18, SUPERSEDES the
   same-day "max one, auto, strict setting" version):
@@ -47,7 +54,7 @@ _Last updated: 2026-10-17_
   - An unanswered offer stays pending until answered; offers don't stack.
   - Never sold; same for every tier.
   - Schema: `User.graceDays` (0–cap), `graceOfferPending`, `graceOffersEnabled`.
-    Streak is derived on read from `localDate` with the same rules.
+    Display applies the same rules to the stored fields (see "Stored, displayed live").
 - **Last call:** local notification ~8pm, only if not prayed today, plain wording
   ("A moment for prayer before the day ends.").
 - **Milestones:** 7, 30, 100, 365 days — one plain line each, no confetti.

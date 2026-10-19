@@ -11,7 +11,18 @@ _Last updated: 2026-10-17_
 - **Engagement gate applies to all tiers.** Paid users must pray the list like
   everyone else; no convenience bypass.
 - **`includeLimit`** stored as a concrete number on User (supports one-off
-  grants), server-written only on billing events. Free = 0.
+  grants), server-written only on billing events. **Free = 1** (an intention
+  under "Me"). The **pool** = everything carried beyond the user's own name; each
+  extra name and each intention counts as one.
+- **`basePremiumPool = 10`** (2026-10-18, server config): the reverse trial grants
+  exactly the base subscription's pool, so subscribing changes nothing. One
+  value drives both; tune before launch.
+- **Effective entitlement is computed:** expired entitlement + no active
+  subscription ⇒ free limit (no scheduled job).
+- **Trial-end soft landing:** assembly keeps carrying the full trial portion
+  until the user completes the trial-end choice, up to 7 days; after that only
+  the self name until they choose. Portion screen shows "Waiting for your choice".
+  Never a silent drop.
 - **Quality bar:** very premium-feeling app, accessibly priced.
 
 - **Free tier = you + one intention of your own** (2026-10-17, "option C").

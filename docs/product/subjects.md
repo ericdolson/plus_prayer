@@ -56,6 +56,11 @@ _Last updated: 2026-10-17_
   only when the number is meaningful (PROPOSED: a cumulative running total,
   e.g. "312 intentions answered", which only grows; per-list numbers only above
   a threshold). Mention in privacy terms.
+- **Name ↔ intention carrying** (2026-10-18): an intention is *effectively*
+  carried only when `intention.isCarried && parent.isCarried`. Uncarrying a name
+  leaves its intentions' own flags intact; re-carrying the name brings them back
+  (over-limit flow if needed). The pool counts only effectively carried items.
+- **Cascade:** archive / restore / purge on a name applies to its intentions.
 - **Selection rules in prayer** (2026-10-17): checking an intention also holds
   its name (both linked → counts toward the name); checking a name does not
   auto-check its intentions; unchecking a name unchecks its intentions; a name

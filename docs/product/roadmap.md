@@ -19,7 +19,7 @@ Stage 1 is a private beta that tests whether the app is the right mechanism.
 - [ ] Replace `answeredAt` with `resolvedAt` + `resolution` (ANSWERED | RELEASED)
 - [ ] `personalLabel` surfaced as "alias"; self alias = "Me"
 - [ ] `Prayer.localDate: Date!`
-- [ ] `User.timezone`, `lastPrayedLocalDate` (replaces `lastPrayedListNumber`)
+- [ ] `User.timezone`, `lastListLocalDate` (replaces `lastPrayedListNumber`)
 - [ ] `User.graceDays`, `graceOfferPending`, `graceOffersEnabled`
 - [ ] `User.selfNameChangedAt`
 - [ ] Entitlement: `includeLimit` = pool beyond self name; free = 1 (own intention only);
@@ -28,7 +28,9 @@ Stage 1 is a private beta that tests whether the app is the right mechanism.
 - [ ] `User.locale`
 - [ ] `Prayer.endedBy` (AMEN | AUTO)
 - [ ] Seams: `Prayer.mode` (MANUAL | GUIDED), `User.prayerVoice` (consent-gated)
-- [ ] Reminder prefs on User (presets + times + tz); grace offer fields
+- [ ] `ReminderPreference` table (presets + custom later); grace offer fields
+- [ ] `PrayerList.closesAt`, `prayerSeconds`; `DailyStats` table
+- [ ] `setSelfName` callable; `mergeAccounts` function
 - [ ] `ExternalPerson` table (SOCIAL | BASE_SET, platform/handle or NamUs ID,
       displayName, firstSeen, activeFrom/Until)
 - [ ] `PrayerListEntry`: surrogate id; subject XOR externalPerson (DB check);
