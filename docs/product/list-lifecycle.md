@@ -119,8 +119,12 @@ _Last updated: 2026-10-17_
   closesAt`); prayers started after the cutoff count toward N+1.
 - Social display names are truncated to 40 graphemes on ingest. Blocklist is
   seeded from an open multilingual list (editable config) + contact/link patterns.
-- **Gate qualification (precise):** (a) `communityList` = the closing list
-  (started before `closesAt`) OR (b) the prayer **ended** within 30h of assembly.
+- **Gate qualification (precise, revised 2026-10-18):** only prayers that
+  **started before `closesAt`** count for the closing list's assembly: (a)
+  `communityList` = the closing list, OR (b) a list prayer that ended within the
+  30h before `closesAt`. Prayers after the cutoff belong to N+1 only — one prayer
+  can never earn two lists. No extra step for Eric: setting `closesAt` (which
+  also creates the N+1 row) and running assembly are the existing routine.
 - **Enums:** `source` APP | SOCIAL | BASE_SET; `moderationStatus` APPROVED | HELD |
   EXCLUDED; `reasonCategory` LANGUAGE | CONTACT_OR_LINK | NAME_CHANGES | OTHER →
   shown as "Not printed · Language / Contact info or links / Frequent name

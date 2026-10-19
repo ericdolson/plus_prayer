@@ -649,3 +649,10 @@ Released intention reopens it. Social names truncated to 40 graphemes; blocklist
 seeded from an open multilingual list. Moderation exclusions enforced in
 server operations. "List is live" push: "List 52 is up · 4,345 people,
 including you."
+
+### Decision: Gate counts only prayers started before the cutoff
+**Timestamp:** 2026-10-18 (refines the "since last flip OR within ~30h" gate)
+The 30h window is bounded to before `closesAt`, so a prayer after the cutoff
+counts only for N+1 and can't earn two lists. "List is live" push drops
+"including you" because it is a broadcast. Name-like words removed from the
+blocklist seed.

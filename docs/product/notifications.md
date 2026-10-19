@@ -21,7 +21,9 @@ _Last updated: 2026-10-17_
   with the list → "Today's list is still open. Hold them with you before the day
   ends." A prayer with the list cancels today's local last call (works offline).
 - Skip "You were carried on List N" push — shown in-app.
-- "List is live" copy (2026-10-18): "List 52 is up · 4,345 people, including you."
+- "List is live" copy (2026-10-18, revised): "List 52 is up · 4,345 people."
+  It's one broadcast to all opted-in users, so it can't say "including you";
+  the app shows the personal line when opened.
 
 ## Notification content & privacy (2026-10-18)
 - **Names and aliases are allowed** in notifications by default ("Today's list ·

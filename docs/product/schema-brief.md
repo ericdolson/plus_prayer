@@ -257,3 +257,14 @@ server functions (addSubject, updateSubject, setCarriedItems), `Prayer.countedAt
     counts approved only. **Bead strand / world-count operations return only
     APPROVED entries (server-side), not an app-side filter.**
 15. Draft fields added to §3.
+
+## 10. Follow-ups (2026-10-18)
+- Gate window bound: rule (b) counts only list prayers that ended in the 30h
+  **before `closesAt`**; anything started after `closesAt` belongs to N+1 only
+  (fixes one prayer earning two lists).
+- `avatarTone` 0–15 placeholder approved. Streak repair: never lowers the stored
+  streak, doesn't re-spend grace, doesn't trigger offers — approved.
+- Blocklist: remove words that are also common given names/nicknames (e.g.
+  "dick", "fanny", "willy") from the seed; keep CJK single-character
+  whole-word matching.
+- Push copy: "List 52 is up · 4,345 people." (broadcast — no "including you").
