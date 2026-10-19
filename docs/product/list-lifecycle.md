@@ -95,12 +95,11 @@ _Last updated: 2026-10-17_
   4. ~8:00 **Publish:** existing skill also sets videoPublishedAt, post links,
      sealVariant, and uploads the video.
 - **Auto-flag rules** (apply to app names/intentions and social names):
-  profanity/blocklist; phone numbers, emails, URLs; frequent self-name changes.
-  NOT flagged: all-caps (list is private), brand-new accounts. At scale, rely on
-  auto-exclusion of clear violations rather than reading everything.
-- **Users are told:** held items show "Held for review" on the portion screen;
-  excluded items show "Not printed" with a short reason category. Never silent.
-
+  (superseded for the beta — see "Moderation for MVP / beta": contact info is
+  blocked at input; word blocklist off until Stage 2.)
+- **Users are told only about exclusions** (revised 2026-10-18, see "Moderation
+  for MVP / beta"): never a pending state; an EXCLUDED item shows "Not printed
+  on List N · {category}" after assembly.
 - **List gate** (2026-10-18; replaces the seed's 48h window proposal): at
   assembly, a user (and their carried items) is included if they prayed with the
   list included **since the last flip, OR within the last ~30 hours**. The first

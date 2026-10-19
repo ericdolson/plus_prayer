@@ -87,7 +87,7 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
 - [ ] [app] Add name (40) / add intention (80, "For: Me" default); aliases;
       archive / restore / purge; resolve: Answered vs Release
 - [ ] [app] "Your portion" screen: preview, carried meter, include/remove,
-      Held for review / Not printed states
+      "Not printed" state (exclusions only; no pending state); contact-info input block
 - [ ] [app] Subject detail: lists it's been on, world count (live stitch), my
       history, gaps in days
 - [ ] [app] List detail: full-bleed self-hosted video, "being filmed" state
