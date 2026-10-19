@@ -22,8 +22,6 @@ class GetMyListStatusMyEntries {
   final String id;
   final EnumValue<SubjectKind> kind;
   final String publicName;
-  final EnumValue<ModerationStatus> moderationStatus;
-  final EnumValue<ReasonCategory>? reasonCategory;
   final GetMyListStatusMyEntriesParentEntry? parentEntry;
   final GetMyListStatusMyEntriesSubject? subject;
   GetMyListStatusMyEntries.fromJson(dynamic json):
@@ -31,8 +29,6 @@ class GetMyListStatusMyEntries {
   id = nativeFromJson<String>(json['id']),
   kind = subjectKindDeserializer(json['kind']),
   publicName = nativeFromJson<String>(json['publicName']),
-  moderationStatus = moderationStatusDeserializer(json['moderationStatus']),
-  reasonCategory = json['reasonCategory'] == null ? null : reasonCategoryDeserializer(json['reasonCategory']),
   parentEntry = json['parentEntry'] == null ? null : GetMyListStatusMyEntriesParentEntry.fromJson(json['parentEntry']),
   subject = json['subject'] == null ? null : GetMyListStatusMyEntriesSubject.fromJson(json['subject']);
   @override
@@ -48,14 +44,12 @@ class GetMyListStatusMyEntries {
     return id == otherTyped.id && 
     kind == otherTyped.kind && 
     publicName == otherTyped.publicName && 
-    moderationStatus == otherTyped.moderationStatus && 
-    reasonCategory == otherTyped.reasonCategory && 
     parentEntry == otherTyped.parentEntry && 
     subject == otherTyped.subject;
     
   }
   @override
-  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, publicName.hashCode, moderationStatus.hashCode, reasonCategory.hashCode, parentEntry.hashCode, subject.hashCode]);
+  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, publicName.hashCode, parentEntry.hashCode, subject.hashCode]);
   
 
   Map<String, dynamic> toJson() {
@@ -65,14 +59,6 @@ class GetMyListStatusMyEntries {
     subjectKindSerializer(kind)
     ;
     json['publicName'] = nativeToJson<String>(publicName);
-    json['moderationStatus'] = 
-    moderationStatusSerializer(moderationStatus)
-    ;
-    if (reasonCategory != null) {
-      json['reasonCategory'] = 
-    reasonCategorySerializer(reasonCategory!)
-    ;
-    }
     if (parentEntry != null) {
       json['parentEntry'] = parentEntry!.toJson();
     }
@@ -86,8 +72,6 @@ class GetMyListStatusMyEntries {
     required this.id,
     required this.kind,
     required this.publicName,
-    required this.moderationStatus,
-    this.reasonCategory,
     this.parentEntry,
     this.subject,
   });
@@ -167,6 +151,102 @@ class GetMyListStatusMyEntriesSubject {
 }
 
 @immutable
+class GetMyListStatusNotPrinted {
+  final String id;
+  final EnumValue<SubjectKind> kind;
+  final String publicName;
+  final EnumValue<ReasonCategory>? reasonCategory;
+  final GetMyListStatusNotPrintedSubject? subject;
+  GetMyListStatusNotPrinted.fromJson(dynamic json):
+  
+  id = nativeFromJson<String>(json['id']),
+  kind = subjectKindDeserializer(json['kind']),
+  publicName = nativeFromJson<String>(json['publicName']),
+  reasonCategory = json['reasonCategory'] == null ? null : reasonCategoryDeserializer(json['reasonCategory']),
+  subject = json['subject'] == null ? null : GetMyListStatusNotPrintedSubject.fromJson(json['subject']);
+  @override
+  bool operator ==(Object other) {
+    if(identical(this, other)) {
+      return true;
+    }
+    if(other.runtimeType != runtimeType) {
+      return false;
+    }
+
+    final GetMyListStatusNotPrinted otherTyped = other as GetMyListStatusNotPrinted;
+    return id == otherTyped.id && 
+    kind == otherTyped.kind && 
+    publicName == otherTyped.publicName && 
+    reasonCategory == otherTyped.reasonCategory && 
+    subject == otherTyped.subject;
+    
+  }
+  @override
+  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, publicName.hashCode, reasonCategory.hashCode, subject.hashCode]);
+  
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> json = {};
+    json['id'] = nativeToJson<String>(id);
+    json['kind'] = 
+    subjectKindSerializer(kind)
+    ;
+    json['publicName'] = nativeToJson<String>(publicName);
+    if (reasonCategory != null) {
+      json['reasonCategory'] = 
+    reasonCategorySerializer(reasonCategory!)
+    ;
+    }
+    if (subject != null) {
+      json['subject'] = subject!.toJson();
+    }
+    return json;
+  }
+
+  GetMyListStatusNotPrinted({
+    required this.id,
+    required this.kind,
+    required this.publicName,
+    this.reasonCategory,
+    this.subject,
+  });
+}
+
+@immutable
+class GetMyListStatusNotPrintedSubject {
+  final String id;
+  GetMyListStatusNotPrintedSubject.fromJson(dynamic json):
+  
+  id = nativeFromJson<String>(json['id']);
+  @override
+  bool operator ==(Object other) {
+    if(identical(this, other)) {
+      return true;
+    }
+    if(other.runtimeType != runtimeType) {
+      return false;
+    }
+
+    final GetMyListStatusNotPrintedSubject otherTyped = other as GetMyListStatusNotPrintedSubject;
+    return id == otherTyped.id;
+    
+  }
+  @override
+  int get hashCode => id.hashCode;
+  
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> json = {};
+    json['id'] = nativeToJson<String>(id);
+    return json;
+  }
+
+  GetMyListStatusNotPrintedSubject({
+    required this.id,
+  });
+}
+
+@immutable
 class GetMyListStatusMyPrayersWithList {
   final int count_;
   GetMyListStatusMyPrayersWithList.fromJson(dynamic json):
@@ -237,12 +317,16 @@ class GetMyListStatusCarriedLists {
 @immutable
 class GetMyListStatusData {
   final List<GetMyListStatusMyEntries> myEntries;
+  final List<GetMyListStatusNotPrinted> notPrinted;
   final List<GetMyListStatusMyPrayersWithList> myPrayersWithList;
   final List<GetMyListStatusCarriedLists> carriedLists;
   GetMyListStatusData.fromJson(dynamic json):
   
   myEntries = (json['myEntries'] as List<dynamic>)
         .map((e) => GetMyListStatusMyEntries.fromJson(e))
+        .toList(),
+  notPrinted = (json['notPrinted'] as List<dynamic>)
+        .map((e) => GetMyListStatusNotPrinted.fromJson(e))
         .toList(),
   myPrayersWithList = (json['myPrayersWithList'] as List<dynamic>)
         .map((e) => GetMyListStatusMyPrayersWithList.fromJson(e))
@@ -261,17 +345,19 @@ class GetMyListStatusData {
 
     final GetMyListStatusData otherTyped = other as GetMyListStatusData;
     return myEntries == otherTyped.myEntries && 
+    notPrinted == otherTyped.notPrinted && 
     myPrayersWithList == otherTyped.myPrayersWithList && 
     carriedLists == otherTyped.carriedLists;
     
   }
   @override
-  int get hashCode => Object.hashAll([myEntries.hashCode, myPrayersWithList.hashCode, carriedLists.hashCode]);
+  int get hashCode => Object.hashAll([myEntries.hashCode, notPrinted.hashCode, myPrayersWithList.hashCode, carriedLists.hashCode]);
   
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
     json['myEntries'] = myEntries.map((e) => e.toJson()).toList();
+    json['notPrinted'] = notPrinted.map((e) => e.toJson()).toList();
     json['myPrayersWithList'] = myPrayersWithList.map((e) => e.toJson()).toList();
     json['carriedLists'] = carriedLists.map((e) => e.toJson()).toList();
     return json;
@@ -279,6 +365,7 @@ class GetMyListStatusData {
 
   GetMyListStatusData({
     required this.myEntries,
+    required this.notPrinted,
     required this.myPrayersWithList,
     required this.carriedLists,
   });

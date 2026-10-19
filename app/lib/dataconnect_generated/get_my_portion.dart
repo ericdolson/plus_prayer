@@ -192,17 +192,15 @@ class GetMyPortionItemsParent {
 }
 
 @immutable
-class GetMyPortionEntries {
+class GetMyPortionNotPrinted {
   final String id;
-  final EnumValue<ModerationStatus> moderationStatus;
   final EnumValue<ReasonCategory>? reasonCategory;
-  final GetMyPortionEntriesSubject? subject;
-  GetMyPortionEntries.fromJson(dynamic json):
+  final GetMyPortionNotPrintedSubject? subject;
+  GetMyPortionNotPrinted.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']),
-  moderationStatus = moderationStatusDeserializer(json['moderationStatus']),
   reasonCategory = json['reasonCategory'] == null ? null : reasonCategoryDeserializer(json['reasonCategory']),
-  subject = json['subject'] == null ? null : GetMyPortionEntriesSubject.fromJson(json['subject']);
+  subject = json['subject'] == null ? null : GetMyPortionNotPrintedSubject.fromJson(json['subject']);
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -212,23 +210,19 @@ class GetMyPortionEntries {
       return false;
     }
 
-    final GetMyPortionEntries otherTyped = other as GetMyPortionEntries;
+    final GetMyPortionNotPrinted otherTyped = other as GetMyPortionNotPrinted;
     return id == otherTyped.id && 
-    moderationStatus == otherTyped.moderationStatus && 
     reasonCategory == otherTyped.reasonCategory && 
     subject == otherTyped.subject;
     
   }
   @override
-  int get hashCode => Object.hashAll([id.hashCode, moderationStatus.hashCode, reasonCategory.hashCode, subject.hashCode]);
+  int get hashCode => Object.hashAll([id.hashCode, reasonCategory.hashCode, subject.hashCode]);
   
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
     json['id'] = nativeToJson<String>(id);
-    json['moderationStatus'] = 
-    moderationStatusSerializer(moderationStatus)
-    ;
     if (reasonCategory != null) {
       json['reasonCategory'] = 
     reasonCategorySerializer(reasonCategory!)
@@ -240,18 +234,17 @@ class GetMyPortionEntries {
     return json;
   }
 
-  GetMyPortionEntries({
+  GetMyPortionNotPrinted({
     required this.id,
-    required this.moderationStatus,
     this.reasonCategory,
     this.subject,
   });
 }
 
 @immutable
-class GetMyPortionEntriesSubject {
+class GetMyPortionNotPrintedSubject {
   final String id;
-  GetMyPortionEntriesSubject.fromJson(dynamic json):
+  GetMyPortionNotPrintedSubject.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']);
   @override
@@ -263,7 +256,7 @@ class GetMyPortionEntriesSubject {
       return false;
     }
 
-    final GetMyPortionEntriesSubject otherTyped = other as GetMyPortionEntriesSubject;
+    final GetMyPortionNotPrintedSubject otherTyped = other as GetMyPortionNotPrintedSubject;
     return id == otherTyped.id;
     
   }
@@ -277,7 +270,7 @@ class GetMyPortionEntriesSubject {
     return json;
   }
 
-  GetMyPortionEntriesSubject({
+  GetMyPortionNotPrintedSubject({
     required this.id,
   });
 }
@@ -286,15 +279,15 @@ class GetMyPortionEntriesSubject {
 class GetMyPortionData {
   final GetMyPortionUser? user;
   final List<GetMyPortionItems> items;
-  final List<GetMyPortionEntries> entries;
+  final List<GetMyPortionNotPrinted> notPrinted;
   GetMyPortionData.fromJson(dynamic json):
   
   user = json['user'] == null ? null : GetMyPortionUser.fromJson(json['user']),
   items = (json['items'] as List<dynamic>)
         .map((e) => GetMyPortionItems.fromJson(e))
         .toList(),
-  entries = (json['entries'] as List<dynamic>)
-        .map((e) => GetMyPortionEntries.fromJson(e))
+  notPrinted = (json['notPrinted'] as List<dynamic>)
+        .map((e) => GetMyPortionNotPrinted.fromJson(e))
         .toList();
   @override
   bool operator ==(Object other) {
@@ -308,11 +301,11 @@ class GetMyPortionData {
     final GetMyPortionData otherTyped = other as GetMyPortionData;
     return user == otherTyped.user && 
     items == otherTyped.items && 
-    entries == otherTyped.entries;
+    notPrinted == otherTyped.notPrinted;
     
   }
   @override
-  int get hashCode => Object.hashAll([user.hashCode, items.hashCode, entries.hashCode]);
+  int get hashCode => Object.hashAll([user.hashCode, items.hashCode, notPrinted.hashCode]);
   
 
   Map<String, dynamic> toJson() {
@@ -321,14 +314,14 @@ class GetMyPortionData {
       json['user'] = user!.toJson();
     }
     json['items'] = items.map((e) => e.toJson()).toList();
-    json['entries'] = entries.map((e) => e.toJson()).toList();
+    json['notPrinted'] = notPrinted.map((e) => e.toJson()).toList();
     return json;
   }
 
   GetMyPortionData({
     this.user,
     required this.items,
-    required this.entries,
+    required this.notPrinted,
   });
 }
 

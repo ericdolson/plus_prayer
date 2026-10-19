@@ -60,37 +60,6 @@ part 'get_my_reminders.dart';
 
 
 
-  enum ModerationStatus {
-    
-      APPROVED,
-    
-      HELD,
-    
-      EXCLUDED,
-    
-  }
-  
-  String moderationStatusSerializer(EnumValue<ModerationStatus> e) {
-    return e.stringValue;
-  }
-  EnumValue<ModerationStatus> moderationStatusDeserializer(dynamic data) {
-    switch (data) {
-      
-      case 'APPROVED':
-        return const Known(ModerationStatus.APPROVED);
-      
-      case 'HELD':
-        return const Known(ModerationStatus.HELD);
-      
-      case 'EXCLUDED':
-        return const Known(ModerationStatus.EXCLUDED);
-      
-      default:
-        return Unknown(data);
-    }
-  }
-  
-
   enum PrayerEndedBy {
     
       AMEN,

@@ -298,12 +298,10 @@ class GetSubjectDetailPrayerSubjectsIntentions {
 @immutable
 class GetSubjectDetailPrayerSubjectsEntries {
   final String id;
-  final EnumValue<ModerationStatus> moderationStatus;
   final GetSubjectDetailPrayerSubjectsEntriesList list;
   GetSubjectDetailPrayerSubjectsEntries.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']),
-  moderationStatus = moderationStatusDeserializer(json['moderationStatus']),
   list = GetSubjectDetailPrayerSubjectsEntriesList.fromJson(json['list']);
   @override
   bool operator ==(Object other) {
@@ -316,27 +314,22 @@ class GetSubjectDetailPrayerSubjectsEntries {
 
     final GetSubjectDetailPrayerSubjectsEntries otherTyped = other as GetSubjectDetailPrayerSubjectsEntries;
     return id == otherTyped.id && 
-    moderationStatus == otherTyped.moderationStatus && 
     list == otherTyped.list;
     
   }
   @override
-  int get hashCode => Object.hashAll([id.hashCode, moderationStatus.hashCode, list.hashCode]);
+  int get hashCode => Object.hashAll([id.hashCode, list.hashCode]);
   
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
     json['id'] = nativeToJson<String>(id);
-    json['moderationStatus'] = 
-    moderationStatusSerializer(moderationStatus)
-    ;
     json['list'] = list.toJson();
     return json;
   }
 
   GetSubjectDetailPrayerSubjectsEntries({
     required this.id,
-    required this.moderationStatus,
     required this.list,
   });
 }
