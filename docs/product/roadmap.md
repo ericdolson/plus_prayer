@@ -13,29 +13,30 @@ Stage 1 is a private beta that tests whether the app is the right mechanism.
 ## Stage 0 — Foundations
 
 ### Schema changes (`schema.gql`) [be]
-- [ ] `PrayerSubject.parent` (nullable self-ref; required when kind = INTENTION; one level)
-- [ ] `PrayerSubject.isCarried` (user-chosen; auto-set while pool has room)
-- [ ] `PrayerSubject.avatarTone: Int` (palette index), `avatarPath: String` (photo seam)
-- [ ] Replace `answeredAt` with `resolvedAt` + `resolution` (ANSWERED | RELEASED)
-- [ ] `personalLabel` surfaced as "alias"; self alias = "Me"
-- [ ] `Prayer.localDate: Date!`
-- [ ] `User.timezone`, `lastListLocalDate` (replaces `lastPrayedListNumber`)
-- [ ] `User.graceDays`, `graceOfferPending`, `graceOffersEnabled`
-- [ ] `User.selfNameChangedAt`
-- [ ] Entitlement: `includeLimit` = pool beyond self name; free = 1 (own intention only);
+- [x] `PrayerSubject.parent` (nullable self-ref; required when kind = INTENTION; one level)
+- [x] `PrayerSubject.isCarried` (user-chosen; auto-set while pool has room)
+- [x] `PrayerSubject.avatarTone: Int` (palette index), `avatarPath: String` (photo seam)
+- [x] Replace `answeredAt` with `resolvedAt` + `resolution` (ANSWERED | RELEASED)
+- [x] `personalLabel` surfaced as "alias"; self alias = "Me"
+- [x] `Prayer.localDate: Date!`
+- [x] `User.timezone`, `lastListLocalDate` (replaces `lastPrayedListNumber`)
+- [x] `User.graceDays`, `graceOfferPending`, `graceOffersEnabled`
+- [x] `User.selfNameChangedAt`
+- [x] Entitlement: `includeLimit` = pool beyond self name; free = 1 (own intention only);
       add `entitlementExpiresAt` + `trialStartedAt` for the reverse trial
-- [ ] `PrayerList.sealVariant: Int`; `PrayerList.scope` (default GLOBAL), unique (scope, listNumber)
-- [ ] `User.locale`
-- [ ] `Prayer.endedBy` (AMEN | AUTO)
-- [ ] Seams: `Prayer.mode` (MANUAL | GUIDED), `User.prayerVoice` (consent-gated)
-- [ ] `ReminderPreference` table (presets + custom later); grace offer fields
-- [ ] `PrayerList.closesAt`, `prayerSeconds`; `DailyStats` table
-- [ ] `setSelfName` callable; `mergeAccounts` function
-- [ ] `ExternalPerson` table (SOCIAL | BASE_SET, platform/handle or NamUs ID,
+- [x] `PrayerList.sealVariant: Int`; `PrayerList.scope` (default GLOBAL), unique (scope, listNumber)
+- [x] `User.locale`
+- [x] `Prayer.endedBy` (AMEN | AUTO)
+- [x] Seams: `Prayer.mode` (MANUAL | GUIDED), `User.prayerVoice` (consent-gated)
+- [x] `ReminderPreference` table (presets + custom later); grace offer fields
+- [x] `PrayerList.closesAt`, `prayerSeconds`; `DailyStats` table
+- [x] `setSelfName` callable; `mergeAccounts` function
+- [x] `ExternalPerson` table (SOCIAL | BASE_SET, platform/handle or NamUs ID,
       displayName, firstSeen, activeFrom/Until)
-- [ ] `PrayerListEntry`: surrogate id; subject XOR externalPerson (DB check);
+- [x] `PrayerListEntry`: surrogate id; subject XOR externalPerson (DB check);
       moderation reason category
-- [ ] Update `OPERATIONS.md` + connector `.gql` with @auth for all of the above
+- [x] Update `OPERATIONS.md` (operation map)
+- [ ] Write connector `.gql` operations with @auth + generate the Dart SDK
 
 ### Functions & live state [be]
 - [ ] `onAuthUserCreated` (User + self "Me"; detect anon→permanent linking)
