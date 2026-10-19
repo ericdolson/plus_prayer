@@ -1,15 +1,46 @@
 {
-  "//": "Deploys run from inside backend/. Paths are relative to this file. This is a starting stub — the SQL Connect setup (Gemini/VS Code extension or Claude Code) will populate exact paths/config on init. Verify against current Firebase CLI.",
+  "//": "Deploys and emulators run from inside backend/. Paths are relative to this file.",
   "dataconnect": {
     "source": "dataconnect"
   },
   "functions": {
-    "source": "functions"
+    "source": "functions",
+    "runtime": "nodejs22",
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run build"
+    ],
+    "ignore": [
+      "node_modules",
+      "test",
+      "scripts",
+      "*.log"
+    ]
   },
   "database": {
     "rules": "database.rules.json"
   },
   "storage": {
     "rules": "storage.rules"
+  },
+  "emulators": {
+    "singleProjectMode": true,
+    "auth": {
+      "port": 9099
+    },
+    "database": {
+      "port": 9000
+    },
+    "dataconnect": {
+      "port": 9399
+    },
+    "functions": {
+      "port": 5001
+    },
+    "eventarc": {
+      "port": 9299
+    },
+    "ui": {
+      "enabled": false
+    }
   }
 }

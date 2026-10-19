@@ -52,5 +52,7 @@ Thumbs.db
 
 # ---- SQL Connect emulator output (generated) ----
 .dataconnect/
-dataconnect-debug.log
-pglite-debug.log
+*-debug.log
+
+# ---- Functions build output (TypeScript → lib/) ----
+backend/functions/lib/

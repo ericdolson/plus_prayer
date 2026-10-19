@@ -1,0 +1,26 @@
+{
+  "name": "plusprayer-functions",
+  "private": true,
+  "description": "+Prayer Cloud Functions (assembly, prayer reactions, presence, admin callables).",
+  "main": "lib/src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "firebase emulators:exec --only dataconnect --project demo-plusprayer '\"$npm_node_execpath\" --import tsx --test --test-concurrency=1 test/*.test.ts'",
+    "test:run": "node --import tsx --test --test-concurrency=1 test/*.test.ts",
+    "seed:config": "node --import tsx scripts/seed-config.ts",
+    "test:rules": "firebase emulators:exec --only database --project demo-plusprayer '\"$npm_node_execpath\" --import tsx --test test/rules/*.test.ts'"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.0",
+    "firebase-functions": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.3"
+  }
+}

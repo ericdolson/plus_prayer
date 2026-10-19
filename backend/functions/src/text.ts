@@ -1,0 +1,40 @@
+// Name / intention text rules (subjects.md, screens.md): caps count visible
+// characters (grapheme clusters), not bytes or code points; any script.
+
+import { HttpsError } from "firebase-functions/v2/https";
+
+const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+
+export function graphemeLength(text: string): number {
+  let n = 0;
+  for (const _ of segmenter.segment(text)) n++;
+  return n;
+}
+
+/** Trim, collapse whitespace runs (incl. newlines) to one space, NFC. */
+export function cleanText(text: string): string {
+  return text.normalize("NFC").replace(/\s+/gu, " ").trim();
+}
+
+export function requireName(raw: unknown, cap: number, field = "name"): string {
+  if (typeof raw !== "string") throw new HttpsError("invalid-argument", `${field} is required`);
+  const text = cleanText(raw);
+  if (text.length === 0) throw new HttpsError("invalid-argument", `${field} is required`);
+  if (graphemeLength(text) > cap) {
+    throw new HttpsError("invalid-argument", `${field} is limited to ${cap} characters`, { cap });
+  }
+  return text;
+}
+
+/** Optional free text (alias / note): undefined = unchanged, null/"" = clear. */
+export function optionalText(raw: unknown, cap: number, field: string): string | null | undefined {
+  if (raw === undefined) return undefined;
+  if (raw === null) return null;
+  if (typeof raw !== "string") throw new HttpsError("invalid-argument", `${field} must be text`);
+  const text = cleanText(raw);
+  if (text.length === 0) return null;
+  if (graphemeLength(text) > cap) {
+    throw new HttpsError("invalid-argument", `${field} is limited to ${cap} characters`, { cap });
+  }
+  return text;
+}

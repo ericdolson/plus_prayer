@@ -1,0 +1,11 @@
+{
+  "//": "Defaults for RTDB /config (public-read, server-write). The app compiles the same defaults in; the server reads /config for the values it enforces (grace cap / interval). Seed with `npm run seed:config` (backend/functions) (writes only missing keys).",
+  "graceCap": 2,
+  "graceIntervalDays": 7,
+  "presenceDisplayThreshold": 10,
+  "minAppVersion": "0.0.0",
+  "minPrayerSeconds": 5,
+  "draftResumeMinutes": 30,
+  "autoSaveHours": 6,
+  "durationCapHours": 4
+}
