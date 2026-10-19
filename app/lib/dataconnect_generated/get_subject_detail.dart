@@ -411,6 +411,40 @@ class GetSubjectDetailPrayerSubjectsEntriesList {
 
 @immutable
 class GetSubjectDetailPrayerSubjectsPrayers {
+  final GetSubjectDetailPrayerSubjectsPrayersPrayer prayer;
+  GetSubjectDetailPrayerSubjectsPrayers.fromJson(dynamic json):
+  
+  prayer = GetSubjectDetailPrayerSubjectsPrayersPrayer.fromJson(json['prayer']);
+  @override
+  bool operator ==(Object other) {
+    if(identical(this, other)) {
+      return true;
+    }
+    if(other.runtimeType != runtimeType) {
+      return false;
+    }
+
+    final GetSubjectDetailPrayerSubjectsPrayers otherTyped = other as GetSubjectDetailPrayerSubjectsPrayers;
+    return prayer == otherTyped.prayer;
+    
+  }
+  @override
+  int get hashCode => prayer.hashCode;
+  
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> json = {};
+    json['prayer'] = prayer.toJson();
+    return json;
+  }
+
+  GetSubjectDetailPrayerSubjectsPrayers({
+    required this.prayer,
+  });
+}
+
+@immutable
+class GetSubjectDetailPrayerSubjectsPrayersPrayer {
   final String id;
   final Timestamp startedAt;
   final Timestamp prayedAt;
@@ -419,7 +453,7 @@ class GetSubjectDetailPrayerSubjectsPrayers {
   final EnumValue<PrayerEndedBy> endedBy;
   final int listContextNumber;
   final String? note;
-  GetSubjectDetailPrayerSubjectsPrayers.fromJson(dynamic json):
+  GetSubjectDetailPrayerSubjectsPrayersPrayer.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']),
   startedAt = Timestamp.fromJson(json['startedAt']),
@@ -438,7 +472,7 @@ class GetSubjectDetailPrayerSubjectsPrayers {
       return false;
     }
 
-    final GetSubjectDetailPrayerSubjectsPrayers otherTyped = other as GetSubjectDetailPrayerSubjectsPrayers;
+    final GetSubjectDetailPrayerSubjectsPrayersPrayer otherTyped = other as GetSubjectDetailPrayerSubjectsPrayersPrayer;
     return id == otherTyped.id && 
     startedAt == otherTyped.startedAt && 
     prayedAt == otherTyped.prayedAt && 
@@ -470,7 +504,7 @@ class GetSubjectDetailPrayerSubjectsPrayers {
     return json;
   }
 
-  GetSubjectDetailPrayerSubjectsPrayers({
+  GetSubjectDetailPrayerSubjectsPrayersPrayer({
     required this.id,
     required this.startedAt,
     required this.prayedAt,

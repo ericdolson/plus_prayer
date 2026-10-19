@@ -19,11 +19,13 @@ class RestoreSubjectVariablesBuilder {
 
 @immutable
 class RestoreSubjectData {
-  final int prayerSubject_updateMany;
+  final int reopened;
+  final int restored;
   final int cascade;
   RestoreSubjectData.fromJson(dynamic json):
   
-  prayerSubject_updateMany = nativeFromJson<int>(json['prayerSubject_updateMany']),
+  reopened = nativeFromJson<int>(json['reopened']),
+  restored = nativeFromJson<int>(json['restored']),
   cascade = nativeFromJson<int>(json['cascade']);
   @override
   bool operator ==(Object other) {
@@ -35,23 +37,26 @@ class RestoreSubjectData {
     }
 
     final RestoreSubjectData otherTyped = other as RestoreSubjectData;
-    return prayerSubject_updateMany == otherTyped.prayerSubject_updateMany && 
+    return reopened == otherTyped.reopened && 
+    restored == otherTyped.restored && 
     cascade == otherTyped.cascade;
     
   }
   @override
-  int get hashCode => Object.hashAll([prayerSubject_updateMany.hashCode, cascade.hashCode]);
+  int get hashCode => Object.hashAll([reopened.hashCode, restored.hashCode, cascade.hashCode]);
   
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
-    json['prayerSubject_updateMany'] = nativeToJson<int>(prayerSubject_updateMany);
+    json['reopened'] = nativeToJson<int>(reopened);
+    json['restored'] = nativeToJson<int>(restored);
     json['cascade'] = nativeToJson<int>(cascade);
     return json;
   }
 
   RestoreSubjectData({
-    required this.prayerSubject_updateMany,
+    required this.reopened,
+    required this.restored,
     required this.cascade,
   });
 }

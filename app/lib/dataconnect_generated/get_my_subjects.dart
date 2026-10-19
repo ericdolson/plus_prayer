@@ -176,8 +176,42 @@ class GetMySubjectsPrayerSubjectsParent {
 
 @immutable
 class GetMySubjectsPrayerSubjectsLastPrayed {
-  final DateTime localDate;
+  final GetMySubjectsPrayerSubjectsLastPrayedPrayer prayer;
   GetMySubjectsPrayerSubjectsLastPrayed.fromJson(dynamic json):
+  
+  prayer = GetMySubjectsPrayerSubjectsLastPrayedPrayer.fromJson(json['prayer']);
+  @override
+  bool operator ==(Object other) {
+    if(identical(this, other)) {
+      return true;
+    }
+    if(other.runtimeType != runtimeType) {
+      return false;
+    }
+
+    final GetMySubjectsPrayerSubjectsLastPrayed otherTyped = other as GetMySubjectsPrayerSubjectsLastPrayed;
+    return prayer == otherTyped.prayer;
+    
+  }
+  @override
+  int get hashCode => prayer.hashCode;
+  
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> json = {};
+    json['prayer'] = prayer.toJson();
+    return json;
+  }
+
+  GetMySubjectsPrayerSubjectsLastPrayed({
+    required this.prayer,
+  });
+}
+
+@immutable
+class GetMySubjectsPrayerSubjectsLastPrayedPrayer {
+  final DateTime localDate;
+  GetMySubjectsPrayerSubjectsLastPrayedPrayer.fromJson(dynamic json):
   
   localDate = nativeFromJson<DateTime>(json['localDate']);
   @override
@@ -189,7 +223,7 @@ class GetMySubjectsPrayerSubjectsLastPrayed {
       return false;
     }
 
-    final GetMySubjectsPrayerSubjectsLastPrayed otherTyped = other as GetMySubjectsPrayerSubjectsLastPrayed;
+    final GetMySubjectsPrayerSubjectsLastPrayedPrayer otherTyped = other as GetMySubjectsPrayerSubjectsLastPrayedPrayer;
     return localDate == otherTyped.localDate;
     
   }
@@ -203,7 +237,7 @@ class GetMySubjectsPrayerSubjectsLastPrayed {
     return json;
   }
 
-  GetMySubjectsPrayerSubjectsLastPrayed({
+  GetMySubjectsPrayerSubjectsLastPrayedPrayer({
     required this.localDate,
   });
 }
