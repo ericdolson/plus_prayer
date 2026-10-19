@@ -10,4 +10,4 @@ schemas:
           instanceId: "plusprayer-instance"
           # schemaValidation: "STRICT"     # Postgres schema must match Data Connect exactly.
           # schemaValidation: "COMPATIBLE" # Postgres schema may contain extra objects (friendlier while iterating).
-connectorDirs: ["./connector"]
+connectorDirs: ["./connector", "./admin"]

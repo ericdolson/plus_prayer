@@ -1,0 +1,281 @@
+# ============================================================================
+# admin connector — prayer reactions (onPrayerLogged), auto-save, live stats
+# ============================================================================
+
+
+# Everything onPrayerLogged needs about one prayer, its user, and the list
+# that is current right now (only that list's counters may still move).
+query GetPrayerContext($id: UUID!) @auth(level: NO_ACCESS) {
+  prayer(key: { id: $id }) {
+    id
+    startedAt
+    prayedAt
+    durationSeconds
+    localDate
+    countedAt
+    communityList { id }
+    user {
+      id
+      includeLimit
+      trialStartedAt
+      entitlementExpiresAt
+      currentStreak
+      bestStreak
+      lastListLocalDate
+      lastStatsDate
+      graceDays
+      graceOfferPending
+      graceOffersEnabled
+    }
+  }
+  current: prayerLists(
+    where: { scope: { eq: GLOBAL }, currentFrom: { isNull: false } }
+    orderBy: [{ currentFrom: DESC }]
+    limit: 1
+  ) {
+    id
+    listNumber
+    closesAt
+  }
+}
+
+
+# Apply one prayer's increments + the user's new streak/grace/trial state in
+# ONE atomic statement, exactly once. Each step only runs if the previous one
+# did (data-modifying CTEs chained through RETURNING):
+#   u      — the user's new state, IF the row still matches what the function
+#            read (optimistic) and the prayer is still uncounted
+#   claim  — flips countedAt from null (the exactly-once marker)
+#   list   — increment-on-write; $listId is null unless the prayer's list is
+#            still current and it started before closesAt
+#   (main) — DailyStats for the UTC day of the prayer's end
+# Returns 1 when applied. 0 means already counted, or the user row moved
+# (the function re-reads and retries).
+mutation ApplyPrayer(
+  $prayerId: UUID!
+  $listId: UUID
+  $durationSeconds: Int!
+  $statsDate: Date!
+  $peopleIncrement: Int!
+  $uid: String!
+  # new state
+  $currentStreak: Int!
+  $bestStreak: Int!
+  $lastListLocalDate: Date
+  $graceDays: Int!
+  $graceOfferPending: Boolean!
+  $lastStatsDate: Date
+  $trialStartedAt: Timestamp
+  $entitlementExpiresAt: Timestamp
+  $includeLimit: Int!
+  # state read (optimistic check)
+  $wasCurrentStreak: Int!
+  $wasBestStreak: Int!
+  $wasLastListLocalDate: Date
+  $wasGraceDays: Int!
+  $wasGraceOfferPending: Boolean!
+  $wasLastStatsDate: Date
+  $wasTrialStartedAt: Timestamp
+  $wasEntitlementExpiresAt: Timestamp
+  $wasIncludeLimit: Int!
+) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    WITH u AS (
+      UPDATE "user" SET
+        current_streak = $2::int, best_streak = $3::int, last_list_local_date = $4::date,
+        grace_days = $5::int, grace_offer_pending = $6::boolean, last_stats_date = $7::date,
+        trial_started_at = $8::timestamptz, entitlement_expires_at = $9::timestamptz,
+        include_limit = $10::int
+      WHERE id = $1
+        AND current_streak = $11::int AND best_streak = $12::int
+        AND last_list_local_date IS NOT DISTINCT FROM $13::date
+        AND grace_days = $14::int AND grace_offer_pending = $15::boolean
+        AND last_stats_date IS NOT DISTINCT FROM $16::date
+        AND trial_started_at IS NOT DISTINCT FROM $17::timestamptz
+        AND entitlement_expires_at IS NOT DISTINCT FROM $18::timestamptz
+        AND include_limit = $19::int
+        AND EXISTS (SELECT 1 FROM prayer WHERE id = $20::uuid AND counted_at IS NULL)
+      RETURNING id
+    ), claim AS (
+      UPDATE prayer SET counted_at = now()
+      WHERE id = $20::uuid AND counted_at IS NULL AND EXISTS (SELECT 1 FROM u)
+      RETURNING id
+    ), list AS (
+      UPDATE prayer_list
+      SET prayer_count = prayer_count + 1, prayer_seconds = prayer_seconds + $22::int
+      WHERE id = $21::uuid AND EXISTS (SELECT 1 FROM claim)
+      RETURNING id
+    )
+    INSERT INTO daily_stats (date, prayers, prayer_seconds, people_praying)
+    SELECT $23::date, 1, $22::int, $24::int FROM claim
+    ON CONFLICT (date) DO UPDATE SET
+      prayers = daily_stats.prayers + 1,
+      prayer_seconds = daily_stats.prayer_seconds + EXCLUDED.prayer_seconds,
+      people_praying = daily_stats.people_praying + EXCLUDED.people_praying
+    """
+    params: [
+      { _expr: "vars.uid" }
+      { _expr: "vars.currentStreak" }
+      { _expr: "vars.bestStreak" }
+      { _expr: "vars.lastListLocalDate" }
+      { _expr: "vars.graceDays" }
+      { _expr: "vars.graceOfferPending" }
+      { _expr: "vars.lastStatsDate" }
+      { _expr: "vars.trialStartedAt" }
+      { _expr: "vars.entitlementExpiresAt" }
+      { _expr: "vars.includeLimit" }
+      { _expr: "vars.wasCurrentStreak" }
+      { _expr: "vars.wasBestStreak" }
+      { _expr: "vars.wasLastListLocalDate" }
+      { _expr: "vars.wasGraceDays" }
+      { _expr: "vars.wasGraceOfferPending" }
+      { _expr: "vars.wasLastStatsDate" }
+      { _expr: "vars.wasTrialStartedAt" }
+      { _expr: "vars.wasEntitlementExpiresAt" }
+      { _expr: "vars.wasIncludeLimit" }
+      { _expr: "vars.prayerId" }
+      { _expr: "vars.listId" }
+      { _expr: "vars.durationSeconds" }
+      { _expr: "vars.statsDate" }
+      { _expr: "vars.peopleIncrement" }
+    ]
+  )
+}
+
+
+# Prayers whose reaction never ran (trigger failure / outage) — the sweeper
+# re-runs onPrayerLogged for these. Uses the countedAt marker only.
+query GetUncountedPrayers($before: Timestamp!, $limit: Int = 200) @auth(level: NO_ACCESS) {
+  prayers(
+    where: { countedAt: { isNull: true }, prayedAt: { lt: $before } }
+    orderBy: [{ prayedAt: ASC }]
+    limit: $limit
+  ) {
+    id
+  }
+}
+
+
+# Grace offer answer (accept / decline). Server-owned streak state.
+# Returns 1 when a pending offer was answered.
+mutation AnswerGraceOffer($uid: String!, $graceDays: Int!, $graceOffersEnabled: Boolean!)
+@auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    UPDATE "user" SET grace_days = $2::int, grace_offer_pending = false,
+      grace_offers_enabled = $3::boolean
+    WHERE id = $1 AND grace_offer_pending
+    """
+    params: [{ _expr: "vars.uid" }, { _expr: "vars.graceDays" }, { _expr: "vars.graceOffersEnabled" }]
+  )
+}
+
+query GetGraceState($uid: String!) @auth(level: NO_ACCESS) {
+  user(key: { id: $uid }) {
+    graceDays
+    graceOfferPending
+    graceOffersEnabled
+  }
+}
+
+
+# ----------------------------------------------------------------------------
+# Auto-save of abandoned drafts (endedBy AUTO)
+# ----------------------------------------------------------------------------
+
+# The list that was current at a moment (listContextNumber / communityList of
+# a draft are taken from its START).
+query GetListAt($at: Timestamp!) @auth(level: NO_ACCESS) {
+  prayerLists(
+    where: { scope: { eq: GLOBAL }, currentFrom: { le: $at } }
+    orderBy: [{ currentFrom: DESC }]
+    limit: 1
+  ) {
+    id
+    listNumber
+  }
+}
+
+query GetUserTimezone($uid: String!) @auth(level: NO_ACCESS) {
+  user(key: { id: $uid }) {
+    id
+    timezone
+  }
+}
+
+# Same id as the client would have used, so a later Amen from the device and
+# this auto-save can never both land (ON CONFLICT DO NOTHING). One statement:
+# the prayer, then its links (owned subjects + parent names).
+mutation InsertAutoSavedPrayer(
+  $id: UUID!
+  $uid: String!
+  $startedAt: Timestamp!
+  $prayedAt: Timestamp!
+  $durationSeconds: Int!
+  $localDate: Date!
+  $timezone: String!
+  $communityListId: UUID
+  $listContextNumber: Int!
+  $subjectIds: [UUID!]!
+) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    WITH p AS (
+      INSERT INTO prayer (id, user_id, started_at, prayed_at, duration_seconds, local_date,
+        timezone, community_list_id, list_context_number, ended_by, mode)
+      SELECT $1::uuid, u.id, $3::timestamptz, $4::timestamptz, $5::int, $6::date, $7,
+        (SELECT l.id FROM prayer_list l WHERE l.id = $8::uuid), $9::int, 'AUTO', 'MANUAL'
+      FROM "user" u WHERE u.id = $2
+      ON CONFLICT (id) DO NOTHING
+      RETURNING id
+    )
+    INSERT INTO prayer_subject_link (prayer_id, subject_id)
+    SELECT p.id, x.sid FROM p, (
+      SELECT s.id AS sid FROM prayer_subject s
+      WHERE s.owner_id = $2
+        AND s.id IN (SELECT value::uuid FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof($10::jsonb) = 'array' THEN $10::jsonb ELSE '[]'::jsonb END))
+      UNION
+      SELECT s.parent_id FROM prayer_subject s
+      WHERE s.owner_id = $2 AND s.parent_id IS NOT NULL
+        AND s.id IN (SELECT value::uuid FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof($10::jsonb) = 'array' THEN $10::jsonb ELSE '[]'::jsonb END))
+    ) x
+    ON CONFLICT DO NOTHING
+    """
+    params: [
+      { _expr: "vars.id" }
+      { _expr: "vars.uid" }
+      { _expr: "vars.startedAt" }
+      { _expr: "vars.prayedAt" }
+      { _expr: "vars.durationSeconds" }
+      { _expr: "vars.localDate" }
+      { _expr: "vars.timezone" }
+      { _expr: "vars.communityListId" }
+      { _expr: "vars.listContextNumber" }
+      { _expr: "vars.subjectIds" }
+    ]
+  )
+}
+
+
+# ----------------------------------------------------------------------------
+# Live stats for /stats/live (presence reconcile, 1 / min)
+# ----------------------------------------------------------------------------
+query GetLiveStats($since: Timestamp!, $today: Date!) @auth(level: NO_ACCESS) {
+  lastHour: _selectFirst(
+    sql: "SELECT count(DISTINCT user_id)::int AS people FROM prayer WHERE prayed_at >= $1::timestamptz"
+    params: [{ _expr: "vars.since" }]
+  )
+  today: dailyStats(key: { date: $today }) {
+    prayers
+    peoplePraying
+  }
+}
+
+
+# The list's settled-so-far count, mirrored to RTDB /lists/current.
+query GetListCount($id: UUID!) @auth(level: NO_ACCESS) {
+  prayerList(key: { id: $id }) {
+    prayerCount
+  }
+}

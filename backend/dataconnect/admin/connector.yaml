@@ -1,0 +1,3 @@
+connectorId: "admin"
+# Server-only operations (all @auth(level: NO_ACCESS)), executed by Cloud
+# Functions through the Admin SDK. No client SDK is generated for this connector.

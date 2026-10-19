@@ -1,44 +1,20 @@
-# connector/ — Operations (queries & mutations)
+# connector/ — client operations (queries & mutations)
 
-This folder holds the deployable operations — the API surface the app calls via
-the generated typed SDK. Each operation declares its own `@auth` level; this is
-the security model (a client can only run operations defined here).
+The ONLY operations the app can call, via the generated typed SDK
+(`app/lib/dataconnect_generated`, regenerate with
+`firebase dataconnect:sdk:generate` from `backend/`). Each declares its own
+`@auth`; that is the security model.
 
-## Status: DESIGNED — see OPERATIONS.md (authoritative)
+- `queries.gql` — reads (`USER_ANON`, every row scoped to `auth.uid`; list
+  metadata is public-safe: numbers, counts, seal, video — never names).
+- `mutations.gql` — writes, including `LogPrayer`. Read its header for the
+  native-SQL rules this engine needs.
+- `OPERATIONS.md` — the authoritative screen → operation map (what each op
+  does and why). Start there.
 
-The list below is the original June draft and is SUPERSEDED: `signUp` →
-`onAuthUserCreated` trigger; `setSubjectActive` → cut (status enum);
-`linkAnonymousAccount` → Firebase linking handled in `onAuthUserCreated`.
+Server-only operations (assembly, prayer reactions, merge, moderation,
+publish, entitlements) live in `../admin/` (`NO_ACCESS`) and are called by
+the Cloud Functions in `backend/functions`.
 
-The schema is locked (`../schema/schema.gql`). Operations are the next design
-step. Do not hand-write these ad hoc — design them deliberately (with Claude,
-then implement here) so auth levels and the sensitive-data posture are correct.
-
-## Operations to design (from the MVP loop)
-
-Reads:
-- `getMe` — my user + entitlement (planTier, includeLimit) + streaks
-- `getMySubjects` — my souls/intentions, ordered by sortOrder
-- `getCurrentList` — today's published list (counts, post links)
-- `getMyListStats` — how many times I prayed for a given list (cheap aggregate)
-- `getMyPrayerHistory` — my past prayers (+ optional location for "where I prayed")
-
-Mutations:
-- `signUp` — create User + self-PrayerSubject in ONE transaction
-- `addSubject` / `updateSubject` / `reorderSubjects` / `setSubjectActive`
-- `markIntentionAnswered`
-- `logPrayer` — write Prayer + PrayerSubjectLink rows; enforce "must include
-  current community list if not yet prayed for it"; bump counts; update streak;
-  mirror live count to RTDB
-- `linkAnonymousAccount` — carry souls/history across the anon→permanent upgrade
-
-Admin / server-only (privileged environment, not client `@auth`):
-- `assembleNextList` — join-and-write: users who prayed current list → their
-  eligible subjects → PrayerListEntry rows (frozen names, moderation applied)
-- `publishList` — flip draft → published after review
-- billing entitlement writes (planTier / includeLimit)
-
-## Auth posture
-Intentions are sensitive personal data. Default to the tightest auth that still
-works. A user reads/writes only their own subjects and prayers. List reads are
-authed-user level. Assembly/publish/billing are server-only.
+Auth posture: anonymous users get the full surface — use `USER_ANON`, never
+`USER` (SQL Connect's `USER` excludes anonymous accounts).

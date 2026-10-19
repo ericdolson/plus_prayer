@@ -1,0 +1,355 @@
+# ============================================================================
+# admin connector — accounts, self name, subjects written by callables
+# ============================================================================
+# NO_ACCESS: runnable only through the Admin SDK (Cloud Functions). Callers
+# have already authenticated the user / admin claim; `$uid` is trusted here.
+# Native SQL rules: see ../connector/mutations.gql header (one atomic
+# _execute statement per multi-step write; never mixed under @transaction).
+# ============================================================================
+
+
+# Create the User row if missing (onAuthUserCreated, and defensively from any
+# callable that runs before the trigger lands). Keeps auth fields current.
+mutation EnsureUser($uid: String!, $authProvider: String, $isAnonymous: Boolean!)
+@auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    INSERT INTO "user" (id, auth_provider, is_anonymous, created_at)
+    VALUES ($1, $2, $3::boolean, now())
+    ON CONFLICT (id) DO UPDATE
+      SET auth_provider = EXCLUDED.auth_provider, is_anonymous = EXCLUDED.is_anonymous
+    """
+    params: [{ _expr: "vars.uid" }, { _expr: "vars.authProvider" }, { _expr: "vars.isAnonymous" }]
+  )
+}
+
+
+# Everything setSelfName needs: the user, the self subject, and whether the
+# self name has been printed (an APPROVED entry on a PUBLISHED list).
+query GetSelfState($uid: String!) @auth(level: NO_ACCESS) {
+  user(key: { id: $uid }) {
+    id
+    displayName
+    selfNameChangedAt
+    self: prayerSubjects_on_owner(where: { isSelf: { eq: true } }, limit: 1) {
+      id
+      publicName
+    }
+  }
+  printed: prayerListEntries(
+    where: {
+      owner: { id: { eq: $uid } }
+      subject: { isSelf: { eq: true } }
+      moderationStatus: { eq: APPROVED }
+      list: { status: { eq: "published" } }
+    }
+  ) {
+    _count
+  }
+}
+
+
+# First setSelfName: the self subject ("Me", always carried) + displayName in
+# one statement. $selfId is derived from the uid by the function, so a
+# double-tap can never create two self subjects (ON CONFLICT on the PK; the
+# later call's name wins on both rows). Returns 0 if the user doesn't exist.
+mutation CreateSelf($uid: String!, $selfId: UUID!, $name: String!) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    WITH u AS (
+      UPDATE "user" SET display_name = $2 WHERE id = $1 RETURNING id
+    )
+    INSERT INTO prayer_subject
+      (id, owner_id, kind, public_name, personal_label, is_self, is_carried, sort_order, status, created_at)
+    SELECT $3::uuid, u.id, 'SOUL', $2, 'Me', true, true, 0, 'ACTIVE', now() FROM u
+    ON CONFLICT (id) DO UPDATE SET public_name = EXCLUDED.public_name
+    """
+    params: [{ _expr: "vars.uid" }, { _expr: "vars.name" }, { _expr: "vars.selfId" }]
+  )
+}
+
+
+# Self-name edit: publicName + displayName + selfNameChangedAt together.
+# Returns 1 when the self subject was renamed.
+mutation RenameSelf($uid: String!, $name: String!) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    WITH u AS (
+      UPDATE "user" SET display_name = $2, self_name_changed_at = now() WHERE id = $1 RETURNING id
+    )
+    UPDATE prayer_subject SET public_name = $2
+    WHERE is_self AND owner_id IN (SELECT id FROM u)
+    """
+    params: [{ _expr: "vars.uid" }, { _expr: "vars.name" }]
+  )
+}
+
+
+# ----------------------------------------------------------------------------
+# Subjects (pool-aware writes: addSubject, updateSubject, setCarriedItems)
+# ----------------------------------------------------------------------------
+
+# Entitlement + every non-purged subject (for sortOrder, the abuse cap, and
+# the pool computation).
+query GetPoolState($uid: String!) @auth(level: NO_ACCESS) {
+  user(key: { id: $uid }) {
+    id
+    planTier
+    includeLimit
+    entitlementExpiresAt
+  }
+  subjects: prayerSubjects(where: { owner: { id: { eq: $uid } }, status: { ne: PURGED } }) {
+    id
+    kind
+    isSelf
+    isCarried
+    status
+    sortOrder
+    resolvedAt
+    parent { id }
+  }
+}
+
+mutation InsertSubject(
+  $uid: String!
+  $kind: SubjectKind!
+  $parentId: UUID
+  $publicName: String!
+  $personalLabel: String
+  $note: String
+  $isCarried: Boolean!
+  $sortOrder: Int!
+) @auth(level: NO_ACCESS) {
+  prayerSubject_insert(
+    data: {
+      owner: { id: $uid }
+      kind: $kind
+      parentId: $parentId
+      publicName: $publicName
+      personalLabel: $personalLabel
+      note: $note
+      isCarried: $isCarried
+      sortOrder: $sortOrder
+    }
+  )
+}
+
+# Text edits on a non-self item. Omitted variables leave fields unchanged;
+# an explicit null clears personalLabel / note.
+mutation UpdateSubjectText(
+  $uid: String!
+  $id: UUID!
+  $publicName: String
+  $personalLabel: String
+  $note: String
+) @auth(level: NO_ACCESS) @transaction {
+  prayerSubject_updateMany(
+    where: {
+      id: { eq: $id }
+      owner: { id: { eq: $uid } }
+      isSelf: { eq: false }
+      status: { ne: PURGED }
+    }
+    data: { publicName: $publicName, personalLabel: $personalLabel, note: $note }
+  ) @check(expr: "this == 1", message: "NOT_FOUND")
+}
+
+# Save the "your portion" selection: exactly these ACTIVE, unresolved,
+# non-self items are carried; the rest of them are not.
+mutation SetCarried($uid: String!, $carriedIds: [UUID!]!) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    UPDATE prayer_subject
+    SET is_carried = (id IN (SELECT value::uuid FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof($2::jsonb) = 'array' THEN $2::jsonb ELSE '[]'::jsonb END)))
+    WHERE owner_id = $1 AND NOT is_self AND status = 'ACTIVE' AND resolved_at IS NULL
+    """
+    params: [{ _expr: "vars.uid" }, { _expr: "vars.carriedIds" }]
+  )
+}
+
+
+# ----------------------------------------------------------------------------
+# Entitlement / deletion
+# ----------------------------------------------------------------------------
+
+# From a verified billing event. entitlementExpiresAt runs THROUGH any store
+# billing grace period, so the soft landing starts only after grace ends.
+mutation SetEntitlement(
+  $uid: String!
+  $planTier: String!
+  $includeLimit: Int!
+  $entitlementExpiresAt: Timestamp
+) @auth(level: NO_ACCESS) {
+  user_update(
+    key: { id: $uid }
+    data: {
+      planTier: $planTier
+      includeLimit: $includeLimit
+      entitlementExpiresAt: $entitlementExpiresAt
+    }
+  )
+}
+
+# Deletes the user's list entries, then the User (cascading to subjects,
+# prayers, links, reminders) — one statement. Stored list counts /
+# prayerSeconds / DailyStats are increment-on-write and never recounted, so
+# they are unaffected.
+mutation DeleteAccountData($uid: String!) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    WITH e AS (DELETE FROM prayer_list_entry WHERE owner_id = $1 RETURNING id)
+    DELETE FROM "user" WHERE id = $1
+    """
+    params: [{ _expr: "vars.uid" }]
+  )
+}
+
+
+# ----------------------------------------------------------------------------
+# mergeAccounts (anonymous account folded into an existing one)
+# ----------------------------------------------------------------------------
+
+query GetMergeState($anonUid: String!, $targetUid: String!) @auth(level: NO_ACCESS) {
+  anon: user(key: { id: $anonUid }) {
+    ...MergeUser
+  }
+  target: user(key: { id: $targetUid }) {
+    ...MergeUser
+  }
+  listDays: _select(
+    sql: """
+    SELECT DISTINCT to_char(local_date, 'YYYY-MM-DD') AS d FROM prayer
+    WHERE user_id IN ($1, $2) AND community_list_id IS NOT NULL
+    ORDER BY d
+    """
+    params: [{ _expr: "vars.anonUid" }, { _expr: "vars.targetUid" }]
+  )
+}
+
+fragment MergeUser on User {
+  id
+  displayName
+  planTier
+  includeLimit
+  trialStartedAt
+  entitlementExpiresAt
+  currentStreak
+  bestStreak
+  lastListLocalDate
+  lastStatsDate
+  graceDays
+  graceOfferPending
+  self: prayerSubjects_on_owner(where: { isSelf: { eq: true } }, limit: 1) { id }
+}
+
+# ONE atomic statement. Each CTE touches a disjoint set of rows (a row is
+# never modified twice in one statement); foreign-key actions run at the end
+# of the statement, after every re-point, so nothing cascades away.
+#   subjects   anon's names / intentions → target (names appended after the
+#              target's names; the anon self's intentions re-parented to the
+#              target self and appended). If the target has no self yet, the
+#              anon self is adopted as-is.
+#   links      the anon self's links → the target self
+#   entries    where both selves are on the same list, the anon self's entry
+#              is dropped and intentions grouped under it move to the target
+#              self's entry; elsewhere re-pointed; owners → target
+#   prayers    → target;  reminders: the existing account's are kept
+#   user       merged state (computed by the function); anon User deleted
+# $anonSelf / $targetSelf may be null (onboarding not finished).
+mutation MergeAccounts(
+  $anonUid: String!
+  $targetUid: String!
+  $anonSelf: UUID
+  $targetSelf: UUID
+  $displayName: String
+  $planTier: String!
+  $includeLimit: Int!
+  $trialStartedAt: Timestamp
+  $entitlementExpiresAt: Timestamp
+  $currentStreak: Int!
+  $bestStreak: Int!
+  $lastListLocalDate: Date
+  $lastStatsDate: Date
+  $graceDays: Int!
+  $graceOfferPending: Boolean!
+) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    WITH maxes AS (
+      SELECT
+        COALESCE((SELECT max(sort_order) FROM prayer_subject
+          WHERE owner_id = $2 AND parent_id IS NULL AND NOT is_self), 0) AS name_max,
+        COALESCE((SELECT max(sort_order) FROM prayer_subject
+          WHERE parent_id = $4::uuid), 0) AS self_int_max
+    ), subjects AS (
+      UPDATE prayer_subject s SET
+        owner_id = $2,
+        parent_id = CASE WHEN s.parent_id = $3::uuid AND $4::uuid IS NOT NULL
+          THEN $4::uuid ELSE s.parent_id END,
+        sort_order = CASE
+          WHEN s.is_self THEN s.sort_order
+          WHEN s.parent_id IS NULL THEN s.sort_order + m.name_max
+          WHEN s.parent_id = $3::uuid AND $4::uuid IS NOT NULL THEN s.sort_order + m.self_int_max
+          ELSE s.sort_order END
+      FROM maxes m
+      WHERE s.owner_id = $1 AND (NOT s.is_self OR $4::uuid IS NULL)
+      RETURNING s.id
+    ), links AS (
+      UPDATE prayer_subject_link SET subject_id = $4::uuid
+      WHERE subject_id = $3::uuid AND $4::uuid IS NOT NULL
+      RETURNING prayer_id
+    ), dup_self AS (
+      SELECT a.id AS anon_entry, t.id AS target_entry
+      FROM prayer_list_entry a
+      JOIN prayer_list_entry t ON t.list_id = a.list_id AND t.subject_id = $4::uuid
+      WHERE a.subject_id = $3::uuid
+    ), drop_dup AS (
+      DELETE FROM prayer_list_entry e USING dup_self d WHERE e.id = d.anon_entry
+      RETURNING e.id
+    ), entries AS (
+      UPDATE prayer_list_entry e SET
+        owner_id = $2,
+        subject_id = CASE WHEN e.subject_id = $3::uuid AND $4::uuid IS NOT NULL
+          THEN $4::uuid ELSE e.subject_id END,
+        parent_entry_id = COALESCE(
+          (SELECT d.target_entry FROM dup_self d WHERE d.anon_entry = e.parent_entry_id),
+          e.parent_entry_id)
+      WHERE e.owner_id = $1 AND e.id NOT IN (SELECT anon_entry FROM dup_self)
+      RETURNING e.id
+    ), prayers AS (
+      UPDATE prayer SET user_id = $2 WHERE user_id = $1 RETURNING id
+    ), reminders AS (
+      DELETE FROM reminder_preference WHERE user_id = $1 RETURNING id
+    ), drop_self AS (
+      DELETE FROM prayer_subject WHERE id = $3::uuid AND $4::uuid IS NOT NULL RETURNING id
+    ), target AS (
+      UPDATE "user" SET
+        display_name = $5, plan_tier = $6, include_limit = $7::int,
+        trial_started_at = $8::timestamptz, entitlement_expires_at = $9::timestamptz,
+        current_streak = $10::int, best_streak = $11::int,
+        last_list_local_date = $12::date, last_stats_date = $13::date,
+        grace_days = $14::int, grace_offer_pending = $15::boolean
+      WHERE id = $2
+      RETURNING id
+    )
+    DELETE FROM "user" WHERE id = $1 AND EXISTS (SELECT 1 FROM target)
+    """
+    params: [
+      { _expr: "vars.anonUid" }
+      { _expr: "vars.targetUid" }
+      { _expr: "vars.anonSelf" }
+      { _expr: "vars.targetSelf" }
+      { _expr: "vars.displayName" }
+      { _expr: "vars.planTier" }
+      { _expr: "vars.includeLimit" }
+      { _expr: "vars.trialStartedAt" }
+      { _expr: "vars.entitlementExpiresAt" }
+      { _expr: "vars.currentStreak" }
+      { _expr: "vars.bestStreak" }
+      { _expr: "vars.lastListLocalDate" }
+      { _expr: "vars.lastStatsDate" }
+      { _expr: "vars.graceDays" }
+      { _expr: "vars.graceOfferPending" }
+    ]
+  )
+}

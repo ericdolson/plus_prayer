@@ -1,0 +1,404 @@
+# ============================================================================
+# +Prayer client connector — READS
+# ============================================================================
+# Spec: ../connector/OPERATIONS.md §A. Every operation is USER_ANON (anonymous
+# users get the full surface; SQL Connect's `USER` level would EXCLUDE them).
+# Owner-scoped reads filter every row by auth.uid — a foreign id returns
+# nothing rather than an error, so ids never leak existence.
+#
+# "Current list" = the GLOBAL PrayerList with the latest non-null currentFrom.
+# ============================================================================
+
+
+# Home + Today's list header. Public metadata only — never names.
+query GetCurrentListMeta
+@auth(level: USER_ANON, insecureReason: "Public list metadata only (numbers, counts, seal, video); no names or user data.") {
+  prayerLists(
+    where: { scope: { eq: GLOBAL }, currentFrom: { isNull: false } }
+    orderBy: [{ currentFrom: DESC }]
+    limit: 1
+  ) {
+    id
+    listNumber
+    listDate
+    status
+    currentFrom
+    closesAt
+    videoPublishedAt
+    videoPath
+    sealVariant
+    soulCount
+    intentionCount
+    prayerCount
+    prayerSeconds
+    prayerListPosts_on_list { platform url }
+  }
+}
+
+
+# Past lists screen. Published lists only, newest first. No names.
+query GetPastLists($limit: Int = 30, $offset: Int = 0)
+@auth(level: USER_ANON, insecureReason: "Public list metadata only (numbers, counts, seal, video); no names or user data.") {
+  prayerLists(
+    where: { scope: { eq: GLOBAL }, status: { eq: "published" } }
+    orderBy: [{ listNumber: DESC }]
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    listNumber
+    listDate
+    sealVariant
+    soulCount
+    intentionCount
+    prayerCount
+    prayerSeconds
+    videoPath
+    videoPublishedAt
+  }
+}
+
+
+# Header, settings, and onboarding resume (displayName null / no self subject
+# → "What's your name?"). The effective streak is computed client-side from
+# these stored fields + today (streaks-reminders.md).
+query GetMyHeader @auth(level: USER_ANON) {
+  user(key: { id_expr: "auth.uid" }) {
+    id
+    displayName
+    locale
+    timezone
+    planTier
+    includeLimit
+    trialStartedAt
+    entitlementExpiresAt
+    currentStreak
+    bestStreak
+    lastListLocalDate
+    graceDays
+    graceOfferPending
+    graceOffersEnabled
+    listLiveOptIn
+    showNamesInNotifications
+    selfNameChangedAt
+    self: prayerSubjects_on_owner(where: { isSelf: { eq: true } }, limit: 1) {
+      id
+      publicName
+      avatarTone
+      avatarPath
+    }
+  }
+}
+
+
+# Home: the personal list. Answered intentions stay ACTIVE until archived.
+# The client nests intentions under `parent` and orders each level by
+# sortOrder (self pinned top). `lastPrayed` = the user's latest prayer that
+# held this item (filtered by who prayed, never by subject owner).
+query GetMySubjects @auth(level: USER_ANON) {
+  prayerSubjects(
+    where: { owner: { id: { eq_expr: "auth.uid" } }, status: { eq: ACTIVE } }
+    orderBy: [{ sortOrder: ASC }, { createdAt: ASC }]
+  ) {
+    id
+    kind
+    parent { id }
+    publicName
+    personalLabel
+    note
+    isSelf
+    isCarried
+    sortOrder
+    avatarTone
+    avatarPath
+    resolution
+    resolvedAt
+    createdAt
+    lastPrayed: prayers_via_PrayerSubjectLink(
+      where: { prayer: { user: { id: { eq_expr: "auth.uid" } } } }
+      orderBy: [{ prayer: { localDate: DESC } }]
+      limit: 1
+    ) {
+      localDate
+    }
+  }
+}
+
+
+# Header search: full text over publicName + alias ("simple" config, any
+# script). Never returns PURGED items.
+query SearchMySubjects($query: String!) @auth(level: USER_ANON) {
+  prayerSubjects_search(
+    query: $query
+    where: { owner: { id: { eq_expr: "auth.uid" } }, status: { ne: PURGED } }
+    limit: 50
+  ) {
+    id
+    kind
+    parent { id }
+    publicName
+    personalLabel
+    status
+    isSelf
+  }
+}
+
+
+# Today's list page / list row avatar cluster / Amen invitation.
+# `carriedLists` = lists the user's own name was printed on (an APPROVED self
+# entry on a PUBLISHED list) → "You've been carried on N lists".
+query GetMyListStatus($listId: UUID!) @auth(level: USER_ANON) {
+  myEntries: prayerListEntries(
+    where: { list: { id: { eq: $listId } }, owner: { id: { eq_expr: "auth.uid" } } }
+  ) {
+    id
+    kind
+    publicName
+    moderationStatus
+    reasonCategory
+    parentEntry { id }
+    subject { id isSelf }
+  }
+  myPrayersWithList: prayers(
+    where: { user: { id: { eq_expr: "auth.uid" } }, communityList: { id: { eq: $listId } } }
+  ) {
+    _count
+  }
+  carriedLists: prayerListEntries(
+    where: {
+      owner: { id: { eq_expr: "auth.uid" } }
+      subject: { isSelf: { eq: true } }
+      moderationStatus: { eq: APPROVED }
+      list: { status: { eq: "published" } }
+    }
+  ) {
+    _count
+  }
+}
+
+
+# Your portion: every ACTIVE, unresolved item with its own isCarried flag (the
+# client applies effective carry: an intention counts only if its name is
+# carried too), the entitlement for the meter, and the user's entries on the
+# given (newest) list for "Held for review" / "Not printed · {category}".
+query GetMyPortion($listId: UUID) @auth(level: USER_ANON) {
+  user(key: { id_expr: "auth.uid" }) {
+    planTier
+    includeLimit
+    trialStartedAt
+    entitlementExpiresAt
+  }
+  items: prayerSubjects(
+    where: {
+      owner: { id: { eq_expr: "auth.uid" } }
+      status: { eq: ACTIVE }
+      resolvedAt: { isNull: true }
+    }
+    orderBy: [{ sortOrder: ASC }, { createdAt: ASC }]
+  ) {
+    id
+    kind
+    parent { id }
+    publicName
+    personalLabel
+    isSelf
+    isCarried
+    sortOrder
+    avatarTone
+  }
+  entries: prayerListEntries(
+    where: { list: { id: { eq: $listId } }, owner: { id: { eq_expr: "auth.uid" } } }
+  ) {
+    id
+    moderationStatus
+    reasonCategory
+    subject { id }
+  }
+}
+
+
+# Name / intention detail — ONE operation (stats-history.md): the subject, its
+# parent (intention) or intentions (name), its list entries with each list's
+# number/date/seal/count (bead strand, gaps, tier-3 world count), and the
+# user's prayers that held it (tier 1). Client rules: count only APPROVED
+# entries; world count sums prayerCount over CLOSED lists and adds the live
+# RTDB count iff the current list is among them.
+query GetSubjectDetail($id: UUID!, $prayerLimit: Int = 500, $prayerOffset: Int = 0)
+@auth(level: USER_ANON) {
+  prayerSubjects(
+    where: { id: { eq: $id }, owner: { id: { eq_expr: "auth.uid" } }, status: { ne: PURGED } }
+    limit: 1
+  ) {
+    id
+    kind
+    publicName
+    personalLabel
+    note
+    isSelf
+    isCarried
+    status
+    sortOrder
+    avatarTone
+    avatarPath
+    resolution
+    resolvedAt
+    createdAt
+    parent { id publicName personalLabel isCarried isSelf }
+    intentions: prayerSubjects_on_parent(
+      where: { status: { ne: PURGED } }
+      orderBy: [{ sortOrder: ASC }, { createdAt: ASC }]
+    ) {
+      id
+      publicName
+      isCarried
+      status
+      resolution
+      resolvedAt
+    }
+    entries: prayerListEntries_on_subject {
+      id
+      moderationStatus
+      list {
+        id
+        listNumber
+        listDate
+        status
+        currentFrom
+        sealVariant
+        prayerCount
+      }
+    }
+    prayers: prayers_via_PrayerSubjectLink(
+      where: { prayer: { user: { id: { eq_expr: "auth.uid" } } } }
+      orderBy: [{ prayer: { prayedAt: DESC } }]
+      limit: $prayerLimit
+      offset: $prayerOffset
+    ) {
+      id
+      startedAt
+      prayedAt
+      localDate
+      durationSeconds
+      endedBy
+      listContextNumber
+      note
+    }
+  }
+}
+
+
+# History (account-wide), newest first, paginated. Grouped by day client-side.
+query GetMyPrayerHistory($limit: Int = 50, $offset: Int = 0) @auth(level: USER_ANON) {
+  prayers(
+    where: { user: { id: { eq_expr: "auth.uid" } } }
+    orderBy: [{ prayedAt: DESC }]
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    startedAt
+    prayedAt
+    localDate
+    timezone
+    durationSeconds
+    endedBy
+    mode
+    note
+    communityList { id listNumber sealVariant }
+    held: prayerSubjects_via_PrayerSubjectLink {
+      id
+      kind
+      publicName
+      personalLabel
+    }
+  }
+}
+
+
+# History header "Time in prayer" — this week and all time. Never ranked.
+query GetMyPrayerTime($weekStart: Date!) @auth(level: USER_ANON) {
+  week: prayers(
+    where: { user: { id: { eq_expr: "auth.uid" } }, localDate: { ge: $weekStart } }
+  ) {
+    durationSeconds_sum
+    _count
+  }
+  allTime: prayers(where: { user: { id: { eq_expr: "auth.uid" } } }) {
+    durationSeconds_sum
+    _count
+  }
+}
+
+
+# Prayer detail (note) screen.
+query GetPrayer($id: UUID!) @auth(level: USER_ANON) {
+  prayers(where: { id: { eq: $id }, user: { id: { eq_expr: "auth.uid" } } }, limit: 1) {
+    id
+    startedAt
+    prayedAt
+    localDate
+    timezone
+    durationSeconds
+    endedBy
+    mode
+    note
+    listContextNumber
+    communityList { id listNumber sealVariant }
+    held: prayerSubjects_via_PrayerSubjectLink {
+      id
+      kind
+      publicName
+      personalLabel
+    }
+  }
+}
+
+
+# Streak sheet month view: sealed mark (that list's wax) for days prayed with
+# the list, hollow mark for personal-only days (communityList null).
+# "Days in prayer this month" = distinct localDate.
+query GetMyMonth($from: Date!, $to: Date!) @auth(level: USER_ANON) {
+  prayers(
+    where: {
+      user: { id: { eq_expr: "auth.uid" } }
+      localDate: { ge: $from, le: $to }
+    }
+    orderBy: [{ localDate: ASC }]
+  ) {
+    localDate
+    communityList { listNumber sealVariant }
+  }
+}
+
+
+# Archived screen (incl. Released intentions). PURGED never appears anywhere.
+query GetMyArchivedSubjects @auth(level: USER_ANON) {
+  prayerSubjects(
+    where: { owner: { id: { eq_expr: "auth.uid" } }, status: { eq: ARCHIVED } }
+    orderBy: [{ createdAt: DESC }]
+  ) {
+    id
+    kind
+    parent { id publicName personalLabel status }
+    publicName
+    personalLabel
+    resolution
+    resolvedAt
+    archivedByCascade
+  }
+}
+
+
+# Settings → reminders (scheduled on device).
+query GetMyReminders @auth(level: USER_ANON) {
+  reminderPreferences(
+    where: { user: { id: { eq_expr: "auth.uid" } } }
+    orderBy: [{ createdAt: ASC }]
+  ) {
+    id
+    slot
+    enabled
+    localTime
+    label
+  }
+}

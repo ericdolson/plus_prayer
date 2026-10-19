@@ -1,0 +1,313 @@
+# ============================================================================
+# +Prayer client connector — WRITES
+# ============================================================================
+# Spec: ../connector/OPERATIONS.md §B–C. Every write is USER_ANON and scoped to
+# auth.uid. Updates use `<table>_updateMany(where: { id, owner = auth.uid })`
+# plus `@check(expr: "this == 1")`, so a foreign or missing id fails with a
+# plain message and rolls back (@transaction) instead of touching anything.
+#
+# Writes that carry free text with grapheme caps or touch server-owned state
+# are NOT here — they are callables (functions/): setSelfName, addSubject,
+# updateSubject, setCarriedItems, answerGraceOffer, deleteAccount,
+# mergeAccounts.
+#
+# Native SQL rules (verified against the emulator, firebase-tools 15.22.1):
+#   - List variables bind as JSON text, and an EMPTY list binds as JSON null:
+#     read arrays as jsonb_array_elements_text(CASE WHEN jsonb_typeof($n::jsonb)
+#     = 'array' THEN $n::jsonb ELSE '[]'::jsonb END).
+#   - NEVER put a native SQL field next to other fields under @transaction:
+#     the engine batches them into one invalid statement. A multi-step write
+#     is ONE _execute statement built from data-modifying CTEs (atomic).
+#   - Validate in a leading `query @redact` step with @check (no
+#     @transaction): a failed check stops the operation before any write.
+#   - Statements are written so they cannot fail at runtime (ON CONFLICT DO
+#     NOTHING; UUID-typed variables only; guarded foreign keys).
+# ============================================================================
+
+
+# ----------------------------------------------------------------------------
+# logPrayer — optimistic, idempotent (OPERATIONS.md §C)
+# ----------------------------------------------------------------------------
+# `id` is client-generated (UUID v4). The prayer and its links are written in
+# ONE statement; a retried send with the same id is a no-op success
+# (ON CONFLICT DO NOTHING) — never an overwrite, so history stays immutable.
+# Links: only subjects owned by the caller are linked (others are silently
+# skipped), and holding an intention also links its parent name. A
+# communityListId that isn't a real list is stored as null.
+# Side effects (counts, streak, trial, DailyStats) run in onPrayerLogged.
+# (No @transaction: the validation step's @check aborts before the write,
+# and the write is a single atomic statement.)
+mutation LogPrayer(
+  $id: UUID!
+  $startedAt: Timestamp!
+  $prayedAt: Timestamp!
+  $durationSeconds: Int!
+  $localDate: Date!
+  $timezone: String!
+  $communityListId: UUID
+  $listContextNumber: Int!
+  $note: String
+  $subjectIds: [UUID!]!
+) @auth(level: USER_ANON) {
+  query @redact {
+    user(key: { id_expr: "auth.uid" })
+    @check(expr: "this != null", message: "Account is not ready yet")
+    @check(
+      expr: "vars.durationSeconds >= 5 && vars.durationSeconds <= 14400"
+      message: "A prayer is recorded between 5 seconds and 4 hours"
+    ) {
+      id
+    }
+  }
+  _execute(
+    sql: """
+    WITH p AS (
+      INSERT INTO prayer (id, user_id, started_at, prayed_at, duration_seconds, local_date,
+        timezone, community_list_id, list_context_number, note, ended_by, mode)
+      SELECT $1::uuid, $2, $3::timestamptz, $4::timestamptz, $5::int, $6::date, $7,
+        (SELECT l.id FROM prayer_list l WHERE l.id = $8::uuid), $9::int, $10, 'AMEN', 'MANUAL'
+      ON CONFLICT (id) DO NOTHING
+      RETURNING id
+    )
+    INSERT INTO prayer_subject_link (prayer_id, subject_id)
+    SELECT p.id, x.sid FROM p, (
+      SELECT s.id AS sid FROM prayer_subject s
+      WHERE s.owner_id = $2
+        AND s.id IN (SELECT value::uuid FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof($11::jsonb) = 'array' THEN $11::jsonb ELSE '[]'::jsonb END))
+      UNION
+      SELECT s.parent_id FROM prayer_subject s
+      WHERE s.owner_id = $2 AND s.parent_id IS NOT NULL
+        AND s.id IN (SELECT value::uuid FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof($11::jsonb) = 'array' THEN $11::jsonb ELSE '[]'::jsonb END))
+    ) x
+    ON CONFLICT DO NOTHING
+    """
+    params: [
+      { _expr: "vars.id" }
+      { _expr: "auth.uid" }
+      { _expr: "vars.startedAt" }
+      { _expr: "vars.prayedAt" }
+      { _expr: "vars.durationSeconds" }
+      { _expr: "vars.localDate" }
+      { _expr: "vars.timezone" }
+      { _expr: "vars.communityListId" }
+      { _expr: "vars.listContextNumber" }
+      { _expr: "vars.note" }
+      { _expr: "vars.subjectIds" }
+    ]
+  )
+}
+
+
+# NOTE ONLY. Duration, items, and list are immutable historical fact.
+mutation UpdatePrayerNote($id: UUID!, $note: String) @auth(level: USER_ANON) @transaction {
+  prayer_updateMany(
+    where: { id: { eq: $id }, user: { id: { eq_expr: "auth.uid" } } }
+    data: { note: $note }
+  ) @check(expr: "this == 1", message: "Prayer not found")
+}
+
+
+# ----------------------------------------------------------------------------
+# Subjects
+# ----------------------------------------------------------------------------
+
+# Manual order for ONE level: the names, or one name's intentions, in their
+# new order (sortOrder = 1..n). The self row is pinned and never reordered.
+mutation ReorderSubjects($orderedIds: [UUID!]!) @auth(level: USER_ANON) {
+  _execute(
+    sql: """
+    UPDATE prayer_subject s SET sort_order = o.ord
+    FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof($2::jsonb) = 'array' THEN $2::jsonb ELSE '[]'::jsonb END) WITH ORDINALITY AS o(id, ord)
+    WHERE s.owner_id = $1 AND NOT s.is_self AND s.id = o.id::uuid
+    """
+    params: [{ _expr: "auth.uid" }, { _expr: "vars.orderedIds" }]
+  )
+}
+
+# Answered: stays ACTIVE under its name ("praying in gratitude"); frees its
+# place on the list immediately (resolved items are never list-eligible).
+mutation MarkIntentionAnswered($id: UUID!) @auth(level: USER_ANON) @transaction {
+  prayerSubject_updateMany(
+    where: {
+      id: { eq: $id }
+      owner: { id: { eq_expr: "auth.uid" } }
+      kind: { eq: INTENTION }
+      status: { eq: ACTIVE }
+      resolvedAt: { isNull: true }
+    }
+    data: { resolution: ANSWERED, resolvedAt_expr: "request.time" }
+  ) @check(expr: "this == 1", message: "Open intention not found")
+}
+
+# Release: no gratitude implied; goes straight to the archive.
+mutation ReleaseIntention($id: UUID!) @auth(level: USER_ANON) @transaction {
+  prayerSubject_updateMany(
+    where: {
+      id: { eq: $id }
+      owner: { id: { eq_expr: "auth.uid" } }
+      kind: { eq: INTENTION }
+      status: { eq: ACTIVE }
+      resolvedAt: { isNull: true }
+    }
+    data: { resolution: RELEASED, resolvedAt_expr: "request.time", status: ARCHIVED }
+  ) @check(expr: "this == 1", message: "Open intention not found")
+}
+
+# Archive. On a name, its ACTIVE intentions follow with archivedByCascade so a
+# later restore of the name brings back exactly those.
+mutation ArchiveSubject($id: UUID!) @auth(level: USER_ANON) @transaction {
+  prayerSubject_updateMany(
+    where: {
+      id: { eq: $id }
+      owner: { id: { eq_expr: "auth.uid" } }
+      isSelf: { eq: false }
+      status: { eq: ACTIVE }
+    }
+    data: { status: ARCHIVED, archivedByCascade: false }
+  ) @check(expr: "this == 1", message: "Item not found")
+  cascade: prayerSubject_updateMany(
+    where: {
+      parent: { id: { eq: $id } }
+      owner: { id: { eq_expr: "auth.uid" } }
+      status: { eq: ACTIVE }
+    }
+    data: { status: ARCHIVED, archivedByCascade: true }
+  )
+}
+
+# Restore. On a name, brings back ONLY intentions archived by the cascade —
+# never Released ones or ones archived on their own. An intention whose name
+# is still archived can't be restored on its own (see OPERATIONS.md).
+mutation RestoreSubject($id: UUID!) @auth(level: USER_ANON) @transaction {
+  query @redact {
+    prayerSubjects(
+      where: { id: { eq: $id }, owner: { id: { eq_expr: "auth.uid" } }, status: { eq: ARCHIVED } }
+      limit: 1
+    )
+    @check(expr: "this.size() == 1", message: "Archived item not found")
+    @check(
+      expr: "this[0].parent == null || this[0].parent.status == 'ACTIVE'"
+      message: "Restore its name first"
+    ) {
+      id
+      parent { status }
+    }
+  }
+  prayerSubject_updateMany(
+    where: { id: { eq: $id }, owner: { id: { eq_expr: "auth.uid" } }, status: { eq: ARCHIVED } }
+    data: { status: ACTIVE, archivedByCascade: false }
+  ) @check(expr: "this == 1", message: "Archived item not found")
+  cascade: prayerSubject_updateMany(
+    where: {
+      parent: { id: { eq: $id } }
+      owner: { id: { eq_expr: "auth.uid" } }
+      status: { eq: ARCHIVED }
+      archivedByCascade: { eq: true }
+    }
+    data: { status: ACTIVE, archivedByCascade: false }
+  )
+}
+
+# Purge ("gone gone"; rows persist for history). Cascades to all intentions.
+mutation PurgeSubject($id: UUID!) @auth(level: USER_ANON) @transaction {
+  prayerSubject_updateMany(
+    where: {
+      id: { eq: $id }
+      owner: { id: { eq_expr: "auth.uid" } }
+      isSelf: { eq: false }
+      status: { ne: PURGED }
+    }
+    data: { status: PURGED }
+  ) @check(expr: "this == 1", message: "Item not found")
+  cascade: prayerSubject_updateMany(
+    where: {
+      parent: { id: { eq: $id } }
+      owner: { id: { eq_expr: "auth.uid" } }
+      status: { ne: PURGED }
+    }
+    data: { status: PURGED }
+  )
+}
+
+# Monogram tone (palette index). null = back to the hash-of-id default.
+mutation SetSubjectAvatarTone($id: UUID!, $avatarTone: Int) @auth(level: USER_ANON) @transaction {
+  prayerSubject_updateMany(
+    where: { id: { eq: $id }, owner: { id: { eq_expr: "auth.uid" } }, status: { ne: PURGED } }
+    data: { avatarTone: $avatarTone }
+  ) @check(expr: "this == 1", message: "Item not found")
+}
+
+
+# ----------------------------------------------------------------------------
+# Settings (stored on the User record; sync across devices)
+# ----------------------------------------------------------------------------
+# Omitted variables leave the field unchanged.
+mutation UpdateMySettings(
+  $locale: String
+  $timezone: String
+  $listLiveOptIn: Boolean
+  $showNamesInNotifications: Boolean
+  $graceOffersEnabled: Boolean
+) @auth(level: USER_ANON) {
+  user_update(
+    key: { id_expr: "auth.uid" }
+    data: {
+      locale: $locale
+      timezone: $timezone
+      listLiveOptIn: $listLiveOptIn
+      showNamesInNotifications: $showNamesInNotifications
+      graceOffersEnabled: $graceOffersEnabled
+    }
+  )
+}
+
+
+# ----------------------------------------------------------------------------
+# Reminders (scheduled on device; synced here)
+# ----------------------------------------------------------------------------
+# One row per preset slot; CUSTOM may repeat (its cap ships with the feature).
+mutation CreateReminder($slot: ReminderSlot!, $enabled: Boolean = true, $localTime: String!, $label: String)
+@auth(level: USER_ANON) @transaction {
+  query @redact {
+    reminderPreferences(where: { user: { id: { eq_expr: "auth.uid" } }, slot: { eq: $slot } })
+    @check(expr: "vars.slot == 'CUSTOM' || this.size() == 0", message: "That reminder already exists")
+    @check(
+      expr: "vars.localTime.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')"
+      message: "Time must be HH:mm"
+    ) {
+      id
+    }
+  }
+  reminderPreference_insert(
+    data: {
+      user: { id_expr: "auth.uid" }
+      slot: $slot
+      enabled: $enabled
+      localTime: $localTime
+      label: $label
+    }
+  )
+}
+
+mutation UpdateReminder($id: UUID!, $enabled: Boolean, $localTime: String, $label: String)
+@auth(level: USER_ANON) @transaction {
+  query @redact {
+    user(key: { id_expr: "auth.uid" })
+    @check(
+      expr: "!has(vars.localTime) || vars.localTime == null || vars.localTime.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')"
+      message: "Time must be HH:mm"
+    ) {
+      id
+    }
+  }
+  reminderPreference_updateMany(
+    where: { id: { eq: $id }, user: { id: { eq_expr: "auth.uid" } } }
+    data: { enabled: $enabled, localTime: $localTime, label: $label }
+  ) @check(expr: "this == 1", message: "Reminder not found")
+}
+
+mutation DeleteReminder($id: UUID!) @auth(level: USER_ANON) @transaction {
+  reminderPreference_deleteMany(
+    where: { id: { eq: $id }, user: { id: { eq_expr: "auth.uid" } } }
+  ) @check(expr: "this == 1", message: "Reminder not found")
+}

@@ -191,7 +191,7 @@ enum ReasonCategory { LANGUAGE CONTACT_OR_LINK NAME_CHANGES OTHER }
 # DailyStats are unaffected (increment-on-write).
 # ----------------------------------------------------------------------------
 type User @table {
-  id: String! @default(expr: "auth.uid")     # Firebase Auth UID as PK
+  id: String!                                # Firebase Auth UID as PK (always set by the server)
 
   # ONE name field (auth-onboarding.md): mirrors the self-subject's publicName.
   # The app greets with its first word. null until setSelfName; afterwards
@@ -590,6 +590,12 @@ type Prayer @table @index(fields: ["userId", "localDate"]) {
   # aggregate display.
   latitude: Float
   longitude: Float
+
+  # Server-only idempotency marker: set in the SAME statement that applies
+  # this prayer's increments (list prayerCount/prayerSeconds, DailyStats,
+  # streak). onMutationExecuted is at-least-once, so the increments are applied
+  # only by the run that flips this from null. Never client-settable.
+  countedAt: Timestamp
 }
 
 
