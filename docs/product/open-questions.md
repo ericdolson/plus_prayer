@@ -7,6 +7,7 @@ decisions.md. **MVP** = blocks MVP build._
 |---|---|---|---|
 | Q3 | Price: ~$20–30/yr vs ~$3–5/mo; monthly/annual; one tier or several | monetization | Stage 2 |
 | Q15 | Billing provider (RevenueCat vs direct) | monetization | Stage 2 |
+| Q28 | **KNOWN GAP** — safety handling (self-harm resource card, threat/child-safety policy, lawyer review); see safety.md | safety | Stage 2 (S1–S4 beta) |
 | Q18 | Link a social participant's handle to their app account? | list-lifecycle | Later |
 | Q20 | Physical printing at app scale: how is a list with 100k+ names printed/sealed? | list-lifecycle | Stage 2 |
 

@@ -98,6 +98,8 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
 - [ ] [app] Sign-in / linking prompts (after first prayer, ~3-day streak)
 - [ ] [app] In-app account deletion
 - [ ] [biz] Privacy summary + draft policy/terms; 13+ gate
+- [ ] [biz] Safety beta items S1–S4 (terms, privacy disclosure, internal
+      safety policy, AI first pass flags threats/child safety) — see safety.md
 - [ ] [ops] Daily routine running fully on the DB
 
 **Beta exit question:** does the app beat commenting 🙏 for the people who try it?
@@ -114,6 +116,8 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
       all N places in use" on add; purchase before sign-in, sign-in prompt after
 - [ ] [app] Opt-in "Today's list is live" push (FCM)
 - [ ] [be] Turn on + tune the word blocklist / automated flagging
+- [ ] [app] **KNOWN GAP:** on-device self-harm detection + resource card (safety.md S5)
+- [ ] [biz] Lawyer review of terms/safety policy incl. EU (safety.md S6)
 - [ ] [biz] Store listings ("One list. Everyone. Every day."), privacy labels,
       lawyer-reviewed policy
 - [ ] [ops] Social funnel: `/go/` links, deep links into the app

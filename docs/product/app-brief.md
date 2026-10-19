@@ -230,6 +230,10 @@ to free → second invite if still over. Same flow when a subscription lapses
 7. Membership/trial flows (Stage 2 billing; beta uses a grant).
 
 ## 7. Not in MVP (don't build, don't block)
+**Known gap:** on-device self-harm language detection + resource card
+(safety.md S5) — Stage 2, before public launch. Don't block or reject such
+intentions in the meantime.
+
 Photos, guided prayer ("Help me pray" — schema seams only), location, groups /
 sharing / feed, cross-device draft banner, moment reminders, custom reminders,
 answered running total, "In memory".

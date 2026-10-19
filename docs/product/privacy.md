@@ -25,5 +25,7 @@ _Last updated: 2026-10-18. Not legal advice — final text via a policy generato
 - **Moderation processing:** new/changed names and intentions are reviewed with
   the help of an AI provider (Anthropic) before printing — disclose as a
   processor.
+- **Safety disclosure:** may share information with authorities in rare safety
+  emergencies; child-safety content reported as required (see safety.md).
 - **Deletion:** immediate; past list entries lose name/owner; counts remain;
   subscriptions cancelled via the store.

@@ -671,3 +671,13 @@ disclosed in the privacy policy.
 Aliases are owner-only, never printed or shared, so they skip the contact-info
 input block, the blocklist, and the morning AI first pass. Only printed text
 (names, intentions, the self name) is moderated.
+
+### Known gap logged: safety handling for self-harm and threats
+**Timestamp:** 2026-10-18
+Self-harm language is never blocked; a gentle on-device resource card (988 /
+international directory) is planned for Stage 2. Threats toward others are not
+printed and are prohibited; credible imminent threats and child-safety content
+follow an internal policy (law enforcement / NCMEC). Beta covers terms, privacy
+disclosure, internal policy, and AI first-pass flags; resource card and lawyer
+review close the gap before public launch. Tracked in docs/product/safety.md and
+open-questions Q28.
