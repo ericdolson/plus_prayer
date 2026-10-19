@@ -4,8 +4,8 @@
 import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
 import { mutate } from "../src/db";
-import { assembleNextList, closeList, getReviewDiff } from "../src/lists";
-import { addList, addSubjectRow, adminDb, createUser, DAY, logPrayer, makeDeps, resetDb, TestDeps } from "./helpers";
+import { assembleNextList, closeList, getListForPrint, getReviewDiff, moderateEntries } from "../src/lists";
+import { addList, addSubjectRow, adminDb, createUser, DAY, logPrayer, makeDeps, resetDb, sql, TestDeps } from "./helpers";
 
 /** Everyone prays for the current list, then close + assemble. */
 async function nextList(deps: TestDeps, uids: string[], social: unknown[], listId: string, at: number) {
@@ -66,5 +66,56 @@ describe("review diff", () => {
     const second = await nextList(deps, ["kay"], [], first.listId, first.closesAt + 60_000); // Sam skips
     const third = await nextList(deps, ["sam", "kay"], [], second.listId, second.closesAt + 60_000);
     assert.deepEqual(third.review, []);
+  });
+});
+
+describe("the morning skill's first pass (moderateEntries)", () => {
+  beforeEach(resetDb);
+
+  it("applies obvious calls, and leaves Eric only what it couldn't decide", async () => {
+    const deps = makeDeps();
+    await createUser("una", { name: "Una" });
+    const list1 = await addList(1, { currentFrom: Date.now() - DAY });
+    const res = await nextList(deps, ["una"], [
+      { platform: "youtube", externalId: "a", displayName: "Grace Okafor" },
+      { platform: "youtube", externalId: "b", displayName: "buy followers here" },
+      { platform: "youtube", externalId: "c", displayName: "Xx_Shadow_xX" },
+    ], list1, Date.now());
+    const id = (name: string) => res.review.find((r) => r.publicName === name)!.entryId;
+
+    const out = await moderateEntries(deps, {
+      listId: res.listId,
+      decisions: [
+        { entryId: id("Una"), decision: "approve" },
+        { entryId: id("Grace Okafor"), decision: "approve", note: "a person's name" },
+        { entryId: id("buy followers here"), decision: "exclude", reasonCategory: "OTHER", note: "spam, not a name" },
+        { entryId: id("Xx_Shadow_xX"), decision: "unsure", note: "a handle — could be how they go by" },
+      ],
+    });
+    assert.deepEqual([out.updated, out.approved, out.excluded, out.unsure], [4, 2, 1, 1]);
+    assert.deepEqual(
+      (out.forEric as { publicName: string; heldReason: string }[]).map((e) => [e.publicName, e.heldReason]),
+      [["Xx_Shadow_xX", "auto-review: a handle — could be how they go by"]],
+      "only what it couldn't call reaches Eric, with its reason",
+    );
+
+    // Exception-based: the unsure one still prints if Eric does nothing; the excluded one doesn't.
+    const printed = (await getListForPrint(deps, res.listId)) as { prayerListEntries: { publicName: string }[] };
+    assert.deepEqual(printed.prayerListEntries.map((e) => e.publicName).sort(), ["Grace Okafor", "Una", "Xx_Shadow_xX"]);
+    const [counts] = await sql<{ soul_count: number }>("SELECT soul_count FROM prayer_list WHERE id = $1::uuid", [res.listId]);
+    assert.equal(counts.soul_count, 3);
+  });
+
+  it("validates decisions and only touches entries on the given list", async () => {
+    const deps = makeDeps();
+    await createUser("vic", { name: "Vic" });
+    const list1 = await addList(1, { currentFrom: Date.now() - DAY });
+    const res = await nextList(deps, ["vic"], [], list1, Date.now());
+    const entryId = res.review[0].entryId;
+    await assert.rejects(moderateEntries(deps, { listId: res.listId, decisions: [{ entryId, decision: "exclude", note: "x" }] }), /needs a reasonCategory/);
+    await assert.rejects(moderateEntries(deps, { listId: res.listId, decisions: [{ entryId, decision: "unsure" }] }), /what's unclear/);
+    await assert.rejects(moderateEntries(deps, { listId: res.listId, decisions: [{ entryId, decision: "approve" }, { entryId, decision: "approve" }] }), /duplicate/);
+    const other = await moderateEntries(deps, { listId: list1, decisions: [{ entryId, decision: "exclude", reasonCategory: "OTHER", note: "wrong list" }] });
+    assert.equal(other.updated, 0, "an entry on another list is never touched");
   });
 });

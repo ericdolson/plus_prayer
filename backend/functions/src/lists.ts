@@ -231,6 +231,64 @@ export async function moderateEntry(
   return { entryId: input.entryId, status };
 }
 
+export interface AutoReviewDecision {
+  entryId: string;
+  /** approve → prints as-is · exclude → not printed (category shown to the user) · unsure → flagged for Eric */
+  decision: "approve" | "exclude" | "unsure";
+  reasonCategory?: (typeof REASONS)[number];
+  /** Why — required for exclude and unsure; stored as heldReason ("auto-review: …"). */
+  note?: string;
+}
+
+const ENTRY_ID = /^[0-9a-f]{32}$|^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const MAX_DECISIONS = 5000;
+
+/**
+ * The morning skill's first pass over the review diff, applied in one call:
+ * it decides what's obvious and marks the rest `unsure`, which leaves only
+ * those for Eric (returned as `forEric`). Review stays exception-based —
+ * anything not excluded prints, including what Eric never gets to.
+ */
+export async function moderateEntries(deps: Deps, input: { listId?: unknown; decisions?: unknown }) {
+  if (typeof input.listId !== "string" || !Array.isArray(input.decisions)) {
+    throw new HttpsError("invalid-argument", "listId and decisions are required");
+  }
+  if (input.decisions.length > MAX_DECISIONS) throw new HttpsError("invalid-argument", `at most ${MAX_DECISIONS} decisions per call`);
+  const seen = new Set<string>();
+  const rows = (input.decisions as AutoReviewDecision[]).map((d, i) => {
+    const where = `decisions[${i}]`;
+    if (typeof d?.entryId !== "string" || !ENTRY_ID.test(d.entryId)) throw new HttpsError("invalid-argument", `${where}: bad entryId`);
+    const id = normId(d.entryId);
+    if (seen.has(id)) throw new HttpsError("invalid-argument", `${where}: duplicate entryId`);
+    seen.add(id);
+    const note = typeof d.note === "string" ? d.note.trim().slice(0, 500) : "";
+    const category = d.reasonCategory == null ? null : REASONS.find((r) => r === d.reasonCategory);
+    if (category === undefined) throw new HttpsError("invalid-argument", `${where}: unknown reasonCategory`);
+    switch (d.decision) {
+      case "approve":
+        return { entryId: id, status: "APPROVED", category: null, note: note ? `auto-review: ${note}` : null };
+      case "exclude":
+        if (!category) throw new HttpsError("invalid-argument", `${where}: an exclusion needs a reasonCategory (users see it)`);
+        if (!note) throw new HttpsError("invalid-argument", `${where}: say why it's excluded`);
+        return { entryId: id, status: "EXCLUDED", category, note: `auto-review: ${note}` };
+      case "unsure":
+        if (!note) throw new HttpsError("invalid-argument", `${where}: say what's unclear, for Eric`);
+        return { entryId: id, status: "HELD", category, note: `auto-review: ${note}` };
+      default:
+        throw new HttpsError("invalid-argument", `${where}: decision must be approve, exclude, or unsure`);
+    }
+  });
+  const res = await mutate<{ _execute: number }>(deps.db, "ModerateEntries", { listId: input.listId, decisions: rows });
+  await mutate(deps.db, "RecountList", { listId: input.listId });
+  return {
+    updated: res._execute,
+    approved: rows.filter((r) => r.status === "APPROVED").length,
+    excluded: rows.filter((r) => r.status === "EXCLUDED").length,
+    unsure: rows.filter((r) => r.status === "HELD").length,
+    forEric: await getHeldEntries(deps, input.listId),
+  };
+}
+
 export async function getListForPrint(deps: Deps, listId: string) {
   return query(deps.db, "GetListForPrint", { listId });
 }

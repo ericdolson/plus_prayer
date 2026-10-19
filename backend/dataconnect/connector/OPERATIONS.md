@@ -178,8 +178,8 @@ a foreign or missing id fails plainly and changes nothing.
 Callables (`functions/src/subjects.ts`):
 - **addSubject** — kind, parentId?, publicName, personalLabel?, note?. INTENTION
   needs `parentId` = one of my ACTIVE names; SOUL has none. Caps 40 / 80
-  grapheme clusters (alias 40, note 1000). Names, aliases, and intentions with
-  a phone number (7+ digits with separators), email, or URL/domain are
+  grapheme clusters (alias 40, note 1000). Names and intentions (the printed
+  text — aliases are never printed and aren't checked) with a phone number (7+ digits with separators), email, or URL/domain are
   rejected: `invalid-argument`, message "Names and intentions can't include
   phone numbers, emails, or links.", details `{ reason: "CONTACT_OR_LINK",
   field }` for an inline message. Verse references, room numbers, dates,
@@ -188,7 +188,7 @@ Callables (`functions/src/subjects.ts`):
   effective entitlement) has room, else false and marked not on the list.
   Rejected past the ~500 cap ("contact us").
 - **updateSubject** — publicName, personalLabel, note on a non-self item (same
-  contact check on name and alias). Not
+  contact check on the name; the alias is free). Not
   kind, not parent. The self name uses setSelfName.
 - **setCarriedItems** — the "your portion" save: exactly these ids carried.
   Over the effective entitlement → `failed-precondition` with
@@ -366,7 +366,16 @@ and offline-friendly): see onPrayerLogged.
   on — self-name changes included), with previousName, parentName (for an
   intention), isSelf, and any internal flag. Base set and EXCLUDED entries
   left out; no owner identities.
-- **getHeldEntries** (ADMIN) — the internally flagged (HELD) entries.
+- **moderateEntries** (ADMIN) — the morning skill's first pass over the review
+  diff, applied in one call: `decisions: [{ entryId, decision: approve |
+  exclude | unsure, reasonCategory?, note? }]` (only entries on `listId` are
+  touched). approve → APPROVED · exclude → EXCLUDED (reasonCategory required —
+  users see it; note required) · unsure → HELD (note required — it's Eric's
+  queue). Notes are stored as heldReason "auto-review: …". Recounts; returns
+  counts and `forEric` = the list's HELD entries. Anything not excluded still
+  prints, including what Eric never gets to.
+- **getHeldEntries** (ADMIN) — the HELD entries: what the first pass couldn't
+  call, plus any internal flag it left untouched.
 - **moderateEntry** (ADMIN) — set APPROVED / HELD / EXCLUDED + heldReason +
   reasonCategory (OTHER = "Didn't meet list guidelines"); EXCLUDED requires a
   category (users see it). Recounts the list. Eric only needs it to exclude.
@@ -411,6 +420,29 @@ import scripts themselves are not written yet.
 - Cut the harvest / publish skills over to the admin functions before launch.
 
 ---
+
+## Morning review — decision contract for the skill's AI first pass
+
+Input: the `review` items from assembleNextList (or getReviewDiff). Decide
+every item; send Eric only what can't be called confidently. Never edit text.
+- **approve** — reads plainly as a person's name, a group or cause, or a
+  prayer intention, in any language or script. Includes names that contain
+  words that are insults elsewhere but are used as names ("Dick Smith", the
+  surname "Coon"), nicknames, a social handle that reads as how someone goes
+  by, verse references, dates, memorial years, health or grief details in an
+  intention (that's what intentions are).
+- **exclude** — clearly not a prayer name or intention, or clearly harmful:
+  profanity or slurs used as insults (LANGUAGE); contact info or links that
+  slipped through (CONTACT_OR_LINK); a self name churned into something
+  abusive or impersonating (NAME_CHANGES); spam, ads, promotions, trolling,
+  sexual content, mockery or attacks on a person (OTHER). The user sees only
+  "Not printed on List N · {category}", so the category must be fair.
+- **unsure** — anything else: ambiguous handles, a word that could be a name
+  or an insult in a language it can't judge, an intention that might expose
+  someone else's private information, anything it would want a human for.
+  The note says what's unclear in one line.
+- Privacy: the review fields carry no owner identities; send only those to
+  the AI provider (disclosed in the privacy policy).
 
 ## Auth summary
 - OWNER: all of a user's own subjects, prayers, header, portion, detail,

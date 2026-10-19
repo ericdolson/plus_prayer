@@ -390,6 +390,24 @@ mutation ModerateEntry(
   ) @check(expr: "this == 1", message: "ENTRY_NOT_FOUND")
 }
 
+# The morning skill's decisions in one statement. $decisions: JSON array of
+# { entryId, status (APPROVED | HELD | EXCLUDED), category, note }, validated
+# by the function. Only entries on $listId are touched. Returns rows updated.
+mutation ModerateEntries($listId: UUID!, $decisions: Any!) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    UPDATE prayer_list_entry e SET
+      moderation_status = d.status::moderation_status,
+      reason_category = d.category::reason_category,
+      held_reason = d.note
+    FROM jsonb_to_recordset(CASE WHEN jsonb_typeof($2::jsonb) = 'array' THEN $2::jsonb ELSE '[]'::jsonb END)
+      AS d("entryId" text, status text, category text, note text)
+    WHERE e.id = d."entryId"::uuid AND e.list_id = $1::uuid
+    """
+    params: [{ _expr: "vars.listId" }, { _expr: "vars.decisions" }]
+  )
+}
+
 # What gets printed: every entry not EXCLUDED (HELD is internal and prints),
 # with the keys the print step needs to group a portion (owner → name → its
 # intentions via parentEntry).

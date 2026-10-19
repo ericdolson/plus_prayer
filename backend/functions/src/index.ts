@@ -164,6 +164,7 @@ export const assembleNextList = adminCall((d, data) => lists.assembleNextList(d,
 export const getHeldEntries = adminCall((d, data) => lists.getHeldEntries(d, data.listId));
 export const getReviewDiff = adminCall((d, data) => lists.getReviewDiff(d, data.listId));
 export const moderateEntry = adminCall((d, data) => lists.moderateEntry(d, data));
+export const moderateEntries = adminCall((d, data) => lists.moderateEntries(d, data));
 export const getListForPrint = adminCall((d, data) => lists.getListForPrint(d, data.listId));
 export const publishList = adminCall((d, data) => lists.publishList(d, data.listId));
 export const publishListVideo = adminCall((d, data) => lists.publishListVideo(d, data));
