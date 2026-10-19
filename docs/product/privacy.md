@@ -22,5 +22,8 @@ _Last updated: 2026-10-18. Not legal advice — final text via a policy generato
 - **Base set:** public NamUs data; resolved cases removed quietly.
 - **Anonymous aggregates** (prayer counts, presence, answered total) may appear
   in the app, on the list, and in social captions.
+- **Moderation processing:** new/changed names and intentions are reviewed with
+  the help of an AI provider (Anthropic) before printing — disclose as a
+  processor.
 - **Deletion:** immediate; past list entries lose name/owner; counts remain;
   subscriptions cancelled via the store.

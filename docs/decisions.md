@@ -656,3 +656,12 @@ The 30h window is bounded to before `closesAt`, so a prayer after the cutoff
 counts only for N+1 and can't earn two lists. "List is live" push drops
 "including you" because it is a broadcast. Name-like words removed from the
 blocklist seed.
+
+### Decision: Beta moderation — block contact info at input, invisible pending, exception-based review
+**Timestamp:** 2026-10-18 (refines the 2026-10-18 auto-flag and "Held for review" decisions)
+Phone numbers, emails, and links can't be saved in names/aliases/intentions at
+all (app + server). Pending review is never shown to users; anything Eric doesn't
+exclude prints. The morning skill takes an AI first pass over the new/changed
+diff. Exclusions are shown gently after assembly with an edit path. The word
+blocklist is switched off until public launch. AI moderation processing is
+disclosed in the privacy policy.

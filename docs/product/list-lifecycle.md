@@ -134,6 +134,31 @@ _Last updated: 2026-10-17_
   local days prayed with the list, which always satisfies the gate — so keeping
   the streak keeps you carried.
 
+## Moderation for MVP / beta (2026-10-18)
+- **Contact info and links are blocked at input**, unconditionally: names,
+  aliases, and intentions can't be saved if they contain a phone number (7+
+  digits, allowing separators), an email address, or a URL/domain. Checked in
+  the app (instant inline message: "Names and intentions can't include phone
+  numbers, emails, or links.") and enforced in the server functions. Avoid false
+  positives: verse references ("John 3:16", "Psalm 23"), room numbers, dates,
+  and abbreviations like "St." must pass. Social names (which can't be blocked
+  at input) are excluded at ingest if they match.
+- **Pending review is invisible to users.** Nothing is ever shown as "in review".
+  Rows and the list line read normally ("Daniel will be on List 53").
+- **Exception-based review:** the morning skill takes a first pass over names and
+  intentions that are new or changed since the last list and gives Eric a short
+  list of anything that looks off. **Anything Eric doesn't exclude prints.**
+  `HELD` is internal only ("flagged for Eric").
+- **Exclusion is shown gently, after assembly:** on that item, next app open —
+  "Not printed on List 53 · {category}. Edit to include it next time." (tap →
+  edit). Never shown while pending.
+- **Deferred to Stage 2 (public launch):** the word blocklist (built, switched
+  off by config), its tuning across languages/names, and any broader automated
+  flagging. Eric's daily review of the diff keeps the "curated" principle true
+  until then.
+- Privacy: the morning first pass sends names/intentions to an AI provider
+  (Anthropic) for moderation — disclose in the privacy policy.
+
 ## OPEN
 - **Character caps:** DECIDED 40 for names, 80 for intentions (2026-10-17).
 - **What the app shows of a list** beyond counts and the video (list number,
