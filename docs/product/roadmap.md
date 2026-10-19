@@ -113,6 +113,7 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
 - [ ] [app] Paywall moments: over-limit meter (17/15) on save, "Not on the list ·
       all N places in use" on add; purchase before sign-in, sign-in prompt after
 - [ ] [app] Opt-in "Today's list is live" push (FCM)
+- [ ] [be] Turn on + tune the word blocklist / automated flagging
 - [ ] [biz] Store listings ("One list. Everyone. Every day."), privacy labels,
       lawyer-reviewed policy
 - [ ] [ops] Social funnel: `/go/` links, deep links into the app

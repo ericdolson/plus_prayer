@@ -108,6 +108,11 @@ idea), not a pattern to follow.
 - Prayer started before `closesAt` counts for that list; after it, the app
   treats N+1 as current (no special UI).
 
+### Input validation
+Block saving names, aliases, and intentions containing phone numbers, emails,
+or links — inline: "Names and intentions can't include phone numbers, emails,
+or links." Must allow verse references ("John 3:16"), room numbers, dates.
+
 ### Add sheet (screens.md)
 One bottom sheet. From footer ＋: **Add name** (40), switchable to intention with a
 name picker (default "Me"). From a name's detail/row: **Add intention for {alias}**
@@ -145,8 +150,9 @@ Illustrative preview of the user's part of the printed list (names with their
 intentions). Meter "7 of 10" (free: your name + 1). Tap to include/remove; an
 intention requires its name. Over-selecting allowed ("17 / 15" + upgrade mark);
 saving over the limit invites upgrade; declining **blocks save** and returns with
-extras highlighted. States: "Held for review", "Not printed · {category}",
-"Waiting for your choice" (entitlement ended).
+extras highlighted. States: "Not printed on List 53 · {category}. Edit to
+include it next time." (shown only after assembly), "Waiting for your choice"
+(entitlement ended). **Never show "in review" / pending.**
 
 ### History (stats-history.md)
 Prayers grouped by day: time · duration ("7:42 am · 12 min"; auto-saved "~38

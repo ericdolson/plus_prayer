@@ -268,3 +268,17 @@ server functions (addSubject, updateSubject, setCarriedItems), `Prayer.countedAt
   "dick", "fanny", "willy") from the seed; keep CJK single-character
   whole-word matching.
 - Push copy: "List 52 is up · 4,345 people." (broadcast — no "including you").
+
+## 11. Beta moderation (2026-10-18)
+- **Block contact info/links at input** in addSubject / updateSubject /
+  setSelfName (and alias): phone (7+ digits with separators), email, URL/domain.
+  Return a validation error the app shows inline. Don't block verse references
+  ("John 3:16"), room numbers, dates, "St.". Social ingest: exclude matching names.
+- **Exception-based review:** assembly prints everything not EXCLUDED. `HELD`
+  = internal "flagged for Eric"; held items print unless Eric excludes them.
+- **Review diff:** the assembly/admin output includes names and intentions that
+  are new or changed since the last list (incl. self-name changes) for the
+  morning skill's AI first pass and Eric's review.
+- **Word blocklist: off** via config for the beta (keep the code); Stage 2.
+- Users never see a pending state; `reasonCategory` surfaces only on EXCLUDED
+  entries after assembly.
