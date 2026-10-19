@@ -10,7 +10,7 @@ import * as functionsV1 from "firebase-functions/v1";
 import { onMutationExecuted } from "firebase-functions/dataconnect";
 import { onValueWritten } from "firebase-functions/v2/database";
 import { CallableRequest, HttpsError, onCall } from "firebase-functions/v2/https";
-import { defineInt, defineString } from "firebase-functions/params";
+import { defineBoolean, defineInt, defineString } from "firebase-functions/params";
 import { setGlobalOptions } from "firebase-functions/v2";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
@@ -33,6 +33,8 @@ const gateHours = defineInt("GATE_HOURS", { default: DEFAULT_SERVER_CONFIG.gateH
 const basePremiumPool = defineInt("BASE_PREMIUM_POOL", { default: DEFAULT_SERVER_CONFIG.basePremiumPool });
 const subjectCap = defineInt("SUBJECT_CAP", { default: DEFAULT_SERVER_CONFIG.subjectCap });
 const listTimeZone = defineString("LIST_TIME_ZONE", { default: DEFAULT_SERVER_CONFIG.listTimeZone });
+// Off for the beta; set true at Stage 2 to turn the LANGUAGE flag back on.
+const wordBlocklist = defineBoolean("MODERATION_WORD_BLOCKLIST", { default: DEFAULT_SERVER_CONFIG.wordBlocklistEnabled });
 
 let deps: Deps | null = null;
 function getDeps(): Deps {
@@ -43,6 +45,7 @@ function getDeps(): Deps {
     basePremiumPool: basePremiumPool.value(),
     subjectCap: subjectCap.value(),
     listTimeZone: listTimeZone.value(),
+    wordBlocklistEnabled: wordBlocklist.value(),
   };
   deps = {
     db: getDataConnect({ serviceId: SERVICE_ID, location: LOCATION, connector: "admin" }),
@@ -159,6 +162,7 @@ export const presenceReconcile = onSchedule("every 1 minutes", async () => {
 export const closeList = adminCall((d, data) => lists.closeList(d, data.minutes));
 export const assembleNextList = adminCall((d, data) => lists.assembleNextList(d, data));
 export const getHeldEntries = adminCall((d, data) => lists.getHeldEntries(d, data.listId));
+export const getReviewDiff = adminCall((d, data) => lists.getReviewDiff(d, data.listId));
 export const moderateEntry = adminCall((d, data) => lists.moderateEntry(d, data));
 export const getListForPrint = adminCall((d, data) => lists.getListForPrint(d, data.listId));
 export const publishList = adminCall((d, data) => lists.publishList(d, data.listId));

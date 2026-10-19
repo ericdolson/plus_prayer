@@ -149,19 +149,38 @@ query SearchMySubjects($query: String!) @auth(level: USER_ANON) {
 
 
 # Today's list page / list row avatar cluster / Amen invitation.
-# `carriedLists` = lists the user's own name was printed on (an APPROVED self
-# entry on a PUBLISHED list) → "You've been carried on N lists".
+# Review is invisible to users (schema-brief §11): `myEntries` is everything of
+# theirs that prints (anything not EXCLUDED — HELD is internal), with no
+# moderation fields; `notPrinted` holds only exclusions, the one place a
+# reasonCategory reaches the app ("Not printed on List N · {category}").
+# `carriedLists` = published lists the user's own name printed on →
+# "You've been carried on N lists".
 query GetMyListStatus($listId: UUID!) @auth(level: USER_ANON) {
   myEntries: prayerListEntries(
-    where: { list: { id: { eq: $listId } }, owner: { id: { eq_expr: "auth.uid" } } }
+    where: {
+      list: { id: { eq: $listId } }
+      owner: { id: { eq_expr: "auth.uid" } }
+      moderationStatus: { ne: EXCLUDED }
+    }
   ) {
     id
     kind
     publicName
-    moderationStatus
-    reasonCategory
     parentEntry { id }
     subject { id isSelf }
+  }
+  notPrinted: prayerListEntries(
+    where: {
+      list: { id: { eq: $listId } }
+      owner: { id: { eq_expr: "auth.uid" } }
+      moderationStatus: { eq: EXCLUDED }
+    }
+  ) {
+    id
+    kind
+    publicName
+    reasonCategory
+    subject { id }
   }
   myPrayersWithList: prayers(
     where: { user: { id: { eq_expr: "auth.uid" } }, communityList: { id: { eq: $listId } } }
@@ -172,7 +191,7 @@ query GetMyListStatus($listId: UUID!) @auth(level: USER_ANON) {
     where: {
       owner: { id: { eq_expr: "auth.uid" } }
       subject: { isSelf: { eq: true } }
-      moderationStatus: { eq: APPROVED }
+      moderationStatus: { ne: EXCLUDED }
       list: { status: { eq: "published" } }
     }
   ) {
@@ -183,8 +202,9 @@ query GetMyListStatus($listId: UUID!) @auth(level: USER_ANON) {
 
 # Your portion: every ACTIVE, unresolved item with its own isCarried flag (the
 # client applies effective carry: an intention counts only if its name is
-# carried too), the entitlement for the meter, and the user's entries on the
-# given (newest) list for "Held for review" / "Not printed · {category}".
+# carried too), the entitlement for the meter, and — on the given (newest)
+# list — only the user's EXCLUDED entries ("Not printed on List N ·
+# {category}"). Nothing pending is ever shown.
 query GetMyPortion($listId: UUID) @auth(level: USER_ANON) {
   user(key: { id_expr: "auth.uid" }) {
     planTier
@@ -210,11 +230,14 @@ query GetMyPortion($listId: UUID) @auth(level: USER_ANON) {
     sortOrder
     avatarTone
   }
-  entries: prayerListEntries(
-    where: { list: { id: { eq: $listId } }, owner: { id: { eq_expr: "auth.uid" } } }
+  notPrinted: prayerListEntries(
+    where: {
+      list: { id: { eq: $listId } }
+      owner: { id: { eq_expr: "auth.uid" } }
+      moderationStatus: { eq: EXCLUDED }
+    }
   ) {
     id
-    moderationStatus
     reasonCategory
     subject { id }
   }
@@ -224,8 +247,8 @@ query GetMyPortion($listId: UUID) @auth(level: USER_ANON) {
 # Name / intention detail — ONE operation (stats-history.md): the subject, its
 # parent (intention) or intentions (name), its list entries with each list's
 # number/date/seal/count (bead strand, gaps, tier-3 world count), and the
-# user's prayers that held it (tier 1). Entries are APPROVED only (what was
-# actually printed) — enforced here, not in the app. World count: sum
+# user's prayers that held it (tier 1). Entries are only what printed (not
+# EXCLUDED; HELD is internal and prints) — enforced here, not in the app. World count: sum
 # prayerCount over CLOSED lists and add the live RTDB count iff the current
 # list is among them.
 query GetSubjectDetail($id: UUID!, $prayerLimit: Int = 500, $prayerOffset: Int = 0)
@@ -260,9 +283,8 @@ query GetSubjectDetail($id: UUID!, $prayerLimit: Int = 500, $prayerOffset: Int =
       resolution
       resolvedAt
     }
-    entries: prayerListEntries_on_subject(where: { moderationStatus: { eq: APPROVED } }) {
+    entries: prayerListEntries_on_subject(where: { moderationStatus: { ne: EXCLUDED } }) {
       id
-      moderationStatus
       list {
         id
         listNumber

@@ -25,7 +25,7 @@ mutation EnsureUser($uid: String!, $authProvider: String, $isAnonymous: Boolean!
 
 
 # Everything setSelfName needs: the user, the self subject, and whether the
-# self name has been printed (an APPROVED entry on a PUBLISHED list).
+# self name has been printed (an entry not EXCLUDED on a PUBLISHED list).
 query GetSelfState($uid: String!) @auth(level: NO_ACCESS) {
   user(key: { id: $uid }) {
     id
@@ -40,7 +40,7 @@ query GetSelfState($uid: String!) @auth(level: NO_ACCESS) {
     where: {
       owner: { id: { eq: $uid } }
       subject: { isSelf: { eq: true } }
-      moderationStatus: { eq: APPROVED }
+      moderationStatus: { ne: EXCLUDED }
       list: { status: { eq: "published" } }
     }
   ) {

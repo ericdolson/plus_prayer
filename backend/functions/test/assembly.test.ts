@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
 import { mutate } from "../src/db";
-import { assembleNextList, closeList, listLiveCopy, moderateEntry, publishList, publishListVideo } from "../src/lists";
+import { assembleNextList, closeList, getListForPrint, listLiveCopy, moderateEntry, publishList, publishListVideo } from "../src/lists";
 import { addSubject, setCarriedItems } from "../src/subjects";
 import {
   addList, addSubjectRow, adminDb, clientDb, createUser, DAY, impersonate, logPrayer, makeDeps, resetDb, sql, TestDeps,
@@ -118,46 +118,53 @@ describe("assembly: each user's portion", () => {
 describe("assembly: names from outside the app, flags, counts", () => {
   beforeEach(resetDb);
 
-  it("adds the 🙏 harvest and the active base set; holds contact info; counts non-excluded", async () => {
-    const deps = makeDeps();
+  it("adds the 🙏 harvest and the active base set; excludes contact info; held items still print", async () => {
+    const deps = makeDeps({ wordBlocklistEnabled: true });
     deps.live.blocklist = ["darn"]; // the editable RTDB list overrides the bundled seed
     await createUser("u", { name: "Una" });
-    await createUser("v", { name: "Call me 555-123-4567" });
     await mutate(adminDb, "UpsertBaseSetPerson", { externalId: "MP1", displayName: "Missing Child One", activeFrom: null, activeUntil: null });
     await mutate(adminDb, "UpsertBaseSetPerson", {
       externalId: "MP2", displayName: "Found Child", activeFrom: null, activeUntil: new Date(Date.now() - DAY).toISOString(),
     });
-    const res = await setupAndAssemble(deps, ["u", "v"], [
+    const res = await setupAndAssemble(deps, ["u"], [
       { platform: "YouTube", externalId: "yt1", displayName: "Jane Doe" },
       { platform: "youtube", externalId: "yt1", displayName: "Jane Doe" }, // duplicate → once
       { platform: "instagram", externalId: "ig1", displayName: "darn it" },
       { platform: "threads", externalId: "th1", displayName: "see www.example.com" },
+      { platform: "facebook", externalId: "fb1", displayName: "Call me 555-123-4567" },
+      { platform: "facebook", externalId: "fb2", displayName: "Ruth (John 3:16)" },
     ]);
 
     const rows = await entries(res.listId);
     const by = Object.fromEntries(rows.map((r) => [r.public_name, r]));
-    assert.deepEqual(names(rows), ["Call me 555-123-4567", "Jane Doe", "Missing Child One", "Una", "darn it", "see www.example.com"]);
+    assert.deepEqual(names(rows), [
+      "Call me 555-123-4567", "Jane Doe", "Missing Child One", "Ruth (John 3:16)", "Una", "darn it", "see www.example.com",
+    ]);
     assert.equal(by["Jane Doe"].source, "SOCIAL");
     assert.equal(by["Jane Doe"].moderation_status, "APPROVED");
     assert.equal(by["Missing Child One"].source, "BASE_SET");
-    assert.deepEqual([by["darn it"].moderation_status, by["darn it"].reason_category], ["HELD", "LANGUAGE"]);
-    assert.deepEqual([by["see www.example.com"].reason_category, by["Call me 555-123-4567"].reason_category], ["CONTACT_OR_LINK", "CONTACT_OR_LINK"]);
-    assert.equal(res.held, 3);
-    assert.equal(res.soulCount, 6, "draft counts include held, exclude nothing yet");
-
-    // Review: exclude one, approve the rest, publish → printed counts only.
-    const held = await sql<{ id: string; public_name: string }>(
-      "SELECT id, public_name FROM prayer_list_entry WHERE list_id = $1::uuid AND moderation_status = 'HELD'", [res.listId],
-    );
-    for (const h of held) {
-      await moderateEntry(deps, h.public_name === "darn it"
-        ? { entryId: h.id, status: "EXCLUDED", reasonCategory: "LANGUAGE" }
-        : { entryId: h.id, status: "APPROVED" });
+    assert.equal(by["Ruth (John 3:16)"].moderation_status, "APPROVED", "a verse reference isn't contact info");
+    for (const n of ["see www.example.com", "Call me 555-123-4567"]) {
+      assert.deepEqual([by[n].moderation_status, by[n].reason_category], ["EXCLUDED", "CONTACT_OR_LINK"], n);
     }
+    assert.deepEqual([by["darn it"].moderation_status, by["darn it"].reason_category], ["HELD", "LANGUAGE"]);
+    assert.equal(res.held, 1);
+    assert.equal(res.soulCount, 5, "everything not EXCLUDED counts — HELD prints");
+
+    // Eric doesn't touch the held one: it still prints after publish.
     const pub = await publishList(deps, res.listId);
     assert.equal(pub.sealVariant, new Date(`${(await sql<{ d: string }>("SELECT to_char(list_date, 'YYYY-MM-DD') AS d FROM prayer_list WHERE id = $1::uuid", [res.listId]))[0].d}T12:00:00Z`).getUTCDay());
+    const printed = (await getListForPrint(deps, res.listId)) as { prayerListEntries: { publicName: string }[] };
+    assert.ok(printed.prayerListEntries.some((e) => e.publicName === "darn it"), "HELD prints unless excluded");
+    assert.ok(!printed.prayerListEntries.some((e) => e.publicName === "see www.example.com"));
     const [counts] = await sql<{ soul_count: number }>("SELECT soul_count FROM prayer_list WHERE id = $1::uuid", [res.listId]);
     assert.equal(counts.soul_count, 5);
+
+    // He excludes it after all → it stops printing and leaves the count.
+    const [darn] = await sql<{ id: string }>("SELECT id FROM prayer_list_entry WHERE public_name = 'darn it'");
+    await moderateEntry(deps, { entryId: darn.id, status: "EXCLUDED", reasonCategory: "LANGUAGE" });
+    const [after] = await sql<{ soul_count: number }>("SELECT soul_count FROM prayer_list WHERE id = $1::uuid", [res.listId]);
+    assert.equal(after.soul_count, 4);
   });
 
   it("two assemblies at once: one settles N and fills N+1, the other writes nothing", async () => {
@@ -241,7 +248,7 @@ describe("§9 follow-ups: harvest names, the seeded blocklist, the live push", (
   });
 
   it("the bundled seed leaves out words that are also given names", async () => {
-    const deps = makeDeps();
+    const deps = makeDeps({ wordBlocklistEnabled: true });
     const res = await setupAndAssemble(deps, [], [
       { platform: "youtube", externalId: "n1", displayName: "Dick Smith" },
       { platform: "youtube", externalId: "n2", displayName: "Regina Mona" },
@@ -250,8 +257,14 @@ describe("§9 follow-ups: harvest names, the seeded blocklist, the live push", (
     assert.deepEqual((await entries(res.listId)).map((r) => r.moderation_status), ["APPROVED", "APPROVED", "APPROVED"]);
   });
 
+  it("the word blocklist is off by default for the beta", async () => {
+    const deps = makeDeps();
+    const res = await setupAndAssemble(deps, [], [{ platform: "youtube", externalId: "o1", displayName: "You BASTARD!" }]);
+    assert.deepEqual((await entries(res.listId)).map((r) => r.moderation_status), ["APPROVED"]);
+  });
+
   it("uses the bundled LDNOOBW seed when no editable list is set", async () => {
-    const deps = makeDeps(); // deps.live.blocklist is null → bundled seed
+    const deps = makeDeps({ wordBlocklistEnabled: true }); // deps.live.blocklist is null → bundled seed
     const res = await setupAndAssemble(deps, [], [
       { platform: "youtube", externalId: "w1", displayName: "You BASTARD!" }, // English, whole word, any case
       { platform: "youtube", externalId: "w2", displayName: "Sebastardo Ruiz" }, // not a whole word

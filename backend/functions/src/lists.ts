@@ -12,7 +12,8 @@ import { localDateIn, MINUTE_MS, weekday } from "./dates";
 import { hasCheck, mutate, query } from "./db";
 import { Deps } from "./deps";
 import { normId } from "./ids";
-import { CONTACT_PATTERN, loadBlockTerms } from "./moderation";
+import { hasContactInfo } from "./contact";
+import { BlockTerms, loadBlockTerms } from "./moderation";
 import { cleanText, truncateGraphemes } from "./text";
 
 interface ListRow {
@@ -73,9 +74,15 @@ export interface SocialParticipant {
   platform: string;
   externalId: string;
   displayName: string;
+  /** Contact info or a link in the name → entered as EXCLUDED · CONTACT_OR_LINK. */
+  excluded: boolean;
 }
 
-/** Validate, de-duplicate, and cap display names at 40 graphemes (truncated). */
+/**
+ * Validate, de-duplicate, and cap display names at 40 graphemes (truncated).
+ * Names with contact info or links can't be blocked at input like the app's,
+ * so they are excluded at ingest.
+ */
 function cleanSocial(raw: unknown, cap: number): SocialParticipant[] {
   if (raw === undefined || raw === null) return [];
   if (!Array.isArray(raw)) throw new HttpsError("invalid-argument", "social must be a list");
@@ -91,7 +98,7 @@ function cleanSocial(raw: unknown, cap: number): SocialParticipant[] {
     const key = `${platform}\u0000${externalId}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    out.push({ platform, externalId, displayName });
+    out.push({ platform, externalId, displayName, excluded: hasContactInfo(displayName) });
   }
   return out;
 }
@@ -117,7 +124,8 @@ export async function assembleNextList(deps: Deps, input: { social?: unknown; fo
   if (!next) throw new HttpsError("failed-precondition", `List ${closing.listNumber + 1} is missing; run closeList`);
 
   const assemblyAt = now.toISOString();
-  const terms = await loadBlockTerms(deps.live);
+  // The word blocklist is off for the beta (schema-brief §11); the code stays.
+  const terms: BlockTerms = deps.cfg.wordBlocklistEnabled ? await loadBlockTerms(deps.live) : { words: [], substrings: [] };
   await mutate(deps.db, "AssembleList", {
     closingListId: closing.id,
     closesAt: closing.closesAt,
@@ -128,7 +136,6 @@ export async function assembleNextList(deps: Deps, input: { social?: unknown; fo
     softLandingDays: deps.cfg.softLandingDays,
     blockWords: terms.words,
     blockSubstrings: terms.substrings,
-    contactPattern: CONTACT_PATTERN,
     social,
   });
 
@@ -137,7 +144,7 @@ export async function assembleNextList(deps: Deps, input: { social?: unknown; fo
   if (!settledAt || Date.parse(settledAt) !== Date.parse(assemblyAt)) {
     throw new HttpsError("already-exists", `List ${next.listNumber} was already assembled`);
   }
-  await mutate(deps.db, "RecountList", { listId: next.id, approvedOnly: false });
+  await mutate(deps.db, "RecountList", { listId: next.id });
 
   const summary = await query<{ prayerList: { soulCount: number; intentionCount: number; prayerCount: number } | null }>(
     deps.db, "GetListSummary", { id: next.id },
@@ -156,7 +163,31 @@ export async function assembleNextList(deps: Deps, input: { social?: unknown; fo
     soulCount: summary.prayerList?.soulCount ?? 0,
     intentionCount: summary.prayerList?.intentionCount ?? 0,
     held: held.length,
+    review: await getReviewDiff(deps, next.id),
   };
+}
+
+export interface ReviewItem {
+  entryId: string;
+  kind: "SOUL" | "INTENTION";
+  source: "APP" | "SOCIAL";
+  publicName: string;
+  previousName: string | null;
+  change: "NEW" | "CHANGED";
+  isSelf: boolean;
+  parentName: string | null;
+  moderationStatus: "APPROVED" | "HELD";
+  reasonCategory: string | null;
+}
+
+/**
+ * Names and intentions new or changed since the last list they were on
+ * (self-name changes included) — the morning skill's AI first pass and
+ * Eric's review. Everything not excluded prints.
+ */
+export async function getReviewDiff(deps: Deps, listId: string): Promise<ReviewItem[]> {
+  const res = await query<{ entries: ReviewItem[] }>(deps.db, "GetReviewDiff", { listId });
+  return res.entries;
 }
 
 export async function getHeldEntries(deps: Deps, listId: string) {
@@ -196,7 +227,7 @@ export async function moderateEntry(
     throw err;
   }
   const list = entry.prayerListEntry.list;
-  await mutate(deps.db, "RecountList", { listId: list.id, approvedOnly: list.status === "published" });
+  await mutate(deps.db, "RecountList", { listId: list.id });
   return { entryId: input.entryId, status };
 }
 
@@ -210,7 +241,7 @@ export async function publishList(deps: Deps, listId: string) {
   if (!res.prayerList) throw new HttpsError("not-found", "List not found");
   const sealVariant = weekday(res.prayerList.listDate);
   await mutate(deps.db, "PublishList", { listId, sealVariant });
-  await mutate(deps.db, "RecountList", { listId, approvedOnly: true });
+  await mutate(deps.db, "RecountList", { listId });
   return { listId, listNumber: res.prayerList.listNumber, sealVariant };
 }
 

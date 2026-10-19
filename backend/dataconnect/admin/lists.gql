@@ -96,10 +96,11 @@ mutation CloseList(
 # already settled nothing is written (every insert joins `settle`), so a
 # double run can never duplicate entries; the function reports it.
 #
-# $social: JSON array of { platform, externalId, displayName } from the 🙏
-# harvest (de-duplicated, validated, display names truncated to 40 graphemes
-# by the function). People are upserted into ExternalPerson (latest display
-# name) and entered once each.
+# $social: JSON array of { platform, externalId, displayName, excluded } from
+# the 🙏 harvest (de-duplicated, validated, display names truncated to 40
+# graphemes, `excluded` = contact info or a link, by the function). People
+# are upserted into ExternalPerson (latest display name) and entered once
+# each; excluded ones as EXCLUDED · CONTACT_OR_LINK.
 #
 # GATE (schema-brief §6, §10): a user qualifies with a prayer that included
 # the list and either (a) communityList = the closing list and started before
@@ -117,14 +118,16 @@ mutation CloseList(
 #     within $softLandingDays                  → includeLimit (soft landing)
 #   otherwise                                  → 0 (self name only)
 #
+# Review is exception-based: everything not EXCLUDED prints. HELD is an
+# internal "flagged for Eric" mark and still prints unless he excludes it.
 # AUTO-FLAG (→ HELD + reasonCategory), case-insensitive:
-#   LANGUAGE        — a blocklist term: $blockWords as whole words / phrases
-#                     (text split on spaces + punctuation), $blockSubstrings
-#                     anywhere (Han / Kana / Hangul / Thai, 2+ characters)
-#   CONTACT_OR_LINK — $contactPattern (phone / email / URL)
+#   LANGUAGE        — a blocklist term (off for the beta: both lists empty):
+#                     $blockWords as whole words / phrases (text split on
+#                     spaces + punctuation), $blockSubstrings anywhere
+#                     (Han / Kana / Hangul / Thai, 2+ characters)
 #   NAME_CHANGES    — the self name changed since it was last printed
-#                     (after the latest published list it was APPROVED on)
-# Base-set names are not flagged. Counts are set afterwards by RecountList.
+# Contact info / links can't reach app entries (blocked at input). Base-set
+# names are not flagged. Counts are set afterwards by RecountList.
 mutation AssembleList(
   $closingListId: UUID!
   $closesAt: Timestamp!
@@ -135,7 +138,6 @@ mutation AssembleList(
   $softLandingDays: Int!
   $blockWords: Any!
   $blockSubstrings: Any!
-  $contactPattern: String!
   $social: Any!
 ) @auth(level: NO_ACCESS) {
   _execute(
@@ -152,13 +154,13 @@ mutation AssembleList(
       WHERE value <> ''
     ), bs AS (
       SELECT DISTINCT value AS w
-      FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof($10::jsonb) = 'array' THEN $10::jsonb ELSE '[]'::jsonb END)
+      FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof($9::jsonb) = 'array' THEN $9::jsonb ELSE '[]'::jsonb END)
       WHERE value <> ''
     ), social_in AS (
       SELECT DISTINCT ON (x.platform, x."externalId") x.platform, x."externalId" AS external_id,
-        x."displayName" AS display_name
-      FROM jsonb_to_recordset(CASE WHEN jsonb_typeof($11::jsonb) = 'array' THEN $11::jsonb ELSE '[]'::jsonb END)
-        AS x(platform text, "externalId" text, "displayName" text)
+        x."displayName" AS display_name, COALESCE(x.excluded, false) AS excluded
+      FROM jsonb_to_recordset(CASE WHEN jsonb_typeof($10::jsonb) = 'array' THEN $10::jsonb ELSE '[]'::jsonb END)
+        AS x(platform text, "externalId" text, "displayName" text, excluded boolean)
       WHERE x.platform IS NOT NULL AND x."externalId" IS NOT NULL AND x."displayName" IS NOT NULL
       ORDER BY x.platform, x."externalId"
     ), people AS (
@@ -166,22 +168,21 @@ mutation AssembleList(
       SELECT 'SOCIAL', s.platform, s.external_id, s.display_name, now()
       FROM social_in s, new_list
       ON CONFLICT (source, platform, external_id) DO UPDATE SET display_name = EXCLUDED.display_name
-      RETURNING id, display_name
+      RETURNING id, display_name, platform, external_id
     ), social_ins AS (
       INSERT INTO prayer_list_entry
         (list_id, external_person_id, kind, public_name, source, moderation_status, reason_category)
       SELECT n.id, f.id, 'SOUL', f.display_name, 'SOCIAL',
-        (CASE WHEN f.flag IS NULL THEN 'APPROVED' ELSE 'HELD' END)::moderation_status,
-        f.flag::reason_category
+        (CASE WHEN f.excluded THEN 'EXCLUDED' WHEN f.flag IS NULL THEN 'APPROVED' ELSE 'HELD' END)::moderation_status,
+        (CASE WHEN f.excluded THEN 'CONTACT_OR_LINK' ELSE f.flag END)::reason_category
       FROM new_list n, (
-        SELECT p.id, p.display_name,
+        SELECT p.id, p.display_name, s.excluded,
           CASE
             WHEN EXISTS (SELECT 1 FROM bw WHERE strpos(' ' || regexp_replace(lower(p.display_name), '[[:space:][:punct:]]+', ' ', 'g') || ' ', ' ' || bw.w || ' ') > 0)
               OR EXISTS (SELECT 1 FROM bs WHERE strpos(lower(p.display_name), bs.w) > 0)
               THEN 'LANGUAGE'
-            WHEN p.display_name ~* $9::text THEN 'CONTACT_OR_LINK'
           END AS flag
-        FROM people p
+        FROM people p JOIN social_in s ON s.platform = p.platform AND s.external_id = p.external_id
       ) f
       RETURNING id
     ), base_ins AS (
@@ -209,10 +210,9 @@ mutation AssembleList(
           WHEN EXISTS (SELECT 1 FROM bw WHERE strpos(' ' || regexp_replace(lower(s.public_name), '[[:space:][:punct:]]+', ' ', 'g') || ' ', ' ' || bw.w || ' ') > 0)
             OR EXISTS (SELECT 1 FROM bs WHERE strpos(lower(s.public_name), bs.w) > 0)
             THEN 'LANGUAGE'
-          WHEN s.public_name ~* $9::text THEN 'CONTACT_OR_LINK'
           WHEN u.self_name_changed_at > (
             SELECT max(pl.current_from) FROM prayer_list_entry pe JOIN prayer_list pl ON pl.id = pe.list_id
-            WHERE pe.subject_id = s.id AND pe.moderation_status = 'APPROVED' AND pl.status = 'published')
+            WHERE pe.subject_id = s.id AND pe.moderation_status <> 'EXCLUDED' AND pl.status = 'published')
             THEN 'NAME_CHANGES'
         END AS flag
       FROM prayer_subject s JOIN u ON u.id = s.owner_id
@@ -248,7 +248,6 @@ mutation AssembleList(
           WHEN EXISTS (SELECT 1 FROM bw WHERE strpos(' ' || regexp_replace(lower(r.public_name), '[[:space:][:punct:]]+', ' ', 'g') || ' ', ' ' || bw.w || ' ') > 0)
             OR EXISTS (SELECT 1 FROM bs WHERE strpos(lower(r.public_name), bs.w) > 0)
             THEN 'LANGUAGE'
-          WHEN r.public_name ~* $9::text THEN 'CONTACT_OR_LINK'
         END AS flag
       FROM (
         SELECT c.*, row_number() OVER (PARTITION BY c.owner_id ORDER BY c.o1, c.o2, c.o3, c.o4) AS rn
@@ -292,29 +291,64 @@ mutation AssembleList(
       { _expr: "vars.softLandingDays" }
       { _expr: "vars.nextListId" }
       { _expr: "vars.blockWords" }
-      { _expr: "vars.contactPattern" }
       { _expr: "vars.blockSubstrings" }
       { _expr: "vars.social" }
     ]
   )
 }
 
-# Denormalized soul / intention counts from the entries. Draft lists count
-# everything not EXCLUDED (held entries are still pending review); at publish
-# ($approvedOnly) only what is printed. Idempotent.
-mutation RecountList($listId: UUID!, $approvedOnly: Boolean!) @auth(level: NO_ACCESS) {
+# Denormalized soul / intention counts: everything that prints, i.e. not
+# EXCLUDED (HELD is internal and still prints). Idempotent.
+mutation RecountList($listId: UUID!) @auth(level: NO_ACCESS) {
   _execute(
     sql: """
     UPDATE prayer_list pl SET
       soul_count = (SELECT count(*) FROM prayer_list_entry e
-        WHERE e.list_id = pl.id AND e.kind = 'SOUL'
-          AND (e.moderation_status = 'APPROVED' OR (NOT $2::boolean AND e.moderation_status = 'HELD'))),
+        WHERE e.list_id = pl.id AND e.kind = 'SOUL' AND e.moderation_status <> 'EXCLUDED'),
       intention_count = (SELECT count(*) FROM prayer_list_entry e
-        WHERE e.list_id = pl.id AND e.kind = 'INTENTION'
-          AND (e.moderation_status = 'APPROVED' OR (NOT $2::boolean AND e.moderation_status = 'HELD')))
+        WHERE e.list_id = pl.id AND e.kind = 'INTENTION' AND e.moderation_status <> 'EXCLUDED')
     WHERE pl.id = $1::uuid
     """
-    params: [{ _expr: "vars.listId" }, { _expr: "vars.approvedOnly" }]
+    params: [{ _expr: "vars.listId" }]
+  )
+}
+
+
+# The morning review diff (schema-brief §11): app and social entries on this
+# list that are NEW (never on an earlier list) or CHANGED (name differs from
+# the last list that subject / person was on — self-name changes included).
+# Base-set names and already-EXCLUDED entries are left out. For the morning
+# skill's AI first pass and Eric's review; no owner identities.
+query GetReviewDiff($listId: UUID!) @auth(level: NO_ACCESS) {
+  entries: _select(
+    sql: """
+    WITH cur AS (
+      SELECT e.id, e.kind, e.source, e.public_name, e.moderation_status, e.reason_category,
+        e.subject_id, e.external_person_id, e.parent_entry_id, l.list_number
+      FROM prayer_list_entry e JOIN prayer_list l ON l.id = e.list_id
+      WHERE e.list_id = $1::uuid AND e.source <> 'BASE_SET' AND e.moderation_status <> 'EXCLUDED'
+    ), prev AS (
+      SELECT DISTINCT ON (c.id) c.id, p.public_name AS previous_name
+      FROM cur c
+      JOIN prayer_list_entry p
+        ON (c.subject_id IS NOT NULL AND p.subject_id = c.subject_id)
+        OR (c.external_person_id IS NOT NULL AND p.external_person_id = c.external_person_id)
+      JOIN prayer_list pl ON pl.id = p.list_id AND pl.list_number < c.list_number
+      ORDER BY c.id, pl.list_number DESC
+    )
+    SELECT replace(c.id::text, '-', '') AS "entryId", c.kind::text AS kind, c.source::text AS source,
+      c.public_name AS "publicName", prev.previous_name AS "previousName",
+      CASE WHEN prev.id IS NULL THEN 'NEW' ELSE 'CHANGED' END AS change,
+      COALESCE(s.is_self, false) AS "isSelf", pe.public_name AS "parentName",
+      c.moderation_status::text AS "moderationStatus", c.reason_category::text AS "reasonCategory"
+    FROM cur c
+    LEFT JOIN prev ON prev.id = c.id
+    LEFT JOIN prayer_list_entry pe ON pe.id = c.parent_entry_id
+    LEFT JOIN prayer_subject s ON s.id = c.subject_id
+    WHERE prev.id IS NULL OR prev.previous_name IS DISTINCT FROM c.public_name
+    ORDER BY c.source, pe.public_name NULLS FIRST, c.public_name
+    """
+    params: [{ _expr: "vars.listId" }]
   )
 }
 
@@ -356,8 +390,9 @@ mutation ModerateEntry(
   ) @check(expr: "this == 1", message: "ENTRY_NOT_FOUND")
 }
 
-# What gets printed: APPROVED entries with the keys the print step needs to
-# group a portion (owner → name → its intentions via parentEntry).
+# What gets printed: every entry not EXCLUDED (HELD is internal and prints),
+# with the keys the print step needs to group a portion (owner → name → its
+# intentions via parentEntry).
 query GetListForPrint($listId: UUID!) @auth(level: NO_ACCESS) {
   prayerList(key: { id: $listId }) {
     id
@@ -368,7 +403,7 @@ query GetListForPrint($listId: UUID!) @auth(level: NO_ACCESS) {
     intentionCount
   }
   prayerListEntries(
-    where: { list: { id: { eq: $listId } }, moderationStatus: { eq: APPROVED } }
+    where: { list: { id: { eq: $listId } }, moderationStatus: { ne: EXCLUDED } }
   ) {
     id
     kind
@@ -380,7 +415,7 @@ query GetListForPrint($listId: UUID!) @auth(level: NO_ACCESS) {
   }
 }
 
-# Draft → published after review (then RecountList approvedOnly).
+# Draft → published after review (then RecountList).
 mutation PublishList($listId: UUID!, $sealVariant: Int!) @auth(level: NO_ACCESS) @transaction {
   prayerList_updateMany(
     where: { id: { eq: $listId } }

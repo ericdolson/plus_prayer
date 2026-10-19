@@ -45,6 +45,14 @@ exists from the moment N's closesAt is set, and becomes current at that
 cutoff. A list is **settled** (`settledAt`) when assembly runs; from then on
 its numbers never move.
 
+**Beta moderation (schema-brief §11):** contact info / links are blocked at
+input (below). Review is exception-based: everything not EXCLUDED prints;
+HELD is an internal "flagged for Eric" mark that still prints. Users never see
+a pending state — client operations return no moderation fields, and a
+`reasonCategory` reaches the app only on an EXCLUDED entry ("Not printed on
+List N · {category}"). "Printed" everywhere (print, counts, beads, world
+count, "first printed", "carried on N lists") = not EXCLUDED.
+
 Two computed rules used throughout (never swept by a job):
 - **Effective carry** — an intention is carried only if `isCarried &&
   parent.isCarried`; the pool counts only effectively carried items beyond the
@@ -91,11 +99,11 @@ Two computed rules used throughout (never swept by a job):
   from RTDB subscriptions while foregrounded, NOT this connector.
 
 ### Screen: Today's list page (+ list row avatar cluster, Amen invitation)
-- **getMyListStatus** (OWNER) — for the current list: my entries on it
-  (publicName, kind, parentEntry, moderationStatus, reasonCategory) — "who's
-  carried"; whether I've prayed with it (a Prayer with communityList = current
-  since `currentFrom`); lifetime "You've been carried on N lists" (count of
-  distinct lists with an entry owned by me).
+- **getMyListStatus** (OWNER) — for the given list: `myEntries` (what of mine
+  prints: publicName, kind, parentEntry — no moderation fields) — "who's
+  carried"; `notPrinted` (my EXCLUDED entries with reasonCategory); whether
+  I've prayed with it; lifetime "You've been carried on N lists" (published
+  lists my self entry printed on).
 - Post links: PrayerListPost rows for the list (ANON, metadata only), if the
   page shows them.
 
@@ -109,8 +117,9 @@ Two computed rules used throughout (never swept by a job):
   subject with its isCarried flag, nested and ordered as on Home (client
   applies effective carry); the user's entitlement (includeLimit, planTier,
   entitlementExpiresAt, trialStartedAt) for the meter (e.g. "17 / 15", against
-  the effective entitlement); and my entries on the given (newest) list with
-  their moderationStatus ("Held for review" / "Not printed · {reasonCategory}").
+  the effective entitlement); and `notPrinted` — my EXCLUDED entries on the
+  given (newest) list ("Not printed on List N · {reasonCategory}. Edit to
+  include it next time."). Nothing pending is ever shown.
   No active entitlement (trial ended or subscription lapsed) + effective carry
   still over the free limit = "Waiting for your choice" (the soft landing). The illustrative print preview is rendered
   client-side from this.
@@ -121,8 +130,8 @@ Two computed rules used throughout (never swept by a job):
   - its PrayerListEntry rows joined to PrayerList: listNumber, listDate,
     sealVariant, prayerCount, and whether that list is the current one —
     powers the bead strand, "Off the list · N days" gaps, "On N lists", and
-    the tier-3 world count — APPROVED entries only (what was printed),
-    enforced in the operation,
+    the tier-3 world count — printed entries only (not EXCLUDED), enforced
+    in the operation,
   - the user's prayers that link this subject (filter `Prayer.user ==
     auth.uid`, never by subject owner): id, prayedAt, startedAt, localDate,
     durationSeconds, endedBy, listContextNumber, note.
@@ -169,11 +178,17 @@ a foreign or missing id fails plainly and changes nothing.
 Callables (`functions/src/subjects.ts`):
 - **addSubject** — kind, parentId?, publicName, personalLabel?, note?. INTENTION
   needs `parentId` = one of my ACTIVE names; SOUL has none. Caps 40 / 80
-  grapheme clusters (alias 40, note 1000 — see ambiguities). Appended to the
+  grapheme clusters (alias 40, note 1000). Names, aliases, and intentions with
+  a phone number (7+ digits with separators), email, or URL/domain are
+  rejected: `invalid-argument`, message "Names and intentions can't include
+  phone numbers, emails, or links.", details `{ reason: "CONTACT_OR_LINK",
+  field }` for an inline message. Verse references, room numbers, dates,
+  year ranges, and "St." pass (`functions/src/contact.ts`). Appended to the
   bottom of its level. `isCarried` auto-set while the pool (effective carry vs.
   effective entitlement) has room, else false and marked not on the list.
   Rejected past the ~500 cap ("contact us").
-- **updateSubject** — publicName, personalLabel, note on a non-self item. Not
+- **updateSubject** — publicName, personalLabel, note on a non-self item (same
+  contact check on name and alias). Not
   kind, not parent. The self name uses setSelfName.
 - **setCarriedItems** — the "your portion" save: exactly these ids carried.
   Over the effective entitlement → `failed-precondition` with
@@ -251,9 +266,9 @@ and offline-friendly): see onPrayerLogged.
   PrayerSubject (kind SOUL, isSelf, personalLabel "Me", isCarried true) and
   sets User.displayName. The self subject's id is derived from the uid, so a
   double-tap can never create two. Later calls are self-name edits: publicName + displayName +
-  selfNameChangedAt together; free until the self's first APPROVED entry on a
+  selfNameChangedAt together; free until the self's first printed entry on a
   PUBLISHED list, then once per 7 days, returning the next-available date.
-  40-grapheme cap.
+  40-grapheme cap; same contact check.
 - **mergeAccounts(anonIdToken)** (callable, the signed-in existing user) —
   after a credential-in-use conflict where both accounts have data and the
   user chose [Merge both] (an empty anon account just switches silently).
@@ -334,25 +349,32 @@ and offline-friendly): see onPrayerLogged.
      harvest and the active base set (activeUntil null or future). Freeze
      publicName/kind; source APP | SOCIAL | BASE_SET; exactly one of subject /
      externalPerson per row;
-  5. auto-flag (moderationStatus HELD + reasonCategory): blocklist → LANGUAGE
-     (editable RTDB `/moderation/blocklist`, seeded from LDNOOBW CC BY 4.0
-     minus words that are also given names / nicknames —
-     `functions/config/blocklist`; whole words / phrases, case-insensitive;
-     Han/Kana/Hangul/Thai terms of 2+ characters as substrings);
-     phone/email/URL → CONTACT_OR_LINK; the self name changed since it was
-     last printed → NAME_CHANGES.
-     Not flagged: all-caps, brand-new accounts, base-set names;
-  6. RecountList: soulCount / intentionCount (draft: everything not
-     EXCLUDED). Returns the new list id/number, counts, and how many are held.
-- **getHeldEntries** (ADMIN) — the auto-flagged entries to review.
-- **moderateEntry** (ADMIN) — HELD → APPROVED / EXCLUDED, set heldReason +
+  5. moderation: social names with contact info / links → EXCLUDED ·
+     CONTACT_OR_LINK (checked at ingest with the same rule as input). Internal
+     HELD flags (they still print): the self name changed since it was last
+     printed → NAME_CHANGES; word blocklist → LANGUAGE — **off for the beta**
+     (`MODERATION_WORD_BLOCKLIST` param, default false; editable RTDB
+     `/moderation/blocklist`, seeded from LDNOOBW CC BY 4.0 minus given
+     names / nicknames; returns at Stage 2). Not flagged: all-caps,
+     brand-new accounts, base-set names;
+  6. RecountList: soulCount / intentionCount = everything not EXCLUDED.
+     Returns the new list id/number, counts, how many are held, and
+     `review` — the review diff (below).
+- **getReviewDiff** (ADMIN) — for the morning skill's AI first pass and Eric's
+  review: app and social entries on a list that are NEW (never on an earlier
+  list) or CHANGED (name differs from the last list that subject / person was
+  on — self-name changes included), with previousName, parentName (for an
+  intention), isSelf, and any internal flag. Base set and EXCLUDED entries
+  left out; no owner identities.
+- **getHeldEntries** (ADMIN) — the internally flagged (HELD) entries.
+- **moderateEntry** (ADMIN) — set APPROVED / HELD / EXCLUDED + heldReason +
   reasonCategory (OTHER = "Didn't meet list guidelines"); EXCLUDED requires a
-  category (users see it). Recounts the list.
-- **getListForPrint** (ADMIN) — APPROVED entries with owner / parentEntry /
-  sortOrder so the print step can group each portion.
+  category (users see it). Recounts the list. Eric only needs it to exclude.
+- **getListForPrint** (ADMIN) — every entry not EXCLUDED, with owner /
+  parentEntry / sortOrder so the print step can group each portion.
 - **publishList** (ADMIN) — status draft → published, publishedAt,
   sealVariant from the weekday of listDate (Sunday = 0 … Saturday = 6, the
-  ritual/CLAUDE.md rotation); recounts APPROVED only.
+  ritual/CLAUDE.md rotation); recounts (not EXCLUDED).
 - **publishListVideo** (ADMIN, ~8am) — videoPublishedAt, videoPath (Storage
   `videos/…`), PrayerListPost rows; sends the opt-in FCM push "List 52 is up
   · 4,345 people." (people = the published soulCount; one broadcast) to the

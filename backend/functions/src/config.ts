@@ -32,6 +32,8 @@ export interface ServerConfig {
   closeListMinutes: number;
   /** The list's calendar day (listDate) is taken in this zone. */
   listTimeZone: string;
+  /** LANGUAGE auto-flag from the word blocklist. Off for the beta (Stage 2). */
+  wordBlocklistEnabled: boolean;
 }
 
 export const DEFAULT_SERVER_CONFIG: ServerConfig = {
@@ -53,6 +55,7 @@ export const DEFAULT_SERVER_CONFIG: ServerConfig = {
   statsPublishIntervalMs: 5000,
   closeListMinutes: 5,
   listTimeZone: "America/Denver",
+  wordBlocklistEnabled: false,
 };
 
 export interface ClientConfig {

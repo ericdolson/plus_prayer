@@ -186,3 +186,40 @@ describe("every client query executes", () => {
     assert.deepEqual(detail[0].prayers.map((p) => p.prayer.id), [prayerId]);
   });
 });
+
+describe("review is invisible to users (schema-brief §11)", () => {
+  beforeEach(resetDb);
+
+  it("HELD looks like any printed entry; only EXCLUDED surfaces, with its category", async () => {
+    const { selfId } = await createUser("me");
+    const held = await addSubjectRow("me", { name: "Flagged one" });
+    const excluded = await addSubjectRow("me", { name: "Not printed one" });
+    const listId = await addList(1, { currentFrom: Date.now() - DAY });
+    await exec(
+      `INSERT INTO prayer_list_entry (list_id, subject_id, owner_id, kind, public_name, source, moderation_status, reason_category)
+       VALUES ($1::uuid, $2::uuid, 'me', 'SOUL', 'Me', 'APP', 'APPROVED', NULL),
+              ($1::uuid, $3::uuid, 'me', 'SOUL', 'Flagged one', 'APP', 'HELD', 'NAME_CHANGES'),
+              ($1::uuid, $4::uuid, 'me', 'SOUL', 'Not printed one', 'APP', 'EXCLUDED', 'OTHER')`,
+      [listId, selfId, held, excluded],
+    );
+    const as = impersonate("me");
+    type Status = {
+      myEntries: Record<string, unknown>[];
+      notPrinted: { subject: { id: string }; reasonCategory: string }[];
+    };
+    const status = (await clientDb.executeQuery<Status, { listId: string }>("GetMyListStatus", { listId }, as)).data;
+    assert.deepEqual(status.myEntries.map((e) => e.publicName).sort(), ["Flagged one", "Me"]);
+    assert.ok(status.myEntries.every((e) => !("moderationStatus" in e) && !("reasonCategory" in e)));
+    assert.deepEqual(status.notPrinted.map((e) => [e.subject.id, e.reasonCategory]), [[excluded, "OTHER"]]);
+
+    const portion = (await clientDb.executeQuery<{ notPrinted: { subject: { id: string } }[] }, { listId: string }>(
+      "GetMyPortion", { listId }, as,
+    )).data;
+    assert.deepEqual(portion.notPrinted.map((e) => e.subject.id), [excluded]);
+
+    const detail = (await clientDb.executeQuery<{ prayerSubjects: { entries: unknown[] }[] }, { id: string }>(
+      "GetSubjectDetail", { id: held }, as,
+    )).data;
+    assert.equal(detail.prayerSubjects[0].entries.length, 1, "a HELD entry printed, so it's a bead");
+  });
+});

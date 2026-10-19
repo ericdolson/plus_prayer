@@ -9,7 +9,7 @@ triggers require it). All SQL lives in the `admin` connector
 |---|---|
 | `src/index.ts` | Wiring only: triggers, schedules, callables, params |
 | `src/prayers.ts` | `onPrayerLogged` (exactly-once increments, streak/grace, trial), sweeper, grace answers |
-| `src/lists.ts` | `closeList`, `assembleNextList`, review, print data, publish, video |
+| `src/lists.ts` | `closeList`, `assembleNextList`, review diff, print data, publish, video |
 | `src/subjects.ts` | `setSelfName`, `addSubject`, `updateSubject`, `setCarriedItems` |
 | `src/accounts.ts` | User creation, `deleteAccount`, `mergeAccounts`, `setEntitlement` |
 | `src/presence.ts` | `/stats/live` publisher + reconcile, draft auto-save |
@@ -21,10 +21,14 @@ Admin callables check the `admin` custom claim (Eric's skills).
 ## Config
 - Server params (`firebase-functions/params`, defaults in `src/config.ts`):
   `GATE_HOURS` (30), `BASE_PREMIUM_POOL` (10), `SUBJECT_CAP` (500),
-  `LIST_TIME_ZONE` (America/Denver). The first deploy prompts for them once.
-- Blocklist: RTDB `/moderation/blocklist` (server-only, editable without a
-  deploy), seeded from `config/blocklist` (LDNOOBW, CC BY 4.0 — see its
-  README); the functions fall back to the bundled seed when it's empty.
+  `LIST_TIME_ZONE` (America/Denver), `MODERATION_WORD_BLOCKLIST` (false — off
+  for the beta). The first deploy prompts for them once.
+- Contact info / links: blocked at input and excluded at social ingest
+  (`src/contact.ts`), always on.
+- Word blocklist (off for the beta): RTDB `/moderation/blocklist`
+  (server-only, editable without a deploy), seeded from `config/blocklist`
+  (LDNOOBW, CC BY 4.0 — see its README); the functions fall back to the
+  bundled seed when it's empty.
 - Client-visible values: RTDB `/config`, defaults in
   `config/client-config.json` (also compiled into the app). Seed missing keys
   (and the blocklist, if empty) with `FIREBASE_DATABASE_URL=… npm run seed:config`.
