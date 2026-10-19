@@ -93,7 +93,8 @@ export async function addSubject(
     requireName(input.publicName, kind === "SOUL" ? deps.cfg.nameCap : deps.cfg.intentionCap, "publicName"),
     "publicName",
   );
-  const personalLabel = requireNoContact(optionalText(input.personalLabel, ALIAS_CAP, "personalLabel") ?? null, "personalLabel");
+  // Aliases are owner-only and never printed, so they aren't moderated.
+  const personalLabel = optionalText(input.personalLabel, ALIAS_CAP, "personalLabel") ?? null;
   const note = optionalText(input.note, NOTE_CAP, "note") ?? null;
 
   const { user, subjects } = await poolState(deps, uid);
@@ -151,7 +152,7 @@ export async function updateSubject(
       "publicName",
     );
   }
-  const personalLabel = requireNoContact(optionalText(input.personalLabel, ALIAS_CAP, "personalLabel"), "personalLabel");
+  const personalLabel = optionalText(input.personalLabel, ALIAS_CAP, "personalLabel"); // never printed: not moderated
   if (personalLabel !== undefined) vars.personalLabel = personalLabel;
   const note = optionalText(input.note, NOTE_CAP, "note");
   if (note !== undefined) vars.note = note;

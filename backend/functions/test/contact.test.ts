@@ -67,14 +67,11 @@ function isContactError(field: string) {
 describe("blocked at input with an inline-ready error", () => {
   beforeEach(resetDb);
 
-  it("addSubject: names, aliases, and intentions", async () => {
+  it("addSubject: names and intentions (aliases are never printed, so they aren't checked)", async () => {
     const deps = makeDeps();
     const { selfId } = await createUser("c1", { includeLimit: 10, expiresInMs: 86_400_000 });
     await assert.rejects(addSubject(deps, "c1", { kind: "SOUL", publicName: "Ana 555-123-4567" }), isContactError("publicName"));
-    await assert.rejects(
-      addSubject(deps, "c1", { kind: "SOUL", publicName: "Ana", personalLabel: "ana@example.com" }),
-      isContactError("personalLabel"),
-    );
+    await addSubject(deps, "c1", { kind: "SOUL", publicName: "Ana", personalLabel: "Ana 555-123-4567" });
     await assert.rejects(
       addSubject(deps, "c1", { kind: "INTENTION", parentId: selfId, publicName: "Donate at example.org" }),
       isContactError("publicName"),
@@ -85,12 +82,12 @@ describe("blocked at input with an inline-ready error", () => {
     await addSubject(deps, "c1", { kind: "SOUL", publicName: "St. Jude Room 412" });
   });
 
-  it("updateSubject: name and alias", async () => {
+  it("updateSubject: name blocked, alias free", async () => {
     const deps = makeDeps();
     await createUser("c2");
     const id = await addSubjectRow("c2", { name: "Bea" });
     await assert.rejects(updateSubject(deps, "c2", { id, publicName: "Bea www.bea.com" }), isContactError("publicName"));
-    await assert.rejects(updateSubject(deps, "c2", { id, personalLabel: "+1 555 123 4567" }), isContactError("personalLabel"));
+    await updateSubject(deps, "c2", { id, personalLabel: "Bea +1 555 123 4567" });
     await updateSubject(deps, "c2", { id, personalLabel: "Aunt Bea (Psalm 23)" });
   });
 

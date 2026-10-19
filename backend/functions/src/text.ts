@@ -39,8 +39,8 @@ export function requireName(raw: unknown, cap: number, field = "name"): string {
 }
 
 /**
- * Printed text (names, aliases, intentions) may not carry contact info or
- * links. The error is shaped for an inline message: code invalid-argument,
+ * Printed text (names and intentions — not aliases, which are never printed)
+ * may not carry contact info or links. The error is shaped for an inline message: code invalid-argument,
  * details { reason: "CONTACT_OR_LINK", field }.
  */
 export function requireNoContact<T extends string | null | undefined>(text: T, field: string): T {

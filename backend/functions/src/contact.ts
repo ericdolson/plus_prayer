@@ -1,7 +1,8 @@
 // Contact info and links are blocked at input (list-lifecycle.md "Moderation
-// for MVP / beta", schema-brief §11): names, aliases, and intentions can't
-// contain a phone number (7+ digits, allowing separators), an email address,
-// or a URL / domain. The same check excludes matching social names at ingest.
+// for MVP / beta", schema-brief §11): names and intentions — the printed
+// text; aliases are never printed and aren't checked — can't contain a phone
+// number (7+ digits, allowing separators), an email address, or a URL /
+// domain. The same check excludes matching social names at ingest.
 //
 // Must pass: verse references ("John 3:16", "Isaiah 41:10-13", "Psalm 23"),
 // room / ward numbers, dates ("10/18/2026", "2026-10-18", "Oct 18, 2026"),
