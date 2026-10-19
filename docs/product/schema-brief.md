@@ -130,7 +130,9 @@ month" · "carried on N lists" · answered running total · prayer time per pray
 ## 3. Realtime Database
 - `/presence/{uid}/{deviceId}` (owner-write): `startedAt`, `lastActiveAt`
   (heartbeat ~1/min in foreground), `inForeground`, `listIncluded`, `itemIds[]`
-  (IDs only). Doubles as the in-progress prayer draft. `onDisconnect` marks
+  (IDs only), plus optional `prayerId` (client UUID — makes auto-save and a late
+  Amen idempotent), `localDate` and `timezone` (start date from the device).
+  Doubles as the in-progress prayer draft. `onDisconnect` marks
   background/disconnect; counts as praying for ~30 min after backgrounding.
 - `/stats/live` (server-write, public-read): `prayingNow` (people, not devices),
   `prayedLastHour`, `prayedToday`, `updatedAt` — republished ≥5s apart + 1-min
@@ -222,3 +224,36 @@ mirrored to RTDB `/lists/current`. The ≤7-day soft landing applies to ANY
 entitlement end (trial or lapsed subscription), detected as "no active
 entitlement and carried > free limit" — no `trialEndChoiceAt` field. 11. "First printed" = first APPROVED entry on a
 PUBLISHED list. 12. Effective carry + cascade. 13. Enums as listed.
+
+## 9. Answers to the backend implementation review (2026-10-18)
+Approved as built: RTDB `/config` (+ seed defaults), pool/cap/abuse checks in
+server functions (addSubject, updateSubject, setCarriedItems), `Prayer.countedAt`
+(exactly-once counting), no `auth.uid` default on `User.id`.
+1. Late offline prayers for a settled list don't change its number; they count
+   for DailyStats, streak, and gate.
+2. **When `closesAt` is set, create the N+1 PrayerList row immediately** (draft,
+   `currentFrom = closesAt`). Prayers started after `closesAt` link to and count
+   toward N+1; assembly later fills its entries. App shows N+1 current from then.
+3. **Repair streaks from late syncs:** if a prayer arrives with `localDate`
+   earlier than the latest counted, recompute the streak from the user's list
+   days (look back ~1 year) using the grace days currently held.
+4. Grace offers: every 7th consecutive list day of the current streak; a break
+   restarts the count (bridged days don't count).
+5. Name-change flag = "self name changed since it was last printed".
+6. Blocklist: seed from an open list (e.g. LDNOOBW, CC-BY — attribute) for
+   English + top languages, stored as editable config; plus phone/email/URL
+   patterns.
+7. Restoring an intention under an archived name is blocked ("Restore its name
+   first"). **Restoring a Released intention clears its resolution** (open and
+   list-eligible again). Answered stays Answered when restored.
+8. "Over the free limit" definition approved.
+9. Print order: decided by the print step.
+10. Paid plan active at first prayer → no trial; no "trial" tier — approved.
+11. Alias 40, note 1,000 approved. **Social display names capped at 40
+    graphemes (truncate on ingest).** Range-check `avatarTone`.
+12. Push copy: "List 52 is up · 4,345 people, including you."
+13. Merged streak rule approved.
+14. List date = Mountain date at assembly; draft counts incl. held, published
+    counts approved only. **Bead strand / world-count operations return only
+    APPROVED entries (server-side), not an app-side filter.**
+15. Draft fields added to §3.

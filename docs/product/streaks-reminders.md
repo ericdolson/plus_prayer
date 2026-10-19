@@ -32,7 +32,9 @@ _Last updated: 2026-10-17_
   `onPrayerLogged`. Grace is consumed lazily at the next list prayer (missed days
   ≤ graceDays → consume; else reset). Between prayers the app computes the
   *effective* streak from the stored fields + today's date, so missed days show
-  correctly before the next write.
+  correctly before the next write. **Late-synced offline prayers repair the
+  streak:** an older `localDate` triggers a recompute from list days (~1 year)
+  with the grace days currently held.
   Travel: use the device's current zone; accept a skipped/doubled day, no penalty.
 - **Grace days — offered, accepted, banked** (2026-10-18, SUPERSEDES the
   same-day "max one, auto, strict setting" version):
@@ -47,7 +49,9 @@ _Last updated: 2026-10-17_
     "Seven days kept. Your grace days are full." 
   - **No strict-mode setting.** Declining offers "Don't offer again"
     (reversible in Settings) — that's the strict path.
-  - Only real list days count toward earning; grace-bridged days don't.
+  - Only real list days count toward earning; grace-bridged days don't. Offers
+    come every 7th consecutive list day of the current streak; a break restarts
+    the count.
   - Each consecutive missed day consumes one grace day; if misses exceed the
     bank, the streak breaks (bank unchanged). A bridged day keeps the streak
     alive but doesn't add a day.

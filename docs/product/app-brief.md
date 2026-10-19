@@ -105,7 +105,8 @@ idea), not a pattern to follow.
 - Backgrounding: back within ~30 min → resume quietly; later → "Welcome back.
   Finish your prayer from 7:42?" [Amen] [Discard]. Drafts are per device; no
   cross-device UI at MVP.
-- Prayer started before `closesAt` counts for that list (no UI needed).
+- Prayer started before `closesAt` counts for that list; after it, the app
+  treats N+1 as current (no special UI).
 
 ### Add sheet (screens.md)
 One bottom sheet. From footer ＋: **Add name** (40), switchable to intention with a

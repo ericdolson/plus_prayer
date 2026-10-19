@@ -638,3 +638,14 @@ cap/interval, presence threshold, min app version) live in a public-read,
 server-write RTDB `/config` node with app-compiled defaults — already in the
 stack, offline-cached, live. Enforcement stays server-side. Revisit Remote Config
 only for A/B tests or audience targeting.
+
+### Decision: Answers to the backend implementation review
+**Timestamp:** 2026-10-18
+Approved backend choices (RTDB /config, server-function writes for pool/caps,
+`Prayer.countedAt`, no auth.uid default). Setting `closesAt` creates the N+1 list
+row so post-cutoff prayers count toward N+1. Late-synced offline prayers repair
+the stored streak. Grace offers count within the current streak. Restoring a
+Released intention reopens it. Social names truncated to 40 graphemes; blocklist
+seeded from an open multilingual list. Moderation exclusions enforced in
+server operations. "List is live" push: "List 52 is up · 4,345 people,
+including you."

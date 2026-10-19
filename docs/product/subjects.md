@@ -62,7 +62,9 @@ _Last updated: 2026-10-17_
   (over-limit flow if needed). The pool counts only effectively carried items.
 - **Cascade:** archive / purge on a name applies to its intentions. Restore brings
   back only intentions archived *by that cascade* — never Released ones or ones
-  the user archived themselves.
+  the user archived themselves. Restoring an intention whose name is archived is
+  blocked ("Restore its name first"). Restoring a Released intention clears its
+  release (open and list-eligible again); Answered stays Answered.
 - **Selection rules in prayer** (2026-10-17): checking an intention also holds
   its name (both linked → counts toward the name); checking a name does not
   auto-check its intentions; unchecking a name unchecks its intentions; a name

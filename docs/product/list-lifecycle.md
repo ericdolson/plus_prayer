@@ -115,6 +115,10 @@ _Last updated: 2026-10-17_
   `currentFrom = closesAt`. In-app only: a quiet "List 52 closes in 5 minutes"
   banner (tap to pray) for anyone who hasn't prayed with the list; no push.
   `closesAt` is mirrored to RTDB `/lists/current` so open apps react live.
+  Setting `closesAt` also **creates the N+1 list row** (draft, `currentFrom =
+  closesAt`); prayers started after the cutoff count toward N+1.
+- Social display names are truncated to 40 graphemes on ingest. Blocklist is
+  seeded from an open multilingual list (editable config) + contact/link patterns.
 - **Gate qualification (precise):** (a) `communityList` = the closing list
   (started before `closesAt`) OR (b) the prayer **ended** within 30h of assembly.
 - **Enums:** `source` APP | SOCIAL | BASE_SET; `moderationStatus` APPROVED | HELD |
