@@ -1,8 +1,18 @@
 rules_version = '2';
-// Cloud Storage security rules. Media bytes live here (NOT in git).
-// Populate concrete rules when wiring storage. Default deny.
+// Cloud Storage rules. Media bytes live here (NOT in git).
+// The publish step uploads with the Admin SDK (rules don't apply to it) and
+// sets cache headers in the object metadata.
 service firebase.storage {
   match /b/{bucket}/o {
+    // Self-hosted list videos (compressed vertical renditions + posters):
+    // public read so the app can stream and cache them; never client-written.
+    match /videos/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Everything else is closed — including the avatar photo seam
+    // (PrayerSubject.avatarPath, private + owner-only), which isn't built yet.
     match /{allPaths=**} {
       allow read, write: if false;
     }

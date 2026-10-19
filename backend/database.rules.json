@@ -1,15 +1,38 @@
+// RTDB rules (schema-brief §3). Clients write ONLY their own presence/draft
+// nodes; every public node is server-written (the Admin SDK bypasses rules).
+// Clients never read raw presence.
 {
-  "//": "RTDB security rules. Presence and live counts are READ by clients, WRITTEN by server only. Populate concrete rules when implementing the presence/onDisconnect design and the live-count mirror.",
   "rules": {
     ".read": false,
     ".write": false,
+
     "presence": {
-      ".read": "auth != null",
-      ".write": false
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$deviceId": {
+          ".write": "auth != null && auth.uid === $uid && $deviceId.length <= 64",
+          ".validate": "newData.hasChildren(['startedAt', 'lastActiveAt', 'inForeground'])",
+          "startedAt": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+          "lastActiveAt": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
+          "inForeground": { ".validate": "newData.isBoolean()" },
+          "listIncluded": { ".validate": "newData.isBoolean()" },
+          "itemIds": {
+            "$i": { ".validate": "$i.length <= 3 && newData.isString() && newData.val().length <= 36" }
+          },
+          "prayerId": { ".validate": "newData.isString() && newData.val().length <= 36" },
+          "localDate": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)" },
+          "timezone": { ".validate": "newData.isString() && newData.val().length <= 64" },
+          "$other": { ".validate": false }
+        }
+      }
     },
-    "liveCounts": {
-      ".read": "auth != null",
-      ".write": false
-    }
+
+    "stats": {
+      "live": { ".read": true }
+    },
+    "lists": {
+      "current": { ".read": true }
+    },
+    "config": { ".read": true }
   }
 }
