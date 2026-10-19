@@ -151,9 +151,15 @@ separate Entitlement table for family/gift plans, scoped lists.
 | Gate window | server param | 30h |
 | Draft resume / auto-save / duration cap | server param (+ client mirror) | 30 min / 6h / 4h |
 | Min prayer duration | both | 5s |
-| Grace cap / interval | Remote Config + server enforcement | 2 / 7 list days |
-| Presence display threshold | Remote Config | 10 |
-| Min app version | Remote Config | — |
+| Grace cap / interval | RTDB `/config` + server enforcement | 2 / 7 list days |
+| Presence display threshold | RTDB `/config` | 10 |
+| Min app version | RTDB `/config` | — |
+
+Client-visible config lives in a small public-read, server-write RTDB node
+`/config` (with defaults compiled into the app), NOT Firebase Remote Config —
+Remote Config moved to usage-based pricing on 2026-09-01, and RTDB is already
+in the stack, offline-cached, and live-updating. Revisit Remote Config only if
+A/B testing or audience targeting is needed.
 | Subject abuse cap | server | ~500 |
 
 ## 6. Functions & operations to add/revise (update OPERATIONS.md)

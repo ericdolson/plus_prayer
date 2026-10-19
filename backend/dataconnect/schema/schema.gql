@@ -24,7 +24,7 @@
 # Not stored here (by design): live presence and the live current-list count
 # (RTDB — see docs/product/presence-live.md), in-progress prayer drafts (RTDB
 # /presence/{uid}/{deviceId}), and tunables like the 30h gate window or grace
-# cap (server params / Remote Config — see schema-brief §5).
+# cap (server params / RTDB /config — see schema-brief §5).
 #
 # ----------------------------------------------------------------------------
 # COUNTS & STREAKS MODEL (read this before adding any count/streak columns)

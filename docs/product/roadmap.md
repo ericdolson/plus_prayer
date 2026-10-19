@@ -49,7 +49,9 @@ Stage 1 is a private beta that tests whether the app is the right mechanism.
 - [ ] Presence: private `/presence/{uid}` + throttled public `/stats/live`
       publisher (~5s) + 1-min reconcile job
 - [ ] RTDB + Storage rules (public-read `videos/`)
-- [ ] Remote Config: grace cap (2), grace interval (7), presence thresholds (10)
+- [ ] RTDB `/config` (public-read, server-write): grace cap (2), grace
+      interval (7), presence threshold (10), min app version — replaces Remote
+      Config (usage-based pricing since 2026-09-01)
 
 ### Data & pipeline [ops]
 - [ ] Backfill lists 1..N + participants from `publishing/*.json`
@@ -65,7 +67,7 @@ Stage 1 is a private beta that tests whether the app is the right mechanism.
 - [ ] ~500-name soft safety cap (abuse only, not a paywall)
 - [ ] Analytics events from day one (first prayer, list prayer, D1/D7/D30,
       trial start, conversion, invitation accepted, last call opened)
-- [ ] Minimum app version (Remote Config)
+- [ ] Minimum app version (RTDB `/config`)
 - [ ] Design tokens: dark/antique palette, avatar tone palette, wax-seal vectors
 
 ---

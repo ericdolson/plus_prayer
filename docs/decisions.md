@@ -629,3 +629,12 @@ them; account deletion removes entries. `setSelfName` creates the self subject;
 onboarding resumes by state; `mergeAccounts` offered on link conflicts with a
 duplicates warning. Effective carry = intention && parent; cascades on archive.
 Moderation fields become enums with four user-facing reason categories.
+
+### Decision: Client config in RTDB /config, not Firebase Remote Config
+**Timestamp:** 2026-10-18 (SUPERSEDES earlier same-day references to Remote Config)
+Firebase Remote Config moved to usage-based pricing on 2026-09-01 (free plan
+capped at 100k fetches/day; beyond that metered). Tunable client values (grace
+cap/interval, presence threshold, min app version) live in a public-read,
+server-write RTDB `/config` node with app-compiled defaults — already in the
+stack, offline-cached, live. Enforcement stays server-side. Revisit Remote Config
+only for A/B tests or audience targeting.

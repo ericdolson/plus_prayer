@@ -42,7 +42,7 @@ _Last updated: 2026-10-17_
   - Accepted grace days **bank up to 2** (2026-10-18), shown as small marks beside
     the streak. Start at 2 (close to Duolingo's market-tested choice); may raise
     to 3 later — never lower once launched. Cap and 7-day interval are server
-    config (Remote Config), tunable without an app release.
+    config (RTDB `/config`), tunable without an app release.
   - When the bank is full, the 7-day mark is still acknowledged quietly:
     "Seven days kept. Your grace days are full." 
   - **No strict-mode setting.** Declining offers "Don't offer again"
