@@ -8,7 +8,7 @@ import { hasCheck, mutate, query } from "./db";
 import { Deps } from "./deps";
 import { selfSubjectId } from "./ids";
 import { checkPool, Entitlement, PoolSubject } from "./pool";
-import { optionalText, requireName } from "./text";
+import { optionalText, requireName, requireNoContact } from "./text";
 
 const ALIAS_CAP = 40;
 const NOTE_CAP = 1000;
@@ -29,7 +29,7 @@ interface SelfState {
  * APPROVED entry on a PUBLISHED list), then once per 7 days.
  */
 export async function setSelfName(deps: Deps, uid: string, rawName: unknown) {
-  const name = requireName(rawName, deps.cfg.nameCap);
+  const name = requireNoContact(requireName(rawName, deps.cfg.nameCap), "name");
   const state = await query<SelfState>(deps.db, "GetSelfState", { uid });
   if (!state.user) throw new HttpsError("failed-precondition", "Account is not ready yet");
   const self = state.user.self[0];
@@ -89,8 +89,11 @@ export async function addSubject(
 ) {
   const kind = input.kind === "INTENTION" ? "INTENTION" : input.kind === "SOUL" ? "SOUL" : null;
   if (!kind) throw new HttpsError("invalid-argument", "kind must be SOUL or INTENTION");
-  const publicName = requireName(input.publicName, kind === "SOUL" ? deps.cfg.nameCap : deps.cfg.intentionCap, "publicName");
-  const personalLabel = optionalText(input.personalLabel, ALIAS_CAP, "personalLabel") ?? null;
+  const publicName = requireNoContact(
+    requireName(input.publicName, kind === "SOUL" ? deps.cfg.nameCap : deps.cfg.intentionCap, "publicName"),
+    "publicName",
+  );
+  const personalLabel = requireNoContact(optionalText(input.personalLabel, ALIAS_CAP, "personalLabel") ?? null, "personalLabel");
   const note = optionalText(input.note, NOTE_CAP, "note") ?? null;
 
   const { user, subjects } = await poolState(deps, uid);
@@ -143,9 +146,12 @@ export async function updateSubject(
   if (!subject) throw new HttpsError("not-found", "Item not found");
   const vars: Record<string, unknown> = { uid, id: subject.id };
   if (input.publicName !== undefined) {
-    vars.publicName = requireName(input.publicName, subject.kind === "SOUL" ? deps.cfg.nameCap : deps.cfg.intentionCap, "publicName");
+    vars.publicName = requireNoContact(
+      requireName(input.publicName, subject.kind === "SOUL" ? deps.cfg.nameCap : deps.cfg.intentionCap, "publicName"),
+      "publicName",
+    );
   }
-  const personalLabel = optionalText(input.personalLabel, ALIAS_CAP, "personalLabel");
+  const personalLabel = requireNoContact(optionalText(input.personalLabel, ALIAS_CAP, "personalLabel"), "personalLabel");
   if (personalLabel !== undefined) vars.personalLabel = personalLabel;
   const note = optionalText(input.note, NOTE_CAP, "note");
   if (note !== undefined) vars.note = note;

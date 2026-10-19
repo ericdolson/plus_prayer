@@ -2,6 +2,7 @@
 // characters (grapheme clusters), not bytes or code points; any script.
 
 import { HttpsError } from "firebase-functions/v2/https";
+import { CONTACT_MESSAGE, hasContactInfo } from "./contact";
 
 const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 
@@ -33,6 +34,18 @@ export function requireName(raw: unknown, cap: number, field = "name"): string {
   if (text.length === 0) throw new HttpsError("invalid-argument", `${field} is required`);
   if (graphemeLength(text) > cap) {
     throw new HttpsError("invalid-argument", `${field} is limited to ${cap} characters`, { cap });
+  }
+  return text;
+}
+
+/**
+ * Printed text (names, aliases, intentions) may not carry contact info or
+ * links. The error is shaped for an inline message: code invalid-argument,
+ * details { reason: "CONTACT_OR_LINK", field }.
+ */
+export function requireNoContact<T extends string | null | undefined>(text: T, field: string): T {
+  if (typeof text === "string" && hasContactInfo(text)) {
+    throw new HttpsError("invalid-argument", CONTACT_MESSAGE, { reason: "CONTACT_OR_LINK", field });
   }
   return text;
 }
