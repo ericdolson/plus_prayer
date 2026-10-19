@@ -11,8 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test": "firebase emulators:exec --only dataconnect --project demo-plusprayer '\"$npm_node_execpath\" --import tsx --test --test-concurrency=1 test/*.test.ts'",
     "test:run": "node --import tsx --test --test-concurrency=1 test/*.test.ts",
-    "seed:config": "node --import tsx scripts/seed-config.ts",
-    "test:rules": "firebase emulators:exec --only database --project demo-plusprayer '\"$npm_node_execpath\" --import tsx --test test/rules/*.test.ts'"
+    "seed:config": "node --import tsx scripts/admin.ts seed-config",
+    "test:rules": "firebase emulators:exec --only database --project demo-plusprayer '\"$npm_node_execpath\" --import tsx --test test/rules/*.test.ts'",
+    "admin": "node --import tsx scripts/admin.ts"
   },
   "dependencies": {
     "firebase-admin": "^14.5.0",

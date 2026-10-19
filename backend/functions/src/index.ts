@@ -1,11 +1,10 @@
 // +Prayer Cloud Functions — wiring only. Logic lives in the modules imported
-// below, each taking `Deps` so tests can run it against the emulator.
+// below, each taking `Deps` so tests can run it against the emulator. The
+// admin callables here are also available to Eric's skills as a CLI
+// (scripts/admin.ts) that runs the same modules with a service account.
 // Region us-central1 (same as SQL Connect — required for its triggers).
 
 import { initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { getDataConnect } from "firebase-admin/data-connect";
-import { getMessaging } from "firebase-admin/messaging";
 import * as functionsV1 from "firebase-functions/v1";
 import { onMutationExecuted } from "firebase-functions/dataconnect";
 import { onValueWritten } from "firebase-functions/v2/database";
@@ -15,19 +14,16 @@ import { setGlobalOptions } from "firebase-functions/v2";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
 import * as accounts from "./accounts";
-import { DEFAULT_SERVER_CONFIG, ServerConfig } from "./config";
+import { DEFAULT_SERVER_CONFIG } from "./config";
 import { Deps } from "./deps";
 import * as lists from "./lists";
-import { rtdbLive } from "./live";
 import * as prayers from "./prayers";
 import * as presence from "./presence";
+import { LOCATION, productionDeps, SERVICE_ID } from "./runtime";
 import * as subjects from "./subjects";
 
 initializeApp();
-setGlobalOptions({ region: "us-central1" });
-
-export const SERVICE_ID = "plusprayer-service";
-const LOCATION = "us-central1";
+setGlobalOptions({ region: LOCATION });
 
 const gateHours = defineInt("GATE_HOURS", { default: DEFAULT_SERVER_CONFIG.gateHours });
 const basePremiumPool = defineInt("BASE_PREMIUM_POOL", { default: DEFAULT_SERVER_CONFIG.basePremiumPool });
@@ -38,39 +34,14 @@ const wordBlocklist = defineBoolean("MODERATION_WORD_BLOCKLIST", { default: DEFA
 
 let deps: Deps | null = null;
 function getDeps(): Deps {
-  if (deps) return deps;
-  const cfg: ServerConfig = {
+  deps ??= productionDeps({
     ...DEFAULT_SERVER_CONFIG,
     gateHours: gateHours.value(),
     basePremiumPool: basePremiumPool.value(),
     subjectCap: subjectCap.value(),
     listTimeZone: listTimeZone.value(),
     wordBlocklistEnabled: wordBlocklist.value(),
-  };
-  deps = {
-    db: getDataConnect({ serviceId: SERVICE_ID, location: LOCATION, connector: "admin" }),
-    live: rtdbLive(),
-    notifier: {
-      async sendToTopic(topic, notification, data) {
-        await getMessaging().send({ topic, notification, data });
-      },
-    },
-    auth: {
-      async deleteUser(uid) {
-        try {
-          await getAuth().deleteUser(uid);
-        } catch (err) {
-          if ((err as { code?: string }).code !== "auth/user-not-found") throw err;
-        }
-      },
-      async verifyIdToken(token) {
-        const decoded = await getAuth().verifyIdToken(token, true);
-        return { uid: decoded.uid, signInProvider: decoded.firebase?.sign_in_provider };
-      },
-    },
-    cfg,
-    now: () => new Date(),
-  };
+  });
   return deps;
 }
 

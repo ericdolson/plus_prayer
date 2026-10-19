@@ -16,7 +16,9 @@ triggers require it). All SQL lives in the `admin` connector
 | `src/streak.ts`, `src/pool.ts` | Pure rules (streak + grace; carried pool) |
 | `src/live.ts` | RTDB writes (`/lists/current`, `/stats/live`, `/config`) |
 
-Admin callables check the `admin` custom claim (Eric's skills).
+Eric's skills run the admin operations through the admin CLI below (service
+account). The deployed admin callables stay available too and check the
+`admin` custom claim.
 
 ## Config
 - Server params (`firebase-functions/params`, defaults in `src/config.ts`):
@@ -31,7 +33,28 @@ Admin callables check the `admin` custom claim (Eric's skills).
   bundled seed when it's empty.
 - Client-visible values: RTDB `/config`, defaults in
   `config/client-config.json` (also compiled into the app). Seed missing keys
-  (and the blocklist, if empty) with `FIREBASE_DATABASE_URL=… npm run seed:config`.
+  (and the blocklist, if empty) with `npm run seed:config` (the admin CLI's `seed-config`).
+
+## Admin CLI (for Eric's skills)
+The admin callables, run locally with a service account — same code paths
+as the deployed functions, JSON on stdout, errors as
+`{ "error": { code, message, details } }` on stderr with exit code 1:
+
+```sh
+export GOOGLE_APPLICATION_CREDENTIALS=~/.config/plusprayer/service-account.json
+npm --prefix backend/functions run admin -- help
+npm --prefix backend/functions run admin -- close-list            # ~5 min before the routine
+npm --prefix backend/functions run admin -- assemble --social harvest.json
+npm --prefix backend/functions run admin -- moderate --decisions decisions.json
+npm --prefix backend/functions run admin -- held                   # Eric's short list
+```
+
+Key: Firebase console → Project settings → Service accounts → Generate new
+private key. Keep it outside the repo (`service-account*.json` is
+gitignored anyway). It has full admin rights — treat it like a password.
+Config comes from `.env` / `.env.<projectId>` (what `firebase deploy` writes
+for the params) and the environment, so the CLI and the deployed functions
+agree. Every run prints the target project to stderr (production / EMULATOR).
 
 ## Tests
 - `npm test` — starts the SQL Connect emulator (no Java needed) and runs

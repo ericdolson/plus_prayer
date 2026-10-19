@@ -26,8 +26,10 @@ Legend for auth (SQL Connect spellings verified against the firebase-tools
   "auth.uid"`). Ownership of client-supplied ids is proven with a query step +
   `@check` inside the operation.
 - **ADMIN** = `@auth(level: NO_ACCESS)` (the default) — runnable only via the
-  Admin SDK from Cloud Functions. Eric's skills call admin-only callables that
-  verify the `admin` custom claim.
+  Admin SDK. Eric's skills run the admin operations through the admin CLI
+  (`backend/functions/scripts/admin.ts`, service account; same modules as the
+  callables); the deployed admin callables also verify the `admin` custom
+  claim.
 
 Mechanisms available (prelude): `@transaction` on mutations; `@check(expr,
 message)` on fields/steps; `@allow(fields, maxCount)` on `_Data` variables

@@ -35,6 +35,18 @@ async function openLists(deps: Deps): Promise<{ closing: ListRow; next: ListRow 
 }
 
 /**
+ * The lists that aren't settled yet (N, plus N+1 once closeList ran) and the
+ * one that's current now (latest currentFrom ≤ now) — for the admin CLI and
+ * skills, which default to the current list.
+ */
+export async function listStatus(deps: Deps) {
+  const res = await query<{ prayerLists: ListRow[] }>(deps.db, "GetOpenLists");
+  const now = deps.now().getTime();
+  const current = [...res.prayerLists].reverse().find((l) => l.currentFrom && Date.parse(l.currentFrom) <= now) ?? null;
+  return { current, openLists: res.prayerLists };
+}
+
+/**
  * Sets the exact cutoff (now + 5 min), creates N+1 current from it, and
  * mirrors closesAt for the in-app banner. Re-running before the cutoff moves
  * it; after the cutoff, assemble first.
