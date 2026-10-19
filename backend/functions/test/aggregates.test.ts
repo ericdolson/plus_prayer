@@ -70,9 +70,9 @@ describe("increment-only aggregates", () => {
     assert.deepEqual(await listCounts(listId), { prayer_count: 1, prayer_seconds: 10 });
   });
 
-  it("a closed list's numbers are final: late prayers for it don't move them", async () => {
+  it("a settled list's numbers are final: late prayers for it don't move them", async () => {
     const deps = makeDeps();
-    const closed = await addList(1, { currentFrom: Date.now() - 2 * DAY, closesAt: Date.now() - DAY });
+    const closed = await addList(1, { currentFrom: Date.now() - 2 * DAY, closesAt: Date.now() - DAY, settled: true });
     await addList(2, { currentFrom: Date.now() - DAY });
     await createUser("c1");
     // Offline device still thought List 1 was current; syncs after the flip.

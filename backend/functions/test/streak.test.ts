@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
 import { processPrayer } from "../src/prayers";
-import { applyListDay, StreakState, streakFromDays } from "../src/streak";
+import { applyListDay, repairStreak, StreakState, streakFromDays } from "../src/streak";
 import { addList, createUser, DAY, logPrayer, makeDeps, resetDb, sql } from "./helpers";
 
 const rules = { graceCap: 2, graceIntervalDays: 7, graceOffersEnabled: true };
@@ -120,5 +120,57 @@ describe("streak end-to-end via onPrayerLogged", () => {
     assert.equal(u.current_streak, 1);
     assert.equal(u.best_streak, 1);
     assert.equal(u.last, "2026-10-03");
+  });
+});
+
+describe("late-sync repair (schema-brief §9.3)", () => {
+  it("a filled gap restores the run; grace held bridges remaining gaps without being spent", () => {
+    const stored: StreakState = { currentStreak: 1, bestStreak: 2, lastListLocalDate: "2026-10-04", graceDays: 1, graceOfferPending: false };
+    // 10-03 synced late; 10-01..10-04 is now unbroken.
+    assert.deepEqual(repairStreak(stored, ["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"]), {
+      ...stored, currentStreak: 4, bestStreak: 4,
+    });
+    // One remaining gap (09-30) bridged by the one grace day held; the bank isn't spent again.
+    const bridged = repairStreak(stored, ["2026-09-28", "2026-09-29", "2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"]);
+    assert.equal(bridged.currentStreak, 6);
+    assert.equal(bridged.graceDays, 1);
+  });
+
+  it("never lowers the stored streak", () => {
+    const stored: StreakState = { currentStreak: 9, bestStreak: 9, lastListLocalDate: "2026-10-04", graceDays: 0, graceOfferPending: false };
+    assert.equal(repairStreak(stored, ["2026-10-01", "2026-10-04"]).currentStreak, 9);
+  });
+});
+
+describe("late-sync repair end-to-end via onPrayerLogged", () => {
+  beforeEach(resetDb);
+
+  it("an older day prayed offline and synced after a newer one repairs the streak", async () => {
+    const deps = makeDeps();
+    const listId = await addList(1, { currentFrom: Date.now() - 10 * DAY });
+    await createUser("r1");
+    for (const d of ["2026-10-01", "2026-10-02", "2026-10-04"]) {
+      await processPrayer(deps, await logPrayer("r1", { listId, localDate: d }));
+    }
+    const read = async () => (await sql<{ current_streak: number; best_streak: number; last: string }>(
+      `SELECT current_streak, best_streak, to_char(last_list_local_date, 'YYYY-MM-DD') AS last FROM "user" WHERE id = $1`, ["r1"],
+    ))[0];
+    assert.deepEqual(await read(), { current_streak: 1, best_streak: 2, last: "2026-10-04" }, "10-03 missing → restarted");
+
+    // The 10-03 prayer was made offline and only now syncs.
+    await processPrayer(deps, await logPrayer("r1", { listId, localDate: "2026-10-03" }));
+    assert.deepEqual(await read(), { current_streak: 4, best_streak: 4, last: "2026-10-04" });
+  });
+
+  it("a late personal-only prayer (no list) doesn't touch the streak", async () => {
+    const deps = makeDeps();
+    const listId = await addList(1, { currentFrom: Date.now() - 10 * DAY });
+    await createUser("r2");
+    for (const d of ["2026-10-01", "2026-10-03"]) {
+      await processPrayer(deps, await logPrayer("r2", { listId, localDate: d }));
+    }
+    await processPrayer(deps, await logPrayer("r2", { listId: null, localDate: "2026-10-02" }));
+    const [u] = await sql<{ current_streak: number }>(`SELECT current_streak FROM "user" WHERE id = $1`, ["r2"]);
+    assert.equal(u.current_streak, 1);
   });
 });

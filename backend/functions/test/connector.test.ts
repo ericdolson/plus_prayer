@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { beforeEach, describe, it } from "node:test";
-import { addList, addSubjectRow, clientDb, createUser, DAY, impersonate, logPrayer, resetDb, sql } from "./helpers";
+import { addList, addSubjectRow, clientDb, createUser, DAY, exec, impersonate, logPrayer, resetDb, sql } from "./helpers";
 
 const status = async (id: string) =>
   (await sql<{ status: string; cascade: boolean }>(
@@ -97,5 +97,92 @@ describe("subject lifecycle", () => {
       "SELECT public_name, sort_order FROM prayer_subject WHERE owner_id = $1 ORDER BY is_self DESC, sort_order", ["me"],
     );
     assert.deepEqual(rows.map((r) => [r.public_name, r.sort_order]), [["Person me", 0], ["B", 1], ["A", 2]]);
+  });
+});
+
+describe("§9 follow-ups on the client connector", () => {
+  beforeEach(resetDb);
+
+  it("restoring a Released intention reopens it; an Answered one stays Answered", async () => {
+    await createUser("me");
+    const name = await addSubjectRow("me", { name: "Ma" });
+    const released = await addSubjectRow("me", { parentId: name, name: "Ma: move" });
+    const answered = await addSubjectRow("me", { parentId: name, name: "Ma: test results" });
+    const as = impersonate("me");
+    await clientDb.executeMutation("ReleaseIntention", { id: released }, as);
+    await clientDb.executeMutation("MarkIntentionAnswered", { id: answered }, as);
+    await clientDb.executeMutation("ArchiveSubject", { id: answered }, as);
+
+    await clientDb.executeMutation("RestoreSubject", { id: released }, as);
+    await clientDb.executeMutation("RestoreSubject", { id: answered }, as);
+    const rows = await sql<{ id: string; status: string; resolution: string | null; resolved: boolean }>(
+      "SELECT id, status::text AS status, resolution::text AS resolution, resolved_at IS NOT NULL AS resolved FROM prayer_subject WHERE id IN ($1::uuid, $2::uuid)",
+      [released, answered],
+    );
+    const by = Object.fromEntries(rows.map((r) => [r.id, r]));
+    assert.deepEqual(by[released], { id: released, status: "ACTIVE", resolution: null, resolved: false });
+    assert.deepEqual(by[answered], { id: answered, status: "ACTIVE", resolution: "ANSWERED", resolved: true });
+  });
+
+  it("range-checks avatarTone (0–15, or null for the default)", async () => {
+    await createUser("me");
+    const id = await addSubjectRow("me", { name: "Jo" });
+    const as = impersonate("me");
+    await clientDb.executeMutation("SetSubjectAvatarTone", { id, avatarTone: 15 }, as);
+    await clientDb.executeMutation("SetSubjectAvatarTone", { id, avatarTone: null }, as);
+    await assert.rejects(clientDb.executeMutation("SetSubjectAvatarTone", { id, avatarTone: 16 }, as), /0 to 15/);
+    await assert.rejects(clientDb.executeMutation("SetSubjectAvatarTone", { id, avatarTone: -1 }, as), /0 to 15/);
+  });
+
+  it("the detail page's entries (beads, world count) are APPROVED only, server-side", async () => {
+    await createUser("me");
+    const name = await addSubjectRow("me", { name: "Al" });
+    const l1 = await addList(1, { currentFrom: Date.now() - 2 * DAY });
+    const l2 = await addList(2, { currentFrom: Date.now() - DAY });
+    await exec(
+      `INSERT INTO prayer_list_entry (list_id, subject_id, owner_id, kind, public_name, source, moderation_status)
+       VALUES ($1::uuid, $3::uuid, 'me', 'SOUL', 'Al', 'APP', 'APPROVED'),
+              ($2::uuid, $3::uuid, 'me', 'SOUL', 'Al', 'APP', 'EXCLUDED')`,
+      [l1, l2, name],
+    );
+    const res = await clientDb.executeQuery<{ prayerSubjects: { entries: { list: { listNumber: number } }[] }[] }, { id: string }>(
+      "GetSubjectDetail", { id: name }, impersonate("me"),
+    );
+    assert.deepEqual(res.data.prayerSubjects[0].entries.map((e) => e.list.listNumber), [1]);
+  });
+});
+
+describe("every client query executes", () => {
+  beforeEach(resetDb);
+
+  it("runs all 14 reads for a user with subjects, prayers, and list entries", async () => {
+    const { selfId } = await createUser("me");
+    const name = await addSubjectRow("me", { name: "Bea" });
+    const intention = await addSubjectRow("me", { parentId: name, name: "Bea: rest" });
+    const listId = await addList(1, { currentFrom: Date.now() - DAY });
+    const prayerId = await logPrayer("me", { listId, subjectIds: [intention], localDate: "2026-10-10" });
+    await exec(
+      `INSERT INTO prayer_list_entry (list_id, subject_id, owner_id, kind, public_name, source, moderation_status)
+       VALUES ($1::uuid, $2::uuid, 'me', 'SOUL', 'Bea', 'APP', 'APPROVED')`,
+      [listId, name],
+    );
+    await clientDb.executeMutation("CreateReminder", { slot: "MORNING", localTime: "07:30" }, impersonate("me"));
+    const as = impersonate("me");
+    const run = (op: string, vars: object = {}) => clientDb.executeQuery<Record<string, unknown>, object>(op, vars, as);
+
+    const ops: [string, object][] = [
+      ["GetCurrentListMeta", {}], ["GetPastLists", {}], ["GetMyHeader", {}], ["GetMySubjects", {}],
+      ["SearchMySubjects", { query: "Bea" }], ["GetMyListStatus", { listId }], ["GetMyPortion", { listId }],
+      ["GetSubjectDetail", { id: name }], ["GetMyPrayerHistory", {}], ["GetMyPrayerTime", { weekStart: "2026-10-05" }],
+      ["GetPrayer", { id: prayerId }], ["GetMyMonth", { from: "2026-10-01", to: "2026-10-31" }],
+      ["GetMyArchivedSubjects", {}], ["GetMyReminders", {}],
+    ];
+    for (const [op, vars] of ops) await run(op, vars);
+
+    const subjects = (await run("GetMySubjects")).data.prayerSubjects as { id: string; lastPrayed: { prayer: { localDate: string } }[] }[];
+    assert.equal(subjects.find((x) => x.id === name)?.lastPrayed[0]?.prayer.localDate, "2026-10-10", "parent name linked");
+    assert.equal(subjects.find((x) => x.id === selfId)?.lastPrayed.length, 0);
+    const detail = (await run("GetSubjectDetail", { id: name })).data.prayerSubjects as { prayers: { prayer: { id: string } }[] }[];
+    assert.deepEqual(detail[0].prayers.map((p) => p.prayer.id), [prayerId]);
   });
 });

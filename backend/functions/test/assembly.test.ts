@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
 import { mutate } from "../src/db";
-import { assembleNextList, closeList, moderateEntry, publishList } from "../src/lists";
+import { assembleNextList, closeList, listLiveCopy, moderateEntry, publishList, publishListVideo } from "../src/lists";
 import { addSubject, setCarriedItems } from "../src/subjects";
 import {
   addList, addSubjectRow, adminDb, clientDb, createUser, DAY, impersonate, logPrayer, makeDeps, resetDb, sql, TestDeps,
@@ -119,7 +119,8 @@ describe("assembly: names from outside the app, flags, counts", () => {
   beforeEach(resetDb);
 
   it("adds the 🙏 harvest and the active base set; holds contact info; counts non-excluded", async () => {
-    const deps = makeDeps({ blocklist: ["darn"] });
+    const deps = makeDeps();
+    deps.live.blocklist = ["darn"]; // the editable RTDB list overrides the bundled seed
     await createUser("u", { name: "Una" });
     await createUser("v", { name: "Call me 555-123-4567" });
     await mutate(adminDb, "UpsertBaseSetPerson", { externalId: "MP1", displayName: "Missing Child One", activeFrom: null, activeUntil: null });
@@ -159,17 +160,18 @@ describe("assembly: names from outside the app, flags, counts", () => {
     assert.equal(counts.soul_count, 5);
   });
 
-  it("if list N+1 already exists, assembly writes nothing and says so", async () => {
+  it("two assemblies at once: one settles N and fills N+1, the other writes nothing", async () => {
     const deps = makeDeps();
     await createUser("w");
     const listId = await addList(1, { currentFrom: Date.now() - DAY });
     await logPrayer("w", { listId });
-    const clash = await addList(2, { currentFrom: null, status: "draft" }); // not current
     await closeList(deps, 0);
-    deps.clock.now = new Date(Date.now() + 1000);
-    await assert.rejects(assembleNextList(deps, {}), /already assembled/);
-    assert.equal((await entries(clash)).length, 0);
-    assert.equal((await sql("SELECT id FROM prayer_list_entry")).length, 0);
+    const later = (ms: number) => ({ ...deps, now: () => new Date(Date.now() + ms) });
+    const results = await Promise.allSettled([assembleNextList(later(1000), {}), assembleNextList(later(1001), {})]);
+    assert.equal(results.filter((r) => r.status === "fulfilled").length, 1);
+    const failed = results.find((r) => r.status === "rejected") as PromiseRejectedResult;
+    assert.match(String(failed.reason), /already assembled/);
+    assert.equal((await sql("SELECT id FROM prayer_list_entry")).length, 1, "no duplicate entries");
   });
 });
 
@@ -220,5 +222,49 @@ describe("the pool on the server (addSubject / setCarriedItems)", () => {
     await assert.rejects(addSubject(deps, "cap", { kind: "SOUL", publicName: "x".repeat(41) }), /40 characters/);
     await addSubject(deps, "cap", { kind: "INTENTION", parentId: selfId, publicName: "y".repeat(80) });
     await assert.rejects(addSubject(deps, "cap", { kind: "INTENTION", parentId: selfId, publicName: "y".repeat(81) }), /80 characters/);
+  });
+});
+
+describe("§9 follow-ups: harvest names, the seeded blocklist, the live push", () => {
+  beforeEach(resetDb);
+
+  it("truncates social display names to 40 graphemes on ingest", async () => {
+    const deps = makeDeps();
+    const family = "👨‍👩‍👧‍👦";
+    const res = await setupAndAssemble(deps, [], [
+      { platform: "youtube", externalId: "long1", displayName: "A".repeat(39) + family + "BCD" },
+    ]);
+    const [row] = await entries(res.listId);
+    assert.equal(row.public_name, "A".repeat(39) + family, "40 visible characters, emoji intact");
+    const [person] = await sql<{ display_name: string }>("SELECT display_name FROM external_person");
+    assert.equal(person.display_name, row.public_name);
+  });
+
+  it("uses the bundled LDNOOBW seed when no editable list is set", async () => {
+    const deps = makeDeps(); // deps.live.blocklist is null → bundled seed
+    const res = await setupAndAssemble(deps, [], [
+      { platform: "youtube", externalId: "w1", displayName: "You BASTARD!" }, // English, whole word, any case
+      { platform: "youtube", externalId: "w2", displayName: "Sebastardo Ruiz" }, // not a whole word
+      { platform: "youtube", externalId: "z1", displayName: "王下贱明" }, // zh 2-char term inside a name
+      { platform: "youtube", externalId: "z2", displayName: "王性明" }, // zh single char: whole token only
+    ]);
+    const by = Object.fromEntries((await entries(res.listId)).map((r) => [r.public_name, r]));
+    assert.deepEqual([by["You BASTARD!"].moderation_status, by["You BASTARD!"].reason_category], ["HELD", "LANGUAGE"]);
+    assert.equal(by["Sebastardo Ruiz"].moderation_status, "APPROVED");
+    assert.equal(by["王下贱明"].reason_category, "LANGUAGE");
+    assert.equal(by["王性明"].moderation_status, "APPROVED");
+  });
+
+  it("the list-live push says how many people the list holds", async () => {
+    const deps = makeDeps();
+    await createUser("pp", { name: "Pia" });
+    const res = await setupAndAssemble(deps, ["pp"], [
+      { platform: "youtube", externalId: "s1", displayName: "Sam" },
+      { platform: "youtube", externalId: "s2", displayName: "Sue" },
+    ]);
+    await publishList(deps, res.listId);
+    await publishListVideo(deps, { listId: res.listId, videoPath: "videos/2.mp4", posts: [] });
+    assert.deepEqual(deps.sent, [{ topic: "list-live", body: "List 2 is up · 3 people, including you." }]);
+    assert.equal(listLiveCopy(52, 4345), "List 52 is up · 4,345 people, including you.");
   });
 });

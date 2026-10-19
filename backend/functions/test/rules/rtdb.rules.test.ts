@@ -74,14 +74,16 @@ describe("RTDB rules: public, server-written nodes", () => {
 describe("live.ts against RTDB", () => {
   const live = rtdbLive();
 
-  it("mirrors the current list and only ever raises its count", async () => {
+  it("mirrors the current list, only ever raises its count, and moves forward to N+1", async () => {
+    const read = async () => (await fetch(`http://${HOST}/lists/current.json?ns=${NS}`)).json();
     await live.setCurrentList({ listId: "abc-def", listNumber: 7, prayerCount: 0, closesAt: null });
-    await live.raiseCurrentListCount("abcdef", 5);
-    await live.raiseCurrentListCount("abcdef", 3);
-    await live.raiseCurrentListCount("other", 99);
+    await live.raiseCurrentListCount({ listId: "abcdef", listNumber: 7 }, 5);
+    await live.raiseCurrentListCount({ listId: "abcdef", listNumber: 7 }, 3);
+    await live.raiseCurrentListCount({ listId: "older", listNumber: 6 }, 99);
     await live.setCurrentListClosesAt({ listId: "abcdef", listNumber: 7, prayerCount: 0, closesAt: 123 });
-    const res = await fetch(`http://${HOST}/lists/current.json?ns=${NS}`);
-    assert.deepEqual(await res.json(), { listId: "abcdef", listNumber: 7, prayerCount: 5, closesAt: 123 });
+    assert.deepEqual(await read(), { listId: "abcdef", listNumber: 7, prayerCount: 5, closesAt: 123 });
+    await live.raiseCurrentListCount({ listId: "next", listNumber: 8 }, 1);
+    assert.deepEqual(await read(), { listId: "next", listNumber: 8, prayerCount: 1 });
   });
 
   it("throttles /stats/live publishing", async () => {

@@ -42,6 +42,7 @@ export class FakeLive implements Live {
   stats: LiveStats | null = null;
   presence: PresenceTree = {};
   config: Partial<ClientConfig> | null = null;
+  blocklist: string[] | null = null;
   lastPublish: number | null = null;
   async setCurrentList(v: CurrentListLive) { this.currentList = { ...v, listId: normId(v.listId) }; }
   async setCurrentListClosesAt(list: CurrentListLive & { closesAt: number }) {
@@ -50,9 +51,12 @@ export class FakeLive implements Live {
       ? { ...this.currentList, closesAt: list.closesAt }
       : { ...list, listId: id };
   }
-  async raiseCurrentListCount(listId: string, count: number) {
-    if (this.currentList?.listId === normId(listId)) {
-      this.currentList.prayerCount = Math.max(this.currentList.prayerCount, count);
+  async raiseCurrentListCount(list: { listId: string; listNumber: number }, count: number) {
+    const id = normId(list.listId);
+    const cur = this.currentList;
+    if (cur?.listId === id) cur.prayerCount = Math.max(cur.prayerCount, count);
+    else if (cur && cur.listNumber < list.listNumber) {
+      this.currentList = { listId: id, listNumber: list.listNumber, prayerCount: count, closesAt: null };
     }
   }
   async readPresence() { return structuredClone(this.presence); }
@@ -69,12 +73,18 @@ export class FakeLive implements Live {
     return true;
   }
   async readClientConfig() { return this.config; }
+  async readBlocklist() { return this.blocklist; }
+  async writeBlocklistIfMissing(terms: string[]) {
+    if (this.blocklist?.length) return false;
+    this.blocklist = terms;
+    return true;
+  }
   async writeClientConfigDefaults(d: ClientConfig) { this.config = { ...d, ...this.config }; return []; }
 }
 
 export interface TestDeps extends Deps {
   live: FakeLive;
-  sent: { topic: string; title: string; body: string }[];
+  sent: { topic: string; title?: string; body: string }[];
   deletedAuthUsers: string[];
   clock: { now: Date };
 }
@@ -86,7 +96,7 @@ export function makeDeps(cfg: Partial<ServerConfig> = {}): TestDeps {
   return {
     db: adminDb,
     live: new FakeLive(),
-    notifier: { async sendToTopic(topic, title, body) { sent.push({ topic, title, body }); } },
+    notifier: { async sendToTopic(topic, n) { sent.push({ topic, ...n }); } },
     auth: {
       async deleteUser(uid) { deletedAuthUsers.push(uid); },
       async verifyIdToken(token) {
@@ -153,7 +163,7 @@ export async function addSubjectRow(
 
 export async function addList(
   listNumber: number,
-  opts: { currentFrom?: number | null; closesAt?: number | null; status?: string; listDate?: string } = {},
+  opts: { currentFrom?: number | null; closesAt?: number | null; settled?: boolean; status?: string; listDate?: string } = {},
 ): Promise<string> {
   const id = normId(randomUUID());
   await mutate(adminDb, "InsertList", {
@@ -163,6 +173,7 @@ export async function addList(
     status: opts.status ?? "published",
     currentFrom: opts.currentFrom == null ? null : iso(opts.currentFrom),
     closesAt: opts.closesAt == null ? null : iso(opts.closesAt),
+    settledAt: opts.settled ? iso(opts.closesAt ?? Date.now()) : null,
     publishedAt: null,
     sealVariant: null,
   });
@@ -197,7 +208,7 @@ export async function logPrayer(
     note: null,
     subjectIds: p.subjectIds ?? [],
   }, impersonate(uid));
-  return id;
+  return normId(id);
 }
 
 /** Ad-hoc read for assertions. */
@@ -214,6 +225,18 @@ export async function sql<T = Record<string, unknown>>(statement: string, params
   return res.data.rows.map((row) => Object.fromEntries(
     Object.entries(row as Record<string, unknown>).map(([k, v]) => [k, typeof v === "string" && uuid.test(v) ? normId(v) : v]),
   ) as T);
+}
+
+/** Ad-hoc write for fixtures (parameterized, like `sql`). Returns rows affected. */
+export async function exec(statement: string, params: unknown[] = []): Promise<number> {
+  const decls = params.map((_, i) => `$p${i}: Any`).join(", ");
+  const binds = params.map((_, i) => `{ _expr: "vars.p${i}" }`).join(", ");
+  const variables = Object.fromEntries(params.map((v, i) => [`p${i}`, v]));
+  const res = await adminDb.executeGraphql<{ n: number }, Record<string, unknown>>(
+    `mutation M${decls ? `(${decls})` : ""} { n: _execute(sql: ${JSON.stringify(statement)}, params: [${binds}]) }`,
+    { variables },
+  );
+  return res.data.n;
 }
 
 export { CLIENT_CONFIG_DEFAULTS };

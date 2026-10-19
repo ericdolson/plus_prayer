@@ -21,7 +21,7 @@ describe("list gate", () => {
 
   it("carries (a) prayers for the closing list started before closesAt and (b) list prayers ended within 30h", async () => {
     const deps = makeDeps();
-    const older = await addList(1, { currentFrom: Date.now() - 4 * DAY, closesAt: Date.now() - 3 * DAY });
+    const older = await addList(1, { currentFrom: Date.now() - 4 * DAY, closesAt: Date.now() - 3 * DAY, settled: true });
     const closing = await addList(2, { currentFrom: Date.now() - 3 * DAY });
     for (const uid of ["a", "b", "c", "d", "e", "f"]) await createUser(uid);
 
@@ -48,7 +48,7 @@ describe("list gate", () => {
 
   it("praying every other day is not enough (a two-day-old list prayer for an older list)", async () => {
     const deps = makeDeps();
-    const older = await addList(1, { currentFrom: Date.now() - 3 * DAY, closesAt: Date.now() - DAY });
+    const older = await addList(1, { currentFrom: Date.now() - 3 * DAY, closesAt: Date.now() - DAY, settled: true });
     await addList(2, { currentFrom: Date.now() - DAY });
     await createUser("g");
     await logPrayer("g", { listId: older, startedAt: Date.now() - 2 * DAY + HOUR });
