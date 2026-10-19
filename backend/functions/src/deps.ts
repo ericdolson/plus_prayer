@@ -40,8 +40,12 @@ export interface Live {
   setCurrentList(value: CurrentListLive): Promise<void>;
   /** Set closesAt on /lists/current (re-syncing the node if it's missing or stale). */
   setCurrentListClosesAt(list: CurrentListLive & { closesAt: number }): Promise<void>;
-  /** Raise /lists/current/prayerCount to `count` (never lowers it). */
-  raiseCurrentListCount(listId: string, count: number): Promise<void>;
+  /**
+   * Mirror a counted list's prayerCount: raise it if this is the list shown
+   * (never lowers it); move the node forward to a newer list (N+1 after the
+   * cutoff); ignore an older one.
+   */
+  raiseCurrentListCount(list: { listId: string; listNumber: number }, count: number): Promise<void>;
   readPresence(): Promise<PresenceTree>;
   removeDraft(uid: string, deviceId: string): Promise<void>;
   removeUser(uid: string): Promise<void>;
@@ -50,11 +54,15 @@ export interface Live {
   /** True if this caller may publish now (≥ intervalMs since the last). */
   claimStatsPublish(now: number, intervalMs: number): Promise<boolean>;
   readClientConfig(): Promise<Partial<ClientConfig> | null>;
+  /** RTDB /moderation/blocklist (server-only), or null if not set. */
+  readBlocklist(): Promise<string[] | null>;
+  /** Seed /moderation/blocklist if empty; true when written. */
+  writeBlocklistIfMissing(terms: string[]): Promise<boolean>;
   writeClientConfigDefaults(defaults: ClientConfig): Promise<string[]>;
 }
 
 export interface Notifier {
-  sendToTopic(topic: string, title: string, body: string, data?: Record<string, string>): Promise<void>;
+  sendToTopic(topic: string, notification: { title?: string; body: string }, data?: Record<string, string>): Promise<void>;
 }
 
 export interface AuthAdmin {

@@ -16,6 +16,17 @@ export function cleanText(text: string): string {
   return text.normalize("NFC").replace(/\s+/gu, " ").trim();
 }
 
+/** The first `cap` grapheme clusters of `text` (never splits a character). */
+export function truncateGraphemes(text: string, cap: number): string {
+  let out = "";
+  let n = 0;
+  for (const { segment } of segmenter.segment(text)) {
+    if (n++ === cap) break;
+    out += segment;
+  }
+  return out;
+}
+
 export function requireName(raw: unknown, cap: number, field = "name"): string {
   if (typeof raw !== "string") throw new HttpsError("invalid-argument", `${field} is required`);
   const text = cleanText(raw);

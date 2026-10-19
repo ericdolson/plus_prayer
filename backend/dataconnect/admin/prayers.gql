@@ -3,8 +3,7 @@
 # ============================================================================
 
 
-# Everything onPrayerLogged needs about one prayer, its user, and the list
-# that is current right now (only that list's counters may still move).
+# Everything onPrayerLogged needs about one prayer, its list, and its user.
 query GetPrayerContext($id: UUID!) @auth(level: NO_ACCESS) {
   prayer(key: { id: $id }) {
     id
@@ -13,7 +12,7 @@ query GetPrayerContext($id: UUID!) @auth(level: NO_ACCESS) {
     durationSeconds
     localDate
     countedAt
-    communityList { id }
+    communityList { id listNumber closesAt settledAt }
     user {
       id
       includeLimit
@@ -28,15 +27,20 @@ query GetPrayerContext($id: UUID!) @auth(level: NO_ACCESS) {
       graceOffersEnabled
     }
   }
-  current: prayerLists(
-    where: { scope: { eq: GLOBAL }, currentFrom: { isNull: false } }
-    orderBy: [{ currentFrom: DESC }]
-    limit: 1
-  ) {
-    id
-    listNumber
-    closesAt
-  }
+}
+
+# The user's local days prayed with the list in a window — the input for
+# repairing a streak when an older day syncs late.
+query GetUserListDays($uid: String!, $from: Date!, $to: Date!) @auth(level: NO_ACCESS) {
+  days: _select(
+    sql: """
+    SELECT DISTINCT to_char(local_date, 'YYYY-MM-DD') AS d FROM prayer
+    WHERE user_id = $1 AND community_list_id IS NOT NULL
+      AND local_date BETWEEN $2::date AND $3::date
+    ORDER BY d
+    """
+    params: [{ _expr: "vars.uid" }, { _expr: "vars.from" }, { _expr: "vars.to" }]
+  )
 }
 
 
@@ -47,7 +51,7 @@ query GetPrayerContext($id: UUID!) @auth(level: NO_ACCESS) {
 #            read (optimistic) and the prayer is still uncounted
 #   claim  — flips countedAt from null (the exactly-once marker)
 #   list   — increment-on-write; $listId is null unless the prayer's list is
-#            still current and it started before closesAt
+#            not yet settled and the prayer started before its closesAt
 #   (main) — DailyStats for the UTC day of the prayer's end
 # Returns 1 when applied. 0 means already counted, or the user row moved
 # (the function re-reads and retries).

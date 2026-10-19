@@ -7,11 +7,12 @@
 # ============================================================================
 
 
-query GetCurrentList @auth(level: NO_ACCESS) {
+# Lists not yet settled by assembly, oldest first: normally just the current
+# list N, plus N+1 once N's closesAt has been set.
+query GetOpenLists @auth(level: NO_ACCESS) {
   prayerLists(
-    where: { scope: { eq: GLOBAL }, currentFrom: { isNull: false } }
-    orderBy: [{ currentFrom: DESC }]
-    limit: 1
+    where: { scope: { eq: GLOBAL }, currentFrom: { isNull: false }, settledAt: { isNull: true } }
+    orderBy: [{ listNumber: ASC }]
   ) {
     id
     listNumber
@@ -30,7 +31,9 @@ query GetList($id: UUID!) @auth(level: NO_ACCESS) {
     status
     currentFrom
     closesAt
+    settledAt
     sealVariant
+    soulCount
   }
 }
 
@@ -45,23 +48,58 @@ query GetListSummary($id: UUID!) @auth(level: NO_ACCESS) {
   }
 }
 
-# The exact cutoff: a prayer counts for this list if it STARTED before it.
-mutation CloseList($id: UUID!, $closesAt: Timestamp!) @auth(level: NO_ACCESS) @transaction {
-  prayerList_updateMany(where: { id: { eq: $id } }, data: { closesAt: $closesAt })
-  @check(expr: "this == 1", message: "LIST_NOT_FOUND")
+# The exact cutoff, in one statement: set list N's closesAt AND create list
+# N+1 (draft, currentFrom = closesAt) — or move N+1's currentFrom if it
+# already exists (closeList re-run before the cutoff). A prayer counts for N
+# if it STARTED before closesAt; later prayers count toward N+1. Nothing is
+# written once N is settled. Returns 1 when N+1 was created.
+mutation CloseList(
+  $listId: UUID!
+  $closesAt: Timestamp!
+  $nextListId: UUID!
+  $nextListNumber: Int!
+  $nextListDate: Date!
+) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    WITH n AS (
+      UPDATE prayer_list SET closes_at = $2::timestamptz
+      WHERE id = $1::uuid AND settled_at IS NULL
+      RETURNING id
+    ), moved AS (
+      UPDATE prayer_list SET current_from = $2::timestamptz
+      WHERE scope = 'GLOBAL' AND list_number = $4::int AND settled_at IS NULL
+        AND EXISTS (SELECT 1 FROM n)
+      RETURNING id
+    )
+    INSERT INTO prayer_list (id, scope, list_number, list_date, status, current_from, created_at)
+    SELECT $3::uuid, 'GLOBAL', $4::int, $5::date, 'draft', $2::timestamptz, now()
+    WHERE EXISTS (SELECT 1 FROM n)
+      AND NOT EXISTS (SELECT 1 FROM prayer_list WHERE scope = 'GLOBAL' AND list_number = $4::int)
+    """
+    params: [
+      { _expr: "vars.listId" }
+      { _expr: "vars.closesAt" }
+      { _expr: "vars.nextListId" }
+      { _expr: "vars.nextListNumber" }
+      { _expr: "vars.nextListDate" }
+    ]
+  )
 }
 
 
 # ----------------------------------------------------------------------------
 # assembleNextList — ONE statement; names never leave Postgres
 # ----------------------------------------------------------------------------
-# Opens list N+1 (draft, current from N's closesAt) and drafts every entry.
-# If N+1 already exists nothing is written (new_list is empty and every
-# insert joins it); the function then reports "already assembled".
+# Settles list N (settledAt = $assemblyAt, so the caller can tell its own run
+# from a concurrent one) and fills list N+1 (created by CloseList). If N is
+# already settled nothing is written (every insert joins `settle`), so a
+# double run can never duplicate entries; the function reports it.
 #
 # $social: JSON array of { platform, externalId, displayName } from the 🙏
-# harvest (de-duplicated and validated by the function). People are upserted
-# into ExternalPerson (latest display name) and entered once each.
+# harvest (de-duplicated, validated, display names truncated to 40 graphemes
+# by the function). People are upserted into ExternalPerson (latest display
+# name) and entered once each.
 #
 # GATE (schema-brief §6): a user qualifies with a prayer that included the
 # list and either (a) communityList = the closing list and started before its
@@ -78,37 +116,48 @@ mutation CloseList($id: UUID!, $closesAt: Timestamp!) @auth(level: NO_ACCESS) @t
 #     within $softLandingDays                  → includeLimit (soft landing)
 #   otherwise                                  → 0 (self name only)
 #
-# AUTO-FLAG (→ HELD + reasonCategory): blocklist → LANGUAGE; phone/email/URL
-# → CONTACT_OR_LINK; self name changed since the closing list became current,
-# after it was first printed → NAME_CHANGES. Base-set names are not flagged.
-#
-# Counts are set afterwards by RecountList (idempotent).
+# AUTO-FLAG (→ HELD + reasonCategory), case-insensitive:
+#   LANGUAGE        — a blocklist term: $blockWords as whole words / phrases
+#                     (text split on spaces + punctuation), $blockSubstrings
+#                     anywhere (Han / Kana / Hangul / Thai, 2+ characters)
+#   CONTACT_OR_LINK — $contactPattern (phone / email / URL)
+#   NAME_CHANGES    — the self name changed since it was last printed
+#                     (after the latest published list it was APPROVED on)
+# Base-set names are not flagged. Counts are set afterwards by RecountList.
 mutation AssembleList(
   $closingListId: UUID!
   $closesAt: Timestamp!
-  $lastFlipAt: Timestamp!
   $assemblyAt: Timestamp!
-  $newListId: UUID!
-  $listNumber: Int!
-  $listDate: Date!
+  $nextListId: UUID!
   $gateHours: Int!
   $freeLimit: Int!
   $softLandingDays: Int!
-  $blockPattern: String
+  $blockWords: Any!
+  $blockSubstrings: Any!
   $contactPattern: String!
   $social: Any!
 ) @auth(level: NO_ACCESS) {
   _execute(
     sql: """
-    WITH new_list AS (
-      INSERT INTO prayer_list (id, scope, list_number, list_date, status, current_from, created_at)
-      SELECT $7::uuid, 'GLOBAL', $11::int, $12::date, 'draft', $2::timestamptz, now()
-      WHERE NOT EXISTS (SELECT 1 FROM prayer_list WHERE scope = 'GLOBAL' AND list_number = $11::int)
+    WITH settle AS (
+      UPDATE prayer_list SET settled_at = $3::timestamptz
+      WHERE id = $1::uuid AND settled_at IS NULL
       RETURNING id
+    ), new_list AS (
+      SELECT l.id FROM prayer_list l, settle WHERE l.id = $7::uuid AND l.settled_at IS NULL
+    ), bw AS (
+      SELECT DISTINCT value AS w
+      FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof($8::jsonb) = 'array' THEN $8::jsonb ELSE '[]'::jsonb END)
+      WHERE value <> ''
+    ), bs AS (
+      SELECT DISTINCT value AS w
+      FROM jsonb_array_elements_text(CASE WHEN jsonb_typeof($10::jsonb) = 'array' THEN $10::jsonb ELSE '[]'::jsonb END)
+      WHERE value <> ''
     ), social_in AS (
       SELECT DISTINCT ON (x.platform, x."externalId") x.platform, x."externalId" AS external_id,
         x."displayName" AS display_name
-      FROM jsonb_to_recordset(CASE WHEN jsonb_typeof($13::jsonb) = 'array' THEN $13::jsonb ELSE '[]'::jsonb END) AS x(platform text, "externalId" text, "displayName" text)
+      FROM jsonb_to_recordset(CASE WHEN jsonb_typeof($11::jsonb) = 'array' THEN $11::jsonb ELSE '[]'::jsonb END)
+        AS x(platform text, "externalId" text, "displayName" text)
       WHERE x.platform IS NOT NULL AND x."externalId" IS NOT NULL AND x."displayName" IS NOT NULL
       ORDER BY x.platform, x."externalId"
     ), people AS (
@@ -126,7 +175,9 @@ mutation AssembleList(
       FROM new_list n, (
         SELECT p.id, p.display_name,
           CASE
-            WHEN $8::text IS NOT NULL AND p.display_name ~* $8::text THEN 'LANGUAGE'
+            WHEN EXISTS (SELECT 1 FROM bw WHERE strpos(' ' || regexp_replace(lower(p.display_name), '[[:space:][:punct:]]+', ' ', 'g') || ' ', ' ' || bw.w || ' ') > 0)
+              OR EXISTS (SELECT 1 FROM bs WHERE strpos(lower(p.display_name), bs.w) > 0)
+              THEN 'LANGUAGE'
             WHEN p.display_name ~* $9::text THEN 'CONTACT_OR_LINK'
           END AS flag
         FROM people p
@@ -153,12 +204,13 @@ mutation AssembleList(
     ), selfs AS (
       SELECT s.id, s.owner_id, s.public_name,
         CASE
-          WHEN $8::text IS NOT NULL AND s.public_name ~* $8::text THEN 'LANGUAGE'
+          WHEN EXISTS (SELECT 1 FROM bw WHERE strpos(' ' || regexp_replace(lower(s.public_name), '[[:space:][:punct:]]+', ' ', 'g') || ' ', ' ' || bw.w || ' ') > 0)
+            OR EXISTS (SELECT 1 FROM bs WHERE strpos(lower(s.public_name), bs.w) > 0)
+            THEN 'LANGUAGE'
           WHEN s.public_name ~* $9::text THEN 'CONTACT_OR_LINK'
-          WHEN u.self_name_changed_at > $10::timestamptz AND EXISTS (
-            SELECT 1 FROM prayer_list_entry pe JOIN prayer_list pl ON pl.id = pe.list_id
-            WHERE pe.subject_id = s.id AND pe.moderation_status = 'APPROVED'
-              AND pl.status = 'published')
+          WHEN u.self_name_changed_at > (
+            SELECT max(pl.current_from) FROM prayer_list_entry pe JOIN prayer_list pl ON pl.id = pe.list_id
+            WHERE pe.subject_id = s.id AND pe.moderation_status = 'APPROVED' AND pl.status = 'published')
             THEN 'NAME_CHANGES'
         END AS flag
       FROM prayer_subject s JOIN u ON u.id = s.owner_id
@@ -191,7 +243,9 @@ mutation AssembleList(
     ), picked AS (
       SELECT r.*,
         CASE
-          WHEN $8::text IS NOT NULL AND r.public_name ~* $8::text THEN 'LANGUAGE'
+          WHEN EXISTS (SELECT 1 FROM bw WHERE strpos(' ' || regexp_replace(lower(r.public_name), '[[:space:][:punct:]]+', ' ', 'g') || ' ', ' ' || bw.w || ' ') > 0)
+            OR EXISTS (SELECT 1 FROM bs WHERE strpos(lower(r.public_name), bs.w) > 0)
+            THEN 'LANGUAGE'
           WHEN r.public_name ~* $9::text THEN 'CONTACT_OR_LINK'
         END AS flag
       FROM (
@@ -234,12 +288,10 @@ mutation AssembleList(
       { _expr: "vars.gateHours" }
       { _expr: "vars.freeLimit" }
       { _expr: "vars.softLandingDays" }
-      { _expr: "vars.newListId" }
-      { _expr: "vars.blockPattern" }
+      { _expr: "vars.nextListId" }
+      { _expr: "vars.blockWords" }
       { _expr: "vars.contactPattern" }
-      { _expr: "vars.lastFlipAt" }
-      { _expr: "vars.listNumber" }
-      { _expr: "vars.listDate" }
+      { _expr: "vars.blockSubstrings" }
       { _expr: "vars.social" }
     ]
   )
@@ -363,7 +415,8 @@ mutation PublishListVideo($listId: UUID!, $videoPath: String!, $posts: Any!)
 # ----------------------------------------------------------------------------
 
 # Backfill (publishing/lists.json → lists 1..N) and test fixtures: insert a
-# list with explicit numbers, dates, and counts.
+# list with explicit numbers, dates, and counts. Backfilled past lists get a
+# settledAt (their numbers are final); only the current one is left open.
 mutation InsertList(
   $id: UUID!
   $listNumber: Int!
@@ -371,6 +424,7 @@ mutation InsertList(
   $status: String!
   $currentFrom: Timestamp
   $closesAt: Timestamp
+  $settledAt: Timestamp
   $publishedAt: Timestamp
   $sealVariant: Int
   $soulCount: Int = 0
@@ -386,6 +440,7 @@ mutation InsertList(
       status: $status
       currentFrom: $currentFrom
       closesAt: $closesAt
+      settledAt: $settledAt
       publishedAt: $publishedAt
       sealVariant: $sealVariant
       soulCount: $soulCount

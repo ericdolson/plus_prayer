@@ -21,15 +21,19 @@ Admin callables check the `admin` custom claim (Eric's skills).
 ## Config
 - Server params (`firebase-functions/params`, defaults in `src/config.ts`):
   `GATE_HOURS` (30), `BASE_PREMIUM_POOL` (10), `SUBJECT_CAP` (500),
-  `LIST_TIME_ZONE` (America/Denver), `MODERATION_BLOCKLIST` (empty).
+  `LIST_TIME_ZONE` (America/Denver). The first deploy prompts for them once.
+- Blocklist: RTDB `/moderation/blocklist` (server-only, editable without a
+  deploy), seeded from `config/blocklist` (LDNOOBW, CC BY 4.0 — see its
+  README); the functions fall back to the bundled seed when it's empty.
 - Client-visible values: RTDB `/config`, defaults in
   `config/client-config.json` (also compiled into the app). Seed missing keys
-  with `FIREBASE_DATABASE_URL=… npm run seed:config`.
+  (and the blocklist, if empty) with `FIREBASE_DATABASE_URL=… npm run seed:config`.
 
 ## Tests
 - `npm test` — starts the SQL Connect emulator (no Java needed) and runs
-  `test/*.test.ts`: gate, streak/grace, assembly + pool, increment-only
-  aggregates, client connector ops, accounts. RTDB is faked in memory.
+  `test/*.test.ts`: gate, the closesAt → N+1 lifecycle, streak/grace incl.
+  late-sync repair, assembly + pool + blocklist, increment-only aggregates,
+  every client query, client mutations, accounts. RTDB is faked in memory.
 - `npm run test:rules` — RTDB rules + `live.ts` against the Database emulator
   (needs JDK 21+).
 - Against already-running emulators: `npm run test:run`.

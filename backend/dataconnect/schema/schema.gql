@@ -379,9 +379,10 @@ type PrayerSubject @table {
 # ----------------------------------------------------------------------------
 # PrayerList  (one per day, per scope)
 # ----------------------------------------------------------------------------
-# The current list is the one that most recently became current (latest
-# currentFrom) in its scope. The flip is MANUAL at ~6am MT (assembleNextList),
-# preceded by an exact cutoff (closesAt) set ~5 minutes earlier.
+# The current list is the one with the latest currentFrom that has arrived
+# (currentFrom ≤ now) in its scope. The flip is the exact cutoff: setting
+# list N's closesAt (~5 min ahead, manual, ~6am MT) creates N+1 with
+# currentFrom = closesAt; assembleNextList then settles N and fills N+1.
 # Assembled as draft → reviewed → published (status), so names get a human
 # checkpoint before being sealed. A list can be current while still draft (the
 # app shows counts only).
@@ -399,8 +400,13 @@ type PrayerList @table @unique(fields: ["scope", "listNumber"]) {
   # 30h rule. Mirrored to RTDB /lists/current so open apps show the in-app
   # "List N closes in 5 minutes" banner without re-fetching.
   closesAt: Timestamp
-  # When this list became current = the previous list's closesAt.
+  # When this list became current = the previous list's closesAt. Setting a
+  # list's closesAt creates the next list right away (draft, currentFrom =
+  # that closesAt), so prayers started after the cutoff count toward it.
   currentFrom: Timestamp
+  # When assembly settled this list (server-only). Until then its counters
+  # still take prayers that started before closesAt; after it they never move.
+  settledAt: Timestamp
 
   # When the VIDEO of this list went live. null while the list is current but
   # its video is still being filmed/edited — the app shows "the list is being

@@ -1,6 +1,6 @@
 # +Prayer — Screen → Operation Map (MVP operation spec)
 
-_Updated 2026-10-18 from `docs/product/schema-brief.md` §6 and §8 (review
+_Updated 2026-10-18 from `docs/product/schema-brief.md` §6, §8 and §9 (review
 answers) and the feature files it cites. Schema: `../schema/schema.gql`._
 
 Operations are designed from what each screen needs in ONE round trip. This maps
@@ -40,7 +40,10 @@ DML allowed, no DDL); `<table>_search` full-text on `@searchable` fields;
 service/connector/operation, region must match `us-central1`.
 
 "Current list" everywhere = the GLOBAL-scope `PrayerList` with the latest
-non-null `currentFrom`. It may still be `draft`.
+`currentFrom` that has arrived (≤ now). It may still be `draft`. List N+1
+exists from the moment N's closesAt is set, and becomes current at that
+cutoff. A list is **settled** (`settledAt`) when assembly runs; from then on
+its numbers never move.
 
 Two computed rules used throughout (never swept by a job):
 - **Effective carry** — an intention is carried only if `isCarried &&
@@ -118,13 +121,13 @@ Two computed rules used throughout (never swept by a job):
   - its PrayerListEntry rows joined to PrayerList: listNumber, listDate,
     sealVariant, prayerCount, and whether that list is the current one —
     powers the bead strand, "Off the list · N days" gaps, "On N lists", and
-    the tier-3 world count,
+    the tier-3 world count — APPROVED entries only (what was printed),
+    enforced in the operation,
   - the user's prayers that link this subject (filter `Prayer.user ==
     auth.uid`, never by subject owner): id, prayedAt, startedAt, localDate,
     durationSeconds, endedBy, listContextNumber, note.
   Client buckets prayers/beads into period rows; tier-1 raw = number of
-  prayers returned, tier-1 cycles = distinct listContextNumber. Entries come
-  with their moderationStatus: only APPROVED ones were printed and count.
+  prayers returned, tier-1 cycles = distinct listContextNumber.
   **World-count stitch contract (unchanged):** sum prayerCount over CLOSED
   lists only (exclude the current list) + an "on current list" flag; the
   client adds the live RTDB count iff the flag is true. Paginate by period if
@@ -191,9 +194,12 @@ Connector mutations (`connector/mutations.gql`):
   intentions with `archivedByCascade = true` (flag cleared) — never Released
   ones or ones archived on their own. An intention whose name is still
   archived can't be restored on its own ("Restore its name first").
+  Restoring a Released intention reopens it (resolution cleared: open and
+  list-eligible again); an Answered one stays Answered.
 - **purgeSubject** — PURGED ("gone gone"; row persists); on a name, all its
   intentions too. Blocked for isSelf.
-- **setSubjectAvatarTone** — palette index, or null for the hash default.
+- **setSubjectAvatarTone** — palette index 0–15 (placeholder bound until the
+  palette is designed), or null for the hash default.
 - **updatePrayerNote** — NOTE ONLY. Duration, items, list are immutable. No
   deletion.
 - **updateMySettings** — locale, timezone, listLiveOptIn,
@@ -270,13 +276,20 @@ and offline-friendly): see onPrayerLogged.
   - always: on the DailyStats row for the UTC day of the prayer's END
     (`prayedAt`), increment prayers / prayerSeconds; if `User.lastStatsDate`
     differs from that day, increment peoplePraying and set lastStatsDate;
-  - if communityList is set and that list is still current and the prayer
-    started before its closesAt: increment its prayerCount and prayerSeconds
-    and mirror the count to RTDB `/lists/current` (a closed list's numbers are
-    final);
+  - if communityList is set, that list isn't settled, and the prayer started
+    before its closesAt: increment its prayerCount and prayerSeconds and
+    mirror the count to RTDB `/lists/current` (the mirror moves forward to
+    N+1 at its first counted prayer after the cutoff). A settled list's
+    numbers are final: late offline prayers for it still count for
+    DailyStats, the streak, and the gate;
   - if communityList is set: update
     currentStreak / bestStreak / lastListLocalDate from `localDate` (list days
-    only — personal-only prayers never extend it). Grace is consumed LAZILY
+    only — personal-only prayers never extend it). If the prayer's localDate
+    is EARLIER than lastListLocalDate (an offline prayer synced late), the
+    streak is REPAIRED instead: recomputed from the user's list days (~1
+    year back) ending at lastListLocalDate, bridging gaps within the grace
+    days currently held (the bank isn't spent again), never lowering the
+    stored streak. Otherwise grace is consumed LAZILY
     here: missed days since lastListLocalDate ≤ graceDays → consume that many
     and continue; else reset the streak (bank unchanged). Every 7 real list
     days set graceOfferPending (or the "grace days are full"
@@ -289,19 +302,22 @@ and offline-friendly): see onPrayerLogged.
   graceOffersEnabled = false.
 - **closeList** (ADMIN callable) — Eric's skill sets the current list's
   `closesAt = now + 5 min` shortly before the morning routine (the exact
-  cutoff) and mirrors it to RTDB `/lists/current.closesAt`, so open apps show
-  the banner without re-fetching.
+  cutoff) and, in the same statement, creates list N+1 (draft, `currentFrom =
+  closesAt`, list date = Mountain date). Prayers started after the cutoff
+  link to and count toward N+1. Re-running before the cutoff moves both;
+  after it, assemble first. Mirrors closesAt to RTDB `/lists/current`, so
+  open apps show the banner without re-fetching.
 - **assembleNextList** (ADMIN callable, manual ~6am MT, after closesAt) — one
   command:
-  1. settle list N: nothing to copy — N's prayerCount / prayerSeconds are
-     already final (Postgres is the counter; RTDB only mirrors it, and only
-     the current list's counters move);
-  2. ingest the 🙏 harvest as ExternalPerson (SOCIAL) rows;
-  3. create N+1 as draft with `currentFrom = N.closesAt` (N+1 is current from
-     here);
+  1. settle list N (`settledAt`): its prayerCount / prayerSeconds are final
+     from here (Postgres is the counter; RTDB only mirrors it);
+  2. ingest the 🙏 harvest as ExternalPerson (SOCIAL) rows, display names
+     truncated to 40 graphemes;
+  3. fill N+1 — the row closeList created (current since the cutoff);
   4. draft N+1 entries — steps 2–5 are ONE native statement (`admin/lists.gql`
-     AssembleList), names never leave Postgres; if N+1 already exists nothing
-     is written. GATE — a user qualifies if they have a
+     AssembleList), names never leave Postgres; if N is already settled
+     nothing is written (two concurrent runs: one fills, the other reports
+     "already assembled"). GATE — a user qualifies if they have a
      prayer with (a) `communityList` = N, started before `N.closesAt` and
      committed before assembly runs, OR (b) the list included and ended
      (`prayedAt`) within 30h of assembly (server param). Per qualifying user:
@@ -316,10 +332,12 @@ and offline-friendly): see onPrayerLogged.
      harvest and the active base set (activeUntil null or future). Freeze
      publicName/kind; source APP | SOCIAL | BASE_SET; exactly one of subject /
      externalPerson per row;
-  5. auto-flag (moderationStatus HELD + reasonCategory): blocklist
-     (`MODERATION_BLOCKLIST` param, whole words) → LANGUAGE; phone/email/URL →
-     CONTACT_OR_LINK; a self name changed since the closing list became
-     current, after it was first printed → NAME_CHANGES (see ambiguities).
+  5. auto-flag (moderationStatus HELD + reasonCategory): blocklist → LANGUAGE
+     (editable RTDB `/moderation/blocklist`, seeded from LDNOOBW CC BY 4.0 —
+     `functions/config/blocklist`; whole words / phrases, case-insensitive;
+     Han/Kana/Hangul/Thai terms of 2+ characters as substrings);
+     phone/email/URL → CONTACT_OR_LINK; the self name changed since it was
+     last printed → NAME_CHANGES.
      Not flagged: all-caps, brand-new accounts, base-set names;
   6. RecountList: soulCount / intentionCount (draft: everything not
      EXCLUDED). Returns the new list id/number, counts, and how many are held.
@@ -333,8 +351,9 @@ and offline-friendly): see onPrayerLogged.
   sealVariant from the weekday of listDate (Sunday = 0 … Saturday = 6, the
   ritual/CLAUDE.md rotation); recounts APPROVED only.
 - **publishListVideo** (ADMIN, ~8am) — videoPublishedAt, videoPath (Storage
-  `videos/…`), PrayerListPost rows; sends the opt-in FCM "Today's list is
-  live" to the `list-live` topic (the app subscribes/unsubscribes alongside
+  `videos/…`), PrayerListPost rows; sends the opt-in FCM push "List 52 is up
+  · 4,345 people, including you." (people = the published soulCount) to the
+  `list-live` topic (the app subscribes/unsubscribes alongside
   User.listLiveOptIn — no device tokens are stored).
 - **autoSavePrayerDrafts** (scheduled) — finalize RTDB drafts idle > 6h as a
   Prayer with endedBy AUTO; estimated duration = last foreground moment + up
@@ -390,6 +409,9 @@ import scripts themselves are not written yet.
 - `_executeReturning` wraps its SQL, so it takes plain `DML … RETURNING` only.
 - SQL Connect returns UUIDs as 32 hex digits (no dashes); ids written to RTDB
   use the same form.
+- `<x>s_via_<JoinTable>(where: …)` compiles but generates invalid SQL (it
+  crashes the emulator's Postgres). Filter through the join table instead
+  (`prayerSubjectLinks_on_subject(where: { prayer: … }) { prayer { … } }`).
 - firebase-admin caches DataConnect instances per app by location+service
   (the connector is ignored) — one connector per app.
 - The "exactly one of subject / externalPerson" rule has no CHECK directive;

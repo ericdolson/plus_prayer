@@ -1,6 +1,10 @@
 // Morning admin flow (list-lifecycle.md), all ADMIN callables used by Eric's
 // skills: closeList → assembleNextList → review held → print → publishList →
 // publishListVideo.
+//
+// closeList sets list N's exact cutoff and creates N+1 (current from that
+// cutoff). assembleNextList settles N — its numbers never move again — and
+// fills N+1's entries.
 
 import { randomUUID } from "node:crypto";
 import { HttpsError } from "firebase-functions/v2/https";
@@ -8,7 +12,8 @@ import { localDateIn, MINUTE_MS, weekday } from "./dates";
 import { hasCheck, mutate, query } from "./db";
 import { Deps } from "./deps";
 import { normId } from "./ids";
-import { blockPattern, CONTACT_PATTERN } from "./moderation";
+import { CONTACT_PATTERN, loadBlockTerms } from "./moderation";
+import { cleanText, truncateGraphemes } from "./text";
 
 interface ListRow {
   id: string;
@@ -19,26 +24,49 @@ interface ListRow {
   closesAt: string | null;
 }
 
-async function currentList(deps: Deps): Promise<ListRow> {
-  const res = await query<{ prayerLists: ListRow[] }>(deps.db, "GetCurrentList");
-  const list = res.prayerLists[0];
-  if (!list) throw new HttpsError("failed-precondition", "There is no current list yet (backfill lists first)");
-  return list;
+/** The list being closed (oldest unsettled) and, once closeList ran, N+1. */
+async function openLists(deps: Deps): Promise<{ closing: ListRow; next: ListRow | null }> {
+  const res = await query<{ prayerLists: ListRow[] }>(deps.db, "GetOpenLists");
+  const closing = res.prayerLists[0];
+  if (!closing) throw new HttpsError("failed-precondition", "There is no current list yet (backfill lists first)");
+  const next = res.prayerLists.find((l) => l.listNumber === closing.listNumber + 1) ?? null;
+  return { closing, next };
 }
 
-/** Sets the exact cutoff (now + 5 min) and mirrors it for the in-app banner. */
+/**
+ * Sets the exact cutoff (now + 5 min), creates N+1 current from it, and
+ * mirrors closesAt for the in-app banner. Re-running before the cutoff moves
+ * it; after the cutoff, assemble first.
+ */
 export async function closeList(deps: Deps, minutes = deps.cfg.closeListMinutes) {
-  const list = await currentList(deps);
-  const closesAt = new Date(deps.now().getTime() + minutes * MINUTE_MS);
-  await mutate(deps.db, "CloseList", { id: list.id, closesAt: closesAt.toISOString() });
-  const summary = await query<{ prayerList: { prayerCount: number } | null }>(deps.db, "GetListSummary", { id: list.id });
+  const { closing } = await openLists(deps);
+  const now = deps.now();
+  if (closing.closesAt && Date.parse(closing.closesAt) <= now.getTime()) {
+    throw new HttpsError("failed-precondition", `List ${closing.listNumber} closed at ${closing.closesAt}; run assembleNextList`);
+  }
+  const closesAt = new Date(now.getTime() + minutes * MINUTE_MS);
+  await mutate(deps.db, "CloseList", {
+    listId: closing.id,
+    closesAt: closesAt.toISOString(),
+    nextListId: normId(randomUUID()),
+    nextListNumber: closing.listNumber + 1,
+    nextListDate: localDateIn(deps.cfg.listTimeZone, closesAt),
+  });
+  const summary = await query<{ prayerList: { prayerCount: number } | null }>(deps.db, "GetListSummary", { id: closing.id });
   await deps.live.setCurrentListClosesAt({
-    listId: list.id,
-    listNumber: list.listNumber,
+    listId: closing.id,
+    listNumber: closing.listNumber,
     prayerCount: summary.prayerList?.prayerCount ?? 0,
     closesAt: closesAt.getTime(),
   });
-  return { listId: list.id, listNumber: list.listNumber, closesAt: closesAt.toISOString() };
+  const { next } = await openLists(deps);
+  return {
+    listId: closing.id,
+    listNumber: closing.listNumber,
+    closesAt: closesAt.toISOString(),
+    nextListId: next?.id ?? null,
+    nextListNumber: closing.listNumber + 1,
+  };
 }
 
 export interface SocialParticipant {
@@ -47,7 +75,8 @@ export interface SocialParticipant {
   displayName: string;
 }
 
-function cleanSocial(raw: unknown): SocialParticipant[] {
+/** Validate, de-duplicate, and cap display names at 40 graphemes (truncated). */
+function cleanSocial(raw: unknown, cap: number): SocialParticipant[] {
   if (raw === undefined || raw === null) return [];
   if (!Array.isArray(raw)) throw new HttpsError("invalid-argument", "social must be a list");
   const seen = new Set<string>();
@@ -55,7 +84,7 @@ function cleanSocial(raw: unknown): SocialParticipant[] {
   for (const r of raw) {
     const platform = typeof r?.platform === "string" ? r.platform.trim().toLowerCase() : "";
     const externalId = typeof r?.externalId === "string" ? r.externalId.trim() : "";
-    const displayName = typeof r?.displayName === "string" ? r.displayName.replace(/\s+/gu, " ").trim() : "";
+    const displayName = typeof r?.displayName === "string" ? truncateGraphemes(cleanText(r.displayName), cap).trim() : "";
     if (!platform || !externalId || !displayName) {
       throw new HttpsError("invalid-argument", "each social participant needs platform, externalId, displayName");
     }
@@ -68,57 +97,61 @@ function cleanSocial(raw: unknown): SocialParticipant[] {
 }
 
 /**
- * The flip: settle N, ingest the 🙏 harvest, open N+1 (current from N's
- * closesAt) as a draft, and draft its entries in one transaction.
- * N's prayerCount/prayerSeconds are already final: only the current list's
- * counters move, and only for prayers started before its closesAt.
+ * The morning assembly: settle N, ingest the 🙏 harvest, and draft N+1's
+ * entries in one statement. N+1 has been current since N's closesAt;
+ * prayers that started before the cutoff and were committed by now counted
+ * toward N, later ones toward N+1.
  */
 export async function assembleNextList(deps: Deps, input: { social?: unknown; force?: boolean }) {
-  const social = cleanSocial(input.social);
-  const closing = await currentList(deps);
+  const social = cleanSocial(input.social, deps.cfg.nameCap);
+  let { closing, next } = await openLists(deps);
   const now = deps.now();
 
-  let closesAt = closing.closesAt;
-  if (!closesAt) {
+  if (!closing.closesAt) {
     if (!input.force) throw new HttpsError("failed-precondition", `Run closeList for List ${closing.listNumber} first`);
-    closesAt = now.toISOString();
-    await mutate(deps.db, "CloseList", { id: closing.id, closesAt });
-  } else if (Date.parse(closesAt) > now.getTime() && !input.force) {
-    throw new HttpsError("failed-precondition", `List ${closing.listNumber} closes at ${closesAt}`);
+    await closeList(deps, 0);
+    ({ closing, next } = await openLists(deps));
+  } else if (Date.parse(closing.closesAt) > now.getTime() && !input.force) {
+    throw new HttpsError("failed-precondition", `List ${closing.listNumber} closes at ${closing.closesAt}`);
   }
+  if (!next) throw new HttpsError("failed-precondition", `List ${closing.listNumber + 1} is missing; run closeList`);
 
-  const newListId = normId(randomUUID());
-  const listNumber = closing.listNumber + 1;
+  const assemblyAt = now.toISOString();
+  const terms = await loadBlockTerms(deps.live);
   await mutate(deps.db, "AssembleList", {
     closingListId: closing.id,
-    closesAt,
-    lastFlipAt: closing.currentFrom ?? closesAt,
-    assemblyAt: now.toISOString(),
-    newListId,
-    listNumber,
-    listDate: localDateIn(deps.cfg.listTimeZone, now),
+    closesAt: closing.closesAt,
+    assemblyAt,
+    nextListId: next.id,
     gateHours: deps.cfg.gateHours,
     freeLimit: deps.cfg.freeLimit,
     softLandingDays: deps.cfg.softLandingDays,
-    blockPattern: blockPattern(deps.cfg.blocklist),
+    blockWords: terms.words,
+    blockSubstrings: terms.substrings,
     contactPattern: CONTACT_PATTERN,
     social,
   });
 
-  const created = await query<{ prayerList: ListRow | null }>(deps.db, "GetList", { id: newListId });
-  if (!created.prayerList) {
-    throw new HttpsError("already-exists", `List ${listNumber} was already assembled`);
+  const settled = await query<{ prayerList: { settledAt: string | null } | null }>(deps.db, "GetList", { id: closing.id });
+  const settledAt = settled.prayerList?.settledAt;
+  if (!settledAt || Date.parse(settledAt) !== Date.parse(assemblyAt)) {
+    throw new HttpsError("already-exists", `List ${next.listNumber} was already assembled`);
   }
-  await mutate(deps.db, "RecountList", { listId: newListId, approvedOnly: false });
-  await deps.live.setCurrentList({ listId: newListId, listNumber, prayerCount: 0, closesAt: null });
+  await mutate(deps.db, "RecountList", { listId: next.id, approvedOnly: false });
 
-  const summary = await query<{ prayerList: { soulCount: number; intentionCount: number } | null }>(
-    deps.db, "GetListSummary", { id: newListId },
+  const summary = await query<{ prayerList: { soulCount: number; intentionCount: number; prayerCount: number } | null }>(
+    deps.db, "GetListSummary", { id: next.id },
   );
-  const held = await getHeldEntries(deps, newListId);
+  await deps.live.setCurrentList({
+    listId: next.id,
+    listNumber: next.listNumber,
+    prayerCount: summary.prayerList?.prayerCount ?? 0,
+    closesAt: null,
+  });
+  const held = await getHeldEntries(deps, next.id);
   return {
-    listId: newListId,
-    listNumber,
+    listId: next.id,
+    listNumber: next.listNumber,
     closedListNumber: closing.listNumber,
     soulCount: summary.prayerList?.soulCount ?? 0,
     intentionCount: summary.prayerList?.intentionCount ?? 0,
@@ -181,6 +214,11 @@ export async function publishList(deps: Deps, listId: string) {
   return { listId, listNumber: res.prayerList.listNumber, sealVariant };
 }
 
+/** schema-brief §9.12: "List 52 is up · 4,345 people, including you." */
+export function listLiveCopy(listNumber: number, people: number): string {
+  return `List ${listNumber} is up · ${people.toLocaleString("en-US")} people, including you.`;
+}
+
 export interface PostLink {
   platform: string;
   url?: string | null;
@@ -197,16 +235,14 @@ export async function publishListVideo(deps: Deps, input: { listId?: unknown; vi
     url: p?.url ?? null,
     externalId: p?.externalId ?? null,
   })).filter((p) => p.platform);
-  const res = await query<{ prayerList: ListRow | null }>(deps.db, "GetList", { id: input.listId });
+  const res = await query<{ prayerList: (ListRow & { soulCount: number }) | null }>(deps.db, "GetList", { id: input.listId });
   if (!res.prayerList) throw new HttpsError("not-found", "List not found");
   await mutate(deps.db, "PublishListVideo", { listId: input.listId, videoPath: input.videoPath, posts });
   // Users opt in by subscribing to this topic alongside User.listLiveOptIn.
-  // Copy is a placeholder until notification copy is written (notifications.md OPEN).
-  await deps.notifier.sendToTopic(
-    "list-live",
-    `List ${res.prayerList.listNumber}`,
-    "Today's list is live.",
-    { listId: input.listId, listNumber: String(res.prayerList.listNumber) },
-  );
-  return { listId: input.listId, posts: posts.length };
+  const body = listLiveCopy(res.prayerList.listNumber, res.prayerList.soulCount);
+  await deps.notifier.sendToTopic("list-live", { body }, {
+    listId: input.listId,
+    listNumber: String(res.prayerList.listNumber),
+  });
+  return { listId: input.listId, posts: posts.length, body };
 }

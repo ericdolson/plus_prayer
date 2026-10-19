@@ -10,7 +10,7 @@ import * as functionsV1 from "firebase-functions/v1";
 import { onMutationExecuted } from "firebase-functions/dataconnect";
 import { onValueWritten } from "firebase-functions/v2/database";
 import { CallableRequest, HttpsError, onCall } from "firebase-functions/v2/https";
-import { defineInt, defineList, defineString } from "firebase-functions/params";
+import { defineInt, defineString } from "firebase-functions/params";
 import { setGlobalOptions } from "firebase-functions/v2";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
@@ -33,7 +33,6 @@ const gateHours = defineInt("GATE_HOURS", { default: DEFAULT_SERVER_CONFIG.gateH
 const basePremiumPool = defineInt("BASE_PREMIUM_POOL", { default: DEFAULT_SERVER_CONFIG.basePremiumPool });
 const subjectCap = defineInt("SUBJECT_CAP", { default: DEFAULT_SERVER_CONFIG.subjectCap });
 const listTimeZone = defineString("LIST_TIME_ZONE", { default: DEFAULT_SERVER_CONFIG.listTimeZone });
-const blocklist = defineList("MODERATION_BLOCKLIST", { default: [] });
 
 let deps: Deps | null = null;
 function getDeps(): Deps {
@@ -44,14 +43,13 @@ function getDeps(): Deps {
     basePremiumPool: basePremiumPool.value(),
     subjectCap: subjectCap.value(),
     listTimeZone: listTimeZone.value(),
-    blocklist: blocklist.value(),
   };
   deps = {
     db: getDataConnect({ serviceId: SERVICE_ID, location: LOCATION, connector: "admin" }),
     live: rtdbLive(),
     notifier: {
-      async sendToTopic(topic, title, body, data) {
-        await getMessaging().send({ topic, notification: { title, body }, data });
+      async sendToTopic(topic, notification, data) {
+        await getMessaging().send({ topic, notification, data });
       },
     },
     auth: {

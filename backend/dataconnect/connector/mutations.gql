@@ -177,7 +177,9 @@ mutation ArchiveSubject($id: UUID!) @auth(level: USER_ANON) @transaction {
 
 # Restore. On a name, brings back ONLY intentions archived by the cascade —
 # never Released ones or ones archived on their own. An intention whose name
-# is still archived can't be restored on its own (see OPERATIONS.md).
+# is still archived can't be restored on its own. Restoring a Released
+# intention reopens it (resolution cleared: open and list-eligible again);
+# an Answered one stays Answered.
 mutation RestoreSubject($id: UUID!) @auth(level: USER_ANON) @transaction {
   query @redact {
     prayerSubjects(
@@ -193,10 +195,23 @@ mutation RestoreSubject($id: UUID!) @auth(level: USER_ANON) @transaction {
       parent { status }
     }
   }
-  prayerSubject_updateMany(
-    where: { id: { eq: $id }, owner: { id: { eq_expr: "auth.uid" } }, status: { eq: ARCHIVED } }
+  reopened: prayerSubject_updateMany(
+    where: {
+      id: { eq: $id }
+      owner: { id: { eq_expr: "auth.uid" } }
+      status: { eq: ARCHIVED }
+      resolution: { eq: RELEASED }
+    }
+    data: { status: ACTIVE, archivedByCascade: false, resolution: null, resolvedAt: null }
+  )
+  restored: prayerSubject_updateMany(
+    where: {
+      id: { eq: $id }
+      owner: { id: { eq_expr: "auth.uid" } }
+      status: { eq: ARCHIVED }
+    }
     data: { status: ACTIVE, archivedByCascade: false }
-  ) @check(expr: "this == 1", message: "Archived item not found")
+  )
   cascade: prayerSubject_updateMany(
     where: {
       parent: { id: { eq: $id } }
@@ -229,8 +244,18 @@ mutation PurgeSubject($id: UUID!) @auth(level: USER_ANON) @transaction {
   )
 }
 
-# Monogram tone (palette index). null = back to the hash-of-id default.
+# Monogram tone (palette index, 0–15). null = back to the hash-of-id default.
+# 16 is a placeholder bound until the avatar palette is designed.
 mutation SetSubjectAvatarTone($id: UUID!, $avatarTone: Int) @auth(level: USER_ANON) @transaction {
+  query @redact {
+    user(key: { id_expr: "auth.uid" })
+    @check(
+      expr: "vars.avatarTone == null || (vars.avatarTone >= 0 && vars.avatarTone < 16)"
+      message: "avatarTone must be a palette index from 0 to 15"
+    ) {
+      id
+    }
+  }
   prayerSubject_updateMany(
     where: { id: { eq: $id }, owner: { id: { eq_expr: "auth.uid" } }, status: { ne: PURGED } }
     data: { avatarTone: $avatarTone }

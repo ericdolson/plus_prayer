@@ -80,3 +80,24 @@ export function streakFromDays(sortedDays: string[]): number {
   }
   return run;
 }
+
+/**
+ * Late-sync repair (schema-brief §9.3): when an older list day arrives after a
+ * newer one, recompute the run ending at the latest day from the user's list
+ * days (~1 year), letting gaps be bridged within the grace days currently
+ * held. The bank itself is left as it is, and a repair never lowers the
+ * stored streak.
+ */
+export function repairStreak(state: StreakState, sortedDays: string[]): StreakState {
+  if (sortedDays.length === 0) return { ...state };
+  let run = 1;
+  let budget = state.graceDays;
+  for (let i = sortedDays.length - 1; i > 0; i--) {
+    const missed = daysBetween(sortedDays[i - 1], sortedDays[i]) - 1;
+    if (missed > budget) break;
+    budget -= missed;
+    run += 1;
+  }
+  const currentStreak = Math.max(state.currentStreak, run);
+  return { ...state, currentStreak, bestStreak: Math.max(state.bestStreak, currentStreak) };
+}

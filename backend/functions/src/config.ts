@@ -32,8 +32,6 @@ export interface ServerConfig {
   closeListMinutes: number;
   /** The list's calendar day (listDate) is taken in this zone. */
   listTimeZone: string;
-  /** Profanity / blocklist words (whole-word, case-insensitive). */
-  blocklist: string[];
 }
 
 export const DEFAULT_SERVER_CONFIG: ServerConfig = {
@@ -55,7 +53,6 @@ export const DEFAULT_SERVER_CONFIG: ServerConfig = {
   statsPublishIntervalMs: 5000,
   closeListMinutes: 5,
   listTimeZone: "America/Denver",
-  blocklist: [],
 };
 
 export interface ClientConfig {

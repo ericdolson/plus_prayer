@@ -11,10 +11,12 @@
 
 
 # Home + Today's list header. Public metadata only — never names.
+# Current = the latest list whose currentFrom has arrived: List N+1 exists from
+# the moment N's closesAt is set, but becomes current only at that cutoff.
 query GetCurrentListMeta
 @auth(level: USER_ANON, insecureReason: "Public list metadata only (numbers, counts, seal, video); no names or user data.") {
   prayerLists(
-    where: { scope: { eq: GLOBAL }, currentFrom: { isNull: false } }
+    where: { scope: { eq: GLOBAL }, currentFrom: { le_expr: "request.time" } }
     orderBy: [{ currentFrom: DESC }]
     limit: 1
   ) {
@@ -222,9 +224,10 @@ query GetMyPortion($listId: UUID) @auth(level: USER_ANON) {
 # Name / intention detail — ONE operation (stats-history.md): the subject, its
 # parent (intention) or intentions (name), its list entries with each list's
 # number/date/seal/count (bead strand, gaps, tier-3 world count), and the
-# user's prayers that held it (tier 1). Client rules: count only APPROVED
-# entries; world count sums prayerCount over CLOSED lists and adds the live
-# RTDB count iff the current list is among them.
+# user's prayers that held it (tier 1). Entries are APPROVED only (what was
+# actually printed) — enforced here, not in the app. World count: sum
+# prayerCount over CLOSED lists and add the live RTDB count iff the current
+# list is among them.
 query GetSubjectDetail($id: UUID!, $prayerLimit: Int = 500, $prayerOffset: Int = 0)
 @auth(level: USER_ANON) {
   prayerSubjects(
@@ -257,7 +260,7 @@ query GetSubjectDetail($id: UUID!, $prayerLimit: Int = 500, $prayerOffset: Int =
       resolution
       resolvedAt
     }
-    entries: prayerListEntries_on_subject {
+    entries: prayerListEntries_on_subject(where: { moderationStatus: { eq: APPROVED } }) {
       id
       moderationStatus
       list {

@@ -3,6 +3,7 @@
 //   /stats/live                 server-write, public-read
 //   /lists/current              server-write, public-read
 //   /config                     server-write, public-read
+//   /moderation/blocklist       server-only (editable LANGUAGE terms)
 
 import { getDatabase } from "firebase-admin/database";
 import { ClientConfig } from "./config";
@@ -24,11 +25,13 @@ export function rtdbLive(): Live {
         return { ...list, listId: id }; // missing or stale: re-sync the whole node
       });
     },
-    async raiseCurrentListCount(listId, count) {
-      const id = normId(listId);
+    async raiseCurrentListCount(list, count) {
+      const id = normId(list.listId);
       await db().ref("lists/current").transaction((cur: CurrentListLive | null) => {
-        if (!cur || cur.listId !== id) return cur;
-        return { ...cur, prayerCount: Math.max(cur.prayerCount ?? 0, count) };
+        if (cur && cur.listId === id) return { ...cur, prayerCount: Math.max(cur.prayerCount ?? 0, count) };
+        if (cur && cur.listNumber > list.listNumber) return cur; // an older list: N is past
+        if (!cur) return cur; // first run sees the local cache; retried with the server value
+        return { listId: id, listNumber: list.listNumber, prayerCount: count, closesAt: null };
       });
     },
     async readPresence() {
@@ -58,6 +61,14 @@ export function rtdbLive(): Live {
     },
     async readClientConfig() {
       return ((await db().ref("config").get()).val() ?? null) as Partial<ClientConfig> | null;
+    },
+    async readBlocklist() {
+      const v = (await db().ref("moderation/blocklist").get()).val();
+      return Array.isArray(v) ? v.filter((t): t is string => typeof t === "string") : null;
+    },
+    async writeBlocklistIfMissing(terms) {
+      const res = await db().ref("moderation/blocklist").transaction((cur: unknown) => (cur ? undefined : terms));
+      return res.committed;
     },
     async writeClientConfigDefaults(defaults) {
       const ref = db().ref("config");

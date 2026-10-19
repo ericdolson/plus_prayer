@@ -5,19 +5,20 @@
 //   always        DailyStats (UTC day of the prayer's end); peoplePraying via
 //                 User.lastStatsDate
 //   list prayer   the list's prayerCount / prayerSeconds — only while that
-//                 list is still current and the prayer started before its
-//                 closesAt (a closed list's numbers are final); streak + grace
+//                 list isn't settled and the prayer started before its
+//                 closesAt (a settled list's numbers are final); streak +
+//                 grace, or a streak repair when an older day syncs late
 //   first prayer  starts the 14-day reverse trial (basePremiumPool)
 //
 // Aggregates are increment-on-write and never recounted from rows.
 
 import { HttpsError } from "firebase-functions/v2/https";
 import { getClientConfig } from "./clientConfig";
-import { DAY_MS, utcDate } from "./dates";
+import { addDays, DAY_MS, utcDate } from "./dates";
 import { mutate, query } from "./db";
 import { Deps } from "./deps";
 import { hasActiveEntitlement } from "./pool";
-import { applyListDay, StreakState } from "./streak";
+import { applyListDay, repairStreak, StreakState } from "./streak";
 
 interface PrayerContext {
   prayer: {
@@ -27,7 +28,7 @@ interface PrayerContext {
     durationSeconds: number;
     localDate: string;
     countedAt: string | null;
-    communityList: { id: string } | null;
+    communityList: { id: string; listNumber: number; closesAt: string | null; settledAt: string | null } | null;
     user: {
       id: string;
       includeLimit: number;
@@ -42,8 +43,10 @@ interface PrayerContext {
       graceOffersEnabled: boolean;
     };
   } | null;
-  current: { id: string; listNumber: number; closesAt: string | null }[];
 }
+
+/** How far back a late-sync repair looks for list days. */
+const REPAIR_LOOKBACK_DAYS = 366;
 
 export type ProcessResult = "applied" | "already" | "missing";
 
@@ -57,12 +60,12 @@ export async function processPrayer(deps: Deps, prayerId: string): Promise<Proce
     const u = p.user;
     const now = deps.now();
 
-    // The list's counters move only while it is current and before its cutoff.
-    let listId: string | null = null;
-    const current = ctx.current[0];
-    if (p.communityList && current?.id === p.communityList.id) {
-      if (!current.closesAt || Date.parse(p.startedAt) < Date.parse(current.closesAt)) listId = current.id;
-    }
+    // A list's counters move until assembly settles it, and only for prayers
+    // that started before its cutoff (later ones count toward the next list).
+    const list = p.communityList;
+    const listId = list && !list.settledAt && (!list.closesAt || Date.parse(p.startedAt) < Date.parse(list.closesAt))
+      ? list.id
+      : null;
 
     const statsDate = utcDate(new Date(p.prayedAt));
     const countPerson = u.lastStatsDate === null || u.lastStatsDate < statsDate;
@@ -74,13 +77,23 @@ export async function processPrayer(deps: Deps, prayerId: string): Promise<Proce
       graceDays: u.graceDays,
       graceOfferPending: u.graceOfferPending,
     };
-    const next = p.communityList
-      ? applyListDay(was, p.localDate, {
-          graceCap: rules.graceCap,
-          graceIntervalDays: rules.graceIntervalDays,
-          graceOffersEnabled: u.graceOffersEnabled,
-        })
-      : was;
+    let next = was;
+    if (list && was.lastListLocalDate !== null && p.localDate < was.lastListLocalDate) {
+      // An older list day synced late: recompute the run from the list days
+      // (this prayer included) with the grace currently held.
+      const res = await query<{ days: { d: string }[] }>(deps.db, "GetUserListDays", {
+        uid: u.id,
+        from: addDays(was.lastListLocalDate, -REPAIR_LOOKBACK_DAYS),
+        to: was.lastListLocalDate,
+      });
+      next = repairStreak(was, res.days.map((r) => r.d));
+    } else if (list) {
+      next = applyListDay(was, p.localDate, {
+        graceCap: rules.graceCap,
+        graceIntervalDays: rules.graceIntervalDays,
+        graceOffersEnabled: u.graceOffersEnabled,
+      });
+    }
 
     // Reverse trial at the first prayer — unless an entitlement (e.g. bought
     // before praying) is already active.
@@ -118,9 +131,11 @@ export async function processPrayer(deps: Deps, prayerId: string): Promise<Proce
     // 0 rows: counted meanwhile, or the user row moved — re-read and decide.
     if (res._execute !== 1) continue;
 
-    if (listId) {
+    if (list && listId) {
       const counts = await query<{ prayerList: { prayerCount: number } | null }>(deps.db, "GetListCount", { id: listId });
-      if (counts.prayerList) await deps.live.raiseCurrentListCount(listId, counts.prayerList.prayerCount);
+      if (counts.prayerList) {
+        await deps.live.raiseCurrentListCount({ listId, listNumber: list.listNumber }, counts.prayerList.prayerCount);
+      }
     }
     return "applied";
   }
