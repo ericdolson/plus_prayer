@@ -665,3 +665,9 @@ exclude prints. The morning skill takes an AI first pass over the new/changed
 diff. Exclusions are shown gently after assembly with an edit path. The word
 blocklist is switched off until public launch. AI moderation processing is
 disclosed in the privacy policy.
+
+### Decision: Aliases are not moderated
+**Timestamp:** 2026-10-18
+Aliases are owner-only, never printed or shared, so they skip the contact-info
+input block, the blocklist, and the morning AI first pass. Only printed text
+(names, intentions, the self name) is moderated.

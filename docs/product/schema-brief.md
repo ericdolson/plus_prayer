@@ -271,7 +271,7 @@ server functions (addSubject, updateSubject, setCarriedItems), `Prayer.countedAt
 
 ## 11. Beta moderation (2026-10-18)
 - **Block contact info/links at input** in addSubject / updateSubject /
-  setSelfName (and alias): phone (7+ digits with separators), email, URL/domain.
+  setSelfName (printed text only — not aliases): phone (7+ digits with separators), email, URL/domain.
   Return a validation error the app shows inline. Don't block verse references
   ("John 3:16"), room numbers, dates, "St.". Social ingest: exclude matching names.
 - **Exception-based review:** assembly prints everything not EXCLUDED. `HELD`

@@ -135,13 +135,16 @@ _Last updated: 2026-10-17_
 
 ## Moderation for MVP / beta (2026-10-18)
 - **Contact info and links are blocked at input**, unconditionally: names,
-  aliases, and intentions can't be saved if they contain a phone number (7+
+  and intentions can't be saved if they contain a phone number (7+
   digits, allowing separators), an email address, or a URL/domain. Checked in
   the app (instant inline message: "Names and intentions can't include phone
   numbers, emails, or links.") and enforced in the server functions. Avoid false
   positives: verse references ("John 3:16", "Psalm 23"), room numbers, dates,
   and abbreviations like "St." must pass. Social names (which can't be blocked
   at input) are excluded at ingest if they match.
+- **Aliases are never moderated** (2026-10-18): they're owner-only, never printed,
+  never shared (group members see the real name), and are excluded from the
+  morning AI first pass. A colorful but sentimental nickname is the user's own.
 - **Pending review is invisible to users.** Nothing is ever shown as "in review".
   Rows and the list line read normally ("Daniel will be on List 53").
 - **Exception-based review:** the morning skill takes a first pass over names and

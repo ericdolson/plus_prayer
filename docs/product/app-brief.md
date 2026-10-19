@@ -109,7 +109,7 @@ idea), not a pattern to follow.
   treats N+1 as current (no special UI).
 
 ### Input validation
-Block saving names, aliases, and intentions containing phone numbers, emails,
+Block saving names and intentions (not aliases) containing phone numbers, emails,
 or links — inline: "Names and intentions can't include phone numbers, emails,
 or links." Must allow verse references ("John 3:16"), room numbers, dates.
 

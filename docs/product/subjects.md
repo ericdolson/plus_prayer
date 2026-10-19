@@ -12,7 +12,8 @@ _Last updated: 2026-10-17_
   the app as "alias". The owner sees the alias in their own list ("Dad"); the
   real name ("Gary Olson") is what's printed. The self-subject's alias is always
   "Me". Aliases are owner-only — in future prayer groups, members see the real
-  name. Search matches both.
+  name. Search matches both. Aliases are never moderated or sent to the
+  moderation first pass.
 - **Self-subject:** auto-created, always carried free, pinned top, exempt from
   `includeLimit` and ordering, forced ACTIVE.
 - **Lifecycle enum** (2026-06-24): ACTIVE (main list, list-eligible) / ARCHIVED
