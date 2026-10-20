@@ -63,15 +63,16 @@ dependencies:
   lottie: ^3.1.3
   screen_corner_radius: ^3.0.0
 
-  # Auth providers (build step 3)
-  sign_in_with_apple: ^7.0.1
-  google_sign_in: ^6.2.2
+  # Auth providers (build step 3). google_sign_in is left out for now: every
+  # release still pins GoogleSignIn-iOS to gtm-session-fetcher 3.x, which
+  # conflicts with firebase-ios-sdk 13 (gtm-session-fetcher 4+) under SwiftPM.
+  sign_in_with_apple: ^8.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  flutter_native_splash: ^2.4.1
+  flutter_native_splash: ^2.4.8
   icons_launcher: ^2.1.7
 
 # For information on the generic Dart part of this file, see the
