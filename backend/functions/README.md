@@ -47,6 +47,7 @@ npm --prefix backend/functions run admin -- close-list            # ~5 min befor
 npm --prefix backend/functions run admin -- assemble --social harvest.json
 npm --prefix backend/functions run admin -- moderate --decisions decisions.json
 npm --prefix backend/functions run admin -- held                   # Eric's short list
+npm --prefix backend/functions run admin -- backfill --dry-run     # lists 1..N from publishing/*.json
 ```
 
 Key: Firebase console → Project settings → Service accounts → Generate new

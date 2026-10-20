@@ -413,12 +413,19 @@ and offline-friendly): see onPrayerLogged.
   (increment-on-write, never recounted).
 
 ### Data & migration (admin scripts, run once / as needed)
-Operations exist (`admin/lists.gql` InsertList, UpsertBaseSetPerson); the
-import scripts themselves are not written yet.
 - Backfill lists 1..N + participants from `publishing/lists.json` /
-  `participants.json`: PrayerList (numbers, dates, counts, sealVariant from
-  weekday, `currentFrom`), PrayerListPost, ExternalPerson, PrayerListEntry.
-- Import the NamUs base set as ExternalPerson (BASE_SET).
+  `participants.json` — admin CLI `backfill` (`functions/src/backfill.ts`,
+  `admin/lists.gql` GetListNumbers + BackfillList): PrayerList (numbers,
+  dates, printed counts, sealVariant from weekday, `currentFrom` = publish
+  time; settled at the next list's `currentFrom`, the last one current),
+  PrayerListPost (posts with a recorded URL), ExternalPerson (SOCIAL; names
+  added by hand are keyed `name:<lowercased name>`), PrayerListEntry
+  (APPROVED). Lists already in the database are skipped (their post links
+  are refreshed). Backfilled lists have no base-set entries, so their
+  soulCount is the printed total and they are never recounted.
+- Import the NamUs base set as ExternalPerson (BASE_SET) — UpsertBaseSetPerson
+  exists; the import script is not written yet. Until it runs, assembly
+  produces lists without the base set.
 - Cut the harvest / publish skills over to the admin functions before launch.
 
 ---

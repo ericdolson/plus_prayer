@@ -505,6 +505,99 @@ mutation InsertList(
   )
 }
 
+# Every list number already in the database — the backfill skips these.
+query GetListNumbers @auth(level: NO_ACCESS) {
+  prayerLists(where: { scope: { eq: GLOBAL } }, orderBy: [{ listNumber: ASC }], limit: 100000) {
+    id
+    listNumber
+    settledAt
+  }
+}
+
+# Backfill one list from publishing/*.json, in one statement: the list
+# (published; settled unless it's the current one), its 🙏 commenters as
+# SOCIAL ExternalPerson + APPROVED entries (they were printed), and its post
+# links. A list number that already exists is never touched — only its posts
+# are upserted, so a re-run picks up links confirmed later (TikTok).
+# soulCount is the printed total: the base set's entries aren't in the
+# database for backfilled lists, so these lists are never recounted.
+# $people: JSON array of { platform, externalId, displayName, firstSeen }.
+# $posts: JSON array of { platform, url, externalId }.
+mutation BackfillList(
+  $id: UUID!
+  $listNumber: Int!
+  $listDate: Date!
+  $currentFrom: Timestamp!
+  $closesAt: Timestamp
+  $settledAt: Timestamp
+  $sealVariant: Int!
+  $soulCount: Int!
+  $intentionCount: Int!
+  $videoPath: String
+  $people: Any!
+  $posts: Any!
+) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    WITH l AS (
+      INSERT INTO prayer_list
+        (id, scope, list_number, list_date, status, current_from, closes_at, settled_at, published_at,
+         seal_variant, soul_count, intention_count, video_path, video_published_at, created_at)
+      VALUES ($1::uuid, 'GLOBAL', $2::int, $3::date, 'published', $4::timestamptz, $5::timestamptz,
+        $6::timestamptz, $4::timestamptz, $7::int, $8::int, $9::int, $10::text,
+        CASE WHEN $10::text IS NULL THEN NULL ELSE $4::timestamptz END, now())
+      ON CONFLICT (scope, list_number) DO NOTHING
+      RETURNING id
+    ), people_in AS (
+      SELECT DISTINCT ON (x.platform, x."externalId") x.platform, x."externalId" AS external_id,
+        x."displayName" AS display_name, x."firstSeen" AS first_seen
+      FROM jsonb_to_recordset(CASE WHEN jsonb_typeof($11::jsonb) = 'array' THEN $11::jsonb ELSE '[]'::jsonb END)
+        AS x(platform text, "externalId" text, "displayName" text, "firstSeen" timestamptz)
+      WHERE x.platform IS NOT NULL AND x."externalId" IS NOT NULL AND x."displayName" IS NOT NULL
+      ORDER BY x.platform, x."externalId"
+    ), people AS (
+      INSERT INTO external_person (source, platform, external_id, display_name, first_seen)
+      SELECT 'SOCIAL', p.platform, p.external_id, p.display_name, COALESCE(p.first_seen, $4::timestamptz)
+      FROM people_in p, l
+      ON CONFLICT (source, platform, external_id) DO UPDATE SET display_name = EXCLUDED.display_name
+      RETURNING id, display_name
+    ), entries AS (
+      INSERT INTO prayer_list_entry (list_id, external_person_id, kind, public_name, source, moderation_status)
+      SELECT l.id, p.id, 'SOUL', p.display_name, 'SOCIAL', 'APPROVED'
+      FROM l, people p
+      ON CONFLICT DO NOTHING
+      RETURNING id
+    ), target AS (
+      SELECT id FROM l
+      UNION ALL
+      SELECT id FROM prayer_list WHERE scope = 'GLOBAL' AND list_number = $2::int
+    )
+    INSERT INTO prayer_list_post (list_id, platform, url, external_id)
+    SELECT DISTINCT ON (x.platform) t.id, x.platform, x.url, x."externalId"
+    FROM target t, jsonb_to_recordset(CASE WHEN jsonb_typeof($12::jsonb) = 'array' THEN $12::jsonb ELSE '[]'::jsonb END)
+      AS x(platform text, url text, "externalId" text)
+    WHERE x.platform IS NOT NULL
+    ORDER BY x.platform
+    ON CONFLICT (list_id, platform) DO UPDATE
+      SET url = EXCLUDED.url, external_id = EXCLUDED.external_id
+    """
+    params: [
+      { _expr: "vars.id" }
+      { _expr: "vars.listNumber" }
+      { _expr: "vars.listDate" }
+      { _expr: "vars.currentFrom" }
+      { _expr: "vars.closesAt" }
+      { _expr: "vars.settledAt" }
+      { _expr: "vars.sealVariant" }
+      { _expr: "vars.soulCount" }
+      { _expr: "vars.intentionCount" }
+      { _expr: "vars.videoPath" }
+      { _expr: "vars.people" }
+      { _expr: "vars.posts" }
+    ]
+  )
+}
+
 # Base set import (NamUs): platform is always "namus". A resolved case gets
 # activeUntil and leaves the base set quietly.
 mutation UpsertBaseSetPerson($externalId: String!, $displayName: String!, $activeFrom: Timestamp, $activeUntil: Timestamp)

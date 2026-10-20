@@ -10,6 +10,7 @@
 import { parseArgs } from "node:util";
 import { HttpsError } from "firebase-functions/v2/https";
 import * as accounts from "./accounts";
+import { backfillLists, planBackfill } from "./backfill";
 import { CLIENT_CONFIG_DEFAULTS } from "./config";
 import { Deps } from "./deps";
 import * as lists from "./lists";
@@ -33,6 +34,8 @@ Morning flow
 Accounts and setup
   set-entitlement --uid UID --tier TIER --limit N [--expires ISO|none]
   seed-config                              seed RTDB /config and /moderation/blocklist (missing keys only)
+  backfill [--only N] [--dry-run] [--lists FILE] [--participants FILE]
+                                           lists 1..N from publishing/*.json; lists already in the DB are skipped
 
 FILE is a JSON file, or - for stdin. --list defaults to the current list.`;
 
@@ -72,6 +75,10 @@ export async function runAdminCommand(deps: Deps, argv: string[], io: CliIO): Pr
       tier: { type: "string" },
       limit: { type: "string" },
       expires: { type: "string" },
+      only: { type: "string" },
+      "dry-run": { type: "boolean" },
+      lists: { type: "string" },
+      participants: { type: "string" },
     },
   });
   const need = (name: keyof typeof o) => {
@@ -146,6 +153,18 @@ export async function runAdminCommand(deps: Deps, argv: string[], io: CliIO): Pr
       const terms = seedBlocklist();
       const blocklistSeeded = await deps.live.writeBlocklistIfMissing(terms);
       return { addedConfigKeys, blocklistSeeded, blocklistTerms: blocklistSeeded ? terms.length : undefined };
+    }
+
+    case "backfill": {
+      const only = o.only === undefined ? undefined : Number(o.only);
+      if (only !== undefined && !(Number.isInteger(only) && only >= 1)) usage("--only must be a list number");
+      // npm --prefix runs the CLI from backend/functions.
+      const plans = planBackfill(
+        await io.readJson(o.lists ?? "../../publishing/lists.json"),
+        await io.readJson(o.participants ?? "../../publishing/participants.json"),
+        deps.cfg.nameCap,
+      );
+      return backfillLists(deps, plans, { only, dryRun: o["dry-run"] === true });
     }
 
     case undefined:
