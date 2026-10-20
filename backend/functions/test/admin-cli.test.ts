@@ -131,8 +131,8 @@ describe("admin CLI: config and the entry script", () => {
     assert.deepEqual(JSON.parse(res.stdout), { current: null, openLists: [] });
   });
 
-  it("refuses to run without a service-account key", () => {
-    const res = exec({}, "status");
+  it("refuses to run without credentials", () => {
+    const res = exec({ CLOUDSDK_CONFIG: "/nonexistent" }, "status"); // never the developer's real gcloud login
     assert.equal(res.status, 2);
     assert.match(res.stderr, /GOOGLE_APPLICATION_CREDENTIALS/);
   });

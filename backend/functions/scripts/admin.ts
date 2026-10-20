@@ -1,11 +1,15 @@
 // Admin CLI for Eric's skills — the admin callables, run locally with a
 // service account. Commands and output: src/adminCli.ts (`npm run admin -- help`).
 //
-// Setup (once):
-//   1. Firebase console → Project settings → Service accounts → "Generate new
-//      private key". Keep the file OUTSIDE the repo (e.g. ~/.config/plusprayer/).
-//   2. export GOOGLE_APPLICATION_CREDENTIALS=~/.config/plusprayer/service-account.json
-//   Optional: FIREBASE_DATABASE_URL (default https://<project>-default-rtdb.firebaseio.com)
+// Credentials, first match wins:
+//   1. GOOGLE_APPLICATION_CREDENTIALS pointing at a service-account key (for a
+//      machine that isn't signed in as Eric). Keep the file OUTSIDE the repo.
+//   2. Eric's gcloud login (Application Default Credentials). Set up once with
+//      `gcloud auth application-default login` and
+//      `gcloud auth application-default set-quota-project plusprayer`; the
+//      project comes from that quota project.
+//   GCLOUD_PROJECT overrides the project. Optional: FIREBASE_DATABASE_URL
+//   (default https://<project>-default-rtdb.firebaseio.com)
 //
 // Config is read like the deployed functions': backend/functions/.env and
 // .env.<projectId> (written by `firebase deploy` when it asks for the params),
@@ -13,8 +17,9 @@
 // FIREBASE_DATABASE_EMULATOR_HOST and GCLOUD_PROJECT instead of a key.
 
 import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { join, resolve } from "node:path";
-import { cert, deleteApp, initializeApp } from "firebase-admin/app";
+import { applicationDefault, cert, Credential, deleteApp, initializeApp } from "firebase-admin/app";
 import { errorJson, runAdminCommand, USAGE } from "../src/adminCli";
 import { productionDeps, serverConfigFromEnv } from "../src/runtime";
 
@@ -30,6 +35,24 @@ function loadEnvFile(path: string): void {
   }
 }
 
+function readJsonFile(path: string | undefined): Record<string, string> | null {
+  return path && existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : null;
+}
+
+/** A service-account key, else the gcloud login (Application Default Credentials). */
+function resolveCredentials(): { credential: Credential; projectId?: string; source: string } | null {
+  const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  const file = readJsonFile(keyPath);
+  if (file?.type === "service_account") {
+    return { credential: cert(file), projectId: file.project_id, source: `service account ${file.client_email}` };
+  }
+  // GOOGLE_APPLICATION_CREDENTIALS can also hold a gcloud login; otherwise gcloud's default spot.
+  const gcloudDir = process.env.CLOUDSDK_CONFIG ?? join(homedir(), ".config", "gcloud");
+  const adc = file ?? readJsonFile(join(gcloudDir, "application_default_credentials.json"));
+  if (adc?.type !== "authorized_user") return null;
+  return { credential: applicationDefault(), projectId: adc.quota_project_id, source: "gcloud login" };
+}
+
 async function readStdin(): Promise<string> {
   const chunks: Buffer[] = [];
   for await (const chunk of process.stdin) chunks.push(chunk as Buffer);
@@ -43,12 +66,13 @@ async function main(): Promise<number> {
     return 0;
   }
   const emulated = !!(process.env.DATA_CONNECT_EMULATOR_HOST || process.env.FIREBASE_DATABASE_EMULATOR_HOST);
-  const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  const key = keyPath && existsSync(keyPath) ? JSON.parse(readFileSync(keyPath, "utf8")) : null;
-  const projectId = process.env.GCLOUD_PROJECT || key?.project_id;
-  if (!projectId || (!key && !emulated)) {
+  const creds = emulated ? null : resolveCredentials();
+  const projectId = process.env.GCLOUD_PROJECT || creds?.projectId;
+  if (!projectId || (!creds && !emulated)) {
     process.stderr.write(
-      "Set GOOGLE_APPLICATION_CREDENTIALS to the service-account key (see the header of scripts/admin.ts).\n",
+      "No credentials. Run `gcloud auth application-default login` and " +
+        "`gcloud auth application-default set-quota-project plusprayer`, or set " +
+        "GOOGLE_APPLICATION_CREDENTIALS to a service-account key (see the header of scripts/admin.ts).\n",
     );
     return 2;
   }
@@ -58,8 +82,8 @@ async function main(): Promise<number> {
   const dbHost = process.env.FIREBASE_DATABASE_EMULATOR_HOST;
   const databaseURL = process.env.FIREBASE_DATABASE_URL
     ?? (dbHost ? `http://${dbHost}?ns=${projectId}-default-rtdb` : `https://${projectId}-default-rtdb.firebaseio.com`);
-  const app = initializeApp({ projectId, databaseURL, ...(key && !emulated ? { credential: cert(key) } : {}) });
-  process.stderr.write(`+Prayer admin · project ${projectId} · ${emulated ? "EMULATOR" : "production"}\n`);
+  const app = initializeApp({ projectId, databaseURL, ...(creds ? { credential: creds.credential } : {}) });
+  process.stderr.write(`+Prayer admin · project ${projectId} · ${emulated ? "EMULATOR" : `production (${creds!.source})`}\n`);
 
   try {
     const result = await runAdminCommand(productionDeps(serverConfigFromEnv()), process.argv.slice(2), {

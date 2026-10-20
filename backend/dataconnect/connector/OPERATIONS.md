@@ -27,7 +27,7 @@ Legend for auth (SQL Connect spellings verified against the firebase-tools
   `@check` inside the operation.
 - **ADMIN** = `@auth(level: NO_ACCESS)` (the default) — runnable only via the
   Admin SDK. Eric's skills run the admin operations through the admin CLI
-  (`backend/functions/scripts/admin.ts`, service account; same modules as the
+  (`backend/functions/scripts/admin.ts`, Eric's gcloud login; same modules as the
   callables); the deployed admin callables also verify the `admin` custom
   claim.
 

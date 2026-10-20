@@ -36,12 +36,11 @@ account). The deployed admin callables stay available too and check the
   (and the blocklist, if empty) with `npm run seed:config` (the admin CLI's `seed-config`).
 
 ## Admin CLI (for Eric's skills)
-The admin callables, run locally with a service account — same code paths
+The admin callables, run locally as Eric (gcloud login) — same code paths
 as the deployed functions, JSON on stdout, errors as
 `{ "error": { code, message, details } }` on stderr with exit code 1:
 
 ```sh
-export GOOGLE_APPLICATION_CREDENTIALS=~/.config/plusprayer/service-account.json
 npm --prefix backend/functions run admin -- help
 npm --prefix backend/functions run admin -- close-list            # ~5 min before the routine
 npm --prefix backend/functions run admin -- assemble --social harvest.json
@@ -50,9 +49,18 @@ npm --prefix backend/functions run admin -- held                   # Eric's shor
 npm --prefix backend/functions run admin -- backfill --dry-run     # lists 1..N from publishing/*.json
 ```
 
-Key: Firebase console → Project settings → Service accounts → Generate new
-private key. Keep it outside the repo (`service-account*.json` is
-gitignored anyway). It has full admin rights — treat it like a password.
+Credentials: your gcloud login (Application Default Credentials), set up once:
+
+```sh
+gcloud auth application-default login
+gcloud auth application-default set-quota-project plusprayer
+```
+
+The project is that quota project (`GCLOUD_PROJECT` overrides it). On a machine
+that isn't signed in as you, set `GOOGLE_APPLICATION_CREDENTIALS` to a
+service-account key instead (Firebase console → Project settings → Service
+accounts); keep it outside the repo (`service-account*.json` is gitignored) —
+it has full admin rights.
 Config comes from `.env` / `.env.<projectId>` (what `firebase deploy` writes
 for the params) and the environment, so the CLI and the deployed functions
 agree. Every run prints the target project to stderr (production / EMULATOR).

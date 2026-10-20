@@ -1,7 +1,7 @@
 // +Prayer Cloud Functions — wiring only. Logic lives in the modules imported
 // below, each taking `Deps` so tests can run it against the emulator. The
 // admin callables here are also available to Eric's skills as a CLI
-// (scripts/admin.ts) that runs the same modules with a service account.
+// (scripts/admin.ts) that runs the same modules as Eric (gcloud login).
 // Region us-central1 (same as SQL Connect — required for its triggers).
 
 import { initializeApp } from "firebase-admin/app";
