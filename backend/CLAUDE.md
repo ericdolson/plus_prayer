@@ -14,15 +14,20 @@ backend/
   .firebaserc
   dataconnect/
     schema/            ← schema.gql (the data model)
-    connector/         ← queries & mutations (the operation/API surface)
+    connector/         ← client operations (the app's API surface; OPERATIONS.md)
+    admin/             ← admin-only operations (Admin SDK: functions + admin CLI)
   functions/           ← Cloud Functions
+    scripts/admin.ts   ← admin CLI (Eric's skills; same modules as the admin callables)
   database.rules.json  ← RTDB security rules (presence, live counts)
   storage.rules        ← Cloud Storage security rules (rules only — no media)
 ```
 
 Run deploys from inside `backend/`: `firebase deploy --only dataconnect`
 (or `:functions`, etc.). The Firebase CLI locates the project by `firebase.json`
-in this folder.
+in this folder. Deploy functions with `npx -y firebase-tools@latest deploy
+--only functions`: the standalone `firebase` binary's bundled npm crashes in
+the predeploy build. Schema migrations: check `firebase dataconnect:sql:diff`
+before a schema deploy.
 
 ---
 
@@ -69,22 +74,36 @@ fan-out billing is the newest, least-proven surface).
 
 ---
 
-## Cloud Functions (anticipated)
+## Cloud Functions (deployed; wiring in `functions/src/index.ts`)
 
-- **assembleNextList** — manual-trigger (see below) join-and-write that builds
-  the next list from users who prayed for the current one. Writes PrayerListEntry
-  rows with frozen publicName, applying moderation filtering on social-sourced
-  names. SETTLE-ON-CLOSE: before opening the new list, freeze the closing list's
-  final live prayerCount (from RTDB) into its PrayerList.prayerCount, so the
-  world-count historical sum reads finalized values (see Counts model below).
-- **mirrorPrayerCount** — on prayer commit, bump the current list's prayerCount
-  and mirror to RTDB.
-- **presence mirror/reconcile** — maintain the RTDB presence counter; periodic
-  reconciliation backstop.
-- **billing entitlement** — on subscription change (later), set planTier /
-  includeLimit on the user. Never client-writable.
-- **streak update** — on a community prayer commit, update currentStreak /
-  bestStreak / lastPrayedListNumber.
+All in `us-central1`. Logic lives in modules taking `Deps`, so tests run them
+against the emulator and the admin CLI runs the same code locally.
+
+- **Accounts** — `onAuthUserCreated` (v1 auth trigger: User row), and user
+  callables `syncAccount`, `setSelfName`, `deleteAccount`, `mergeAccounts`.
+- **Subjects** — user callables `addSubject`, `updateSubject`,
+  `setCarriedItems` (free-text caps and server-owned state live here, not in
+  the client connector).
+- **Prayers** — `onPrayerLogged` (SQL Connect trigger on LogPrayer: list
+  count + RTDB mirror, streak + grace, DailyStats); `sweepUncountedPrayers`
+  (every 10 min, backstop for missed events); `answerGraceOffer`.
+- **Presence** — `presencePublisher` (RTDB write trigger, throttled) and
+  `presenceReconcile` (every minute) publish one public `/stats/live` node;
+  `autoSavePrayerDrafts` (every 15 min) saves drafts past `autoSaveHours`.
+- **Admin callables** (require the `admin` custom claim) — `closeList`,
+  `assembleNextList`, `getReviewDiff`, `moderateEntry`, `moderateEntries`,
+  `getHeldEntries`, `getListForPrint`, `publishList`, `publishListVideo`,
+  `setEntitlement` (billing later; never client-writable). Eric's skills run
+  these through the admin CLI instead (gcloud login, no claim needed).
+
+`assembleNextList` settles list N — its prayerCount is final from then on, so
+the world-count historical sum reads settled values (see Counts model below)
+— and drafts N+1's entries in one statement: app carried items, the 🙏
+harvest (SOCIAL), and the base set (BASE_SET), with moderation flags.
+
+Data scripts (admin CLI): `seed-config` (RTDB `/config` + blocklist) and
+`backfill` (lists 1..N from `publishing/*.json`). The NamUs base-set import
+is not written yet.
 
 ### Daily transition timing (UPDATED 2026-06-24, Option C)
 The daily list transition runs **manually, kicked off by Eric, at the ~6am MT
