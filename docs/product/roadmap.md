@@ -1,6 +1,6 @@
 # Roadmap & Checklist
 
-_Last updated: 2026-10-18. Built from the decisions in this folder. Tags:
+_Last updated: 2026-10-19. Built from the decisions in this folder. Tags:
 **[be]** backend, **[app]** Flutter, **[ops]** Eric's pipeline/skills,
 **[biz]** store/legal/business._
 
@@ -36,25 +36,25 @@ Stage 1 is a private beta that tests whether the app is the right mechanism.
 - [x] `PrayerListEntry`: surrogate id; subject XOR externalPerson (DB check);
       moderation reason category
 - [x] Update `OPERATIONS.md` (operation map)
-- [ ] Write connector `.gql` operations with @auth + generate the Dart SDK
+- [x] Write connector `.gql` operations with @auth + generate the Dart SDK
 
 ### Functions & live state [be]
-- [ ] `onAuthUserCreated` (User + self "Me"; detect anon→permanent linking)
-- [ ] `onPrayerLogged` (list count, streak + grace rules, last-hour stats)
-- [ ] Admin-only callables (admin custom claim): assemble, moderate, publish,
+- [x] `onAuthUserCreated` (User + self "Me"; detect anon→permanent linking)
+- [x] `onPrayerLogged` (list count, streak + grace rules, last-hour stats)
+- [x] Admin-only callables (admin custom claim): assemble, moderate, publish,
       setEntitlement
-- [ ] `assembleNextList`: settle N, ingest harvest, flip N+1 current, draft
+- [x] `assembleNextList`: settle N, ingest harvest, flip N+1 current, draft
       entries (app carried items + social + base set), auto-flag rules
-- [ ] Prayer drafts in `/presence/{uid}/{deviceId}` + 6h auto-save job
-- [ ] Presence: private `/presence/{uid}` + throttled public `/stats/live`
+- [x] Prayer drafts in `/presence/{uid}/{deviceId}` + 6h auto-save job
+- [x] Presence: private `/presence/{uid}` + throttled public `/stats/live`
       publisher (~5s) + 1-min reconcile job
-- [ ] RTDB + Storage rules (public-read `videos/`)
-- [ ] RTDB `/config` (public-read, server-write): grace cap (2), grace
+- [x] RTDB + Storage rules (public-read `videos/`)
+- [x] RTDB `/config` (public-read, server-write): grace cap (2), grace
       interval (7), presence threshold (10), min app version — replaces Remote
       Config (usage-based pricing since 2026-09-01)
 
 ### Data & pipeline [ops]
-- [ ] Backfill lists 1..N + participants from `publishing/*.json`
+- [x] Backfill lists 1..N + participants from `publishing/*.json`
 - [ ] Import NamUs base set as `ExternalPerson` rows
 - [ ] Cut harvest / publish / finalize skills over to the DB (before launch)
 - [ ] Print PDF skill reads from the DB
