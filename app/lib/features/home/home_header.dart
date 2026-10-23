@@ -1,14 +1,14 @@
 // Home header (screens.md): left = your avatar (→ You) with the streak badge;
 // right = search + filter. No centered title. In prayer, the nav side (avatar,
-// badge) steps away; search and filter stay — they persist across modes.
+// badge) steps away for the POC's pulsing praying hands; search and filter
+// stay — they persist across modes.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../app/router.dart';
 import '../../components/monogram_avatar.dart';
+import '../../components/praying_pulse.dart';
 import '../../components/streak_badge.dart';
 import '../../domain/rules/avatar.dart';
 import '../../domain/rules/home_filter.dart';
@@ -19,6 +19,7 @@ import '../../state/home_state.dart';
 import '../../state/prayer_session.dart';
 import '../../state/providers.dart';
 import '../../theme/pp_theme.dart';
+import '../you/you_sheet.dart';
 
 class HomeHeader extends HookConsumerWidget {
   const HomeHeader({super.key});
@@ -70,10 +71,15 @@ class HomeHeader extends HookConsumerWidget {
       bar = Row(
         key: const ValueKey('bar'),
         children: [
-          AnimatedOpacity(
-            opacity: inPrayer ? 0 : 1,
+          AnimatedSwitcher(
             duration: duration,
-            child: IgnorePointer(ignoring: inPrayer, child: const _SelfAndStreak()),
+            child: inPrayer
+                ? Padding(
+                    key: const ValueKey('praying'),
+                    padding: EdgeInsetsDirectional.only(start: pp.space.xs),
+                    child: PrayingPulse(size: pp.size.avatar),
+                  )
+                : const _SelfAndStreak(key: ValueKey('self')),
           ),
           const Spacer(),
           IconButton(
@@ -84,7 +90,7 @@ class HomeHeader extends HookConsumerWidget {
           IconButton(
             tooltip: l10n.filter,
             isSelected: query.filter != HomeFilter.all,
-            selectedIcon: Icon(Icons.filter_list_rounded, color: pp.colors.ember),
+            selectedIcon: Icon(Icons.filter_list_rounded, color: pp.colors.primary),
             icon: const Icon(Icons.filter_list_rounded),
             onPressed: () => showFilters.value = !showFilters.value,
           ),
@@ -135,7 +141,7 @@ class HomeHeader extends HookConsumerWidget {
 }
 
 class _SelfAndStreak extends ConsumerWidget {
-  const _SelfAndStreak();
+  const _SelfAndStreak({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -153,7 +159,7 @@ class _SelfAndStreak extends ConsumerWidget {
           excludeSemantics: true,
           child: InkWell(
             customBorder: const CircleBorder(),
-            onTap: () => context.push(Routes.you),
+            onTap: () => showYouSheet(context),
             child: Padding(
               padding: EdgeInsets.all(pp.space.xs),
               child: MonogramAvatar(

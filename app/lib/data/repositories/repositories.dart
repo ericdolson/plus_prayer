@@ -7,6 +7,7 @@
 import '../../domain/models/live.dart';
 import '../../domain/models/prayer.dart';
 import '../../domain/models/prayer_list.dart';
+import '../../domain/models/reminder.dart';
 import '../../domain/models/subject.dart';
 import '../../domain/models/user_header.dart';
 import '../../domain/rules/validation.dart';
@@ -49,10 +50,40 @@ abstract interface class ListRepository {
   Stream<CurrentList?> watchCurrentList();
 }
 
-/// getMyHeader.
+/// getMyHeader, getMyReminders, and the settings mutations behind You.
+///
+/// Settings writes are online commands for now (like addSubject): the screen
+/// shows the new value at once and puts it back if the write fails.
 abstract interface class UserRepository {
   /// Null while the account isn't ready yet.
   Stream<UserHeader?> watchHeader();
+
+  Stream<List<Reminder>> watchReminders();
+
+  /// updateMySettings: only the given fields change. Throws [OfflineError].
+  Future<void> updateSettings(SettingsChange change);
+
+  /// createReminder / updateReminder for a preset slot. Throws [OfflineError].
+  Future<void> setReminder(ReminderSlot slot, {bool? enabled, ClockTime? localTime});
+}
+
+/// A partial updateMySettings. Null fields are left as they are; [locale]
+/// is a [LocaleChoice] so "follow the device" can be written as a value.
+class SettingsChange {
+  const SettingsChange({this.listLiveOptIn, this.showNamesInNotifications, this.graceOffersEnabled, this.locale});
+
+  final bool? listLiveOptIn;
+  final bool? showNamesInNotifications;
+  final bool? graceOffersEnabled;
+  final LocaleChoice? locale;
+}
+
+/// The language override: a language code, or the device's language.
+class LocaleChoice {
+  const LocaleChoice(this.code);
+  const LocaleChoice.device() : code = null;
+
+  final String? code;
 }
 
 /// logPrayer / updatePrayerNote, through the offline write queue.

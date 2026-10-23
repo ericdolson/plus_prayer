@@ -470,6 +470,198 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'This list is very full. Contact us if you need more room.'**
   String get errorCap;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// You: sign-in / link row (auth-onboarding.md prompt copy).
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your list safe'**
+  String get youSignIn;
+
+  /// No description provided for @youSignInDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Apple or Google'**
+  String get youSignInDetail;
+
+  /// No description provided for @youMembership.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership'**
+  String get youMembership;
+
+  /// Not in the spec; plainest wording, for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial until {date}'**
+  String youMembershipTrial(DateTime date);
+
+  /// Not in the spec; for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get youMembershipActive;
+
+  /// Not in the spec; for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get youMembershipFree;
+
+  /// No description provided for @youRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get youRestore;
+
+  /// No description provided for @youReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get youReminders;
+
+  /// No description provided for @reminderMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning'**
+  String get reminderMorning;
+
+  /// No description provided for @reminderMidday.
+  ///
+  /// In en, this message translates to:
+  /// **'Midday'**
+  String get reminderMidday;
+
+  /// No description provided for @reminderEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening'**
+  String get reminderEvening;
+
+  /// Screen reader label for a reminder's time button.
+  ///
+  /// In en, this message translates to:
+  /// **'{slot} reminder time'**
+  String reminderTimeFor(String slot);
+
+  /// No description provided for @youNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get youNotifications;
+
+  /// No description provided for @youListLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s list is live'**
+  String get youListLive;
+
+  /// No description provided for @youShowNames.
+  ///
+  /// In en, this message translates to:
+  /// **'Show names in notifications'**
+  String get youShowNames;
+
+  /// Device-local light/dark choice, from the POC. Not in the You spec yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get youAppearance;
+
+  /// No description provided for @appearanceSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get appearanceSystem;
+
+  /// No description provided for @appearanceLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get appearanceLight;
+
+  /// No description provided for @appearanceDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get appearanceDark;
+
+  /// No description provided for @youLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get youLanguage;
+
+  /// No description provided for @languageDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Device language'**
+  String get languageDevice;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// Grace offers toggle. Not worded in the spec; for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer grace days'**
+  String get youGraceOffers;
+
+  /// No description provided for @youArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get youArchived;
+
+  /// No description provided for @youPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & terms'**
+  String get youPrivacy;
+
+  /// No description provided for @youAboutRitual.
+  ///
+  /// In en, this message translates to:
+  /// **'About the ritual'**
+  String get youAboutRitual;
+
+  /// No description provided for @youDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get youDeleteAccount;
+
+  /// No description provided for @youVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String youVersion(String version);
+
+  /// From the POC settings footer.
+  ///
+  /// In en, this message translates to:
+  /// **'© {year} Plus Prayer, LLC'**
+  String youCopyright(int year);
+
+  /// After tapping the footer: version and account id are on the clipboard for support.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get youCopied;
+
+  /// No description provided for @errorSettingsOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing this needs a connection.'**
+  String get errorSettingsOffline;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

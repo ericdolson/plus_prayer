@@ -24,10 +24,13 @@ import '../../theme/pp_theme.dart';
 import '../add/add_sheet.dart';
 
 class SubjectRow extends ConsumerWidget {
-  const SubjectRow({super.key, required this.row, required this.tree});
+  const SubjectRow({super.key, required this.row, required this.tree, required this.index});
 
   final HomeRow row;
   final SubjectTree tree;
+
+  /// Position on Home (the list row is 0), for the prayer-mode stagger.
+  final int index;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -126,10 +129,10 @@ class SubjectRow extends ConsumerWidget {
           opacity: row.isContext ? .55 : 1,
           child: Padding(
             padding: EdgeInsetsDirectional.only(
-              start: s.isIntention ? pp.size.intentionIndent : pp.space.xs,
-              end: pp.space.sm,
-              top: s.isName ? pp.space.sm : pp.space.xs,
-              bottom: s.isName ? pp.space.sm : pp.space.xs,
+              start: s.isIntention ? pp.size.intentionIndent : 0,
+              end: pp.space.gutter,
+              top: s.isName ? pp.space.md : pp.space.xs,
+              bottom: s.isName ? pp.space.md : pp.space.xs,
             ),
             child: Row(
               children: [
@@ -164,7 +167,7 @@ class SubjectRow extends ConsumerWidget {
                     ],
                   ),
                 ),
-                EmberCheck(inPrayer: inPrayer, state: hold),
+                EmberCheck(inPrayer: inPrayer, state: hold, index: index),
               ],
             ),
           ),

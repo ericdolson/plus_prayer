@@ -10,7 +10,7 @@ import '../theme/pp_theme.dart';
 /// The screen-edge glow that makes prayer mode unmistakable (prayer-flow.md).
 /// Ported from the POC's SiriHalo: concentric blurred strokes following the
 /// device's physical corner radius (screen_corner_radius), breathing slowly.
-/// Ember instead of blue (the oil lamp, not a UI accent).
+/// In the primary blue, as in the POC.
 ///
 /// Reduced motion: no breathing; the halo simply appears.
 class Halo extends HookWidget {

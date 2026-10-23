@@ -81,13 +81,12 @@ class InvitationSheet extends HookConsumerWidget {
               startedAt: holdingSince,
               duration: config.minPrayer,
               clock: clock,
-              size: pp.size.fab * 1.25,
               semanticLabel: holding ? l10n.amen : l10n.invitationHold(list.soulCount, list.listNumber),
               onPressed: holding ? notifier.amenFromInvitation : notifier.holdList,
               complete: holding ? Text(l10n.amen) : null,
               child: holding
-                  ? Text('${elapsed.inSeconds}', style: context.text.titleLarge?.copyWith(color: pp.colors.ember))
-                  : WaxSeal(variant: list.sealVariant, size: pp.size.fab * .5),
+                  ? Text('${elapsed.inSeconds}', style: context.text.titleLarge?.copyWith(color: pp.colors.primaryGlow))
+                  : WaxSeal(variant: list.sealVariant, size: pp.size.seal * .8),
             ),
             SizedBox(height: pp.space.lg),
             // Finish without the list (only before tapping in).

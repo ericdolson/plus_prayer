@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -14,6 +15,7 @@ import '../domain/models/live.dart';
 import '../domain/models/local_date.dart';
 import '../domain/models/prayer.dart';
 import '../domain/models/prayer_list.dart';
+import '../domain/models/reminder.dart';
 import '../domain/models/subject.dart';
 import '../domain/models/user_header.dart';
 import '../domain/rules/local_prayers.dart';
@@ -51,10 +53,16 @@ final todayProvider = Provider<LocalDate>((ref) {
 /// IANA zone of the device (`Prayer.timezone`, `User.timezone`).
 final timezoneProvider = FutureProvider<String>((_) async {
   try {
-    return await FlutterTimezone.getLocalTimezone();
+    return (await FlutterTimezone.getLocalTimezone()).identifier;
   } catch (_) {
     return 'UTC';
   }
+});
+
+/// "1.0.0 (12)" for the You footer.
+final appVersionProvider = FutureProvider<String>((_) async {
+  final info = await PackageInfo.fromPlatform();
+  return '${info.version} (${info.buildNumber})';
 });
 
 /// Client-generated ids, in SQL Connect's form (32 hex digits, no dashes).
@@ -92,6 +100,12 @@ final headerProvider = Provider<AsyncValue<UserHeader?>>((ref) {
   final local = ref.watch(localPrayersProvider).value ?? const [];
   return ref.watch(_serverHeaderProvider).whenData((h) => h == null ? null : headerWithLocalPrayers(h, local));
 });
+
+/// The preset reminders, in slot order (Morning, Midday, Evening).
+final remindersProvider = StreamProvider<List<Reminder>>((ref) => ref
+    .watch(userRepositoryProvider)
+    .watchReminders()
+    .map((all) => [...all]..sort((a, b) => a.slot.index - b.slot.index)));
 
 final currentListProvider = StreamProvider<CurrentList?>(
   (ref) => ref.watch(listRepositoryProvider).watchCurrentList(),

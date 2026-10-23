@@ -681,3 +681,22 @@ follow an internal policy (law enforcement / NCMEC). Beta covers terms, privacy
 disclosure, internal policy, and AI first-pass flags; resource card and lawyer
 review close the gap before public launch. Tracked in docs/product/safety.md and
 open-questions Q28.
+
+### Decision: Home visual design and color system
+**Timestamp:** 2026-10-23 (SUPERSEDES: unprayed dot, one-line row status text,
+carried mark on rows, chevron→checkbox, pinned list row, floating presence line,
+header search icon)
+Design review of the first Home build. Direction: minimal, modern, expensive.
+The "darker/antique" principle is scoped to the physical ritual and on-camera
+objects; the app UI is clean and modern in light and dark themes. Color by
+meaning: brand blue = action (dark-mode glyph on #5AA9FB for contrast), gold =
+held (rings, intention end-dots, halo, Answered, carried avatars after praying),
+everything else neutral. Rows mark presence not absence: held-today gold ring
+until local midnight; no unprayed dot or "last prayed" text; no chevrons; no
+carried badges. Intentions in smaller system sans on a neutral thread from the
+avatar, left-aligned with names, tappable to their own page. The list row
+becomes a flat tonal community card (scale, presence, carry status; cluster
+lights gold after praying; checkable in prayer). System font for body (SF Pro
+on iOS), serif for names/list numbers/big lines; 20pt margins, no dividers;
+translucent bars; one thin-line icon set; one signature motion (Amen → seal),
+springs only on checks; pull-down search. Full spec: docs/product/design-direction.md.

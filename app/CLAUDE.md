@@ -146,7 +146,9 @@ lib/
 
 ### Navigation
 - `go_router`. Home (`/`) is the only screen with the footer; everything else
-  pushes with a back arrow (`/subject/:id`, `/history`, `/list`, `/you`, …).
+  pushes with a back arrow (`/subject/:id`, `/history`, `/list`, …).
+- You (settings) is the POC's full-height sheet over Home, opened from the
+  header avatar (`features/you`), not a route.
 - Prayer mode is NOT a route: it's Home in a different state (in-place mode,
   prayer-flow.md). Bottom sheets (add sheet, invitation, note) are modal sheets.
 - Onboarding resume is a router `redirect` derived from data (no self name →
@@ -158,7 +160,10 @@ One interface per backend surface; screens never touch the SDK or RTDB.
   updateSubject / reorder / resolve / archive (SQL Connect + callables).
 - `ListRepository` — getCurrentListMeta / getMyListStatus (SQL Connect) merged
   with RTDB `/lists/current` (live count + `closesAt`).
-- `UserRepository` — getMyHeader, settings.
+- `UserRepository` — getMyHeader, getMyReminders, updateMySettings,
+  create/updateReminder. Settings writes are online commands for now; the
+  screen shows the new value at once (`useOptimistic`) and puts it back if
+  the write fails.
 - `PrayerRepository` — logPrayer / updatePrayerNote (through the write queue).
 - `LiveRepository` — RTDB `/stats/live`, `/config` (compiled-in defaults),
   own `/presence/{uid}/{deviceId}` incl. the in-progress prayer draft.
@@ -185,17 +190,25 @@ flipped offline to exercise the queue.
   handoff notes.
 
 ### Theming — no raw styles in widgets
-- `theme/tokens.dart` holds the raw palette (navy/antique dark, ember, wax
-  colors by `sealVariant`, 16 avatar tones), spacing scale, radii, durations.
+- `theme/tokens.dart` holds the raw palettes (the POC's two themes: dark =
+  charcoal grounds and cool ink, light = pale blue grounds and navy ink; both
+  share primary blue #0580F9 for prayer; wax colors by `sealVariant`, 16
+  avatar tones), spacing scale, radii, durations.
   It is the ONLY file that contains color literals.
 - `PPColors` / `PPSpacing` / `PPMotion` are `ThemeExtension`s with semantic
-  names (`ink`, `inkMuted`, `surfaceRaised`, `ember`, `carried`, `unprayed`,
+  names (`ink`, `inkMuted`, `surfaceRaised`, `primary`, `carried`, `unprayed`,
   `halo`, …). Widgets read them via `context.pp.colors`, `context.pp.space`.
 - Text styles come from `Theme.of(context).textTheme` (mapped from tokens);
   tweak with `copyWith(color: …)` from semantic colors only. No `fontSize:`
   or `Color(0x…)` in feature/component code.
-- Dark is the primary (and for now only) theme: darker over lighter, antique
-  over bright. Avoid red for status (copy rules §5).
+- Light and dark both ship (`AppTheme.light()` / `.dark()`, `PPColors.light`
+  / `.dark`). Dark is the primary design and the default; the mode
+  (System/Light/Dark) is a device-local preference (`themeModeProvider`),
+  read before the first frame. Every widget must read colors from
+  `context.pp.colors`, so both themes work without per-widget checks. Avoid
+  red for status (copy rules §5).
+- Visuals follow the POC (legacy_poc/): when porting a screen, start from the
+  POC widget's layout and behavior, move its inline styles into tokens.
 - Layout uses `EdgeInsetsDirectional` / `AlignmentDirectional` (RTL later).
 
 ### Motion & accessibility

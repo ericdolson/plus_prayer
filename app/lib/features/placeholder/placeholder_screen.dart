@@ -1,5 +1,5 @@
 // Stand-ins so navigation works end to end before the screens are built
-// (detail, Today's list, History: build step 5; You: step 6). A back arrow
+// (detail, Today's list, History: build step 5). A back arrow
 // and a title — nothing else.
 
 import 'package:flutter/material.dart';
@@ -8,7 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../state/providers.dart';
 
-enum _Kind { subject, todaysList, history, you }
+enum _Kind { subject, todaysList, history }
 
 class PlaceholderScreen extends ConsumerWidget {
   const PlaceholderScreen.subject(String this.subjectId, {super.key}) : _kind = _Kind.subject;
@@ -17,9 +17,6 @@ class PlaceholderScreen extends ConsumerWidget {
         subjectId = null;
   const PlaceholderScreen.history({super.key})
       : _kind = _Kind.history,
-        subjectId = null;
-  const PlaceholderScreen.you({super.key})
-      : _kind = _Kind.you,
         subjectId = null;
 
   final _Kind _kind;
@@ -32,7 +29,6 @@ class PlaceholderScreen extends ConsumerWidget {
       _Kind.subject => ref.watch(subjectTreeProvider).value?[subjectId!]?.label ?? '',
       _Kind.todaysList => l10n.todaysList,
       _Kind.history => l10n.history,
-      _Kind.you => l10n.you,
     };
     return Scaffold(appBar: AppBar(title: Text(title)));
   }

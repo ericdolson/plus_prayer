@@ -1,6 +1,6 @@
 // Navigation (screens.md): Home is the only screen with the footer; every
 // other screen pushes with a back arrow. Prayer mode is a state of Home, not
-// a route.
+// a route. You is a full-height sheet over Home (features/you), as in the POC.
 
 import 'package:go_router/go_router.dart';
 
@@ -12,7 +12,6 @@ abstract final class Routes {
   static String subject(String id) => '/subject/$id';
   static const todaysList = '/list';
   static const history = '/history';
-  static const you = '/you';
 }
 
 GoRouter buildRouter() => GoRouter(
@@ -33,8 +32,6 @@ GoRouter buildRouter() => GoRouter(
             GoRoute(path: 'list', builder: (context, state) => const PlaceholderScreen.todaysList()),
             // Build step 5.
             GoRoute(path: 'history', builder: (context, state) => const PlaceholderScreen.history()),
-            // Build step 6.
-            GoRoute(path: 'you', builder: (context, state) => const PlaceholderScreen.you()),
           ],
         ),
       ],

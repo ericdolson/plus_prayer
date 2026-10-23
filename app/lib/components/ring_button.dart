@@ -7,10 +7,12 @@ import '../hooks/use_elapsed.dart';
 import '../hooks/use_reduce_motion.dart';
 import '../theme/pp_theme.dart';
 
-/// The decaying ring shared by the pray FAB and the list invitation
-/// (prayer-flow.md: "same visual language"). From [startedAt] the ring decays
-/// over [duration] (the 5 s minimum); then [complete] appears and the button
-/// becomes tappable. Before that, taps do nothing.
+/// The decaying ring shared by the pray button and the list invitation
+/// (prayer-flow.md: "same visual language"). The disc is the POC's FAB: solid
+/// primary blue, white icon. From [startedAt] a ring just outside the disc
+/// (in the footer's notch gap) decays over [duration] (the 5 s minimum); then
+/// [complete] appears and the button becomes tappable. Before that, taps do
+/// nothing and the disc is dimmed.
 ///
 /// With no [startedAt] it is a plain round button showing [child].
 /// Reduced motion: the ring steps once a second instead of sweeping.
@@ -33,12 +35,15 @@ class RingButton extends HookWidget {
   final DateTime? startedAt;
   final Duration duration;
   final VoidCallback? onPressed;
+
+  /// Diameter of the disc; the ring sits outside it.
   final double? size;
   final DateTime Function() clock;
 
   @override
   Widget build(BuildContext context) {
     final pp = context.pp;
+    final c = pp.colors;
     final reduceMotion = useReduceMotion();
     final elapsed = useElapsed(startedAt, smooth: !reduceMotion, until: duration, clock: clock);
     final d = size ?? pp.size.fab;
@@ -49,6 +54,8 @@ class RingButton extends HookWidget {
         : 1.0;
     final done = !running || progress >= 1;
     final enabled = done && onPressed != null;
+    final fill = done ? c.primary : Color.alphaBlend(c.primary.withValues(alpha: .3), c.surface);
+    final foreground = done ? c.onPrimary : c.primaryGlow;
 
     return Semantics(
       button: true,
@@ -58,32 +65,33 @@ class RingButton extends HookWidget {
       child: SizedBox.square(
         dimension: d,
         child: CustomPaint(
-          painter: _RingPainter(
+          foregroundPainter: _RingPainter(
             remaining: running ? 1 - progress : 0,
-            track: pp.colors.hairline,
-            ring: pp.colors.ember,
+            gap: pp.size.notchMargin,
+            track: c.hairline,
+            ring: c.primary,
           ),
-          child: Padding(
-            padding: EdgeInsets.all(d * .09),
-            child: Material(
-              color: done ? pp.colors.ember : pp.colors.surfaceRaised,
-              shape: const CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: enabled ? onPressed : null,
-                child: Center(
-                  child: AnimatedSwitcher(
-                    duration: reduceMotion ? Duration.zero : pp.motion.settle,
-                    child: KeyedSubtree(
-                      key: ValueKey(done && complete != null),
-                      child: IconTheme.merge(
-                        data: IconThemeData(color: done ? pp.colors.onEmber : pp.colors.ember),
-                        child: DefaultTextStyle.merge(
-                          style: context.text.labelLarge!.copyWith(
-                            color: done ? pp.colors.onEmber : pp.colors.ember,
-                          ),
-                          child: done && complete != null ? complete! : child,
-                        ),
+          child: Material(
+            color: fill,
+            shape: const CircleBorder(),
+            elevation: done ? 3 : 0,
+            shadowColor: c.shadow,
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: enabled ? onPressed : null,
+              child: Center(
+                child: AnimatedSwitcher(
+                  duration: reduceMotion ? Duration.zero : pp.motion.settle,
+                  child: KeyedSubtree(
+                    key: ValueKey(done && complete != null),
+                    child: IconTheme.merge(
+                      data: IconThemeData(
+                        color: foreground,
+                        shadows: [Shadow(color: c.shadow.withValues(alpha: .2), blurRadius: 20)],
+                      ),
+                      child: DefaultTextStyle.merge(
+                        style: context.text.labelLarge!.copyWith(color: foreground),
+                        child: done && complete != null ? complete! : child,
                       ),
                     ),
                   ),
@@ -98,18 +106,21 @@ class RingButton extends HookWidget {
 }
 
 class _RingPainter extends CustomPainter {
-  _RingPainter({required this.remaining, required this.track, required this.ring});
+  _RingPainter({required this.remaining, required this.gap, required this.track, required this.ring});
 
   /// 1 → full ring, 0 → gone.
   final double remaining;
+
+  /// Space between the disc and the outer edge of the ring.
+  final double gap;
   final Color track;
   final Color ring;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (remaining <= 0) return;
-    final stroke = size.shortestSide * .045;
-    final rect = Rect.fromCircle(center: size.center(Offset.zero), radius: size.shortestSide / 2 - stroke / 2);
+    final stroke = gap * .45;
+    final rect = Rect.fromCircle(center: size.center(Offset.zero), radius: size.shortestSide / 2 + gap / 2);
     canvas.drawArc(rect, 0, math.pi * 2, false, Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
@@ -122,5 +133,6 @@ class _RingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_RingPainter old) => old.remaining != remaining || old.ring != ring || old.track != track;
+  bool shouldRepaint(_RingPainter old) =>
+      old.remaining != remaining || old.gap != gap || old.ring != ring || old.track != track;
 }

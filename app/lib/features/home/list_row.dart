@@ -70,7 +70,7 @@ class ListRow extends ConsumerWidget {
         // Dev only: scenario controls for the mock backend.
         onLongPress: kDebugMode && mock != null ? () => showMockControls(context, mock) : null,
         child: Padding(
-          padding: EdgeInsetsDirectional.only(start: pp.space.xs, end: pp.space.sm, top: pp.space.md, bottom: pp.space.md),
+          padding: EdgeInsetsDirectional.only(end: pp.space.gutter, top: pp.space.md, bottom: pp.space.md),
           child: Row(
             children: [
               UnprayedDot(visible: !model.prayedWithList),
@@ -137,7 +137,7 @@ class ClosingSoonBanner extends ConsumerWidget {
             padding: EdgeInsetsDirectional.symmetric(horizontal: pp.space.lg, vertical: pp.space.md),
             child: Row(
               children: [
-                Icon(Icons.schedule_rounded, size: 18, color: pp.colors.ember),
+                Icon(Icons.schedule_rounded, size: 18, color: pp.colors.primary),
                 SizedBox(width: pp.space.sm),
                 Expanded(
                   child: Text(

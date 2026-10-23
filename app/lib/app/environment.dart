@@ -7,9 +7,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/misc.dart' show Override;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/local/preferences.dart';
 import '../data/mock/mock_backend.dart';
 import '../data/queue/queued_prayer_repository.dart';
 import '../data/queue/write_queue.dart';
+import '../state/appearance.dart';
 import '../state/providers.dart';
 
 enum AppEnvironment {
@@ -24,16 +26,20 @@ enum AppEnvironment {
 final mockBackendProvider = Provider<MockBackend?>((_) => null);
 
 Future<List<Override>> environmentOverrides(AppEnvironment env) async {
+  final prefs = await SharedPreferences.getInstance();
+  final device = preferencesProvider.overrideWithValue(DevicePreferences(prefs));
   switch (env) {
     case AppEnvironment.mock:
-      final prefs = await SharedPreferences.getInstance();
-      return mockOverrides(
-        MockBackend(),
-        store: KeyValueQueueStore(
-          read: (key) async => prefs.getString(key),
-          write: (key, value) => prefs.setString(key, value),
+      return [
+        device,
+        ...await mockOverrides(
+          MockBackend(),
+          store: KeyValueQueueStore(
+            read: (key) async => prefs.getString(key),
+            write: (key, value) => prefs.setString(key, value),
+          ),
         ),
-      );
+      ];
     case AppEnvironment.firebase:
       // Build step 4: Firebase.initializeApp, anonymous auth, SQL Connect +
       // RTDB repositories, and a WriteSender over the generated SDK.

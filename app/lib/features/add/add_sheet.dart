@@ -209,7 +209,7 @@ class AddSheet extends HookConsumerWidget {
               child: busy.value
                   ? SizedBox.square(
                       dimension: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: pp.colors.onEmber),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: pp.colors.onPrimary),
                     )
                   : Text(l10n.add),
             ),

@@ -8,6 +8,10 @@ the spec file behind it — read it when a rule is unclear. Data shapes come fro
 Firestore POC: **reference only** (its in-prayer mode and halo are the right
 idea), not a pattern to follow.
 
+> **Visual design (2026-10-23): read `design-direction.md` first. It overrides
+> this brief on Home rows, the community card, colors, type, motion, icons, and
+> search.**
+
 ---
 
 ## 0. Non-negotiables
@@ -72,24 +76,25 @@ idea), not a pattern to follow.
   → [Use my existing account] / [Merge both] with a duplicates warning.
 
 ### Home (prayer-flow.md, screens.md)
-- **Pinned list row** (top): wax-seal avatar (unsealed + "being filmed" before
+- **Community card** (top — see design-direction.md §6; formerly the pinned list row): wax-seal avatar (unsealed + "being filmed" before
   publish; sealed in that day's wax after), "List 52", avatar cluster + carry
   line: not yet → "You, Dad ●●● + 4 others are not yet carried on List 53"
   (muted); prayed → "…will be on List 53" (soft green/gold). During the 5-min
   close window: quiet "List 52 closes in 5 minutes" banner (only if not prayed
   with the list today).
 - **Rows:** names (manual drag order; self "Me" pinned top), intentions indented
-  under their name. Title + one secondary line: "Answered · Oct 3" /
-  "Prayed today" / "Last prayed 3 days ago". Small mark if carried on the next
-  list. Unprayed dot (POC pink) left of unprayed avatars. No metrics on rows.
+  under their name on a thread (design-direction.md §5). One line; secondary
+  text only for exceptional states ("Answered · Oct 3", "Not printed…"). Held
+  today = gold ring / gold dot. No unprayed dot, no chevrons, no carried badge.
 - **Search + filter** (All · Unprayed today · Carried) persist across modes.
-- **Presence line:** quiet, using the ladder (live ≥10 → last hour ≥10 → today
-  ≥10 → hidden). Never 0.
+- **Presence:** inside the community card, using the ladder (live ≥10 → last
+  hour ≥10 → today ≥10 → hidden). Never 0.
 - Nav mode: tap row → detail. In prayer: tap row → check.
 
 ### In-prayer mode (prayer-flow.md)
 - Begin: halo forms around the screen, header nav removed, footer becomes the
-  prayer bar (elapsed timer, "with N", ✕). Rows' `>` becomes a checkbox.
+  prayer bar (elapsed timer, "with N", ✕). A checkbox fades into each row's empty trailing slot
+  (no chevrons in nav mode).
 - **Check = "holding this one now"**: soft ember glow on the avatar/name + light
   haptic, once; uncheck silent; respect Reduce Motion.
 - Selection: checking an intention also holds its name; checking a name doesn't
@@ -207,7 +212,8 @@ to free → second invite if still over. Same flow when a subscription lapses
   component.
 - **Halo:** screen-edge glow for prayer mode (POC `CustomPainter` +
   `screen_corner_radius`).
-- **Ember check**, **unprayed dot**, **carried mark**, **pool meter**.
+- **Held ring / held dot** (gold; glow in dark mode only), **thread**,
+  **community card**, **pool meter**. (Unprayed dot and carried mark removed.)
 
 ## 5. Copy rules
 - Wherever "the list" appears, say who's on it ("4,345 people, including you

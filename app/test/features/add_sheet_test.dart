@@ -12,7 +12,7 @@ Finder field(String label) => find.widgetWithText(TextField, label);
 Finder addButton() => find.widgetWithText(FilledButton, 'Add');
 
 Future<void> openAddSheet(WidgetTester tester) async {
-  await tester.tap(find.text('Add'));
+  await tester.tap(find.byTooltip('Add'));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
 }

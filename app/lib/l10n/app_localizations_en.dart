@@ -303,4 +303,111 @@ class L10nEn extends L10n {
   @override
   String get errorCap =>
       'This list is very full. Contact us if you need more room.';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get youSignIn => 'Keep your list safe';
+
+  @override
+  String get youSignInDetail => 'Sign in with Apple or Google';
+
+  @override
+  String get youMembership => 'Membership';
+
+  @override
+  String youMembershipTrial(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Trial until $dateString';
+  }
+
+  @override
+  String get youMembershipActive => 'Member';
+
+  @override
+  String get youMembershipFree => 'Free';
+
+  @override
+  String get youRestore => 'Restore purchases';
+
+  @override
+  String get youReminders => 'Reminders';
+
+  @override
+  String get reminderMorning => 'Morning';
+
+  @override
+  String get reminderMidday => 'Midday';
+
+  @override
+  String get reminderEvening => 'Evening';
+
+  @override
+  String reminderTimeFor(String slot) {
+    return '$slot reminder time';
+  }
+
+  @override
+  String get youNotifications => 'Notifications';
+
+  @override
+  String get youListLive => 'Today\'s list is live';
+
+  @override
+  String get youShowNames => 'Show names in notifications';
+
+  @override
+  String get youAppearance => 'Appearance';
+
+  @override
+  String get appearanceSystem => 'System';
+
+  @override
+  String get appearanceLight => 'Light';
+
+  @override
+  String get appearanceDark => 'Dark';
+
+  @override
+  String get youLanguage => 'Language';
+
+  @override
+  String get languageDevice => 'Device language';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get youGraceOffers => 'Offer grace days';
+
+  @override
+  String get youArchived => 'Archived';
+
+  @override
+  String get youPrivacy => 'Privacy & terms';
+
+  @override
+  String get youAboutRitual => 'About the ritual';
+
+  @override
+  String get youDeleteAccount => 'Delete account';
+
+  @override
+  String youVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String youCopyright(int year) {
+    return '© $year Plus Prayer, LLC';
+  }
+
+  @override
+  String get youCopied => 'Copied';
+
+  @override
+  String get errorSettingsOffline => 'Changing this needs a connection.';
 }

@@ -30,7 +30,7 @@ class WaxSeal extends StatelessWidget {
         : _SealPainter(
             wax: c.wax(variant),
             sheen: c.waxSheen(variant),
-            shadow: c.background,
+            shadow: c.shadow,
             seed: variant!,
             stamp: true,
           );
@@ -61,7 +61,7 @@ class WaxBead extends StatelessWidget {
           painter: _SealPainter(
             wax: c.wax(variant),
             sheen: c.waxSheen(variant),
-            shadow: c.background,
+            shadow: c.shadow,
             seed: variant,
             stamp: false,
           ),

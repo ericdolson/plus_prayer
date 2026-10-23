@@ -40,6 +40,7 @@ every feature crosses that boundary.
 | [privacy.md](privacy.md) | Printed-list privacy, retention, age, data | Decided; legal text pending |
 | [screens.md](screens.md) | Navigation, screen map, add sheet, settings | Decided |
 | [schema-brief.md](schema-brief.md) | Handoff: every table/field/function change from the meetings | Ready for backend |
+| [design-direction.md](design-direction.md) | Visual system: color roles, type, spacing, Home rows, community card, motion, icons — overrides app-brief | Decided 2026-10-23 |
 | [app-brief.md](app-brief.md) | Handoff: screens, components, flows, states, copy for the Flutter app | Ready for app |
 | [safety.md](safety.md) | Self-harm, threats, child safety — KNOWN GAP checklist | Beta items + Stage 2 |
 | [roadmap.md](roadmap.md) | Stages 0–4 with task checklist | Drafted 2026-10-18 |

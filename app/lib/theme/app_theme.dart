@@ -10,29 +10,35 @@ import 'tokens.dart';
 
 abstract final class AppTheme {
   static ThemeData dark() => _build(PPTheme.dark);
+  static ThemeData light() => _build(PPTheme.light);
+
+  /// Status bar icons that read on [c]'s ground.
+  static SystemUiOverlayStyle overlayStyle(PPColors c) =>
+      c.brightness == Brightness.dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark;
 
   static ThemeData _build(PPTheme pp) {
     final c = pp.colors;
     final scheme = ColorScheme(
-      brightness: Brightness.dark,
-      primary: c.ember,
-      onPrimary: PPPalette.night,
+      brightness: c.brightness,
+      primary: c.primary,
+      onPrimary: c.onPrimary,
       secondary: c.carried,
-      onSecondary: PPPalette.night,
+      onSecondary: c.deepest,
       error: c.unprayed, // never a bright red (copy rules §5)
-      onError: PPPalette.night,
+      onError: c.deepest,
       surface: c.background,
       onSurface: c.ink,
       onSurfaceVariant: c.inkMuted,
-      surfaceContainerLowest: PPPalette.night,
+      surfaceContainerLowest: c.deepest,
+      surfaceTint: Colors.transparent,
       surfaceContainerLow: c.background,
       surfaceContainer: c.surface,
       surfaceContainerHigh: c.surfaceRaised,
       surfaceContainerHighest: c.surfaceRaised,
       outline: c.hairline,
       outlineVariant: c.hairline,
-      shadow: PPPalette.night,
-      scrim: PPPalette.night,
+      shadow: c.shadow,
+      scrim: c.shadow,
     );
 
     final text = _textTheme(c);
@@ -40,7 +46,7 @@ abstract final class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: c.brightness,
       colorScheme: scheme,
       scaffoldBackgroundColor: c.background,
       canvasColor: c.background,
@@ -48,8 +54,9 @@ abstract final class AppTheme {
       textTheme: text,
       extensions: [pp],
       splashFactory: InkSparkle.splashFactory,
-      highlightColor: c.surfaceRaised.withValues(alpha: .4),
-      splashColor: c.surfaceRaised.withValues(alpha: .5),
+      // The POC's row splash (surfaceTint).
+      highlightColor: c.backgroundLow.withValues(alpha: .6),
+      splashColor: c.backgroundLow,
       iconTheme: IconThemeData(color: c.inkMuted, size: 24),
       dividerTheme: DividerThemeData(color: c.hairline, thickness: .5, space: 1),
       appBarTheme: AppBarTheme(
@@ -59,12 +66,13 @@ abstract final class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: text.titleLarge,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: overlayStyle(c),
       ),
+      // Sheets and dialogs sit on the ground (POC); fields on the raised surface.
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: c.surface,
-        modalBackgroundColor: c.surface,
-        modalBarrierColor: PPPalette.night.withValues(alpha: .7),
+        backgroundColor: c.background,
+        modalBackgroundColor: c.background,
+        modalBarrierColor: c.scrim,
         dragHandleColor: c.inkFaint,
         showDragHandle: true,
         shape: const RoundedRectangleBorder(
@@ -72,15 +80,15 @@ abstract final class AppTheme {
         ),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: c.surface,
-        barrierColor: PPPalette.night.withValues(alpha: .7),
+        backgroundColor: c.background,
+        barrierColor: c.scrim,
         titleTextStyle: text.titleLarge,
         contentTextStyle: text.bodyLarge,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PPRadiusTokens.lg)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: c.surfaceRaised,
+        fillColor: c.surface,
         hintStyle: text.bodyLarge?.copyWith(color: c.inkFaint),
         labelStyle: text.bodyMedium?.copyWith(color: c.inkMuted),
         helperStyle: text.bodySmall,
@@ -94,7 +102,7 @@ abstract final class AppTheme {
         enabledBorder: OutlineInputBorder(borderRadius: radiusMd, borderSide: BorderSide.none),
         focusedBorder: OutlineInputBorder(
           borderRadius: radiusMd,
-          borderSide: BorderSide(color: c.ember.withValues(alpha: .6)),
+          borderSide: BorderSide(color: c.primary.withValues(alpha: .7)),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: radiusMd,
@@ -107,8 +115,8 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: c.ember,
-          foregroundColor: PPPalette.night,
+          backgroundColor: c.primary,
+          foregroundColor: c.onPrimary,
           disabledBackgroundColor: c.surfaceRaised,
           disabledForegroundColor: c.inkFaint,
           textStyle: text.labelLarge,
@@ -133,7 +141,8 @@ abstract final class AppTheme {
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(foregroundColor: c.inkMuted, minimumSize: const Size(48, 48)),
+        // The POC's app bar and footer icons: full ink.
+        style: IconButton.styleFrom(foregroundColor: c.ink, minimumSize: const Size(48, 48)),
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
@@ -166,11 +175,47 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: radiusMd),
       ),
       textSelectionTheme: TextSelectionThemeData(
-        cursorColor: c.ember,
-        selectionColor: c.ember.withValues(alpha: .3),
-        selectionHandleColor: c.ember,
+        cursorColor: c.primary,
+        selectionColor: c.primary.withValues(alpha: .35),
+        selectionHandleColor: c.primary,
       ),
-      progressIndicatorTheme: ProgressIndicatorThemeData(color: c.ember),
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: c.primary),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.onPrimary : c.inkMuted,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.primary : c.surfaceRaised,
+        ),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+      ),
+      // Pull-down menus (Appearance, Language).
+      menuTheme: MenuThemeData(
+        style: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(c.surfaceRaised),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+          shadowColor: WidgetStatePropertyAll(c.shadow.withValues(alpha: .5)),
+          elevation: const WidgetStatePropertyAll(12),
+          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: radiusMd)),
+          padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: PPSpaceTokens.xs)),
+        ),
+      ),
+      menuButtonTheme: MenuButtonThemeData(
+        style: MenuItemButton.styleFrom(
+          foregroundColor: c.ink,
+          iconColor: c.ink,
+          textStyle: text.bodyLarge,
+          minimumSize: const Size(200, 48),
+          padding: const EdgeInsetsDirectional.symmetric(horizontal: PPSpaceTokens.md),
+        ),
+      ),
+      bottomAppBarTheme: BottomAppBarThemeData(
+        color: c.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        height: PPSizeTokens.footerHeight,
+        padding: const EdgeInsetsDirectional.symmetric(horizontal: PPSpaceTokens.sm),
+      ),
     );
   }
 
@@ -205,7 +250,7 @@ abstract final class AppTheme {
       bodyLarge: body(16, FontWeight.w400, c.ink),
       bodyMedium: body(14, FontWeight.w400, c.ink),
       // Secondary row lines, captions.
-      bodySmall: body(12.5, FontWeight.w500, c.inkMuted),
+      bodySmall: body(12, FontWeight.w600, c.inkMuted),
       labelLarge: body(15, FontWeight.w600, c.ink, height: 1.2),
       labelMedium: body(13, FontWeight.w600, c.inkMuted, height: 1.2),
       // Timer and counts: tabular figures.

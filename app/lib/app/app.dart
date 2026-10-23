@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
+import '../state/appearance.dart';
 import '../state/prayer_session.dart';
 import '../state/providers.dart';
 import '../theme/app_theme.dart';
+import '../theme/pp_theme.dart';
 import 'router.dart';
 
 class PlusPrayerApp extends HookConsumerWidget {
@@ -37,13 +40,21 @@ class PlusPrayerApp extends HookConsumerWidget {
       return null;
     }, [ready]);
 
-    final theme = AppTheme.dark();
+    final light = useMemoized(AppTheme.light);
+    final dark = useMemoized(AppTheme.dark);
     return MaterialApp.router(
       onGenerateTitle: (context) => L10n.of(context).appTitle,
       debugShowCheckedModeBanner: false,
-      theme: theme,
-      darkTheme: theme,
-      themeMode: ThemeMode.dark,
+      theme: light,
+      darkTheme: dark,
+      themeMode: ref.watch(themeModeProvider),
+      themeAnimationDuration: const Duration(milliseconds: 200),
+      // Screens without an AppBar (Home) still get status bar icons that read
+      // on the current ground.
+      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: AppTheme.overlayStyle(context.pp.colors),
+        child: child!,
+      ),
       localizationsDelegates: L10n.localizationsDelegates,
       supportedLocales: L10n.supportedLocales,
       routerConfig: router,

@@ -17,6 +17,9 @@ class UserHeader {
     this.graceOffersEnabled = true,
     this.trialStartedAt,
     this.entitlementExpiresAt,
+    this.listLiveOptIn = false,
+    this.showNamesInNotifications = true,
+    this.locale,
   });
 
   final String id;
@@ -39,6 +42,15 @@ class UserHeader {
   final DateTime? trialStartedAt;
   final DateTime? entitlementExpiresAt;
 
+  // Settings (screens.md: stored on the User record, synced across devices).
+
+  /// "Today's list is live" push, off by default.
+  final bool listLiveOptIn;
+  final bool showNamesInNotifications;
+
+  /// Language override; null follows the device.
+  final String? locale;
+
   bool get hasSelfName => displayName != null && selfSubjectId != null;
 
   UserHeader copyWith({
@@ -46,6 +58,10 @@ class UserHeader {
     int? bestStreak,
     LocalDate? lastListLocalDate,
     int? graceDays,
+    bool? graceOffersEnabled,
+    bool? listLiveOptIn,
+    bool? showNamesInNotifications,
+    String? Function()? locale,
   }) =>
       UserHeader(
         id: id,
@@ -58,8 +74,11 @@ class UserHeader {
         lastListLocalDate: lastListLocalDate ?? this.lastListLocalDate,
         graceDays: graceDays ?? this.graceDays,
         graceOfferPending: graceOfferPending,
-        graceOffersEnabled: graceOffersEnabled,
+        graceOffersEnabled: graceOffersEnabled ?? this.graceOffersEnabled,
         trialStartedAt: trialStartedAt,
         entitlementExpiresAt: entitlementExpiresAt,
+        listLiveOptIn: listLiveOptIn ?? this.listLiveOptIn,
+        showNamesInNotifications: showNamesInNotifications ?? this.showNamesInNotifications,
+        locale: locale == null ? this.locale : locale(),
       );
 }

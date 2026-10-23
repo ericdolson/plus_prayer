@@ -9,6 +9,7 @@ import 'dart:math' as math;
 import '../../domain/models/live.dart';
 import '../../domain/models/prayer.dart';
 import '../../domain/models/prayer_list.dart';
+import '../../domain/models/reminder.dart';
 import '../../domain/models/subject.dart';
 import '../../domain/models/user_header.dart';
 import '../../domain/rules/carry.dart';
@@ -32,6 +33,7 @@ class MockBackend {
         _seed = seed ?? MockSeed.standard((now ?? DateTime.now)()) {
     _subjects = [..._seed.subjects];
     _header = _seed.header;
+    _reminders = [..._seed.reminders];
     _list = _seed.list;
     _stats = _seed.stats;
   }
@@ -49,6 +51,7 @@ class MockBackend {
 
   late List<Subject> _subjects;
   late UserHeader _header;
+  late List<Reminder> _reminders;
   late CurrentList? _list;
   late LiveStats _stats;
   final Set<String> _loggedPrayerIds = {};
@@ -58,18 +61,21 @@ class MockBackend {
 
   final _subjectsCtl = StreamController<List<Subject>>.broadcast();
   final _headerCtl = StreamController<UserHeader?>.broadcast();
+  final _remindersCtl = StreamController<List<Reminder>>.broadcast();
   final _listCtl = StreamController<CurrentList?>.broadcast();
   final _statsCtl = StreamController<LiveStats>.broadcast();
   Timer? _drift;
 
   List<Subject> get subjects => List.unmodifiable(_subjects);
   UserHeader get header => _header;
+  List<Reminder> get reminders => List.unmodifiable(_reminders);
   CurrentList? get currentList => _list;
   Map<String, String?> get notes => Map.unmodifiable(_notes);
   Set<String> get loggedPrayerIds => Set.unmodifiable(_loggedPrayerIds);
 
   Stream<List<Subject>> watchSubjects() => _withCurrent(_subjects, _subjectsCtl.stream);
   Stream<UserHeader?> watchHeader() => _withCurrent(_header, _headerCtl.stream);
+  Stream<List<Reminder>> watchReminders() => _withCurrent(_reminders, _remindersCtl.stream);
   Stream<CurrentList?> watchList() => _withCurrent(_list, _listCtl.stream);
 
   Stream<LiveStats> watchStats() {
@@ -111,6 +117,39 @@ class MockBackend {
     _subjects = [..._subjects, subject];
     _subjectsCtl.add(_subjects);
     return AddedSubject(id: subject.id, isCarried: isCarried, sortOrder: sortOrder);
+  }
+
+  /// updateMySettings: only the given fields change.
+  Future<void> updateSettings(SettingsChange change) async {
+    await Future<void>.delayed(latency);
+    if (!online) throw const OfflineError();
+    final locale = change.locale;
+    _header = _header.copyWith(
+      listLiveOptIn: change.listLiveOptIn,
+      showNamesInNotifications: change.showNamesInNotifications,
+      graceOffersEnabled: change.graceOffersEnabled,
+      locale: locale == null ? null : () => locale.code,
+    );
+    _headerCtl.add(_header);
+  }
+
+  /// createReminder / updateReminder: one row per preset slot.
+  Future<void> setReminder(ReminderSlot slot, {bool? enabled, ClockTime? localTime}) async {
+    await Future<void>.delayed(latency);
+    if (!online) throw const OfflineError();
+    final existing = _reminders.where((r) => r.slot == slot).firstOrNull;
+    if (existing == null) {
+      if (localTime == null) throw ArgumentError('A new reminder needs a time');
+      _reminders = [
+        ..._reminders,
+        Reminder(id: 'r${_nextId++}', slot: slot, enabled: enabled ?? true, localTime: localTime),
+      ];
+    } else {
+      _reminders = [
+        for (final r in _reminders) r.slot == slot ? r.copyWith(enabled: enabled, localTime: localTime) : r,
+      ];
+    }
+    _remindersCtl.add(_reminders);
   }
 
   // ---- Writes (from the queue) --------------------------------------------
@@ -208,6 +247,7 @@ class MockBackend {
     _drift?.cancel();
     _subjectsCtl.close();
     _headerCtl.close();
+    _remindersCtl.close();
     _listCtl.close();
     _statsCtl.close();
   }
@@ -263,6 +303,16 @@ class MockUserRepository implements UserRepository {
 
   @override
   Stream<UserHeader?> watchHeader() => backend.watchHeader();
+
+  @override
+  Stream<List<Reminder>> watchReminders() => backend.watchReminders();
+
+  @override
+  Future<void> updateSettings(SettingsChange change) => backend.updateSettings(change);
+
+  @override
+  Future<void> setReminder(ReminderSlot slot, {bool? enabled, ClockTime? localTime}) =>
+      backend.setReminder(slot, enabled: enabled, localTime: localTime);
 }
 
 class MockLiveRepository implements LiveRepository {

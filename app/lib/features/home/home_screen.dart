@@ -44,6 +44,8 @@ class HomeScreen extends ConsumerWidget {
     return Halo(
       active: inPrayer,
       child: Scaffold(
+        // The list scrolls under the footer's rounded corners and notch.
+        extendBody: true,
         body: SafeArea(
           bottom: false,
           child: Column(
@@ -57,13 +59,19 @@ class HomeScreen extends ConsumerWidget {
                     const SliverToBoxAdapter(child: ListRow()),
                     SliverToBoxAdapter(child: Divider(indent: pp.space.gutter, endIndent: pp.space.gutter)),
                     const _SubjectRows(),
-                    SliverToBoxAdapter(child: SizedBox(height: pp.space.xxl)),
+                    // Clear of the footer and the docked button.
+                    SliverSafeArea(
+                      top: false,
+                      sliver: SliverToBoxAdapter(child: SizedBox(height: pp.size.fab / 2 + pp.space.lg)),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: const HomePrayButton(),
         bottomNavigationBar: const HomeFooter(),
       ),
     );
@@ -82,7 +90,9 @@ class _SubjectRows extends ConsumerWidget {
     }
     return SliverList.builder(
       itemCount: rows.length,
-      itemBuilder: (context, i) => SubjectRow(key: ValueKey(rows[i].subject.id), row: rows[i], tree: tree),
+      // The list row is index 0.
+      itemBuilder: (context, i) =>
+          SubjectRow(key: ValueKey(rows[i].subject.id), row: rows[i], tree: tree, index: i + 1),
     );
   }
 }

@@ -92,7 +92,7 @@ class AvatarCluster extends StatelessWidget {
         maxLines: maxLines,
         overflow: TextOverflow.ellipsis,
         textHeightBehavior: const TextHeightBehavior(applyHeightToFirstAscent: false),
-        selectionColor: pp.colors.ember,
+        selectionColor: pp.colors.primary,
       ),
     );
   }

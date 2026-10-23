@@ -44,6 +44,7 @@ class MonogramAvatar extends StatelessWidget {
           textScaler: TextScaler.noScaling,
           // Initials scale with the disc, not with the text theme.
           style: context.text.titleMedium!.copyWith(
+            color: pp.colors.onAvatar,
             fontSize: d * (initials.length > 1 ? .36 : .44),
             height: 1,
           ),

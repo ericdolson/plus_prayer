@@ -1,26 +1,20 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_timezone (0.0.1):
-    - Flutter
   - screen_corner_radius (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
   - screen_corner_radius (from `.symlinks/plugins/screen_corner_radius/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  flutter_timezone:
-    :path: ".symlinks/plugins/flutter_timezone/ios"
   screen_corner_radius:
     :path: ".symlinks/plugins/screen_corner_radius/ios"
 
 SPEC CHECKSUMS:
   Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
-  flutter_timezone: ffb07bdad3c6276af8dada0f11978d8a1f8a20bb
   screen_corner_radius: e9a4b15bf5c6bef5477b5d78e3d5ad8f96713798
 
 PODFILE CHECKSUM: 4a637506621e0eda4e972cde83597c6afc980c6b

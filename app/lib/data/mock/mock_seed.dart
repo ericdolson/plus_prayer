@@ -5,14 +5,22 @@
 import '../../domain/models/live.dart';
 import '../../domain/models/local_date.dart';
 import '../../domain/models/prayer_list.dart';
+import '../../domain/models/reminder.dart';
 import '../../domain/models/subject.dart';
 import '../../domain/models/user_header.dart';
 
 class MockSeed {
-  const MockSeed({required this.subjects, required this.header, required this.list, required this.stats});
+  const MockSeed({
+    required this.subjects,
+    required this.header,
+    required this.list,
+    required this.stats,
+    this.reminders = const [],
+  });
 
   final List<Subject> subjects;
   final UserHeader header;
+  final List<Reminder> reminders;
   final CurrentList? list;
   final LiveStats stats;
 
@@ -118,6 +126,14 @@ class MockSeed {
 
     const stats = LiveStats(prayingNow: 213, prayedLastHour: 640, prayedToday: 4113);
 
-    return MockSeed(subjects: subjects, header: header, list: list, stats: stats);
+    // Default: Morning on (schema-brief). Preset times are an open question
+    // (notifications.md); these are placeholders.
+    const reminders = [
+      Reminder(id: 'r-morning', slot: ReminderSlot.morning, enabled: true, localTime: ClockTime(7, 0)),
+      Reminder(id: 'r-midday', slot: ReminderSlot.midday, enabled: false, localTime: ClockTime(12, 0)),
+      Reminder(id: 'r-evening', slot: ReminderSlot.evening, enabled: false, localTime: ClockTime(20, 0)),
+    ];
+
+    return MockSeed(subjects: subjects, header: header, list: list, stats: stats, reminders: reminders);
   }
 }
