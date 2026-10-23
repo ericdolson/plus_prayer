@@ -2,19 +2,20 @@
 // font sizes, and durations. Everything else reads the semantic names in
 // pp_theme.dart through `context.pp`.
 //
-// Palettes: the POC's two themes (legacy_poc/lib/presentation/themes.dart):
+// Palettes: the POC's two themes (legacy_poc/lib/presentation/themes.dart),
 // `darkTheme4` (charcoal grounds, cool ink) and `lightTheme3` (pale blue
-// grounds, navy ink), sharing its primary blue for prayer (the pray button,
-// the ring, Amen, the halo). Dark is the primary design (app-brief §0).
+// grounds, navy ink), recolored by meaning (design-direction.md §1):
+//   blue  = do this (pray button, Amen, the invitation, primary buttons)
+//   gold  = held (rings, intention dots, the prayer halo, "Answered")
+//   everything else neutral. No red, no pink.
+// Contrast checked (WCAG): ink and inkMuted ≥ 4.5:1 on ground and card;
+// heldGold ≥ 3:1 (non-text); heldGoldText ≥ 4.5:1; onPrimary ≥ 4.5:1 on
+// primary. inkFaint is decorative only (~3:1 and below).
 
 import 'package:flutter/painting.dart';
 
 /// Shared by both palettes.
 abstract final class PPPalette {
-  // The POC's primary blue.
-  static const blue = Color(0xFF0580F9);
-  static const onBlue = Color(0xFFFFFFFF);
-
   /// Initials on an avatar tone (the tones are mid-dark in both themes).
   static const onAvatar = Color(0xFFF3F5F9);
 
@@ -27,20 +28,24 @@ abstract final class PPDarkPalette {
   static const deepest = Color(0xFF111315); // POC surfaceBright
   static const groundLow = Color(0xFF16191B); // POC surfaceTint
   static const ground = Color(0xFF1D2124); // POC scaffold, sheets, dialogs
-  static const raised = Color(0xFF2D313A); // POC surface: the bottom bar, fields
+  static const card = Color(0xFF23272B); // the community card, settings groups
+  static const raised = Color(0xFF2D313A); // POC surface: fields, pills
   static const raisedHigh = Color(0xFF383D47);
-  static const hairline = Color(0xFF343943);
+  static const hairline = Color(0xFF343943); // also the intention thread
 
   // Ink — the POC's onSurface, stepped down toward the ground.
-  static const ink = Color(0xFFD7E0EE);
-  static const inkMuted = Color(0xFF9097A1);
-  static const inkFaint = Color(0xFF676D75);
+  static const ink = Color(0xFFD7E0EE); // 12.2:1 on ground
+  static const inkMuted = Color(0xFF9097A1); // 5.5:1 on ground, 5.1:1 on card
+  static const inkFaint = Color(0xFF676D75); // decorative only
 
-  static const primaryGlow = Color(0xFF5AA9FB);
+  // The logo blue, with a near-black glyph (white on it is only ~2.5:1).
+  static const primary = Color(0xFF5AA9FB);
+  static const onPrimary = Color(0xFF0B1A2B); // 7.1:1
 
-  // Status (copy rules §5: muted gray → soft gold; never red).
-  static const carriedGold = Color(0xFFC8AE6E);
-  static const unprayedRose = Color(0xFFC98A93); // the POC's pink, aged
+  static const heldGold = Color(0xFFC8AE6E); // 7.5:1 on ground
+  static const heldGoldText = heldGold;
+  static const heldGlow = Color(0x59C8AE6E); // heldGold at 35%
+  static const onHeld = ground;
 
   /// The POC's barrier: black at .75.
   static const scrim = Color(0xBF000000);
@@ -54,19 +59,22 @@ abstract final class PPLightPalette {
   static const deepest = Color(0xFFD7DFEE);
   static const groundLow = Color(0xFFE1E7F3); // POC surfaceTint
   static const ground = Color(0xFFE9EEF9); // POC scaffold, sheets
-  static const raised = Color(0xFFF5F7FD); // POC surface: the bottom bar, fields
+  static const raised = Color(0xFFF5F7FD); // POC surface: fields, the card
+  static const card = raised;
   static const raisedHigh = Color(0xFFFFFFFF);
   static const hairline = Color(0xFFD3DAE8);
 
   // Ink — the POC's dark blue onSurface, stepped up toward the ground.
-  static const ink = Color(0xFF05294A);
-  static const inkMuted = Color(0xFF5C748C);
-  static const inkFaint = Color(0xFF8A9BB0);
+  static const ink = Color(0xFF05294A); // 12.7:1 on ground
+  static const inkMuted = Color(0xFF566D83); // 4.6:1 on ground (the POC's #5C748C was 4.2)
+  static const inkFaint = Color(0xFF8A9BB0); // decorative only
 
-  static const primaryGlow = Color(0xFF0573E0);
+  static const primary = Color(0xFF0573E0);
+  static const onPrimary = Color(0xFFFFFFFF); // 4.6:1
 
-  static const carriedGold = Color(0xFF9A7A30);
-  static const unprayedRose = Color(0xFFC2566F); // the POC's pink.shade400, aged
+  static const heldGold = Color(0xFF9A7A30); // 3.5:1 on ground: rings and dots only
+  static const heldGoldText = Color(0xFF765A1C); // 5.6:1 on ground
+  static const onHeld = Color(0xFFFFFFFF); // 4.0:1 on heldGold (a glyph, not text)
 
   static const scrim = Color(0x6605294A);
   static const unsealed = Color(0xFFC9D1DF);
@@ -129,8 +137,13 @@ abstract final class PPSpaceTokens {
   static const double xxl = 32;
   static const double xxxl = 48;
 
-  /// Text inset inside a grouped card (settings rows).
+  /// Side margins on Home (design-direction.md §3), and text inset inside a
+  /// card.
+  static const double gutter = 20;
   static const double inset = 20;
+
+  /// Between one name (with its intentions) and the next.
+  static const double groupGap = 12;
 }
 
 abstract final class PPRadiusTokens {
@@ -139,53 +152,97 @@ abstract final class PPRadiusTokens {
   static const double lg = 24;
   static const double pill = 999;
 
+  /// The community card.
+  static const double card = 22;
+
   /// Top corners of the footer bar.
   static const double footer = 16;
 }
 
 abstract final class PPSizeTokens {
-  static const double avatar = 48;
+  /// Name rows (design-direction.md §3: one line, ~64 pt, ~44 pt avatar).
+  static const double avatar = 44;
+  static const double nameRow = 64;
+  static const double intentionRow = 44;
+
   /// The profile at the top of You.
   static const double avatarLarge = 72;
   static const double avatarSmall = 28;
   static const double avatarTiny = 20;
-  static const double seal = 48;
+  static const double seal = 44;
+
+  /// Held ring: width and gap from the avatar (§5); the thinner pair is for
+  /// small cluster avatars.
+  static const double heldRing = 2;
+  static const double heldRingGap = 2;
+  static const double heldRingSmall = 1.5;
+  static const double heldRingGapSmall = 1.5;
+
+  /// The gold dot where the thread meets a held intention.
+  static const double heldDot = 5;
+
+  /// The intention thread's stroke.
+  static const double thread = 1;
+
+  /// The prayer-mode check in a row's trailing slot.
+  static const double check = 24;
+
+  /// The live dot beside "praying now".
+  static const double liveDot = 6;
+
+  /// The streak badge's logo seal.
+  static const double badgeSeal = 24;
+
   /// The pray button (the POC's 85 pt FAB), docked in the footer's notch.
   static const double fab = 85;
   static const double footerHeight = 56;
   static const double notchMargin = 8;
-  static const double footerIcon = 30;
-  /// The POC's unprayed dot, centered in a gutter-wide column left of the avatar.
-  static const double unprayedDot = 8;
-  /// Intentions start under their name's avatar.
-  static const double intentionIndent = 48;
+  static const double footerIcon = 28;
+  static const double headerIcon = 24;
+
   /// Minimum height of a settings row.
   static const double settingsRow = 56;
+
   /// Chevrons and menu marks at the end of a row.
   static const double rowIcon = 20;
+
   /// A time wheel (reminder times).
   static const double wheelPicker = 216;
+
   /// The wordmark at the foot of You.
   static const double wordmark = 22;
+
+  /// Pull past this to reveal search (iOS Mail).
+  static const double pullToSearch = 64;
 }
 
 abstract final class PPMotionTokens {
   static const quick = Duration(milliseconds: 160);
   static const settle = Duration(milliseconds: 320);
   static const calm = Duration(milliseconds: 700);
-  /// The POC's elastic check.
-  static const bounce = Duration(milliseconds: 700);
+
+  /// The check's spring — the only spring in the app (design-direction.md §8).
+  static const spring = Duration(milliseconds: 420);
   static const haloBreath = Duration(milliseconds: 2400);
-  static const stagger = Duration(milliseconds: 25);
+}
+
+/// Translucent bars (design-direction.md §4).
+abstract final class PPMaterialTokens {
+  static const double barBlur = 24;
+
+  /// Fill over the blur.
+  static const double barTint = .72;
+
+  /// Fill where blur isn't used (Android, low-end).
+  static const double barOpaque = .94;
 }
 
 abstract final class PPFontTokens {
-  /// Display serif from the POC (names, titles, numbers).
+  /// Display serif from the POC: names on Home, list numbers, big lines only
+  /// (design-direction.md §2).
   static const display = 'Roca';
 
-  /// Body text.
-  static const body = 'Roboto';
-
-  /// Tabular figures (timer).
-  static const mono = 'RobotoMono';
+  /// Body text is the platform's system font (SF Pro on iOS, Roboto on
+  /// Android): no family set, so Material's platform typography supplies it.
+  static const String? body = null;
 }

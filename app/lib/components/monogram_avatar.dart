@@ -12,6 +12,7 @@ class MonogramAvatar extends StatelessWidget {
     required this.tone,
     this.size,
     this.ring = false,
+    this.ringColor,
   });
 
   final String initials;
@@ -20,8 +21,10 @@ class MonogramAvatar extends StatelessWidget {
   final int tone;
   final double? size;
 
-  /// A thin ground-colored ring, for overlapping in a cluster.
+  /// A thin ring in [ringColor] (default: the ground), for overlapping in a
+  /// cluster.
   final bool ring;
+  final Color? ringColor;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +38,7 @@ class MonogramAvatar extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: pp.colors.avatarTone(tone),
-          border: ring ? Border.all(color: pp.colors.background, width: d * .07) : null,
+          border: ring ? Border.all(color: ringColor ?? pp.colors.background, width: d * .07) : null,
         ),
         child: Text(
           initials,

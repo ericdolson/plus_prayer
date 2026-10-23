@@ -67,7 +67,6 @@ dependencies:
   # release still pins GoogleSignIn-iOS to gtm-session-fetcher 3.x, which
   # conflicts with firebase-ios-sdk 13 (gtm-session-fetcher 4+) under SwiftPM.
   sign_in_with_apple: ^8.2.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -91,6 +90,7 @@ flutter:
   assets:
     - assets/animations/coin_flip.lottie.json
     - assets/img/+_prayer.svg
+    - assets/img/+prayer_icon.svg
     - assets/img/google_logo.png
     - assets/img/logo_svg_parts/dot_top.svg
     - assets/img/logo_svg_parts/dot_left.svg
@@ -120,6 +120,10 @@ flutter:
     - family: PlusPrayer
       fonts:
         - asset: assets/fonts/PlusPrayer.ttf
+    # Phosphor Light (MIT, phosphoricons.com): the one interface icon family.
+    - family: PhosphorLight
+      fonts:
+        - asset: assets/fonts/Phosphor-Light.ttf
     - family: Roca
       fonts:
         - asset: assets/fonts/Roca_100.otf

@@ -1,9 +1,10 @@
-// Grouped settings rows (You), from the POC's CardGroup: rounded cards on the
-// ground with hairlines inset to the text. Quieter than the POC: no leading
+// Grouped settings rows (You), from the POC's CardGroup: flat tonal cards on
+// the ground with hairlines inset to the text. Quieter than the POC: no leading
 // icons, sentence-case section titles, more air between groups.
 
 import 'package:flutter/material.dart';
 
+import '../theme/pp_icons.dart';
 import '../theme/pp_theme.dart';
 
 /// A titled (or untitled) card of rows, hairlines between them.
@@ -30,7 +31,7 @@ class SettingsSection extends StatelessWidget {
               ),
             ),
           Material(
-            color: pp.colors.surface,
+            color: pp.colors.cardSurface,
             borderRadius: BorderRadius.circular(pp.size.radiusLg),
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -78,8 +79,8 @@ class SettingsTile extends StatelessWidget {
     final c = pp.colors;
     final icon = switch (accessory) {
       SettingsAccessory.none => null,
-      SettingsAccessory.chevron => Icons.chevron_right_rounded,
-      SettingsAccessory.menu => Icons.unfold_more_rounded,
+      SettingsAccessory.chevron => PPIcons.chevron,
+      SettingsAccessory.menu => PPIcons.choose,
     };
     return MergeSemantics(
       child: InkWell(
@@ -157,8 +158,16 @@ class SettingsSwitchTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (leading != null) ...[leading!, SizedBox(width: context.pp.space.md)],
-          // The iOS switch ignores the theme's track colors.
-          Switch.adaptive(value: value, onChanged: onChanged, activeTrackColor: context.pp.colors.primary),
+          // Neutral when on (design-direction.md §1); the iOS switch ignores the
+          // theme's track colors, so it's passed here.
+          Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+            activeTrackColor: context.pp.colors.ink,
+            thumbColor: WidgetStateProperty.resolveWith(
+              (s) => s.contains(WidgetState.selected) ? context.pp.colors.background : null,
+            ),
+          ),
         ],
       ),
     );
@@ -194,7 +203,7 @@ class SettingsMenuTile<T> extends StatelessWidget {
         for (final (value, text) in options)
           MenuItemButton(
             onPressed: () => onSelected(value),
-            leadingIcon: Icon(Icons.check_rounded, color: value == selected ? c.primary : Colors.transparent),
+            leadingIcon: Icon(PPIcons.check, color: value == selected ? c.primary : Colors.transparent),
             child: Text(text),
           ),
       ],

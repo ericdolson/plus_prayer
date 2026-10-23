@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../domain/rules/validation.dart';
 import '../../l10n/app_localizations.dart';
 import '../../state/prayer_session.dart';
+import '../../theme/pp_icons.dart';
 import '../../theme/pp_theme.dart';
 
 Future<void> showClosingSheet(BuildContext context) => showModalBottomSheet<void>(
@@ -73,7 +74,7 @@ class ClosingSheet extends HookConsumerWidget {
             ] else ...[
               OutlinedButton.icon(
                 onPressed: () => writing.value = true,
-                icon: const Icon(Icons.edit_note_rounded),
+                icon: const Icon(PPIcons.note),
                 label: Text(l10n.addNote),
               ),
               SizedBox(height: pp.space.sm),

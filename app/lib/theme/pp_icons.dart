@@ -19,4 +19,24 @@ abstract final class PPIcons {
   /// The carried mark (the POC's "on the list" badge).
   static const IconData plusDotsList = IconData(0xe80c, fontFamily: _family);
   static const IconData pray = IconData(0xf683, fontFamily: _family);
+
+  // Interface icons: Phosphor Light, the one thin-line family
+  // (design-direction.md §9). Widgets use these names, never `Icons.*`. The
+  // font is bundled from phosphor_flutter 2.1.0 (MIT), whose IconData subclass
+  // no longer compiles on current Flutter; codepoints are Phosphor's names.
+  static const _phosphor = 'PhosphorLight';
+
+  static const IconData search = IconData(0xe30c, fontFamily: _phosphor); // magnifyingGlass
+  static const IconData filter = IconData(0xe268, fontFamily: _phosphor); // funnelSimple
+  static const IconData close = IconData(0xe4f6, fontFamily: _phosphor); // x
+  static const IconData history = IconData(0xe1a0, fontFamily: _phosphor); // clockCounterClockwise
+  static const IconData add = IconData(0xe3d4, fontFamily: _phosphor); // plus
+  static const IconData check = IconData(0xe182, fontFamily: _phosphor); // check
+  static const IconData chevron = IconData(0xe13a, fontFamily: _phosphor, matchTextDirection: true); // caretRight
+  static const IconData choose = IconData(0xe140, fontFamily: _phosphor); // caretUpDown
+  static const IconData clock = IconData(0xe19a, fontFamily: _phosphor); // clock
+  static const IconData note = IconData(0xe34c, fontFamily: _phosphor); // notePencil
+  static const IconData upgrade = IconData(0xe092, fontFamily: _phosphor); // arrowUpRight
+  static const IconData edit = IconData(0xe3b4, fontFamily: _phosphor); // pencilSimple
+  static const IconData archive = IconData(0xe00c, fontFamily: _phosphor); // archive
 }

@@ -17,6 +17,18 @@ class L10nEn extends L10n {
   }
 
   @override
+  String listScale(int people, int prayers) {
+    final intl.NumberFormat peopleNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String peopleString = peopleNumberFormat.format(people);
+    final intl.NumberFormat prayersNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String prayersString = prayersNumberFormat.format(prayers);
+
+    return '$peopleString people · $prayersString prayers';
+  }
+
+  @override
   String listBeingFilmed(int number) {
     return 'List $number, being filmed';
   }
@@ -97,31 +109,12 @@ class L10nEn extends L10n {
   }
 
   @override
-  String get statusPrayedToday => 'Prayed today';
-
-  @override
-  String statusLastPrayed(int days) {
-    String _temp0 = intl.Intl.pluralLogic(
-      days,
-      locale: localeName,
-      other: 'Last prayed $days days ago',
-      one: 'Last prayed yesterday',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String statusNotCarriedFull(int limit) {
     return 'Not on the list · all $limit places in use';
   }
 
   @override
-  String carriedMark(int number) {
-    return 'Carried on List $number';
-  }
-
-  @override
-  String get unprayedToday => 'Not yet prayed for today';
+  String get heldToday => 'Held today';
 
   @override
   String get filterAll => 'All';

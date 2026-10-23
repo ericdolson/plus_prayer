@@ -4,6 +4,8 @@
   "appTitle": "+Prayer",
 
   "listTitle": "List {number}",
+  "listScale": "{people} people · {prayers} prayers",
+  "@listScale": { "description": "Community card, scale first (design-direction.md §6).", "placeholders": { "people": { "type": "int", "format": "decimalPattern" }, "prayers": { "type": "int", "format": "decimalPattern" } } },
   "@listTitle": { "placeholders": { "number": { "type": "int" } } },
   "listBeingFilmed": "List {number}, being filmed",
   "@listBeingFilmed": { "description": "Screen reader label for the unsealed seal before the list is published.", "placeholders": { "number": { "type": "int" } } },
@@ -28,16 +30,11 @@
 
   "statusAnswered": "Answered · {date}",
   "@statusAnswered": { "placeholders": { "date": { "type": "DateTime", "format": "MMMd" } } },
-  "statusPrayedToday": "Prayed today",
-  "statusLastPrayed": "{days, plural, =1{Last prayed yesterday} other{Last prayed {days} days ago}}",
-  "@statusLastPrayed": { "placeholders": { "days": { "type": "int" } } },
   "statusNotCarriedFull": "Not on the list · all {limit} places in use",
   "@statusNotCarriedFull": { "placeholders": { "limit": { "type": "int" } } },
-  "carriedMark": "Carried on List {number}",
-  "@carriedMark": { "description": "Screen reader text for the carried mark.", "placeholders": { "number": { "type": "int" } } },
-  "unprayedToday": "Not yet prayed for today",
-  "@unprayedToday": { "description": "Screen reader text for the unprayed dot." },
 
+  "heldToday": "Held today",
+  "@heldToday": { "description": "Screen reader text for the gold ring / dot. Not in the spec; for review." },
   "filterAll": "All",
   "filterUnprayed": "Unprayed today",
   "filterCarried": "Carried",

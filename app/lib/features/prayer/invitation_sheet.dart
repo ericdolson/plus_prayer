@@ -17,7 +17,7 @@ import '../../state/home_state.dart';
 import '../../state/prayer_session.dart';
 import '../../state/providers.dart';
 import '../../theme/pp_theme.dart';
-import '../home/list_row.dart';
+import '../home/community_card.dart';
 
 Future<void> showInvitationSheet(BuildContext context) => showModalBottomSheet<void>(
       context: context,
@@ -37,7 +37,7 @@ class InvitationSheet extends HookConsumerWidget {
     final l10n = L10n.of(context);
     final session = ref.watch(prayerSessionProvider);
     final notifier = ref.read(prayerSessionProvider.notifier);
-    final model = ref.watch(listRowProvider);
+    final model = ref.watch(communityCardProvider);
     final config = ref.watch(configProvider);
     final clock = ref.watch(clockProvider);
     final holdingSince = session.listHoldingSince;
@@ -73,7 +73,7 @@ class InvitationSheet extends HookConsumerWidget {
             AvatarCluster(
               people: [for (final s in model.carried) clusterPerson(s, l10n)],
               trailing: l10n.carryWillBe(list.nextListNumber),
-              style: context.text.bodyMedium?.copyWith(color: pp.colors.carried),
+              style: context.text.bodyMedium?.copyWith(color: pp.colors.heldGoldText),
             ),
             SizedBox(height: pp.space.xxl),
             RingButton(
@@ -85,7 +85,7 @@ class InvitationSheet extends HookConsumerWidget {
               onPressed: holding ? notifier.amenFromInvitation : notifier.holdList,
               complete: holding ? Text(l10n.amen) : null,
               child: holding
-                  ? Text('${elapsed.inSeconds}', style: context.text.titleLarge?.copyWith(color: pp.colors.primaryGlow))
+                  ? Text('${elapsed.inSeconds}', style: context.text.titleLarge?.copyWith(color: pp.colors.primary))
                   : WaxSeal(variant: list.sealVariant, size: pp.size.seal * .8),
             ),
             SizedBox(height: pp.space.lg),

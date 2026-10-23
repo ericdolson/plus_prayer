@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import '../domain/rules/streak.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/pp_theme.dart';
-import 'wax_seal.dart';
+import 'logo_seal.dart';
 
-/// Header streak badge (streaks-reminders.md): icon + number only.
+/// Header streak badge (streaks-reminders.md): the logo as a small wax seal
+/// (design-direction.md §4, never a "+") and the number.
 /// Prayed with the list today → seal in today's wax + N; alive → muted seal +
 /// N; zero → muted seal, no number (never "0"). Always tappable.
 class StreakBadge extends StatelessWidget {
@@ -40,7 +41,7 @@ class StreakBadge extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              WaxSeal(variant: todayVariant, size: 22, muted: state != StreakBadgeState.sealedToday),
+              LogoSeal(variant: todayVariant, size: pp.size.badgeSeal, muted: state != StreakBadgeState.sealedToday),
               if (showNumber) ...[
                 SizedBox(width: pp.space.xs),
                 Text(

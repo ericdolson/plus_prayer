@@ -22,10 +22,11 @@ abstract final class AppTheme {
       brightness: c.brightness,
       primary: c.primary,
       onPrimary: c.onPrimary,
-      secondary: c.carried,
-      onSecondary: c.deepest,
-      error: c.unprayed, // never a bright red (copy rules §5)
-      onError: c.deepest,
+      secondary: c.heldGold,
+      onSecondary: c.onHeld,
+      // No red or pink anywhere (design-direction.md §1): errors are ink.
+      error: c.ink,
+      onError: c.background,
       surface: c.background,
       onSurface: c.ink,
       onSurfaceVariant: c.inkMuted,
@@ -50,6 +51,8 @@ abstract final class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: c.background,
       canvasColor: c.background,
+      // Null: the platform's system font (SF Pro on iOS) from Material's
+      // platform typography.
       fontFamily: PPFontTokens.body,
       textTheme: text,
       extensions: [pp],
@@ -92,7 +95,7 @@ abstract final class AppTheme {
         hintStyle: text.bodyLarge?.copyWith(color: c.inkFaint),
         labelStyle: text.bodyMedium?.copyWith(color: c.inkMuted),
         helperStyle: text.bodySmall,
-        errorStyle: text.bodySmall?.copyWith(color: c.unprayed),
+        errorStyle: text.bodySmall?.copyWith(color: c.ink),
         counterStyle: text.bodySmall?.copyWith(color: c.inkFaint),
         contentPadding: const EdgeInsetsDirectional.symmetric(
           horizontal: PPSpaceTokens.lg,
@@ -106,11 +109,11 @@ abstract final class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: radiusMd,
-          borderSide: BorderSide(color: c.unprayed.withValues(alpha: .6)),
+          borderSide: BorderSide(color: c.inkMuted),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: radiusMd,
-          borderSide: BorderSide(color: c.unprayed),
+          borderSide: BorderSide(color: c.ink),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -180,12 +183,13 @@ abstract final class AppTheme {
         selectionHandleColor: c.primary,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: c.primary),
+      // Controls are neutral: ink when on, never blue (design-direction.md §1).
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? c.onPrimary : c.inkMuted,
+          (s) => s.contains(WidgetState.selected) ? c.background : c.inkMuted,
         ),
         trackColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? c.primary : c.surfaceRaised,
+          (s) => s.contains(WidgetState.selected) ? c.ink : c.surfaceRaised,
         ),
         trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
       ),
@@ -220,46 +224,48 @@ abstract final class AppTheme {
   }
 
   static TextTheme _textTheme(PPColors c) {
+    // Roca: names on Home, list numbers, big lines (design-direction.md §2).
     TextStyle display(double size, FontWeight weight, {double height = 1.2}) => TextStyle(
           fontFamily: PPFontTokens.display,
           fontSize: size,
           fontWeight: weight,
           height: height,
+          letterSpacing: 0,
           color: c.ink,
         );
-    TextStyle body(double size, FontWeight weight, Color color, {double height = 1.35}) => TextStyle(
+    // System sans, with SF's tracking for its size.
+    TextStyle body(double size, FontWeight weight, Color color, {double height = 1.3, double tracking = 0}) =>
+        TextStyle(
           fontFamily: PPFontTokens.body,
           fontSize: size,
           fontWeight: weight,
           height: height,
+          letterSpacing: tracking,
           color: color,
         );
 
     return TextTheme(
       // Onboarding lines, the welcome-back question.
       displaySmall: display(30, FontWeight.w700),
+      // Names as titles (the You sheet).
       headlineMedium: display(26, FontWeight.w700),
-      // The invitation line ("Hold the 4,345 on List 52 …").
+      // Big lines: the invitation, "You'll be carried on List 53".
       headlineSmall: display(22, FontWeight.w400, height: 1.3),
-      // Sheet titles.
-      titleLarge: display(21, FontWeight.w700),
-      // Row titles (names, "List 52").
-      titleMedium: display(18, FontWeight.w700),
-      // Intention row titles.
-      titleSmall: display(16, FontWeight.w400),
-      bodyLarge: body(16, FontWeight.w400, c.ink),
-      bodyMedium: body(14, FontWeight.w400, c.ink),
-      // Secondary row lines, captions.
-      bodySmall: body(12, FontWeight.w600, c.inkMuted),
-      labelLarge: body(15, FontWeight.w600, c.ink, height: 1.2),
-      labelMedium: body(13, FontWeight.w600, c.inkMuted, height: 1.2),
+      // Sheet and dialog titles.
+      titleLarge: body(20, FontWeight.w600, c.ink, tracking: -.45),
+      // Names on Home and "List 52".
+      titleMedium: display(19, FontWeight.w700),
+      // Intentions on Home: smaller sans, muted.
+      titleSmall: body(15, FontWeight.w400, c.inkMuted, tracking: -.23),
+      bodyLarge: body(17, FontWeight.w400, c.ink, tracking: -.43),
+      bodyMedium: body(15, FontWeight.w400, c.ink, tracking: -.23),
+      // Secondary lines, captions.
+      bodySmall: body(13, FontWeight.w400, c.inkMuted, tracking: -.08),
+      labelLarge: body(15, FontWeight.w600, c.ink, height: 1.2, tracking: -.23),
+      labelMedium: body(13, FontWeight.w500, c.inkMuted, height: 1.2, tracking: -.08),
       // Timer and counts: tabular figures.
-      labelSmall: const TextStyle(
-        fontFamily: PPFontTokens.mono,
-        fontSize: 15,
-        fontWeight: FontWeight.w500,
-        fontFeatures: [FontFeature.tabularFigures()],
-      ).copyWith(color: c.ink),
+      labelSmall: body(15, FontWeight.w500, c.ink, height: 1.2, tracking: -.23)
+          .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
     );
   }
 }

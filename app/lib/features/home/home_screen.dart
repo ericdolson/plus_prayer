@@ -1,14 +1,17 @@
-// Home = the prayer screen (screens.md): personal list with today's list
-// pinned on top. The only screen with the footer. Prayer happens here, in
-// place: the halo forms, the header's nav steps away, the footer becomes the
-// prayer bar, rows become checks — search and filter stay as they were.
+// Home = the prayer screen (screens.md, design-direction.md): the community
+// card on top, then your names and their intentions. The only screen with the
+// footer. Prayer happens here, in place: the gold halo forms, the header's
+// nav steps away, the footer becomes the prayer bar, checks fade into the rows
+// — search and filter stay as they were. Header and footer are frosted; the
+// list scrolls beneath both. Pull down to search.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../components/halo.dart';
-import '../../domain/rules/presence.dart';
-import '../../l10n/app_localizations.dart';
+import '../../components/thread.dart';
+import '../../domain/rules/home_filter.dart';
 import '../../state/home_state.dart';
 import '../../state/prayer_session.dart';
 import '../../state/providers.dart';
@@ -18,7 +21,7 @@ import '../prayer/invitation_sheet.dart';
 import '../prayer/welcome_back_dialog.dart';
 import 'home_footer.dart';
 import 'home_header.dart';
-import 'list_row.dart';
+import 'community_card.dart';
 import 'subject_row.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -41,31 +44,35 @@ class HomeScreen extends ConsumerWidget {
       }
     });
 
+    // Pull down past the threshold to reveal search (iOS Mail).
+    bool onScroll(ScrollUpdateNotification n) {
+      final query = ref.read(homeQueryProvider);
+      if (!query.searchOpen && n.dragDetails != null && n.metrics.pixels < -pp.size.pullToSearch) {
+        HapticFeedback.selectionClick();
+        ref.read(homeQueryProvider.notifier).openSearch();
+      }
+      return false;
+    }
+
     return Halo(
       active: inPrayer,
       child: Scaffold(
-        // The list scrolls under the footer's rounded corners and notch.
+        // The list scrolls under the frosted footer, its corners and notch.
         extendBody: true,
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              const HomeHeader(),
-              Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    const SliverToBoxAdapter(child: _PresenceLine()),
-                    const SliverToBoxAdapter(child: ClosingSoonBanner()),
-                    const SliverToBoxAdapter(child: ListRow()),
-                    SliverToBoxAdapter(child: Divider(indent: pp.space.gutter, endIndent: pp.space.gutter)),
-                    const _SubjectRows(),
-                    // Clear of the footer and the docked button.
-                    SliverSafeArea(
-                      top: false,
-                      sliver: SliverToBoxAdapter(child: SizedBox(height: pp.size.fab / 2 + pp.space.lg)),
-                    ),
-                  ],
-                ),
+        body: NotificationListener<ScrollUpdateNotification>(
+          onNotification: onScroll,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            slivers: [
+              const PinnedHeaderSliver(child: HomeHeader()),
+              SliverToBoxAdapter(child: SizedBox(height: pp.space.sm)),
+              const SliverToBoxAdapter(child: CommunityCard()),
+              SliverToBoxAdapter(child: SizedBox(height: pp.space.xl)),
+              const _SubjectRows(),
+              // Clear of the footer and the docked button.
+              SliverSafeArea(
+                top: false,
+                sliver: SliverToBoxAdapter(child: SizedBox(height: pp.size.fab / 2 + pp.space.xl)),
               ),
             ],
           ),
@@ -90,31 +97,22 @@ class _SubjectRows extends ConsumerWidget {
     }
     return SliverList.builder(
       itemCount: rows.length,
-      // The list row is index 0.
-      itemBuilder: (context, i) =>
-          SubjectRow(key: ValueKey(rows[i].subject.id), row: rows[i], tree: tree, index: i + 1),
+      itemBuilder: (context, i) => SubjectRow(
+        key: ValueKey(rows[i].subject.id),
+        row: rows[i],
+        tree: tree,
+        first: i == 0,
+        thread: threadPartAt(rows, i),
+      ),
     );
   }
 }
 
-/// "212 praying now" — quiet, by the ladder; hidden rather than ever 0.
-class _PresenceLine extends ConsumerWidget {
-  const _PresenceLine();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final line = ref.watch(presenceLineProvider);
-    if (line == null) return const SizedBox.shrink();
-    final l10n = L10n.of(context);
-    final text = switch (line.window) {
-      PresenceWindow.now => l10n.presenceNow(line.count),
-      PresenceWindow.lastHour => l10n.presenceLastHour(line.count),
-      PresenceWindow.today => l10n.presenceToday(line.count),
-    };
-    final pp = context.pp;
-    return Padding(
-      padding: EdgeInsetsDirectional.only(start: pp.space.gutter, end: pp.space.gutter, bottom: pp.space.xs),
-      child: Text(text, style: context.text.bodySmall),
-    );
-  }
+/// Which part of the thread row [i] draws: a name with intentions shown below
+/// starts it; each intention branches off; the last one ends it.
+ThreadPart? threadPartAt(List<HomeRow> rows, int i) {
+  final next = i + 1 < rows.length ? rows[i + 1] : null;
+  final continues = next != null && next.isIntention;
+  if (!rows[i].isIntention) return continues ? ThreadPart.trunk : null;
+  return continues ? ThreadPart.branch : ThreadPart.lastBranch;
 }

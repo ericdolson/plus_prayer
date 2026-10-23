@@ -10,7 +10,8 @@ import '../theme/pp_theme.dart';
 /// The screen-edge glow that makes prayer mode unmistakable (prayer-flow.md).
 /// Ported from the POC's SiriHalo: concentric blurred strokes following the
 /// device's physical corner radius (screen_corner_radius), breathing slowly.
-/// In the primary blue, as in the POC.
+/// Gold: holding (design-direction.md §7). An edge glow in dark mode; wider
+/// and stronger in light mode so it doesn't vanish.
 ///
 /// Reduced motion: no breathing; the halo simply appears.
 class Halo extends HookWidget {
@@ -52,11 +53,13 @@ class Halo extends HookWidget {
     final pulse = useAnimation(breath);
     final shown = useAnimation(CurvedAnimation(parent: presence, curve: Curves.easeInOut));
     final opacity = shown * (reduceMotion ? .85 : .6 + .4 * Curves.easeInOut.transform(pulse));
+    final light = pp.colors.brightness == Brightness.light;
 
     return CustomPaint(
       foregroundPainter: _HaloPainter(
         color: pp.colors.halo,
-        glowWidth: glowWidth,
+        glowWidth: light ? glowWidth * 1.2 : glowWidth,
+        strength: light ? .9 : .8,
         cornerRadius: cornerRadius.value ?? fallbackCornerRadius,
         opacity: opacity,
       ),
@@ -66,10 +69,17 @@ class Halo extends HookWidget {
 }
 
 class _HaloPainter extends CustomPainter {
-  _HaloPainter({required this.color, required this.glowWidth, required this.cornerRadius, required this.opacity});
+  _HaloPainter({
+    required this.color,
+    required this.glowWidth,
+    required this.strength,
+    required this.cornerRadius,
+    required this.opacity,
+  });
 
   final Color color;
   final double glowWidth;
+  final double strength;
   final double cornerRadius;
   final double opacity;
 
@@ -88,7 +98,7 @@ class _HaloPainter extends CustomPainter {
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = glowWidth / layers * 2
-          ..color = color.withValues(alpha: ((1 - t) * opacity * .8).clamp(0, 1))
+          ..color = color.withValues(alpha: ((1 - t) * opacity * strength).clamp(0, 1))
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, (1 - t) * 6 + 1),
       );
     }
@@ -104,5 +114,9 @@ class _HaloPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_HaloPainter old) =>
-      old.opacity != opacity || old.color != color || old.glowWidth != glowWidth || old.cornerRadius != cornerRadius;
+      old.opacity != opacity ||
+      old.color != color ||
+      old.glowWidth != glowWidth ||
+      old.strength != strength ||
+      old.cornerRadius != cornerRadius;
 }

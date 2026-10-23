@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../theme/pp_icons.dart';
 import '../theme/pp_theme.dart';
 
 /// "7 of 10" on Your portion (monetization.md). Over-selecting is allowed and
@@ -33,7 +34,7 @@ class PoolMeter extends StatelessWidget {
                 value: fraction,
                 minHeight: 4,
                 backgroundColor: pp.colors.hairline,
-                color: over ? pp.colors.primary : pp.colors.carried,
+                color: over ? pp.colors.primary : pp.colors.ink,
               ),
             ),
           ),
@@ -44,7 +45,7 @@ class PoolMeter extends StatelessWidget {
           ),
           if (over) ...[
             SizedBox(width: pp.space.xs),
-            Icon(Icons.north_east_rounded, size: 14, color: pp.colors.primary),
+            Icon(PPIcons.upgrade, size: 14, color: pp.colors.primary),
           ],
         ],
       ),

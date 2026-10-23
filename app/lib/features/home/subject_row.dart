@@ -1,6 +1,14 @@
-// A name or intention row (app-brief §3 Home). Title + one secondary line,
-// unprayed dot left of the avatar, carried mark, `>` in nav / check in prayer.
-// Intentions sit indented under their name and have no avatar.
+// Home rows (design-direction.md §3, §5). One line each, no dividers, no
+// chevrons. Names: a 44 pt avatar and the name in the serif, ~64 pt tall.
+// Intentions: smaller muted sans on a thread from the name's avatar, their
+// text aligned with the name's, ~44 pt tall.
+//
+// Held today = the gold ring (names) or gold dot (intentions) until local
+// midnight; in prayer the same marks appear live as rows are checked, and a
+// check fades into the empty trailing slot. Secondary text only for
+// exceptional states ("Answered · Oct 6", "Not on the list …").
+//
+// Tap → the item's own page (in prayer: check). Long-press → quick actions.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +18,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../app/router.dart';
 import '../../components/marks.dart';
 import '../../components/monogram_avatar.dart';
+import '../../components/thread.dart';
+import '../../domain/models/subject.dart';
 import '../../domain/rules/avatar.dart';
 import '../../domain/rules/carry.dart';
 import '../../domain/rules/home_filter.dart';
@@ -21,16 +31,19 @@ import '../../state/home_state.dart';
 import '../../state/prayer_session.dart';
 import '../../state/providers.dart';
 import '../../theme/pp_theme.dart';
-import '../add/add_sheet.dart';
+import 'quick_actions.dart';
 
 class SubjectRow extends ConsumerWidget {
-  const SubjectRow({super.key, required this.row, required this.tree, required this.index});
+  const SubjectRow({super.key, required this.row, required this.tree, this.first = false, this.thread});
 
   final HomeRow row;
   final SubjectTree tree;
 
-  /// Position on Home (the list row is 0), for the prayer-mode stagger.
-  final int index;
+  /// The first row on Home gets no group gap above it.
+  final bool first;
+
+  /// This row's part of the intention thread, if any.
+  final ThreadPart? thread;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,21 +54,18 @@ class SubjectRow extends ConsumerWidget {
     final session = ref.watch(prayerSessionProvider);
     final inPrayer = session.isActive;
     final hold = session.selection.stateOf(s.id, tree);
-    final listRow = ref.watch(listRowProvider);
     final justAdded = ref.watch(justAddedNotCarriedProvider).contains(s.id);
     final status = rowStatus(
       s,
-      today,
       justAddedNotCarried: justAdded && !isEffectivelyCarried(s, tree),
       poolLimit: ref.watch(poolLimitProvider),
     );
-    final unprayed = !prayedToday(s, today);
-    final carried = showsCarriedMark(s, tree);
-    final carryConfirmed = listRow?.prayedWithList ?? false;
-    final nextList = listRow?.list.nextListNumber;
-
-    final title = s.isSelf ? (s.alias ?? s.publicName) : s.label;
-    final statusText = _statusText(l10n, status);
+    final held = prayedToday(s, today) || (inPrayer && hold != HoldState.none);
+    final statusText = switch (status) {
+      AnsweredStatus(:final on) => l10n.statusAnswered(on),
+      NotCarriedPoolFullStatus(:final limit) => l10n.statusNotCarriedFull(limit),
+      null => null,
+    };
 
     void onTap() {
       if (inPrayer) {
@@ -66,7 +76,7 @@ class SubjectRow extends ConsumerWidget {
         return;
       }
       // A "Not on the list" row opens Your portion once it exists (build
-      // step 6); until then every row opens its detail.
+      // step 6); until then every row opens its own page.
       context.push(Routes.subject(s.id));
     }
 
@@ -74,113 +84,149 @@ class SubjectRow extends ConsumerWidget {
     final spoken = [
       if (s.alias != null && s.alias != s.publicName) '${s.label}, ${s.publicName}' else s.publicName,
       if (statusText != null) statusText,
-      if (unprayed) l10n.unprayedToday,
-      if (carried && nextList != null) l10n.carriedMark(nextList),
+      if (held && !inPrayer) l10n.heldToday,
     ].join('. ');
 
-    final leading = s.isName
-        ? Stack(
-            clipBehavior: Clip.none,
-            children: [
-              EmberGlow(
-                state: hold,
-                size: pp.size.avatar,
-                child: MonogramAvatar(initials: monogramOf(s), tone: avatarToneOf(s)),
-              ),
-              if (carried)
-                PositionedDirectional(
-                  bottom: -3,
-                  end: -3,
-                  child: CarriedMark(confirmed: carryConfirmed),
-                ),
-            ],
-          )
-        : SizedBox(
-            width: pp.size.avatarTiny,
-            height: pp.size.avatarTiny,
-            child: EmberGlow(
-              state: hold,
-              size: pp.size.avatarTiny,
-              child: carried
-                  ? CarriedMark(confirmed: carryConfirmed, size: pp.size.avatarTiny)
-                  : Center(
-                      child: Container(
-                        width: pp.space.sm,
-                        height: pp.space.sm,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: pp.colors.inkFaint),
-                        ),
-                      ),
-                    ),
+    final secondary = statusText == null
+        ? null
+        : Text(
+            statusText,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.text.bodySmall?.copyWith(
+              color: status is AnsweredStatus ? pp.colors.heldGoldText : pp.colors.inkMuted,
             ),
           );
 
-    return Semantics(
-      button: !inPrayer,
-      checked: inPrayer ? hold != HoldState.none : null,
-      mixed: inPrayer && hold == HoldState.partial ? true : null,
-      label: spoken,
-      excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: s.isName && !inPrayer ? () => showAddSheet(context, forNameId: s.id) : null,
-        child: Opacity(
-          opacity: row.isContext ? .55 : 1,
-          child: Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: s.isIntention ? pp.size.intentionIndent : 0,
-              end: pp.space.gutter,
-              top: s.isName ? pp.space.md : pp.space.xs,
-              bottom: s.isName ? pp.space.md : pp.space.xs,
-            ),
-            child: Row(
-              children: [
-                UnprayedDot(visible: unprayed),
-                SizedBox(
-                  width: s.isName ? pp.size.avatar : pp.size.avatarTiny,
-                  child: Center(child: leading),
-                ),
-                SizedBox(width: pp.space.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+    final content = s.isName
+        ? _NameContent(subject: s, held: held, secondary: secondary)
+        : _IntentionContent(subject: s, held: held, secondary: secondary);
+
+    final threadPart = thread;
+    final textStart = pp.space.gutter + pp.size.avatar + pp.space.md;
+    return Padding(
+      padding: EdgeInsetsDirectional.only(top: s.isName && !first ? pp.space.groupGap : 0),
+      child: Semantics(
+        button: !inPrayer,
+        checked: inPrayer ? hold != HoldState.none : null,
+        mixed: inPrayer && hold == HoldState.partial ? true : null,
+        label: spoken,
+        excludeSemantics: true,
+        child: InkWell(
+          onTap: onTap,
+          // Intentions get theirs (Answered, Release, edit, archive) with build step 5.
+          onLongPress: inPrayer || !s.isName ? null : () => showQuickActions(context, s),
+          child: CustomPaint(
+            painter: threadPart == null
+                ? null
+                : ThreadPainter(
+                    part: threadPart,
+                    color: pp.colors.thread,
+                    strokeWidth: pp.size.thread,
+                    trunkX: pp.space.gutter + pp.size.avatar / 2,
+                    endX: textStart - pp.space.sm - pp.size.heldDot / 2,
+                    avatarDiameter: pp.size.avatar,
+                    avatarClearance: pp.size.heldRing + pp.size.heldRingGap,
+                    textDirection: Directionality.of(context),
+                  ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: s.isName ? pp.size.nameRow : pp.size.intentionRow),
+              child: Opacity(
+                opacity: row.isContext ? .55 : 1,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(
+                    start: s.isName ? pp.space.gutter : 0,
+                    end: pp.space.gutter,
+                    top: pp.space.xs,
+                    bottom: pp.space.xs,
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        title,
-                        maxLines: s.isIntention ? 2 : 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: s.isName ? context.text.titleMedium : context.text.titleSmall,
-                      ),
-                      if (statusText != null) ...[
-                        SizedBox(height: pp.space.xxs),
-                        Text(
-                          statusText,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.text.bodySmall?.copyWith(
-                            color: status is AnsweredStatus ? pp.colors.carried : pp.colors.inkMuted,
-                          ),
-                        ),
-                      ],
+                      Expanded(child: content),
+                      SizedBox(width: pp.space.md),
+                      PrayerCheck(inPrayer: inPrayer, state: hold),
                     ],
                   ),
                 ),
-                EmberCheck(inPrayer: inPrayer, state: hold, index: index),
-              ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
 
-  static String? _statusText(L10n l10n, RowStatus? status) => switch (status) {
-        AnsweredStatus(:final on) => l10n.statusAnswered(on),
-        PrayedTodayStatus() => l10n.statusPrayedToday,
-        LastPrayedStatus(:final daysAgo) => l10n.statusLastPrayed(daysAgo),
-        NotCarriedPoolFullStatus(:final limit) => l10n.statusNotCarriedFull(limit),
-        null => null,
-      };
+class _NameContent extends StatelessWidget {
+  const _NameContent({required this.subject, required this.held, this.secondary});
+
+  final Subject subject;
+  final bool held;
+  final Widget? secondary;
+
+  @override
+  Widget build(BuildContext context) {
+    final pp = context.pp;
+    final s = subject;
+    return Row(
+      children: [
+        HeldRing(
+          held: held,
+          diameter: pp.size.avatar,
+          child: MonogramAvatar(initials: monogramOf(s), tone: avatarToneOf(s)),
+        ),
+        SizedBox(width: pp.space.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                s.isSelf ? (s.alias ?? s.publicName) : s.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.titleMedium,
+              ),
+              if (secondary != null) ...[SizedBox(height: pp.space.xxs), secondary!],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The dot column ends where the thread does; the text lines up with the
+/// name's.
+class _IntentionContent extends StatelessWidget {
+  const _IntentionContent({required this.subject, required this.held, this.secondary});
+
+  final Subject subject;
+  final bool held;
+  final Widget? secondary;
+
+  @override
+  Widget build(BuildContext context) {
+    final pp = context.pp;
+    final textStart = pp.space.gutter + pp.size.avatar + pp.space.md;
+    return Row(
+      children: [
+        SizedBox(
+          width: textStart - pp.space.sm,
+          child: Align(alignment: AlignmentDirectional.centerEnd, child: HeldDot(held: held)),
+        ),
+        SizedBox(width: pp.space.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(subject.label, maxLines: 2, overflow: TextOverflow.ellipsis, style: context.text.titleSmall),
+              if (secondary != null) ...[SizedBox(height: pp.space.xxs), secondary!],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }

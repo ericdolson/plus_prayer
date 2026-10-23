@@ -105,6 +105,12 @@ abstract class L10n {
   /// **'List {number}'**
   String listTitle(int number);
 
+  /// Community card, scale first (design-direction.md §6).
+  ///
+  /// In en, this message translates to:
+  /// **'{people} people · {prayers} prayers'**
+  String listScale(int people, int prayers);
+
   /// Screen reader label for the unsealed seal before the list is published.
   ///
   /// In en, this message translates to:
@@ -171,35 +177,17 @@ abstract class L10n {
   /// **'Answered · {date}'**
   String statusAnswered(DateTime date);
 
-  /// No description provided for @statusPrayedToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Prayed today'**
-  String get statusPrayedToday;
-
-  /// No description provided for @statusLastPrayed.
-  ///
-  /// In en, this message translates to:
-  /// **'{days, plural, =1{Last prayed yesterday} other{Last prayed {days} days ago}}'**
-  String statusLastPrayed(int days);
-
   /// No description provided for @statusNotCarriedFull.
   ///
   /// In en, this message translates to:
   /// **'Not on the list · all {limit} places in use'**
   String statusNotCarriedFull(int limit);
 
-  /// Screen reader text for the carried mark.
+  /// Screen reader text for the gold ring / dot. Not in the spec; for review.
   ///
   /// In en, this message translates to:
-  /// **'Carried on List {number}'**
-  String carriedMark(int number);
-
-  /// Screen reader text for the unprayed dot.
-  ///
-  /// In en, this message translates to:
-  /// **'Not yet prayed for today'**
-  String get unprayedToday;
+  /// **'Held today'**
+  String get heldToday;
 
   /// No description provided for @filterAll.
   ///

@@ -1,11 +1,12 @@
 // Footer (screens.md): [ History ]  ( 🙏 )  [ ＋ Add ].
 // In prayer it becomes the prayer bar, in place:
 //   [ timer ]  ( Amen )  [ with N · ✕ ]
-// Styled after the POC: a raised bar with rounded top corners and a soft notch
-// that holds the blue pray button (HomePrayButton, docked by the Scaffold).
+// Styled after the POC: a frosted bar with rounded top corners and a soft
+// notch that holds the blue pray button (HomePrayButton, docked by the Scaffold).
 // The button carries the decaying 5 s ring, then becomes Amen; before that
 // only ✕ exits (nothing logged).
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -13,6 +14,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app/router.dart';
+import '../../components/frosted.dart';
 import '../../components/notched_footer_shape.dart';
 import '../../components/ring_button.dart';
 import '../../domain/rules/presence.dart';
@@ -57,40 +59,71 @@ class HomeFooter extends HookConsumerWidget {
     } else {
       start = _FooterIcon(
         key: const ValueKey('history'),
-        icon: Icons.history_rounded,
+        icon: PPIcons.history,
         label: l10n.history,
         onPressed: () => context.push(Routes.history),
       );
       end = _FooterIcon(
         key: const ValueKey('add'),
-        icon: Icons.add_rounded,
+        icon: PPIcons.add,
         label: l10n.add,
         onPressed: () => showAddSheet(context),
       );
     }
 
-    return BottomAppBar(
-      shape: NotchedFooterShape(cornerRadius: pp.size.radiusFooter),
-      notchMargin: pp.size.notchMargin,
-      child: Row(
-        children: [
-          Expanded(
-            child: Align(
-              alignment: AlignmentDirectional.center,
-              child: AnimatedSwitcher(duration: duration, child: start),
+    final shape = NotchedFooterShape(cornerRadius: pp.size.radiusFooter);
+    // Frosted, shaped like the bar: the list shows through beneath it.
+    return Frosted(
+      color: pp.colors.surface,
+      clipper: _FooterClipper(
+        geometry: Scaffold.geometryOf(context),
+        shape: shape,
+        notchMargin: pp.size.notchMargin,
+      ),
+      child: BottomAppBar(
+        color: Colors.transparent,
+        shape: shape,
+        notchMargin: pp.size.notchMargin,
+        child: Row(
+          children: [
+            Expanded(
+              child: Align(
+                alignment: AlignmentDirectional.center,
+                child: AnimatedSwitcher(duration: duration, child: start),
+              ),
             ),
-          ),
-          SizedBox(width: pp.size.fab + pp.size.notchMargin * 2),
-          Expanded(
-            child: Align(
-              alignment: AlignmentDirectional.center,
-              child: AnimatedSwitcher(duration: duration, child: end),
+            SizedBox(width: pp.size.fab + pp.size.notchMargin * 2),
+            Expanded(
+              child: Align(
+                alignment: AlignmentDirectional.center,
+                child: AnimatedSwitcher(duration: duration, child: end),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
+
+/// The footer's outline, notch included (as BottomAppBar clips itself).
+class _FooterClipper extends CustomClipper<Path> {
+  _FooterClipper({required this.geometry, required this.shape, required this.notchMargin}) : super(reclip: geometry);
+
+  final ValueListenable<ScaffoldGeometry> geometry;
+  final NotchedShape shape;
+  final double notchMargin;
+
+  @override
+  Path getClip(Size size) {
+    final g = geometry.value;
+    final button = g.floatingActionButtonArea?.translate(0, -(g.bottomNavigationBarTop ?? 0));
+    return shape.getOuterPath(Offset.zero & size, button?.inflate(notchMargin));
+  }
+
+  @override
+  bool shouldReclip(_FooterClipper old) =>
+      old.geometry != geometry || old.shape != shape || old.notchMargin != notchMargin;
 }
 
 /// The blue pray button docked in the footer's notch; Amen in prayer.
@@ -161,7 +194,7 @@ class _PrayerTimer extends HookWidget {
       child: Semantics(
         label: L10n.of(context).timeInPrayer(text),
         excludeSemantics: true,
-        child: Text(text, style: context.text.labelSmall?.copyWith(color: context.pp.colors.primaryGlow)),
+        child: Text(text, style: context.text.labelSmall),
       ),
     );
   }
@@ -191,7 +224,7 @@ class _WithOthersAndClose extends ConsumerWidget {
           ),
         IconButton(
           tooltip: l10n.discardPrayer,
-          icon: Icon(Icons.close_rounded, color: pp.colors.inkMuted),
+          icon: Icon(PPIcons.close, color: pp.colors.inkMuted),
           onPressed: () => ref.read(prayerSessionProvider.notifier).cancel(),
         ),
       ],

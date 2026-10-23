@@ -20,6 +20,7 @@ import '../../hooks/use_optimistic.dart';
 import '../../l10n/app_localizations.dart';
 import '../../state/appearance.dart';
 import '../../state/providers.dart';
+import '../../theme/pp_icons.dart';
 import '../../theme/pp_theme.dart';
 import 'reminder_time_sheet.dart';
 
@@ -68,7 +69,7 @@ class YouSheet extends ConsumerWidget {
                 child: IconButton(
                   tooltip: l10n.close,
                   color: pp.colors.inkMuted,
-                  icon: const Icon(Icons.close_rounded),
+                  icon: const Icon(PPIcons.close),
                   onPressed: () => Navigator.pop(context),
                 ),
               ),

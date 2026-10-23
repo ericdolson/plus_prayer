@@ -55,7 +55,7 @@ class RingButton extends HookWidget {
     final done = !running || progress >= 1;
     final enabled = done && onPressed != null;
     final fill = done ? c.primary : Color.alphaBlend(c.primary.withValues(alpha: .3), c.surface);
-    final foreground = done ? c.onPrimary : c.primaryGlow;
+    final foreground = done ? c.onPrimary : c.primary;
 
     return Semantics(
       button: true,
@@ -121,15 +121,25 @@ class _RingPainter extends CustomPainter {
     if (remaining <= 0) return;
     final stroke = gap * .45;
     final rect = Rect.fromCircle(center: size.center(Offset.zero), radius: size.shortestSide / 2 + gap / 2);
-    canvas.drawArc(rect, 0, math.pi * 2, false, Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..color = track);
-    canvas.drawArc(rect, -math.pi / 2, math.pi * 2 * remaining, false, Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round
-      ..color = ring);
+    canvas.drawArc(
+        rect,
+        0,
+        math.pi * 2,
+        false,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = stroke
+          ..color = track);
+    canvas.drawArc(
+        rect,
+        -math.pi / 2,
+        math.pi * 2 * remaining,
+        false,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = stroke
+          ..strokeCap = StrokeCap.round
+          ..color = ring);
   }
 
   @override

@@ -1,6 +1,6 @@
 // Home's view state: search + filter (persisting across nav and prayer
-// modes), the visible rows, the pinned list row, the presence line, and the
-// closing banner.
+// modes), the visible rows, and the community card (its carry status,
+// presence, and closing notice).
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -58,8 +58,8 @@ class JustAddedNotCarried extends Notifier<Set<String>> {
   void add(String id) => state = {...state, id};
 }
 
-class ListRowModel {
-  const ListRowModel({required this.list, required this.carried, required this.prayedWithList});
+class CommunityCardModel {
+  const CommunityCardModel({required this.list, required this.carried, required this.prayedWithList});
 
   final CurrentList list;
 
@@ -70,13 +70,13 @@ class ListRowModel {
   final bool prayedWithList;
 }
 
-final listRowProvider = Provider<ListRowModel?>((ref) {
+final communityCardProvider = Provider<CommunityCardModel?>((ref) {
   final list = ref.watch(currentListProvider).value;
   final tree = ref.watch(subjectTreeProvider).value;
   final header = ref.watch(headerProvider).value;
   if (list == null || tree == null) return null;
   final today = ref.watch(todayProvider);
-  return ListRowModel(
+  return CommunityCardModel(
     list: list,
     carried: carriedNames(tree),
     prayedWithList: header != null && prayedWithListToday(header, today),
@@ -92,7 +92,7 @@ final presenceLineProvider = Provider<PresenceLine?>((ref) {
 /// Minutes until the list closes, during the 5-minute window, for anyone who
 /// hasn't prayed with it today; null otherwise.
 final closingSoonMinutesProvider = Provider<int?>((ref) {
-  final row = ref.watch(listRowProvider);
+  final row = ref.watch(communityCardProvider);
   final closesAt = row?.list.closesAt;
   if (row == null || closesAt == null || row.prayedWithList) return null;
   final now = ref.watch(nowProvider).value ?? ref.watch(clockProvider)();

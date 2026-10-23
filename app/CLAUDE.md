@@ -190,30 +190,43 @@ flipped offline to exercise the queue.
   handoff notes.
 
 ### Theming — no raw styles in widgets
+- The visual system is `docs/product/design-direction.md` (overrides
+  app-brief on visuals). Minimal, modern, expensive: space, crisp type, few
+  signals per row, color only when it means something.
 - `theme/tokens.dart` holds the raw palettes (the POC's two themes: dark =
-  charcoal grounds and cool ink, light = pale blue grounds and navy ink; both
-  share primary blue #0580F9 for prayer; wax colors by `sealVariant`, 16
-  avatar tones), spacing scale, radii, durations.
-  It is the ONLY file that contains color literals.
-- `PPColors` / `PPSpacing` / `PPMotion` are `ThemeExtension`s with semantic
-  names (`ink`, `inkMuted`, `surfaceRaised`, `primary`, `carried`, `unprayed`,
-  `halo`, …). Widgets read them via `context.pp.colors`, `context.pp.space`.
-- Text styles come from `Theme.of(context).textTheme` (mapped from tokens);
-  tweak with `copyWith(color: …)` from semantic colors only. No `fontSize:`
-  or `Color(0x…)` in feature/component code.
+  charcoal grounds and cool ink, light = pale blue grounds and navy ink),
+  recolored by meaning: **blue = do this** (pray button, Amen, invitation,
+  primary buttons), **gold = held** (rings, intention dots, halo, "Answered"),
+  everything else neutral, switches included. No red, no pink. Plus wax
+  colors by `sealVariant`, 16 avatar tones, spacing, radii, durations. It is
+  the ONLY file that contains color literals. Contrast is checked there
+  (WCAG AA); `inkFaint` is decorative only.
+- `PPColors` / `PPSpacing` / `PPSizes` / `PPMotion` / `PPBars` hang off one
+  `ThemeExtension` with semantic names (`ink`, `inkMuted`, `cardSurface`,
+  `thread`, `primary`, `heldGold`, `heldGoldText`, `heldGlow`, `halo`, …).
+  Widgets read them via `context.pp.colors`, `context.pp.space`.
+- Type: Roca only for names on Home, list numbers, and big lines; everything
+  else the platform system font (SF Pro on iOS). Text styles come from
+  `Theme.of(context).textTheme`; tweak with `copyWith(color: …)` from
+  semantic colors only. No `fontSize:` or `Color(0x…)` in feature/component
+  code.
+- Icons: `PPIcons` only (Phosphor Light, bundled, plus the custom praying
+  hands). Never `Icons.*`.
 - Light and dark both ship (`AppTheme.light()` / `.dark()`, `PPColors.light`
-  / `.dark`). Dark is the primary design and the default; the mode
-  (System/Light/Dark) is a device-local preference (`themeModeProvider`),
-  read before the first frame. Every widget must read colors from
-  `context.pp.colors`, so both themes work without per-widget checks. Avoid
-  red for status (copy rules §5).
-- Visuals follow the POC (legacy_poc/): when porting a screen, start from the
-  POC widget's layout and behavior, move its inline styles into tokens.
+  / `.dark`). Dark is the default; the mode (System/Light/Dark) is a
+  device-local preference (`themeModeProvider`), read before the first frame.
+  Glows are dark-mode only (`heldGlow` is null in light).
+- Bars are `Frosted` (blur on iOS, semi-opaque elsewhere); the list scrolls
+  beneath header and footer.
+- Layout from the POC where design-direction.md doesn't say otherwise; move
+  its inline styles into tokens.
 - Layout uses `EdgeInsetsDirectional` / `AlignmentDirectional` (RTL later).
 
 ### Motion & accessibility
 - Every animation checks `useReduceMotion()` (`MediaQuery.disableAnimations`)
-  — reduced motion swaps pulses/sweeps for static or stepped states.
+  — reduced motion swaps springs, pulses, and glows for simple fades.
+- One signature moment (Amen → the seal). The prayer check's small spring is
+  the only spring; everything else is quiet and quick.
 - Screen readers read every name: avatar clusters expose all names in their
   `Semantics` label, rows merge semantics into one sentence, prayer-mode rows
   are `checked`/`mixed` toggles.
