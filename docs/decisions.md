@@ -700,3 +700,28 @@ lights gold after praying; checkable in prayer). System font for body (SF Pro
 on iOS), serif for names/list numbers/big lines; 20pt margins, no dividers;
 translucent bars; one thin-line icon set; one signature motion (Amen → seal),
 springs only on checks; pull-down search. Full spec: docs/product/design-direction.md.
+
+### Decision: Dark-mode action blue and a darker dark ground
+**Timestamp:** 2026-10-24 (REVISES the 2026-10-23 "Home visual design and
+color system" tokens)
+In dark mode the action blue goes back to the brand electric blue `#0580F9`
+with a white glyph (the pray button as it was before the review), replacing
+`#5AA9FB` with a near-black glyph. White on `#0580F9` is 3.8:1: enough for the
+glyph and large text, so labels on blue stay large/bold. The dark ground moves
+about halfway to black (`#1D2124` → `#0E1012`), closer to iOS and Gmail dark,
+but not pure black (OLED smear; the frosted bars and gold glow need something
+to read against). Surfaces keep clear steps above it (card `#1A1D21`, raised
+`#23272D`), and sheets/dialogs lift slightly (`#16191D`). Light mode unchanged.
+Spec: docs/product/design-direction.md §1.
+
+### Decision: Community card — day-scoped gold border, two-line status, solid rings
+**Timestamp:** 2026-10-24 (refines 2026-10-23 card decision; replaces gold rims on cluster avatars)
+Praying with the list today (local day) gives the card a thin gold border,
+cleared at local midnight — one clock with the streak and row rings, so a
+prayer for the same list yesterday never looks like today's. Cluster avatars
+stay plain. Avatar row = yours on today's list; a separate status line speaks
+about tomorrow, computed from the gate ("They'll be on List 53" / "Your next
+prayer carries them onto List 54" / "Pray to carry them onto List 53"); only
+differences are named. No extra "held yesterday" icon. Name rings are always
+solid — no dashed partial state (intention dots show detail). Non-breaking
+space in "List N".

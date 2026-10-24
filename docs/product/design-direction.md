@@ -28,20 +28,27 @@ antique character appears in the app.
   state), not blue.
 
 ### Tokens (adjust the existing `PPDarkPalette` / `PPLightPalette`)
+_Revised 2026-10-24: dark `primary`/`onPrimary` back to the electric blue with
+white; dark grounds taken about halfway to black; `sheet` added._
+
 | Token | Dark | Light | Notes |
 |---|---|---|---|
-| `primary` | `#5AA9FB` (logo blue) | `#0573E0` | Same blue family, tuned per theme |
-| `onPrimary` | `#0B1A2B` (near-black) | `#FFFFFF` | White on `#5AA9FB` fails contrast (~2.4:1); dark glyph ~7.5:1 |
+| `primary` | `#0580F9` (brand electric blue) | `#0573E0` | The pray button's blue, as before the review (2026-10-24) |
+| `onPrimary` | `#FFFFFF` | `#FFFFFF` | Dark: 3.8:1 — passes for the glyph and large text (≥3:1), short of 4.5:1 for small text, so keep labels on blue large/bold. Light: 4.6:1 |
+| `ground` | `#0E1012` (was `#1D2124`) | `#E9EEF9` | Dark is near-black like iOS/Gmail dark, not pure black (OLED smear; nothing for frosted bars and the gold glow to read against) |
+| `sheet` (new) | `#16191D` | = `ground` | Bottom sheets and dialogs: a slight lift from the ground in dark (1.08:1; 1.16:1 over the scrim) |
+| `raised` | `#23272D` (was `#2D313A`) | `#F5F7FD` | Fields, pills, the footer bar, settings groups on a sheet |
 | `heldGold` (rename from `carriedGold`) | `#C8AE6E` | `#9A7A30` | Rings + dots (non-text, ≥3:1) |
 | `heldGoldText` (new) | `#C8AE6E` | ~`#765A1C` | Text like "Answered · Oct 6" (≥4.5:1). `#9A7A30` is only ~3.5:1 on `#E9EEF9` |
 | `heldGlow` (new) | `heldGold` @ 30–40% alpha, wide blur | — (none) | Glow is dark-mode only; it washes out in light |
-| `cardSurface` (new) | ~`#23272B` | `#F5F7FD` (`raised`) | Community card. Dark `raised` `#2D313A` is too big a jump from `ground` |
-| `thread` | `hairline` `#343943` | `hairline` `#D3DAE8` | Neutral always |
+| `cardSurface` (new) | `#1A1D21` (was ~`#23272B`) | `#F5F7FD` (`raised`) | Community card: one clear step above the ground (1.13:1) |
+| `thread` | `hairline` `#2A2E35` (was `#343943`) | `hairline` `#D3DAE8` | Neutral always |
 | `unprayedRose` | **delete** | **delete** | The pink dot is gone; remove the token so it isn't reused |
-| `inkFaint` | decorative only | decorative only | ~3.3:1 dark, ~2.4:1 light — never essential text. Secondary text uses `inkMuted` |
+| `inkMuted` | `#9097A1` | `#566D83` (was `#5C748C`) | Secondary text. Dark 6.5:1 on ground; light darkened to pass 4.5:1 (4.6:1) |
+| `inkFaint` | decorative only | decorative only | ~3.7:1 dark, ~2.4:1 light — never essential text. Secondary text uses `inkMuted` |
 
-Contrast figures are hand estimates — **verify every pair** (WCAG AA: 4.5:1
-body text, 3:1 large text and non-text UI).
+Contrast is computed (WCAG AA: 4.5:1 body text, 3:1 large text and non-text
+UI); the figures in `app/lib/theme/tokens.dart` are the checked ones.
 
 ---
 
@@ -92,8 +99,11 @@ body text, 3:1 large text and non-text UI).
   gold ring and **keeps it until local midnight**. Everyone else simply looks
   normal. This is the same signal as checking them in prayer.
   - **Ring spec:** 2 pt ring with a 2 pt gap from the avatar on 40–44 pt
-    avatars; 1.5 pt ring / 1.5 pt gap on small cluster avatars. Dark mode adds
-    `heldGlow`; light mode is ring only.
+    avatars. Dark mode adds `heldGlow`; light mode is ring only.
+  - **Always solid** (2026-10-24): holding a name is whole, however you prayed
+    for them. No dashed/partial ring — the intention dots already show which
+    intentions you held. "Partial" exists only as the checkbox state during
+    prayer mode.
 - **Secondary text only when it means something:** "Answered · Oct 6" (in
   `heldGoldText`), "Not printed on List 53 · {category}. Edit to include it next
   time." Otherwise, no second line.
@@ -121,21 +131,45 @@ pt, generous padding (~16–20 pt). Clearly different from the rows; it is the
 value of the app.
 
 ```
-╭──────────────────────────────────────────────╮
-│  (seal)  List 52                              │  serif, list number
-│          4,345 people · 31,208 prayers        │  sans, inkMuted
-│          ● 258 praying now                    │  only when ≥ threshold
+╭──────────────────────────────────────────────╮  gold border when you've
+│  (seal)  List 52                              │  prayed with the list TODAY
+│          4,345 people · 31,208 prayers        │
+│          ● 258 praying now                    │
 │                                               │
-│  (JE) You, (D) Dad ●●● + 3                    │  avatar cluster
-│  not yet carried on List 53                   │  → "will be on List 53"
+│  (JE) You, (D) Dad ●●● + 3  are on List 52    │  today's list (plain avatars)
+│  Pray to carry them onto List 53              │  tomorrow (text, own line)
 ╰──────────────────────────────────────────────╯
 ```
 - **Scale first** (people · prayers), then **presence** with a small live dot
   (display ladder: live ≥10 → last hour ≥10 → today ≥10 → hidden; never 0),
   then **your carry status** with the avatar cluster.
-- **After you pray with the list, the cluster avatars light up with the gold
-  ring** and the line becomes "will be on List 53" — the moment the card
-  confirms they're held by the world tomorrow.
+- **Held = the card's border, not the avatars** (2026-10-24): when you've prayed
+  with the list **today (your local day)**, the card gets a thin gold border
+  (~1.5 pt, `heldGold` at ~70–80%; soft outer glow in dark mode, border only
+  in light). It lights live when the card is checked in prayer mode and clears
+  at **local midnight** — the same clock as the streak and the row rings, never
+  the flip (a border that survived until the flip would make a user think
+  they'd prayed today and break their streak). **Cluster avatars stay plain**
+  (no rims — too busy at small sizes).
+- **Two groups, two lines:**
+  - **Avatar row = yours on today's list** (the list shown on the card):
+    "You, Dad + 3 are on List 52". New user / not on today's list: no avatar
+    row.
+  - **Status line = tomorrow**, on its own line, computed from the real gate:
+    - qualifying prayer for the next list exists → "They'll be on List 53"
+      (+ small seal stamp at Amen — part of the signature moment);
+    - prayed with the list today but the next list isn't covered yet (some
+      time zones after the flip) → "Your next prayer carries them onto List 54";
+    - not prayed → "Pray to carry them onto List 53".
+    New user: "Pray to be on List 53" → "You'll be on List 53".
+  - **Only differences are named:** "Mom joins you on List 53"; "Aunt Jo isn't
+    carried on List 53" (tap → Your portion).
+  - **No extra "you held this list yesterday" icon or count** (2026-10-24): the
+    status line already says they're covered ("They'll be on List 53"), and a
+    dot or prayer count would compete with today's nudge. Per-list prayer
+    counts live on the Today's list page.
+- **Never break "List" from its number:** use a non-breaking space ("List 53")
+  everywhere.
 - Wax seal: unsealed + "being filmed" before publish; sealed in the day's wax
   after.
 - The 5-minute **closing notice** ("List 52 closes in 5 minutes") lives inside
@@ -187,5 +221,6 @@ value of the app.
 - "Presence line" above the list → inside the card.
 - Header right "search + filter" → filter only; pull-down search.
 - Ember "glow" as the check → gold ring/dot spec (§5); glow only in dark mode.
+- Gold rims on community-card cluster avatars → a gold card border, day-scoped (§6).
 - Streak badge glyph → the new logo as a wax seal.
 - Color rule: blue = action, gold = held, everything else neutral.
