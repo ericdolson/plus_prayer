@@ -40,7 +40,7 @@ list number as a string key (e.g. `"3"`), keeping the newest near the top. Fill 
 - `notes` (optional) — context Claude needs for captions
 
 Don't add `published` or `date` — Claude writes both on publish (`date` is derived
-from the scheduled day). That's it — Eric's prep is done.
+from the scheduled day in US Mountain time, not UTC). That's it — Eric's prep is done.
 
 **3. Commit `lists.json`**
 
@@ -355,7 +355,7 @@ Top-level object with a `template` (only the fields Eric supplies for a new list
 and `lists` keyed by list number as a string. Keep the newest list near the top;
 Claude accesses `lists["N"]` directly. The list number is the key — there is no
 `list_number` field. `date` and `published` are both written by Claude on publish
-(`date` derived from the scheduled day), so a freshly-pasted entry has neither.
+(`date` derived from the scheduled day in US Mountain time), so a freshly-pasted entry has neither.
 
 ```json
 {

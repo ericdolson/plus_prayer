@@ -4,7 +4,7 @@ description: >-
   Publish or schedule a +Prayer daily prayer list across all five social
   platforms (YouTube, Facebook, Instagram, Threads, TikTok) via the Zernio MCP,
   record the result, then auto-run finalize-comments on a timer once the posts
-  go live. Use when the user says "publish list N", "post list N", "schedule
+  go live and add the list to the Framer website and publish it. Use when the user says "publish list N", "post list N", "schedule
   list N", "publish list N at 9am", "publish list N in 5 minutes", or "publish
   list N now".
 ---
@@ -74,7 +74,9 @@ timer wakes Claude a few minutes later to run `finalize-comments` for list N.
 5. Verify each create response: `scheduledFor` equals the target and `status` is
    `scheduled` (or `published` for immediate).
 6. Write `lists["N"].published`: `scheduled_for` (or `published_at`), `date`
-   (scheduled/publish day YYYY-MM-DD), and `platforms` with each Zernio `_id` as
+   (the scheduled/publish day **in US Mountain time**, `America/Denver`, YYYY-MM-DD —
+   NOT the UTC day: an evening publish is already tomorrow in UTC, and `date` drives
+   the website's sort and wax colour), and `platforms` with each Zernio `_id` as
    `post_id` + status. Commit `lists.json`.
 7. Arm the auto-finalize timer, then STOP:
    - Launch `sleep 300` with Bash `run_in_background: true`. It is a bare timer —
@@ -97,6 +99,11 @@ The background timer's exit re-invokes you. On each wake, for list N:
    `failed`. **TikTok reading `published` is provisional** — it is only confirmed once
    a numeric `platformPostId` shows up in analytics (see "A TikTok `success` is not
    proof of publication"). Treat an unconfirmed TikTok as in-flight, not done.
+   **Record each live post's link** for the website: for every platform that reads
+   `published` and has no `platform_post_url` yet, call `posts_get_post` (via
+   `call_tool`; plain `posts_get` returns a summary without the link) and write its
+   `platformPostUrl` into `lists["N"].published.platforms[<platform>].platform_post_url`.
+   Skip TikTok while it is unconfirmed — its link is written when it is confirmed.
 2. **Resolve every `failed` before moving on** (see "Handling a failed platform"
    below) — pull the error, write it into `lists.json`, and carry it into the report.
 3. Invoke the `finalize-comments` skill with N. It finalizes every platform that is
@@ -107,6 +114,11 @@ The background timer's exit re-invokes you. On each wake, for list N:
    re-invokes you; report the interim status, then finish the retry when it wakes.
    Otherwise arm the next timer from the schedule and repeat. Report what landed on
    all five — never report "all five scheduled" as if it were "all five live."
+5. **Once the cycle stops** (including after wake 4), invoke the `update-website`
+   skill with N. It writes the list and every link recorded so far to the Framer
+   CMS, merges to main and publishes the site; TikTok's link follows on the next
+   day's harvest. Put its one-line result in the report, above
+   finalize-comments' checklist.
 
 | wake | timer to arm | lands at    |
 |------|--------------|-------------|

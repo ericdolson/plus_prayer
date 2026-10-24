@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-10-18T20:18:58Z",
+  "last_aggregated_at": "2026-10-23T22:41:46Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -204,7 +204,19 @@
     "youtube:01iEc2hSn0g": 2,
     "facebook:1033072079891934_122140095758983291": 2,
     "instagram:17979146262138930": 2,
-    "youtube:cdc4mqTnbyc": 2
+    "youtube:cdc4mqTnbyc": 2,
+    "instagram:18143645446593279": 2,
+    "facebook:1033072079891934_122140197242983291": 4,
+    "youtube:IfpK6eJauZI": 2,
+    "instagram:18178230172436217": 2,
+    "facebook:1033072079891934_122140302344983291": 5,
+    "youtube:YoX7KatpaqU": 2,
+    "facebook:1033072079891934_122140391090983291": 3,
+    "instagram:17910072054558191": 2,
+    "youtube:n-lZ-JV7Znk": 2,
+    "instagram:18602791993069351": 2,
+    "facebook:1033072079891934_122140553462983291": 3,
+    "youtube:AtiPhDopP74": 2
   },
   "pending": {
     "7": [],
@@ -473,6 +485,69 @@
     "56": [],
     "57": [],
     "58": [],
-    "59": []
+    "59": [],
+    "60": [
+      {
+        "platform": "facebook",
+        "handle": "Diana Irving",
+        "id": "28867262856292387",
+        "at": "2026-10-18T22:35:09Z",
+        "comment_url": "https://www.facebook.com/reel/1097108126466325/?comment_id=122140197242983291_1602064848071395"
+      }
+    ],
+    "61": [
+      {
+        "platform": "facebook",
+        "handle": "Rose Drage",
+        "id": "39249554218026592",
+        "at": "2026-10-20T17:08:28Z",
+        "comment_url": "https://www.facebook.com/reel/1467420162155616/?comment_id=122140302344983291_997394579910014"
+      },
+      {
+        "platform": "facebook",
+        "handle": "Diana Irving",
+        "id": "28867262856292387",
+        "at": "2026-10-20T00:41:35Z",
+        "comment_url": "https://www.facebook.com/reel/1467420162155616/?comment_id=122140302344983291_1831237811546878",
+        "message": "Please  pray  for  me and my son Steven",
+        "note": "Manual exception: asked for prayer on the List 60 Facebook post without a 🙏; the brand reply promised her and Steven a place on the next list. Added per Eric 2026-10-20 (while the pool is small, include people who don't perfectly fit the mechanic)."
+      },
+      {
+        "platform": "manual",
+        "handle": "Steven",
+        "id": null,
+        "at": "2026-10-20T00:41:35Z",
+        "comment_url": "https://www.facebook.com/reel/1467420162155616/?comment_id=122140302344983291_1831237811546878",
+        "note": "Diana Irving's son, named in her request on the List 60 Facebook post (surname not given). Added per Eric 2026-10-20."
+      }
+    ],
+    "62": [
+      {
+        "platform": "facebook",
+        "handle": "Diana Irving",
+        "id": "28867262856292387",
+        "at": "2026-10-22T06:45:43Z",
+        "comment_url": "https://www.facebook.com/reel/3302715283257256/?comment_id=122140391090983291_1137478458719715",
+        "message": "",
+        "note": "Manual exception: empty-text comment (likely a sticker/GIF) on the List 61 Facebook post, no readable 🙏. Added per Eric 2026-10-22 (while the pool is small, include people who don't perfectly fit the mechanic)."
+      },
+      {
+        "platform": "manual",
+        "handle": "Steven",
+        "id": null,
+        "at": "2026-10-22T06:45:43Z",
+        "comment_url": "https://www.facebook.com/reel/3302715283257256/?comment_id=122140391090983291_1137478458719715",
+        "note": "Diana Irving's son, named in her original request on the List 60 Facebook post (surname not given). Carried alongside her onto List 62 per Eric 2026-10-22."
+      }
+    ],
+    "63": [
+      {
+        "platform": "facebook",
+        "handle": "James Haston",
+        "id": "28757032587285618",
+        "at": "2026-10-22T20:32:26Z",
+        "comment_url": "https://www.facebook.com/reel/2795841454144386/?comment_id=122140553462983291_1106694482100981"
+      }
+    ]
   }
 }

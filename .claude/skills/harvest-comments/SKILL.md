@@ -136,6 +136,14 @@ list **N** in `publishing/participants.json`.
    - Write and commit.
 7. Report the count of new participants (often 0 so far) and who they are, plus how
    many posts were deep-fetched vs skipped (so the speedup is visible).
+8. **Confirm yesterday's TikTok and put its link on the website.** For every list
+   whose `published.platforms.tiktok.status` is `unconfirmed`, resolve it with
+   `analytics_get_analytics` exactly as `publish-list` describes ("A TikTok `success`
+   is not proof of publication"): on a match write `status: "published"`,
+   `platform_post_id`, and `platform_post_url` into `lists.json`; still absent after
+   more than a day → `failed`, and say so in the report. Then invoke the
+   `update-website` skill for each list that just got confirmed, so its TikTok link
+   reaches the live site (the skill merges and publishes).
 
 ## Notes
 - Current `brand_accounts`: youtube [`UCwVcRTUGUg_C3eQbA93wk3g`,
