@@ -34,19 +34,21 @@ class PlusPrayerApp extends HookConsumerWidget {
 
     // A draft this device left open (the app was killed mid-prayer), once the
     // list and subjects are known.
-    final ready = ref.watch(subjectTreeProvider).hasValue && ref.watch(currentListProvider).hasValue;
+    final ready = ref.watch(subjectTreeProvider.select((v) => v.hasValue)) &&
+        ref.watch(currentListProvider.select((v) => v.hasValue));
     useEffect(() {
       if (ready) ref.read(prayerSessionProvider.notifier).restoreDraft();
       return null;
     }, [ready]);
 
-    final light = useMemoized(AppTheme.light);
-    final dark = useMemoized(AppTheme.dark);
+    // Built in build, not memoized: hooks survive a hot reload, so a memoized
+    // theme would keep stale tokens until a restart. Cheap, and ThemeData
+    // compares by value, so a rebuild with the same tokens changes nothing.
     return MaterialApp.router(
       onGenerateTitle: (context) => L10n.of(context).appTitle,
       debugShowCheckedModeBanner: false,
-      theme: light,
-      darkTheme: dark,
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
       themeMode: ref.watch(themeModeProvider),
       themeAnimationDuration: const Duration(milliseconds: 200),
       // Screens without an AppBar (Home) still get status bar icons that read
