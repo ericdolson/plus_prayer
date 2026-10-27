@@ -43,6 +43,11 @@ class _MockControls extends HookWidget {
             ),
             ListTile(title: const Text('Clear closesAt'), onTap: () => backend.setClosesAt(null)),
             ListTile(
+              title: const Text('Flip to the next list'),
+              subtitle: const Text('Prayed with this one → you\'re on the next'),
+              onTap: backend.flipList,
+            ),
+            ListTile(
               title: const Text('Live: busy'),
               onTap: () => backend.setStats(const LiveStats(prayingNow: 213, prayedLastHour: 640, prayedToday: 4113)),
             ),

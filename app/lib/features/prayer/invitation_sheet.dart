@@ -74,6 +74,7 @@ class InvitationSheet extends HookConsumerWidget {
               people: [for (final s in model.carried) clusterPerson(s, l10n)],
               trailing: l10n.carryWillBe(list.nextListNumber),
               style: context.text.bodyMedium?.copyWith(color: pp.colors.heldGoldText),
+              surface: pp.colors.sheet,
             ),
             SizedBox(height: pp.space.xxl),
             RingButton(

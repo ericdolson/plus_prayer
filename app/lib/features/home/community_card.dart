@@ -1,15 +1,16 @@
-// The community card (design-direction.md §6; formerly the pinned list row):
-// a flat tonal surface at the top of Home. Scale first, then presence, then
-// your carry status with the avatar cluster:
+// The community card (design-direction.md §6): a flat tonal surface at the
+// top of Home. Scale first, then presence, then two lines about you:
 //
 //   (seal)  List 52
 //           4,345 people · 31,208 prayers
 //           ● 258 praying now                 (by the ladder; never 0)
-//   (JE) You, (D) Dad ●●● + 3 not yet carried on List 53
+//   (JE) You, (D) Dad ●●● + 3 are on List 52  today's list (hidden if you aren't on it)
+//   Pray to carry them onto List 53            tomorrow, from the gate
 //
-// After praying with the list, the cluster lights up gold and the line becomes
-// "will be on List 53". Tap → Today's list; in prayer the whole card is the
-// checkable "hold the list" target.
+// Held = the card's thin gold border: once you've prayed with the list today
+// (your local day), live as soon as it's checked in prayer, cleared at local
+// midnight — never by the flip. Tap → Today's list; in prayer the whole card
+// is the checkable "hold the list" target.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +25,10 @@ import '../../components/marks.dart';
 import '../../components/wax_seal.dart';
 import '../../domain/models/subject.dart';
 import '../../domain/rules/avatar.dart';
+import '../../domain/rules/card_carry.dart';
 import '../../domain/rules/presence.dart';
 import '../../domain/rules/selection.dart';
+import '../../hooks/use_reduce_motion.dart';
 import '../../l10n/app_localizations.dart';
 import '../../state/home_state.dart';
 import '../../state/prayer_session.dart';
@@ -40,11 +43,12 @@ ClusterPerson clusterPerson(Subject s, L10n l10n) => ClusterPerson(
       tone: avatarToneOf(s),
     );
 
-class CommunityCard extends ConsumerWidget {
+class CommunityCard extends HookConsumerWidget {
   const CommunityCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final reduceMotion = useReduceMotion();
     final model = ref.watch(communityCardProvider);
     if (model == null) return const SizedBox.shrink();
     final pp = context.pp;
@@ -56,9 +60,26 @@ class CommunityCard extends ConsumerWidget {
     final presence = ref.watch(presenceLineProvider);
     final closingMinutes = ref.watch(closingSoonMinutesProvider);
     final list = model.list;
+    final carry = model.carry;
+    final held = model.prayedWithList || (inPrayer && listHeld);
 
-    final carry = model.prayedWithList ? l10n.carryWillBe(list.nextListNumber) : l10n.carryNotYet(list.nextListNumber);
-    final people = [for (final s in model.carried) clusterPerson(s, l10n)];
+    final people = [for (final s in carry.onToday) clusterPerson(s, l10n)];
+    final onTodayText = people.length == 1 && !carry.onToday.single.isSelf
+        ? l10n.cardOnListIs(list.listNumber)
+        : l10n.cardOnListAre(list.listNumber);
+    final next = list.nextListNumber;
+    final you = carry.aboutYouOnly;
+    final statusText = switch (carry.status) {
+      TomorrowStatus.covered => you ? l10n.cardCoveredYou(next) : l10n.cardCovered(next),
+      TomorrowStatus.nextPrayerCarries => you ? l10n.cardNextPrayerYou(next) : l10n.cardNextPrayer(next),
+      TomorrowStatus.prayToCarry => you ? l10n.cardPrayToBe(next) : l10n.cardPrayToCarry(next),
+    };
+    String? named(List<Subject> names, String Function(String, int, int) line) =>
+        names.isEmpty ? null : line(names.first.label, names.length - 1, next);
+    // Joining is only true once tomorrow is earned.
+    final joinsText = carry.status == TomorrowStatus.covered ? named(carry.joining, l10n.cardJoins) : null;
+    final notCarriedText = named(carry.notCarried, l10n.cardNotCarried);
+
     final sealLabel = list.isSealed ? l10n.listSealed(list.listNumber) : l10n.listBeingFilmed(list.listNumber);
     final scale = l10n.listScale(list.soulCount, list.prayerCount);
     final presenceText = switch (presence?.window) {
@@ -81,6 +102,8 @@ class CommunityCard extends ConsumerWidget {
 
     final mock = ref.watch(mockBackendProvider);
     final radius = BorderRadius.circular(pp.size.radiusCard);
+    final glow = reduceMotion ? null : c.heldGlow;
+    final quiet = context.text.bodySmall;
     return Padding(
       padding: EdgeInsetsDirectional.symmetric(horizontal: pp.space.gutter),
       child: Semantics(
@@ -90,13 +113,34 @@ class CommunityCard extends ConsumerWidget {
           sealLabel,
           scale,
           if (presenceText != null) presenceText,
-          '${people.map((p) => p.name).join(', ')} $carry',
+          if (people.isNotEmpty) '${people.map((p) => p.name).join(', ')} $onTodayText',
+          statusText,
+          if (joinsText != null) joinsText,
+          if (notCarriedText != null) notCarriedText,
           if (closingText != null) closingText,
         ].join('. '),
         excludeSemantics: true,
-        child: Material(
-          color: c.cardSurface,
-          borderRadius: radius,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(end: held ? 1 : 0),
+          duration: reduceMotion ? pp.motion.quick : pp.motion.settle,
+          curve: Curves.easeOut,
+          builder: (context, t, child) => DecoratedBox(
+            // Dark mode only: a soft outer glow under the border.
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              boxShadow: glow == null || t == 0
+                  ? null
+                  : [BoxShadow(color: glow.withValues(alpha: glow.a * t), blurRadius: pp.space.lg)],
+            ),
+            child: Material(
+              color: c.cardSurface,
+              shape: RoundedRectangleBorder(
+                borderRadius: radius,
+                side: BorderSide(color: c.heldGold.withValues(alpha: .75 * t), width: pp.size.cardBorder),
+              ),
+              child: child,
+            ),
+          ),
           child: InkWell(
             borderRadius: radius,
             onTap: onTap,
@@ -110,11 +154,7 @@ class CommunityCard extends ConsumerWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      HeldRing(
-                        held: listHeld,
-                        diameter: pp.size.seal,
-                        child: WaxSeal(variant: list.sealVariant, size: pp.size.seal),
-                      ),
+                      WaxSeal(variant: list.sealVariant, size: pp.size.seal),
                       SizedBox(width: pp.space.md),
                       Expanded(
                         child: Column(
@@ -122,7 +162,7 @@ class CommunityCard extends ConsumerWidget {
                           children: [
                             Text(l10n.listTitle(list.listNumber), style: context.text.titleMedium),
                             SizedBox(height: pp.space.xxs),
-                            Text(scale, style: context.text.bodySmall),
+                            Text(scale, style: quiet),
                             if (presenceText != null) ...[
                               SizedBox(height: pp.space.xxs),
                               _Presence(text: presenceText, live: presence!.window == PresenceWindow.now),
@@ -134,20 +174,27 @@ class CommunityCard extends ConsumerWidget {
                     ],
                   ),
                   SizedBox(height: pp.space.lg),
-                  AvatarCluster(
-                    people: people,
-                    trailing: carry,
-                    held: model.prayedWithList,
-                    surface: c.cardSurface,
-                    style: context.text.bodySmall?.copyWith(color: model.prayedWithList ? c.ink : c.inkMuted),
-                  ),
+                  if (people.isNotEmpty) ...[
+                    AvatarCluster(people: people, trailing: onTodayText, surface: c.cardSurface, style: quiet),
+                    SizedBox(height: pp.space.xs),
+                  ],
+                  Text(statusText, style: quiet?.copyWith(color: c.ink)),
+                  if (joinsText != null) ...[
+                    SizedBox(height: pp.space.xs),
+                    Text(joinsText, style: quiet),
+                  ],
+                  // Build step 6: tap → Your portion.
+                  if (notCarriedText != null) ...[
+                    SizedBox(height: pp.space.xs),
+                    Text(notCarriedText, style: quiet),
+                  ],
                   if (closingText != null) ...[
                     SizedBox(height: pp.space.md),
                     Row(
                       children: [
                         Icon(PPIcons.clock, size: pp.size.rowIcon, color: c.ink),
                         SizedBox(width: pp.space.sm),
-                        Expanded(child: Text(closingText, style: context.text.bodySmall?.copyWith(color: c.ink))),
+                        Expanded(child: Text(closingText, style: quiet?.copyWith(color: c.ink))),
                       ],
                     ),
                   ],

@@ -71,10 +71,11 @@ abstract final class AppTheme {
         titleTextStyle: text.titleLarge,
         systemOverlayStyle: overlayStyle(c),
       ),
-      // Sheets and dialogs sit on the ground (POC); fields on the raised surface.
+      // Sheets and dialogs lift slightly off the ground (dark); fields on the
+      // raised surface.
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: c.background,
-        modalBackgroundColor: c.background,
+        backgroundColor: c.sheet,
+        modalBackgroundColor: c.sheet,
         modalBarrierColor: c.scrim,
         dragHandleColor: c.inkFaint,
         showDragHandle: true,
@@ -83,7 +84,7 @@ abstract final class AppTheme {
         ),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: c.background,
+        backgroundColor: c.sheet,
         barrierColor: c.scrim,
         titleTextStyle: text.titleLarge,
         contentTextStyle: text.bodyLarge,

@@ -11,24 +11,24 @@ import '../hooks/use_reduce_motion.dart';
 import '../theme/pp_icons.dart';
 import '../theme/pp_theme.dart';
 
-/// A gold ring around a round [child] of [diameter] (an avatar or the seal):
-/// 2 pt ring, 2 pt gap (1.5 / 1.5 when [small]). Drawn outside the child's
-/// bounds, so it never shifts layout. Fades in and out.
+/// A gold ring around an avatar of [diameter]: 2 pt ring, 2 pt gap, always
+/// solid — holding a name is whole, however you prayed for them (partial is
+/// only the prayer-mode check). Drawn outside the child's bounds, so it never
+/// shifts layout. Fades in and out.
 class HeldRing extends HookWidget {
-  const HeldRing({super.key, required this.held, required this.diameter, required this.child, this.small = false});
+  const HeldRing({super.key, required this.held, required this.diameter, required this.child});
 
   final bool held;
   final double diameter;
   final Widget child;
-  final bool small;
 
   @override
   Widget build(BuildContext context) {
     final pp = context.pp;
     final c = pp.colors;
     final reduceMotion = useReduceMotion();
-    final ring = small ? pp.size.heldRingSmall : pp.size.heldRing;
-    final gap = small ? pp.size.heldRingGapSmall : pp.size.heldRingGap;
+    final ring = pp.size.heldRing;
+    final gap = pp.size.heldRingGap;
     final outset = ring + gap;
     final glow = reduceMotion ? null : c.heldGlow;
 

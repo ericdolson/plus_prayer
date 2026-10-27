@@ -16,11 +16,15 @@ class MockSeed {
     required this.list,
     required this.stats,
     this.reminders = const [],
+    this.myStatus,
   });
 
   final List<Subject> subjects;
   final UserHeader header;
   final List<Reminder> reminders;
+
+  /// getMyListStatus for [list].
+  final MyListStatus? myStatus;
   final CurrentList? list;
   final LiveStats stats;
 
@@ -134,6 +138,27 @@ class MockSeed {
       Reminder(id: 'r-evening', slot: ReminderSlot.evening, enabled: false, localTime: ClockTime(20, 0)),
     ];
 
-    return MockSeed(subjects: subjects, header: header, list: list, stats: stats, reminders: reminders);
+    // Prayed with List 51 yesterday, so these were printed on List 52. Ukraine
+    // was added since ("joins you on List 53").
+    ListEntry printed(String id) {
+      final s = subjects.firstWhere((s) => s.id == id);
+      return ListEntry(subjectId: id, publicName: s.publicName, isName: s.isName, isSelf: s.isSelf);
+    }
+
+    final myStatus = MyListStatus(
+      listId: list.id,
+      entries: [
+        for (final id in ['self', 'dad', 'mom', 'daniel', 'parish']) printed(id)
+      ],
+    );
+
+    return MockSeed(
+      subjects: subjects,
+      header: header,
+      list: list,
+      stats: stats,
+      reminders: reminders,
+      myStatus: myStatus,
+    );
   }
 }

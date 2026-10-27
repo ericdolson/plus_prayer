@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../domain/rules/avatar_cluster.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/pp_theme.dart';
-import 'marks.dart';
 import 'monogram_avatar.dart';
 
 class ClusterPerson {
@@ -26,7 +25,6 @@ class AvatarCluster extends StatelessWidget {
     required this.trailing,
     this.style,
     this.maxLines = 2,
-    this.held = false,
     this.surface,
   });
 
@@ -36,10 +34,6 @@ class AvatarCluster extends StatelessWidget {
   final String trailing;
   final TextStyle? style;
   final int maxLines;
-
-  /// After praying with the list: every avatar wears the gold ring
-  /// (design-direction.md §6).
-  final bool held;
 
   /// What the cluster sits on, for the overlap rings (default: the ground).
   final Color? surface;
@@ -59,12 +53,7 @@ class AvatarCluster extends StatelessWidget {
       spans
         ..add(WidgetSpan(
           alignment: PlaceholderAlignment.middle,
-          child: HeldRing(
-            held: held,
-            small: true,
-            diameter: avatar,
-            child: MonogramAvatar(initials: p.initials, tone: p.tone, size: avatar),
-          ),
+          child: MonogramAvatar(initials: p.initials, tone: p.tone, size: avatar),
         ))
         ..add(TextSpan(text: ' ${p.name}'));
     }
@@ -83,17 +72,12 @@ class AvatarCluster extends StatelessWidget {
                 for (var i = 0; i < layout.overlapped.length; i++)
                   PositionedDirectional(
                     start: step * i,
-                    child: HeldRing(
-                      held: held,
-                      small: true,
-                      diameter: avatar,
-                      child: MonogramAvatar(
-                        initials: layout.overlapped[i].initials,
-                        tone: layout.overlapped[i].tone,
-                        size: avatar,
-                        ring: true,
-                        ringColor: surface,
-                      ),
+                    child: MonogramAvatar(
+                      initials: layout.overlapped[i].initials,
+                      tone: layout.overlapped[i].tone,
+                      size: avatar,
+                      ring: true,
+                      ringColor: surface,
                     ),
                   ),
               ],

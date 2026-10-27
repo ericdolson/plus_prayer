@@ -9,8 +9,9 @@
 //   gold  = held (rings, intention dots, the prayer halo, "Answered")
 //   everything else neutral. No red, no pink.
 // Contrast checked (WCAG): ink and inkMuted ≥ 4.5:1 on ground and card;
-// heldGold ≥ 3:1 (non-text); heldGoldText ≥ 4.5:1; onPrimary ≥ 4.5:1 on
-// primary. inkFaint is decorative only (~3:1 and below).
+// heldGold ≥ 3:1 (non-text); heldGoldText ≥ 4.5:1; onPrimary on primary
+// 4.6:1 light, 3.8:1 dark (glyphs and large text). inkFaint is decorative
+// only (~3:1 and below).
 
 import 'package:flutter/painting.dart';
 
@@ -23,26 +24,31 @@ abstract final class PPPalette {
   static const shadow = Color(0xFF000000);
 }
 
-/// The POC's `darkTheme4`.
+/// The POC's `darkTheme4`, taken about halfway to black (2026-10-24): a
+/// near-black ground like iOS and Gmail dark, with surfaces kept in clear
+/// steps above it (the old ground is now roughly the card).
 abstract final class PPDarkPalette {
-  static const deepest = Color(0xFF111315); // POC surfaceBright
-  static const groundLow = Color(0xFF16191B); // POC surfaceTint
-  static const ground = Color(0xFF1D2124); // POC scaffold, sheets, dialogs
-  static const card = Color(0xFF23272B); // the community card, settings groups
-  static const raised = Color(0xFF2D313A); // POC surface: fields, pills
-  static const raisedHigh = Color(0xFF383D47);
-  static const hairline = Color(0xFF343943); // also the intention thread
+  static const deepest = Color(0xFF07080A);
+  static const groundLow = Color(0xFF0A0B0D); // pressed rows, splashes
+  static const ground = Color(0xFF0E1012); // scaffold
+  static const sheet = Color(0xFF16191D); // sheets and dialogs, a slight lift (iOS-style)
+  static const card = Color(0xFF1A1D21); // the community card, settings groups (1.13:1 step)
+  static const raised = Color(0xFF23272D); // fields, pills, the footer bar
+  static const raisedHigh = Color(0xFF2E333A);
+  static const hairline = Color(0xFF2A2E35); // also the intention thread
 
   // Ink — the POC's onSurface, stepped down toward the ground.
-  static const ink = Color(0xFFD7E0EE); // 12.2:1 on ground
-  static const inkMuted = Color(0xFF9097A1); // 5.5:1 on ground, 5.1:1 on card
+  static const ink = Color(0xFFD7E0EE); // 14.3:1 on ground
+  static const inkMuted = Color(0xFF9097A1); // 6.5:1 on ground, 5.7:1 on card, 5.1:1 on raised
   static const inkFaint = Color(0xFF676D75); // decorative only
 
-  // The logo blue, with a near-black glyph (white on it is only ~2.5:1).
-  static const primary = Color(0xFF5AA9FB);
-  static const onPrimary = Color(0xFF0B1A2B); // 7.1:1
+  // The POC's (and brand's) electric blue with white, as the pray button had
+  // it. White on it is 3.8:1: fine for the glyph (≥3:1), short of 4.5:1 for
+  // small text.
+  static const primary = Color(0xFF0580F9);
+  static const onPrimary = Color(0xFFFFFFFF);
 
-  static const heldGold = Color(0xFFC8AE6E); // 7.5:1 on ground
+  static const heldGold = Color(0xFFC8AE6E); // 8.8:1 on ground
   static const heldGoldText = heldGold;
   static const heldGlow = Color(0x59C8AE6E); // heldGold at 35%
   static const onHeld = ground;
@@ -59,6 +65,7 @@ abstract final class PPLightPalette {
   static const deepest = Color(0xFFD7DFEE);
   static const groundLow = Color(0xFFE1E7F3); // POC surfaceTint
   static const ground = Color(0xFFE9EEF9); // POC scaffold, sheets
+  static const sheet = ground;
   static const raised = Color(0xFFF5F7FD); // POC surface: fields, the card
   static const card = raised;
   static const raisedHigh = Color(0xFFFFFFFF);
@@ -171,12 +178,12 @@ abstract final class PPSizeTokens {
   static const double avatarTiny = 20;
   static const double seal = 44;
 
-  /// Held ring: width and gap from the avatar (§5); the thinner pair is for
-  /// small cluster avatars.
+  /// Held ring: width and gap from the avatar (§5).
   static const double heldRing = 2;
   static const double heldRingGap = 2;
-  static const double heldRingSmall = 1.5;
-  static const double heldRingGapSmall = 1.5;
+
+  /// The community card's gold border once you've prayed with the list today.
+  static const double cardBorder = 1.5;
 
   /// The gold dot where the thread meets a held intention.
   static const double heldDot = 5;

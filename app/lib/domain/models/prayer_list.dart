@@ -62,3 +62,35 @@ class CurrentList {
         sealVariant: sealVariant,
       );
 }
+
+/// getMyListStatus for one list: which of yours are printed on it, and
+/// whether you've prayed with it (the gate for the next list).
+class MyListStatus {
+  const MyListStatus({required this.listId, this.entries = const [], this.prayersWithList = 0});
+
+  final String listId;
+
+  /// Your entries on the list (not EXCLUDED), names and intentions.
+  final List<ListEntry> entries;
+
+  /// Your prayers with `communityList` = this list. Any → you (and your
+  /// carried names) are on the next list.
+  final int prayersWithList;
+
+  MyListStatus copyWith({List<ListEntry>? entries, int? prayersWithList}) => MyListStatus(
+        listId: listId,
+        entries: entries ?? this.entries,
+        prayersWithList: prayersWithList ?? this.prayersWithList,
+      );
+}
+
+/// One of your entries on a printed list. [subjectId] is null when the
+/// subject was deleted after printing (the entry keeps its printed name).
+class ListEntry {
+  const ListEntry({required this.publicName, required this.isName, this.subjectId, this.isSelf = false});
+
+  final String? subjectId;
+  final String publicName;
+  final bool isName;
+  final bool isSelf;
+}

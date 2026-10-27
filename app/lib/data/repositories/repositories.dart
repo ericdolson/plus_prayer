@@ -45,9 +45,14 @@ class AddedSubject {
   final int sortOrder;
 }
 
-/// getCurrentListMeta + RTDB `/lists/current` (live count, closesAt).
+/// getCurrentListMeta + RTDB `/lists/current` (live count, closesAt), and
+/// getMyListStatus.
 abstract interface class ListRepository {
   Stream<CurrentList?> watchCurrentList();
+
+  /// getMyListStatus for the current list (re-queried when it flips or after
+  /// a list prayer). Null until the current list is known.
+  Stream<MyListStatus?> watchMyStatus();
 }
 
 /// getMyHeader, getMyReminders, and the settings mutations behind You.

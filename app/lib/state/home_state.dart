@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../domain/models/prayer_list.dart';
 import '../domain/models/subject.dart';
+import '../domain/rules/card_carry.dart';
 import '../domain/rules/carry.dart';
 import '../domain/rules/home_filter.dart';
 import '../domain/rules/presence.dart';
@@ -59,15 +60,24 @@ class JustAddedNotCarried extends Notifier<Set<String>> {
 }
 
 class CommunityCardModel {
-  const CommunityCardModel({required this.list, required this.carried, required this.prayedWithList});
+  const CommunityCardModel({
+    required this.list,
+    required this.carried,
+    required this.prayedWithList,
+    required this.carry,
+  });
 
   final CurrentList list;
 
   /// You first, then effectively carried names, in the user's order.
   final List<Subject> carried;
 
-  /// Prayed with the list today → "… will be on List 53".
+  /// Prayed with the list today (local day): the card's gold border, until
+  /// local midnight — never cleared by the flip.
   final bool prayedWithList;
+
+  /// Today's names and tomorrow's status (domain/rules/card_carry.dart).
+  final CardCarry carry;
 }
 
 final communityCardProvider = Provider<CommunityCardModel?>((ref) {
@@ -80,6 +90,14 @@ final communityCardProvider = Provider<CommunityCardModel?>((ref) {
     list: list,
     carried: carriedNames(tree),
     prayedWithList: header != null && prayedWithListToday(header, today),
+    carry: cardCarry(
+      tree: tree,
+      list: list,
+      status: ref.watch(myListStatusProvider).value,
+      localPrayers: ref.watch(localPrayersProvider).value ?? const [],
+      header: header,
+      today: today,
+    ),
   );
 });
 

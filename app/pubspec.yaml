@@ -208,7 +208,7 @@ flutter_native_splash:
   # size of the app. Only one parameter can be used, color and background_image cannot both be set.
   color: "#E9EEF9"
 #  color: "#ffffff"
-  color_dark: "#1D2124"
+  color_dark: "#0E1012"
 #  background_image: assets/splash_image.png
 
   # Optional parameters are listed below.  To enable a parameter, uncomment the line by removing

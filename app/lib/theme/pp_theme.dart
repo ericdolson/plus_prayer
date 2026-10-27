@@ -14,6 +14,7 @@ class PPColors {
     required this.surface,
     required this.surfaceRaised,
     required this.cardSurface,
+    required this.sheet,
     required this.hairline,
     required this.thread,
     required this.ink,
@@ -50,6 +51,9 @@ class PPColors {
   /// The community card and settings groups: a flat tonal step up from the
   /// ground (no shadow, no border).
   final Color cardSurface;
+
+  /// Bottom sheets and dialogs: a slight lift from the ground in dark mode.
+  final Color sheet;
 
   final Color hairline;
 
@@ -109,6 +113,7 @@ class PPColors {
     surface: PPDarkPalette.raised,
     surfaceRaised: PPDarkPalette.raisedHigh,
     cardSurface: PPDarkPalette.card,
+    sheet: PPDarkPalette.sheet,
     hairline: PPDarkPalette.hairline,
     thread: PPDarkPalette.hairline,
     ink: PPDarkPalette.ink,
@@ -135,6 +140,7 @@ class PPColors {
     surface: PPLightPalette.raised,
     surfaceRaised: PPLightPalette.raisedHigh,
     cardSurface: PPLightPalette.card,
+    sheet: PPLightPalette.sheet,
     hairline: PPLightPalette.hairline,
     thread: PPLightPalette.hairline,
     ink: PPLightPalette.ink,
@@ -169,6 +175,7 @@ class PPColors {
         surface: Color.lerp(surface, other.surface, t)!,
         surfaceRaised: Color.lerp(surfaceRaised, other.surfaceRaised, t)!,
         cardSurface: Color.lerp(cardSurface, other.cardSurface, t)!,
+        sheet: Color.lerp(sheet, other.sheet, t)!,
         hairline: Color.lerp(hairline, other.hairline, t)!,
         thread: Color.lerp(thread, other.thread, t)!,
         ink: Color.lerp(ink, other.ink, t)!,
@@ -221,8 +228,7 @@ class PPSizes {
   double get seal => PPSizeTokens.seal;
   double get heldRing => PPSizeTokens.heldRing;
   double get heldRingGap => PPSizeTokens.heldRingGap;
-  double get heldRingSmall => PPSizeTokens.heldRingSmall;
-  double get heldRingGapSmall => PPSizeTokens.heldRingGapSmall;
+  double get cardBorder => PPSizeTokens.cardBorder;
   double get heldDot => PPSizeTokens.heldDot;
   double get thread => PPSizeTokens.thread;
   double get check => PPSizeTokens.check;

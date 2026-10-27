@@ -35,6 +35,7 @@ class MockBackend {
     _header = _seed.header;
     _reminders = [..._seed.reminders];
     _list = _seed.list;
+    _myStatus = _seed.myStatus ?? (_seed.list == null ? null : MyListStatus(listId: _seed.list!.id));
     _stats = _seed.stats;
   }
 
@@ -53,6 +54,7 @@ class MockBackend {
   late UserHeader _header;
   late List<Reminder> _reminders;
   late CurrentList? _list;
+  late MyListStatus? _myStatus;
   late LiveStats _stats;
   final Set<String> _loggedPrayerIds = {};
   final Map<String, String?> _notes = {};
@@ -63,6 +65,7 @@ class MockBackend {
   final _headerCtl = StreamController<UserHeader?>.broadcast();
   final _remindersCtl = StreamController<List<Reminder>>.broadcast();
   final _listCtl = StreamController<CurrentList?>.broadcast();
+  final _myStatusCtl = StreamController<MyListStatus?>.broadcast();
   final _statsCtl = StreamController<LiveStats>.broadcast();
   Timer? _drift;
 
@@ -77,6 +80,7 @@ class MockBackend {
   Stream<UserHeader?> watchHeader() => _withCurrent(_header, _headerCtl.stream);
   Stream<List<Reminder>> watchReminders() => _withCurrent(_reminders, _remindersCtl.stream);
   Stream<CurrentList?> watchList() => _withCurrent(_list, _listCtl.stream);
+  Stream<MyListStatus?> watchMyStatus() => _withCurrent(_myStatus, _myStatusCtl.stream);
 
   Stream<LiveStats> watchStats() {
     _startDrift();
@@ -183,6 +187,11 @@ class MockBackend {
       if (countsHere) {
         _list = list.copyWith(prayerCount: list.prayerCount + 1);
         _listCtl.add(_list);
+        final status = _myStatus;
+        if (status != null && status.listId == list.id) {
+          _myStatus = status.copyWith(prayersWithList: status.prayersWithList + 1);
+          _myStatusCtl.add(_myStatus);
+        }
       }
     }
   }
@@ -219,6 +228,38 @@ class MockBackend {
     _listCtl.add(_list);
   }
 
+  /// The morning routine, compressed: the current list closes and is
+  /// assembled, and the next one becomes current (unsealed until its video).
+  /// If you prayed with the closing list, you and your carried names are on
+  /// the new one.
+  void flipList() {
+    final list = _list;
+    if (list == null) return;
+    final covered = (_myStatus?.prayersWithList ?? 0) > 0;
+    final next = CurrentList(
+      id: 'list-${list.listNumber + 1}',
+      listNumber: list.listNumber + 1,
+      listDate: list.listDate.addDays(1),
+      isPublished: false,
+      soulCount: list.soulCount + 37,
+      intentionCount: list.intentionCount + 9,
+      prayerCount: 0,
+      currentFrom: _now(),
+    );
+    final tree = SubjectTree.of(_subjects);
+    _list = next;
+    _myStatus = MyListStatus(
+      listId: next.id,
+      entries: [
+        if (covered)
+          for (final s in carriedNames(tree))
+            ListEntry(subjectId: s.id, publicName: s.publicName, isName: true, isSelf: s.isSelf),
+      ],
+    );
+    _listCtl.add(_list);
+    _myStatusCtl.add(_myStatus);
+  }
+
   void setStats(LiveStats stats) {
     _stats = stats;
     _statsCtl.add(stats);
@@ -249,6 +290,7 @@ class MockBackend {
     _headerCtl.close();
     _remindersCtl.close();
     _listCtl.close();
+    _myStatusCtl.close();
     _statsCtl.close();
   }
 }
@@ -295,6 +337,9 @@ class MockListRepository implements ListRepository {
 
   @override
   Stream<CurrentList?> watchCurrentList() => backend.watchList();
+
+  @override
+  Stream<MyListStatus?> watchMyStatus() => backend.watchMyStatus();
 }
 
 class MockUserRepository implements UserRepository {

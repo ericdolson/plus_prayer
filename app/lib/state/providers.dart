@@ -107,6 +107,11 @@ final remindersProvider = StreamProvider<List<Reminder>>((ref) => ref
     .watchReminders()
     .map((all) => [...all]..sort((a, b) => a.slot.index - b.slot.index)));
 
+/// getMyListStatus for the current list.
+final myListStatusProvider = StreamProvider<MyListStatus?>(
+  (ref) => ref.watch(listRepositoryProvider).watchMyStatus(),
+);
+
 final currentListProvider = StreamProvider<CurrentList?>(
   (ref) => ref.watch(listRepositoryProvider).watchCurrentList(),
 );

@@ -102,7 +102,7 @@ abstract class L10n {
   /// No description provided for @listTitle.
   ///
   /// In en, this message translates to:
-  /// **'List {number}'**
+  /// **'List {number}'**
   String listTitle(int number);
 
   /// Community card, scale first (design-direction.md §6).
@@ -114,26 +114,80 @@ abstract class L10n {
   /// Screen reader label for the unsealed seal before the list is published.
   ///
   /// In en, this message translates to:
-  /// **'List {number}, being filmed'**
+  /// **'List {number}, being filmed'**
   String listBeingFilmed(int number);
 
   /// No description provided for @listSealed.
   ///
   /// In en, this message translates to:
-  /// **'List {number}, sealed'**
+  /// **'List {number}, sealed'**
   String listSealed(int number);
-
-  /// After the avatar cluster: 'You, Dad ●●● + 4 others are not yet carried on List 53'. Follows the cluster ('You' or 'You, Dad + 4 others').
-  ///
-  /// In en, this message translates to:
-  /// **'are not yet carried on List {number}'**
-  String carryNotYet(int number);
 
   /// No description provided for @carryWillBe.
   ///
   /// In en, this message translates to:
-  /// **'will be on List {number}'**
+  /// **'will be on List {number}'**
   String carryWillBe(int number);
+
+  /// After the avatar row of yours on today's list: 'You, Dad + 3 are on List 52'.
+  ///
+  /// In en, this message translates to:
+  /// **'are on List {number}'**
+  String cardOnListAre(int number);
+
+  /// Avatar row with one name that isn't you.
+  ///
+  /// In en, this message translates to:
+  /// **'is on List {number}'**
+  String cardOnListIs(int number);
+
+  /// No description provided for @cardCovered.
+  ///
+  /// In en, this message translates to:
+  /// **'They\'ll be on List {number}'**
+  String cardCovered(int number);
+
+  /// No description provided for @cardCoveredYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll be on List {number}'**
+  String cardCoveredYou(int number);
+
+  /// No description provided for @cardNextPrayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next prayer carries them onto List {number}'**
+  String cardNextPrayer(int number);
+
+  /// Not in the spec (the 'you' form of cardNextPrayer); for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next prayer carries you onto List {number}'**
+  String cardNextPrayerYou(int number);
+
+  /// No description provided for @cardPrayToCarry.
+  ///
+  /// In en, this message translates to:
+  /// **'Pray to carry them onto List {number}'**
+  String cardPrayToCarry(int number);
+
+  /// No description provided for @cardPrayToBe.
+  ///
+  /// In en, this message translates to:
+  /// **'Pray to be on List {number}'**
+  String cardPrayToBe(int number);
+
+  /// Names carried tomorrow that aren't on today's list. The plural forms beyond one name aren't in the spec; for review.
+  ///
+  /// In en, this message translates to:
+  /// **'{others, plural, =0{{name} joins you on List {number}} =1{{name} and 1 other join you on List {number}} other{{name} and {others} others join you on List {number}}}'**
+  String cardJoins(String name, int others, int number);
+
+  /// Names on today's list that won't be carried tomorrow (tap → Your portion). Plural forms are for review.
+  ///
+  /// In en, this message translates to:
+  /// **'{others, plural, =0{{name} isn\'t carried on List {number}} =1{{name} and 1 other aren\'t carried on List {number}} other{{name} and {others} others aren\'t carried on List {number}}}'**
+  String cardNotCarried(String name, int others, int number);
 
   /// No description provided for @clusterYou.
   ///
@@ -150,7 +204,7 @@ abstract class L10n {
   /// No description provided for @closesSoon.
   ///
   /// In en, this message translates to:
-  /// **'List {number} closes in {minutes, plural, =1{1 minute} other{{minutes} minutes}}'**
+  /// **'List {number} closes in {minutes, plural, =1{1 minute} other{{minutes} minutes}}'**
   String closesSoon(int number, int minutes);
 
   /// No description provided for @presenceNow.
@@ -300,19 +354,19 @@ abstract class L10n {
   /// No description provided for @invitationHold.
   ///
   /// In en, this message translates to:
-  /// **'Hold the {count} on List {number} in your prayer'**
+  /// **'Hold the {count} on List {number} in your prayer'**
   String invitationHold(int count, int number);
 
   /// No description provided for @invitationHolding.
   ///
   /// In en, this message translates to:
-  /// **'Holding the {count} on List {number}'**
+  /// **'Holding the {count} on List {number}'**
   String invitationHolding(int count, int number);
 
   /// No description provided for @closingCarried.
   ///
   /// In en, this message translates to:
-  /// **'You\'ll be carried on List {number}.'**
+  /// **'You\'ll be carried on List {number}.'**
   String closingCarried(int number);
 
   /// No description provided for @addNote.

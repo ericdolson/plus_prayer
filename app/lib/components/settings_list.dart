@@ -1,5 +1,5 @@
 // Grouped settings rows (You), from the POC's CardGroup: flat tonal cards on
-// the ground with hairlines inset to the text. Quieter than the POC: no leading
+// the sheet with hairlines inset to the text. Quieter than the POC: no leading
 // icons, sentence-case section titles, more air between groups.
 
 import 'package:flutter/material.dart';
@@ -31,7 +31,8 @@ class SettingsSection extends StatelessWidget {
               ),
             ),
           Material(
-            color: pp.colors.cardSurface,
+            // They sit on a sheet: one step up from it.
+            color: pp.colors.surface,
             borderRadius: BorderRadius.circular(pp.size.radiusLg),
             clipBehavior: Clip.antiAlias,
             child: Column(
