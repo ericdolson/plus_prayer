@@ -759,3 +759,14 @@ cluster: grouped overlapping avatars first; >5 people uses 4 avatars + a gray
 "+N" disc and count-free text; the count appears exactly once. Seal art deferred
 to its own task. `PrayerSubjectLink.checkedAt` added as a data seam; no per-item
 prayer time in the UI.
+
+### Decision: Answers to the app agent's Home polish workarounds
+**Timestamp:** 2026-10-27
+Intention rows use a ~40 pt pitch (tap target) instead of 2–4 pt gaps —
+small type carries the tightness. History is an icon with accessibility labels.
+Prayer bar "with 229" (screen readers: "praying with 229 others"). Light-mode
+"+N" disc uses `hairline` fill. One shared cluster component everywhere incl. the
+invitation (larger avatars allowed there). While typing, the docked search row
+carries a compact pray/Amen button so Pray is always reachable. Cluster avatars
+at 24 pt show a single initial (≥11 pt) or color only. App sends `checkedAt` per
+checked item once the regenerated SDK includes it.
