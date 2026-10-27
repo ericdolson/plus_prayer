@@ -65,7 +65,9 @@ prayer experience) — not on avatars.
    buttons. Other blues (indigo, ocean, sky) are fine.
 3. **No true red**: use raspberry / berry / vermilion; pure red reads as an alert.
 
-**Craft:** white initials at ≥3:1 contrast (large text) — roughly Material
+**Craft:** white initials **at 80% opacity**, so the letters lightly take on
+the tone (2026-10-27), at ≥3:1 contrast (large text) on every tone in both
+themes — roughly Material
 600–800 shades, never neon 300s or dull grays. Same palette in light and dark;
 in dark mode lower brightness very slightly to avoid glare on the near-black
 ground. 12–16 colors, well separated in hue so neighbors rarely match
@@ -73,13 +75,31 @@ ground. 12–16 colors, well separated in hue so neighbors rarely match
 the index→color mapping must stay stable** (changing it recolors everyone's
 people); changing it now is free.
 
-**Starting set** (tune + verify contrast; up to 3 more allowed under the rules):
-`#D81B60` raspberry · `#AD1457` berry · `#8E24AA` purple · `#5E35B1` violet ·
-`#3949AB` indigo · `#0277BD` ocean · `#00838F` cyan · `#00897B` teal ·
-`#2E7D32` green · `#558B2F` olive · `#E64A19` vermilion · `#6D4C41` cocoa ·
-`#546E7A` slate
+**Final palette** (2026-10-27; frozen at launch). The starting set, tuned —
+berry `#AD1457` → `#9C1450` and teal `#00897B` → `#00876A` to separate them
+from raspberry and cyan; olive `#558B2F` → `#5F9133` (lighter to separate it
+from green, then darkened just enough to hold 3:1 under 80% initials) — plus
+fuchsia, sienna and forest. Ordered so tones 1 and 3 apart (where similar ids
+land in the FNV-1a hash) differ strongly (ΔE ≥ 67):
 
-The gold held-ring's 2 pt gap keeps it legible on every tone.
+| # | Tone | Hex | # | Tone | Hex |
+|---|---|---|---|---|---|
+| 0 | indigo | `#3949AB` | 8 | raspberry | `#D81B60` |
+| 1 | cocoa | `#6D4C41` | 9 | ocean | `#0277BD` |
+| 2 | purple | `#8E24AA` | 10 | sienna | `#A0522D` |
+| 3 | forest | `#1E6B3A` | 11 | teal | `#00876A` |
+| 4 | vermilion | `#E64A19` | 12 | berry | `#9C1450` |
+| 5 | slate | `#546E7A` | 13 | olive | `#5F9133` |
+| 6 | fuchsia | `#AD1F8C` | 14 | violet | `#5E35B1` |
+| 7 | cyan | `#00838F` | 15 | green | `#2E7D32` |
+
+Dark mode blends each tone 6% toward black. Closest pairs: forest/green and
+olive/green (ΔE 15); lowest initials contrast: olive and vermilion (3.0:1 in
+light). Source of truth: `app/lib/theme/tokens.dart` (`PPAvatarTones`).
+
+The gold held-ring's 2 pt gap keeps it legible on every tone: the ring sits
+on the ground (8.8:1 dark, 3.5:1 light), and every tone is ≥ ΔE 28 from the
+gold.
 
 ## 2. Typography
 - **Serif (Roca)** only for: names on Home, list numbers ("List 52"), and big
@@ -87,8 +107,9 @@ The gold held-ring's 2 pt gap keeps it legible on every tone.
 - **Body sans = the platform system font**: SF Pro on iOS (via the system
   font), Roboto on Android. Roboto on iOS is the biggest thing making it feel
   like an Android port.
-- **Intentions are sans**, one to two steps smaller than names, in `inkMuted`
-  — readable, clearly secondary. Names are the landmarks.
+- **Intentions are sans**, clearly smaller than names (2026-10-27: one more step
+  down than the first build), in `inkMuted` — readable, clearly secondary.
+  Names are the landmarks.
 - Respect Dynamic Type / font scaling; layouts must not clip at large sizes.
 
 ---
@@ -97,26 +118,43 @@ The gold held-ring's 2 pt gap keeps it legible on every tone.
 - **20 pt side margins.** No divider lines between rows.
 - **Name rows: one line** (secondary text only for exceptional states, §5).
   ~64 pt tall with a ~44 pt avatar. Intention rows: ~44 pt.
-- Generous gap between the community card and the list (~24 pt) and between
-  name groups (~12–16 pt). Let the screen breathe.
+- **Tight within a group, generous between groups** (2026-10-27, Gestalt
+  proximity): ~4–8 pt from a name to its first intention, ~2–4 pt between
+  intentions, **~24–28 pt between name groups**; ~24 pt between the community
+  card and the list. Each person reads as one unit.
+- **Bottom padding** so the last row scrolls fully clear of the floating bar.
 - **No chevrons anywhere on Home.** The whole row is tappable. The trailing
   slot stays empty in nav mode; the checkbox fades in there in prayer mode.
 
 ---
 
-## 4. Header, footer, search
-- **Header (left):** your avatar (→ You/settings) with the **streak badge**
-  beside it. The badge is the **new logo as a small wax seal** — never a "+"
-  glyph. States: prayed with the list today → seal in today's wax + number;
-  alive but not yet today → muted seal + number; zero → muted seal, no number.
-- **Header (right):** **filter only.** **Search is hidden until you pull the
-  list down** (iOS Mail/Notes pattern); it persists across nav and prayer modes
-  once shown.
-- **Footer:** `[ History ]  ( 🙏 )  [ ＋ ]`, unchanged in function.
-- **Translucent bars:** header and footer are blurred so the list scrolls
-  visibly beneath them (iOS frosted material). On Android or low-end devices,
-  fall back to a semi-opaque fill. The pray button keeps full contrast over
-  any content.
+## 4. Header, bottom bar, search (revised 2026-10-27)
+- **Header (left):** your avatar at **~32 pt** (smaller than list avatars, so it
+  doesn't compete) with the **streak badge** beside it. Badge = the logo as a
+  small wax seal, never a "+" (seal art is a separate upcoming task). States:
+  prayed with the list today → seal in today's wax + number; alive but not yet
+  today → muted seal + number; zero → muted seal, no number.
+- **Header (right):** filter only.
+- **Bottom bar — floating pill + separate pray button** (iOS 26 pattern):
+  ```
+  Normal:     ( History  🔎  ＋ )   ( 🙏 )
+  In prayer:  ( 3:12 · with 229   ✕ )   ( Amen )
+  ```
+  - The pill is fully rounded, translucent/blurred (semi-opaque fallback on
+    Android/low-end), ~56–60 pt tall, floating with a small gap from the
+    screen edges.
+  - The **pray button** is a separate circle of the **same height**, action
+    blue, on the **right** (thumb side). No notch/cradle. It becomes Amen with
+    the countdown ring in place.
+  - In prayer mode the pill becomes the prayer bar in place: elapsed time ·
+    "with N" · ✕.
+- **Search:** 🔎 in the pill opens a search field **docked just above the
+  keyboard** (Slack-style); the list filters live behind it. If a prayer starts
+  with search active, the field stays, docked above the prayer bar (search
+  persists across modes). **Replaces pull-down search.**
+- **Pull-down encouragement: DEFERRED.** Later, pulling down may reveal one
+  quiet rotating line (faith-neutral by default, brand voice; ~30 lines written
+  by Eric). Not in MVP.
 - "+" means **Add** and nothing else.
 
 ---
@@ -175,17 +213,30 @@ value of the app.
   (display ladder: live ≥10 → last hour ≥10 → today ≥10 → hidden; never 0),
   then **your carry status** with the avatar cluster.
 - **Held = the card's border, not the avatars** (2026-10-24): when you've prayed
-  with the list **today (your local day)**, the card gets a thin gold border
-  (~1.5 pt, `heldGold` at ~70–80%; crisp, no glow, both themes).
+  with the list **today (your local day)**, the card gets the **same held ring
+  as a name** (2026-10-27): 2 pt crisp `heldGold` with a 2 pt gap, outside the
+  card's rounded corners, with the same fade and check bloom — tapping the
+  card in prayer feels exactly like tapping a name.
   It lights live when the card is checked in prayer mode and clears
   at **local midnight** — the same clock as the streak and the row rings, never
   the flip (a border that survived until the flip would make a user think
   they'd prayed today and break their streak). **Cluster avatars stay plain**
   (no rims — too busy at small sizes).
 - **Two groups, two lines:**
-  - **Avatar row = yours on today's list** (the list shown on the card):
-    "You, Dad + 3 are on List 52". New user / not on today's list: no avatar
-    row.
+  - **Avatar row = yours on today's list** (the list shown on the card). New
+    user / not on today's list: no avatar row. Layout (2026-10-27):
+    - **Grouped, overlapping avatars first**, then text that begins with names.
+      You first, then the user's order. A thin ring in `cardSurface` separates
+      overlaps; initials only if they fit cleanly (~24 pt avatars), else color.
+    - **≤5 people:** show all avatars; text names the first one or two and
+      counts the rest — "You and Dad are on List 52", "You, Dad + 3 are on
+      List 52".
+    - **>5 people:** 4 avatars + a **neutral gray overflow disc "+N"** (N = the
+      rest beyond the 4; `raisedHigh` fill, `inkMuted` text). Text names the
+      first one or two **without a number** — "You, Dad and others are on
+      List 52".
+    - **The count appears exactly once** — in the disc when there is one,
+      otherwise in the text. Screen readers read every name.
   - **Status line = tomorrow**, on its own line, computed from the real gate:
     - qualifying prayer for the next list exists → "They'll be on List 53"
       (+ small seal stamp at Amen — part of the signature moment);
@@ -252,7 +303,9 @@ value of the app.
   empty trailing slot.
 - "Pinned list row" → the community card (§6).
 - "Presence line" above the list → inside the card.
-- Header right "search + filter" → filter only; pull-down search.
+- Header right "search + filter" → filter only; search from the pill (docked
+  above the keyboard), not pull-down (revised 2026-10-27).
+- Footer slab with notched pray button → floating pill + separate pray button.
 - Ember "glow" as the check → crisp gold ring/dot (§5); glow only in the
   prayer halo and the transient check bloom.
 - Gold rims on community-card cluster avatars → a gold card border, day-scoped (§6).

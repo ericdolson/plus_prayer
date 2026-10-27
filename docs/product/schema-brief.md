@@ -282,3 +282,10 @@ server functions (addSubject, updateSubject, setCarriedItems), `Prayer.countedAt
 - **Word blocklist: off** via config for the beta (keep the code); Stage 2.
 - Users never see a pending state; `reasonCategory` surfaces only on EXCLUDED
   entries after assembly.
+
+## 12. checkedAt seam (2026-10-27)
+Add `checkedAt: Timestamp` to `PrayerSubjectLink` — when each item was checked
+during the prayer (client-supplied, offline-safe). No UI uses it; it preserves
+options (order held, exact time for single-focus prayers). **No per-item prayer
+time is shown anywhere** (a prayer holds many items; splitting time would be
+invented math, and "longer is not better").

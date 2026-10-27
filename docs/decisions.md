@@ -733,6 +733,9 @@ premium feel and at-a-glance recognition; the sacred palette lives on the wax
 seals and the future prayer experience. Excluded: gold/amber/yellow (collides
 with held), blues near the action blue, true red. 12–16 tones, ≥3:1 white
 initials, mapping frozen after launch. Spec: design-direction.md §1b.
+_Same day:_ 16 tones final (three tuned, plus fuchsia, sienna, forest), ordered
+so hash neighbors differ; initials white at 80% so letters lightly take the
+tone, with olive darkened to `#5F9133` to keep 3:1.
 
 ### Decision: No static glow on held rings, dots, or the card border
 **Timestamp:** 2026-10-27 (revises the 2026-10-23 "glow in dark mode" detail)
@@ -740,3 +743,19 @@ With the bright avatar palette, the static gold glow muddied edges and read as
 cheap. Held rings, intention dots, and the community card border are crisp gold
 in both themes. Glow is kept only for the prayer-mode screen halo and a brief
 (~300–400 ms) bloom when something is checked, which settles into the crisp ring.
+_Same day:_ the community card's held mark is the name ring itself (2 pt gold,
+2 pt gap, same fade and bloom) drawn around the card, replacing the 1.5 pt
+border at 70–80%, so checking the card feels like checking a name.
+
+### Decision: Home polish round — spacing, floating bar, search, avatar grouping, checkedAt
+**Timestamp:** 2026-10-27 (revises 2026-10-23 footer and pull-down search)
+Tight spacing within a name's group and generous between groups; intentions one
+step smaller; header avatar ~32 pt. Bottom bar becomes a floating translucent
+pill (History · Search · Add) with a separate same-height pray button on the
+right; in prayer the pill becomes time · with N · ✕ and the button becomes Amen.
+Search opens from the pill, docked above the keyboard (above the prayer bar while
+praying), replacing pull-down search. Pull-down encouragement deferred. Card
+cluster: grouped overlapping avatars first; >5 people uses 4 avatars + a gray
+"+N" disc and count-free text; the count appears exactly once. Seal art deferred
+to its own task. `PrayerSubjectLink.checkedAt` added as a data seam; no per-item
+prayer time in the UI.
