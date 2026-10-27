@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-10-23T22:41:46Z",
+  "last_aggregated_at": "2026-10-26T18:39:47Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -216,7 +216,16 @@
     "youtube:n-lZ-JV7Znk": 2,
     "instagram:18602791993069351": 2,
     "facebook:1033072079891934_122140553462983291": 3,
-    "youtube:AtiPhDopP74": 2
+    "youtube:AtiPhDopP74": 2,
+    "instagram:18114903881134147": 2,
+    "facebook:1033072079891934_122140736768983291": 3,
+    "youtube:H_TsFJDtG2Q": 2,
+    "instagram:18125538377305076": 2,
+    "facebook:1033072079891934_122140830614983291": 3,
+    "youtube:HiISFpb_SPc": 2,
+    "instagram:17959314735013572": 2,
+    "facebook:1033072079891934_122140907678983291": 3,
+    "youtube:4ZJTMXwQm2U": 2
   },
   "pending": {
     "7": [],
@@ -547,6 +556,63 @@
         "id": "28757032587285618",
         "at": "2026-10-22T20:32:26Z",
         "comment_url": "https://www.facebook.com/reel/2795841454144386/?comment_id=122140553462983291_1106694482100981"
+      }
+    ],
+    "64": [
+      {
+        "platform": "facebook",
+        "handle": "Diana Irving",
+        "id": "28867262856292387",
+        "at": "2026-10-24T01:17:53Z",
+        "comment_url": "https://www.facebook.com/reel/2614691419030514/?comment_id=122140736768983291_1483014977214263",
+        "message": "",
+        "note": "Manual exception: empty-text comment (likely a sticker/GIF) on the List 63 Facebook post, no readable 🙏. Added per Eric 2026-10-24 (same exception as List 62)."
+      },
+      {
+        "platform": "manual",
+        "handle": "Steven",
+        "id": null,
+        "at": "2026-10-24T01:17:53Z",
+        "comment_url": "https://www.facebook.com/reel/2614691419030514/?comment_id=122140736768983291_1483014977214263",
+        "note": "Diana Irving's son (surname not given). Carried alongside her onto List 64 per Eric 2026-10-24, as on List 62."
+      }
+    ],
+    "65": [
+      {
+        "platform": "facebook",
+        "handle": "Diana Irving",
+        "id": "28867262856292387",
+        "at": "2026-10-25T00:05:13Z",
+        "comment_url": "https://www.facebook.com/reel/1268490505443090/?comment_id=122140830614983291_2910186166013991",
+        "message": "",
+        "note": "Manual exception: empty-text comment (likely a sticker/GIF) on the List 64 Facebook post, no readable 🙏. Added per Eric 2026-10-25 (same exception as Lists 62 and 64)."
+      },
+      {
+        "platform": "manual",
+        "handle": "Steven",
+        "id": null,
+        "at": "2026-10-25T00:05:13Z",
+        "comment_url": "https://www.facebook.com/reel/1268490505443090/?comment_id=122140830614983291_2910186166013991",
+        "note": "Diana Irving's son (surname not given). Carried alongside her onto List 65 per Eric 2026-10-25, as on Lists 62 and 64."
+      }
+    ],
+    "66": [
+      {
+        "platform": "facebook",
+        "handle": "Diana Irving",
+        "id": "28867262856292387",
+        "at": "2026-10-26T01:23:18Z",
+        "comment_url": "https://www.facebook.com/reel/1786978872565325/?comment_id=122140907678983291_28766733676288043",
+        "message": "",
+        "note": "Manual exception: empty-text comment (likely a sticker/GIF) on the List 65 Facebook post, no readable 🙏. Added per Eric 2026-10-26 (same exception as Lists 62, 64 and 65)."
+      },
+      {
+        "platform": "manual",
+        "handle": "Steven",
+        "id": null,
+        "at": "2026-10-26T01:23:18Z",
+        "comment_url": "https://www.facebook.com/reel/1786978872565325/?comment_id=122140907678983291_28766733676288043",
+        "note": "Diana Irving's son (surname not given). Carried alongside her onto List 66 per Eric 2026-10-26, as on Lists 62, 64 and 65."
       }
     ]
   }
