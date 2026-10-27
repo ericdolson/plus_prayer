@@ -201,7 +201,7 @@ to free → second invite if still over. Same flow when a subscription lapses
 (≤7-day soft landing).
 
 ## 4. Shared components
-- **Monogram avatar:** initials on a muted/antique tone (`avatarTone` index;
+- **Monogram avatar:** white initials on a bright tone (design-direction.md §1b; `avatarTone` index;
   default from id hash); photo slot reserved for later.
 - **Avatar cluster:** you first, then carried names in user order; first one or
   two named with their avatar beside each name; more overlapped, max 5, then

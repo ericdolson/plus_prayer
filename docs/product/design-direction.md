@@ -52,6 +52,35 @@ UI); the figures in `app/lib/theme/tokens.dart` are the checked ones.
 
 ---
 
+## 1b. Avatar palette — bright, modern (2026-10-27)
+Monogram avatars use **bright, saturated mid-tones with white initials** (the
+Gmail / Spotify feel), not muted/antique tones. Color is how users find their
+people at a glance. The sacred palette lives on the wax seals (and, later, the
+prayer experience) — not on avatars.
+
+**Rules (protect the color system):**
+1. **No gold / amber / yellow** (avoid ~35°–60° hue): gold means *held*; a
+   yellow avatar would blur the held ring.
+2. **No blue close to the action blue `#0580F9`**: avatars must never read as
+   buttons. Other blues (indigo, ocean, sky) are fine.
+3. **No true red**: use raspberry / berry / vermilion; pure red reads as an alert.
+
+**Craft:** white initials at ≥3:1 contrast (large text) — roughly Material
+600–800 shades, never neon 300s or dull grays. Same palette in light and dark;
+in dark mode lower brightness very slightly to avoid glare on the near-black
+ground. 12–16 colors, well separated in hue so neighbors rarely match
+(`avatarTone` 0–15). Default tone from a hash of the subject id. **After launch
+the index→color mapping must stay stable** (changing it recolors everyone's
+people); changing it now is free.
+
+**Starting set** (tune + verify contrast; up to 3 more allowed under the rules):
+`#D81B60` raspberry · `#AD1457` berry · `#8E24AA` purple · `#5E35B1` violet ·
+`#3949AB` indigo · `#0277BD` ocean · `#00838F` cyan · `#00897B` teal ·
+`#2E7D32` green · `#558B2F` olive · `#E64A19` vermilion · `#6D4C41` cocoa ·
+`#546E7A` slate
+
+The gold held-ring's 2 pt gap keeps it legible on every tone.
+
 ## 2. Typography
 - **Serif (Roca)** only for: names on Home, list numbers ("List 52"), and big
   lines (splash, invitation, section titles on detail pages).
@@ -224,3 +253,4 @@ value of the app.
 - Gold rims on community-card cluster avatars → a gold card border, day-scoped (§6).
 - Streak badge glyph → the new logo as a wax seal.
 - Color rule: blue = action, gold = held, everything else neutral.
+- Muted/antique avatar tones → bright avatar palette (§1b).

@@ -725,3 +725,11 @@ prayer carries them onto List 54" / "Pray to carry them onto List 53"); only
 differences are named. No extra "held yesterday" icon. Name rings are always
 solid — no dashed partial state (intention dots show detail). Non-breaking
 space in "List N".
+
+### Decision: Bright avatar palette
+**Timestamp:** 2026-10-27 (SUPERSEDES muted/antique avatar tones)
+Avatars use bright, saturated mid-tones with white initials for a modern,
+premium feel and at-a-glance recognition; the sacred palette lives on the wax
+seals and the future prayer experience. Excluded: gold/amber/yellow (collides
+with held), blues near the action blue, true red. 12–16 tones, ≥3:1 white
+initials, mapping frozen after launch. Spec: design-direction.md §1b.
