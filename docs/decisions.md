@@ -733,3 +733,10 @@ premium feel and at-a-glance recognition; the sacred palette lives on the wax
 seals and the future prayer experience. Excluded: gold/amber/yellow (collides
 with held), blues near the action blue, true red. 12–16 tones, ≥3:1 white
 initials, mapping frozen after launch. Spec: design-direction.md §1b.
+
+### Decision: No static glow on held rings, dots, or the card border
+**Timestamp:** 2026-10-27 (revises the 2026-10-23 "glow in dark mode" detail)
+With the bright avatar palette, the static gold glow muddied edges and read as
+cheap. Held rings, intention dots, and the community card border are crisp gold
+in both themes. Glow is kept only for the prayer-mode screen halo and a brief
+(~300–400 ms) bloom when something is checked, which settles into the crisp ring.

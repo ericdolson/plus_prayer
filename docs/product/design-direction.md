@@ -40,7 +40,7 @@ white; dark grounds taken about halfway to black; `sheet` added._
 | `raised` | `#23272D` (was `#2D313A`) | `#F5F7FD` | Fields, pills, the footer bar, settings groups on a sheet |
 | `heldGold` (rename from `carriedGold`) | `#C8AE6E` | `#9A7A30` | Rings + dots (non-text, ≥3:1) |
 | `heldGoldText` (new) | `#C8AE6E` | ~`#765A1C` | Text like "Answered · Oct 6" (≥4.5:1). `#9A7A30` is only ~3.5:1 on `#E9EEF9` |
-| `heldGlow` (new) | `heldGold` @ 30–40% alpha, wide blur | — (none) | Glow is dark-mode only; it washes out in light |
+| `heldGlow` | `heldGold` @ 30–40% alpha, wide blur | — (none) | **Only** for the prayer-mode screen halo and the brief bloom on check (2026-10-27). Never a static glow on Home |
 | `cardSurface` (new) | `#1A1D21` (was ~`#23272B`) | `#F5F7FD` (`raised`) | Community card: one clear step above the ground (1.13:1) |
 | `thread` | `hairline` `#2A2E35` (was `#343943`) | `hairline` `#D3DAE8` | Neutral always |
 | `unprayedRose` | **delete** | **delete** | The pink dot is gone; remove the token so it isn't reused |
@@ -128,7 +128,9 @@ The gold held-ring's 2 pt gap keeps it legible on every tone.
   gold ring and **keeps it until local midnight**. Everyone else simply looks
   normal. This is the same signal as checking them in prayer.
   - **Ring spec:** 2 pt ring with a 2 pt gap from the avatar on 40–44 pt
-    avatars. Dark mode adds `heldGlow`; light mode is ring only.
+    avatars. **Crisp ring only, both themes — no static glow** (2026-10-27:
+    with the bright avatar palette, the glow muddied the edges and cheapened
+    the look).
   - **Always solid** (2026-10-24): holding a name is whole, however you prayed
     for them. No dashed/partial ring — the intention dots already show which
     intentions you held. "Partial" exists only as the checkbox state during
@@ -145,7 +147,7 @@ The gold held-ring's 2 pt gap keeps it legible on every tone.
   metaphor as the bead history).
 - **Intention text is left-aligned with the name text.** No bullets, no icons.
 - **Held today:** a small **gold dot (~5 pt)** where the thread meets the
-  intention (glow in dark mode, solid in light). The thread itself never
+  intention (crisp, solid, both themes — no glow). The thread itself never
   changes color or weight.
 - Answered intentions: gold "Answered · {date}" text; no special shape.
 - **Tap an intention → its own detail page** (shared detail layout). No
@@ -174,8 +176,8 @@ value of the app.
   then **your carry status** with the avatar cluster.
 - **Held = the card's border, not the avatars** (2026-10-24): when you've prayed
   with the list **today (your local day)**, the card gets a thin gold border
-  (~1.5 pt, `heldGold` at ~70–80%; soft outer glow in dark mode, border only
-  in light). It lights live when the card is checked in prayer mode and clears
+  (~1.5 pt, `heldGold` at ~70–80%; crisp, no glow, both themes).
+  It lights live when the card is checked in prayer mode and clears
   at **local midnight** — the same clock as the streak and the row rings, never
   the flip (a border that survived until the flip would make a user think
   they'd prayed today and break their streak). **Cluster avatars stay plain**
@@ -227,7 +229,9 @@ value of the app.
 - **Checks:** a small spring on the check + the gold ring/dot fading in, plus a
   light haptic. This is the only place a bounce/spring is used.
 - Everything else (navigation, sheets, filters) is quiet and quick.
-- Reduce Motion: replace springs and glows with simple fades.
+- **Check moment:** a brief gold bloom (~300–400 ms) as the ring/dot appears,
+  settling into the crisp ring — motion, not a lasting glow.
+- Reduce Motion: replace springs and the bloom with simple fades.
 
 ---
 
@@ -249,7 +253,8 @@ value of the app.
 - "Pinned list row" → the community card (§6).
 - "Presence line" above the list → inside the card.
 - Header right "search + filter" → filter only; pull-down search.
-- Ember "glow" as the check → gold ring/dot spec (§5); glow only in dark mode.
+- Ember "glow" as the check → crisp gold ring/dot (§5); glow only in the
+  prayer halo and the transient check bloom.
 - Gold rims on community-card cluster avatars → a gold card border, day-scoped (§6).
 - Streak badge glyph → the new logo as a wax seal.
 - Color rule: blue = action, gold = held, everything else neutral.
