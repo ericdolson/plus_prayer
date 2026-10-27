@@ -117,10 +117,14 @@ gold.
 ## 3. Layout & spacing (Home)
 - **20 pt side margins.** No divider lines between rows.
 - **Name rows: one line** (secondary text only for exceptional states, §5).
-  ~64 pt tall with a ~44 pt avatar. Intention rows: ~44 pt.
+  Row = avatar + room for its ring (~52 pt).
+- **Intention rows: ~40 pt pitch** (2026-10-27, revised): the tight look comes
+  from the small 13 pt text, not from squeezing rows. The whole pitch is the
+  tap target (≥40 pt; close to the 44 pt guideline). Accessibility wins over
+  tightness.
 - **Tight within a group, generous between groups** (2026-10-27, Gestalt
-  proximity): ~4–8 pt from a name to its first intention, ~2–4 pt between
-  intentions, **~24–28 pt between name groups**; ~24 pt between the community
+  proximity): ~4–8 pt from a name to its first intention, intentions on the
+  ~40 pt pitch with no extra gap, **~24–28 pt between name groups**; ~24 pt between the community
   card and the list. Each person reads as one unit.
 - **Bottom padding** so the last row scrolls fully clear of the floating bar.
 - **No chevrons anywhere on Home.** The whole row is tappable. The trailing
@@ -152,6 +156,12 @@ gold.
   keyboard** (Slack-style); the list filters live behind it. If a prayer starts
   with search active, the field stays, docked above the prayer bar (search
   persists across modes). **Replaces pull-down search.**
+  - While the keyboard is up, the bar hides, so the docked row carries a
+    **compact pray button** (Amen in prayer mode) at the right end of the
+    search field — Pray is never unreachable.
+  - Icons in the pill have accessibility labels ("History", "Search", "Add").
+  - The prayer bar shows "with 229"; screen readers hear "praying with 229
+    others".
 - **Pull-down encouragement: DEFERRED.** Later, pulling down may reveal one
   quiet rotating line (faith-neutral by default, brand voice; ~30 lines written
   by Eric). Not in MVP.
@@ -227,16 +237,23 @@ value of the app.
     user / not on today's list: no avatar row. Layout (2026-10-27):
     - **Grouped, overlapping avatars first**, then text that begins with names.
       You first, then the user's order. A thin ring in `cardSurface` separates
-      overlaps; initials only if they fit cleanly (~24 pt avatars), else color.
+      overlaps. **At 24 pt, show a single initial** (first letter, ≥11 pt);
+      two-letter initials (~8.6 pt) are too small. If a single letter can't
+      reach 11 pt, color only.
     - **≤5 people:** show all avatars; text names the first one or two and
       counts the rest — "You and Dad are on List 52", "You, Dad + 3 are on
       List 52".
     - **>5 people:** 4 avatars + a **neutral gray overflow disc "+N"** (N = the
-      rest beyond the 4; `raisedHigh` fill, `inkMuted` text). Text names the
+      rest beyond the 4; fill: dark `raisedHigh`, **light `hairline`
+      `#D3DAE8`** (white disappears on the light card); `inkMuted` text; same
+      separator ring as the avatars). Text names the
       first one or two **without a number** — "You, Dad and others are on
       List 52".
     - **The count appears exactly once** — in the disc when there is one,
       otherwise in the text. Screen readers read every name.
+    - **One shared cluster component everywhere** (card, Amen invitation, Today's
+      list, Your portion). Larger contexts (e.g. the invitation) may use
+      28–32 pt avatars with initials.
   - **Status line = tomorrow**, on its own line, computed from the real gate:
     - qualifying prayer for the next list exists → "They'll be on List 53"
       (+ small seal stamp at Amen — part of the signature moment);
