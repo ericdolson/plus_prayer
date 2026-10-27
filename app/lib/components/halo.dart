@@ -15,7 +15,7 @@ import '../theme/pp_theme.dart';
 ///
 /// Reduced motion: no breathing; the halo simply appears.
 class Halo extends HookWidget {
-  const Halo({super.key, required this.active, required this.child, this.glowWidth = 10});
+  const Halo({super.key, required this.active, required this.child, this.glowWidth = 4});
 
   final bool active;
   final Widget child;

@@ -172,7 +172,6 @@ class _NameContent extends StatelessWidget {
       children: [
         HeldRing(
           held: held,
-          diameter: pp.size.avatar,
           child: MonogramAvatar(initials: monogramOf(s), tone: avatarToneOf(s)),
         ),
         SizedBox(width: pp.space.md),

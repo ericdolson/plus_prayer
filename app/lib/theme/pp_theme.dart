@@ -82,7 +82,8 @@ class PPColors {
   /// Gold text ("Answered · Oct 6").
   final Color heldGoldText;
 
-  /// Soft glow around held marks; dark mode only (it washes out in light).
+  /// Gold glow, dark mode only: the prayer halo and the brief bloom on check.
+  /// Never a static glow (design-direction.md, 2026-10-27).
   final Color? heldGlow;
 
   /// A glyph on a gold fill (the prayer check).
@@ -165,8 +166,14 @@ class PPColors {
 
   Color waxSheen(int? sealVariant) => sealVariant == null ? unsealed : PPWax.sheen[sealVariant % PPWax.sheen.length];
 
-  /// Monogram tone by palette index (`avatarTone`).
-  Color avatarTone(int tone) => PPAvatarTones.all[tone % PPAvatarTones.all.length];
+  /// Monogram tone by palette index (`avatarTone`): the same palette in both
+  /// themes, a touch dimmer in dark.
+  Color avatarTone(int tone) {
+    final base = PPAvatarTones.all[tone % PPAvatarTones.all.length];
+    return brightness == Brightness.dark
+        ? Color.lerp(base, PPAvatarTones.dimToward, PPAvatarTones.darkDim)!
+        : base;
+  }
 
   PPColors lerp(PPColors other, double t) => PPColors(
         brightness: t < .5 ? brightness : other.brightness,
@@ -228,7 +235,6 @@ class PPSizes {
   double get seal => PPSizeTokens.seal;
   double get heldRing => PPSizeTokens.heldRing;
   double get heldRingGap => PPSizeTokens.heldRingGap;
-  double get cardBorder => PPSizeTokens.cardBorder;
   double get heldDot => PPSizeTokens.heldDot;
   double get thread => PPSizeTokens.thread;
   double get check => PPSizeTokens.check;
@@ -259,6 +265,7 @@ class PPMotion {
   Duration get settle => PPMotionTokens.settle;
   Duration get calm => PPMotionTokens.calm;
   Duration get spring => PPMotionTokens.spring;
+  Duration get bloom => PPMotionTokens.bloom;
   Duration get haloBreath => PPMotionTokens.haloBreath;
 }
 

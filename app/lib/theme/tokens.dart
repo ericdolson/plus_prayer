@@ -17,8 +17,9 @@ import 'package:flutter/painting.dart';
 
 /// Shared by both palettes.
 abstract final class PPPalette {
-  /// Initials on an avatar tone (the tones are mid-dark in both themes).
-  static const onAvatar = Color(0xFFF3F5F9);
+  /// Initials on an avatar tone: white at 80%, so the letters lightly take
+  /// on the tone (still ≥ 3:1 on every tone).
+  static const onAvatar = Color(0xCCFFFFFF);
 
   /// Drop shadows and wax shading.
   static const shadow = Color(0xFF000000);
@@ -111,27 +112,39 @@ abstract final class PPWax {
 }
 
 /// Monogram avatar tones, indexed by `PrayerSubject.avatarTone` (0–15, the
-/// placeholder bound the backend checks). Muted, antique, legible under
-/// the light ink. Placeholder palette — retune here, the index stays stable.
+/// range the backend checks; default = FNV-1a of the subject id, mod 16).
+/// Bright, saturated mid-tones with white initials (design-direction.md §1b):
+/// no gold/amber/yellow (35°–60°: gold means held), no blue near the action
+/// blue (ΔE ≥ 25 from #0580F9), no true red. Initials (white at 80%) ≥ 3:1
+/// on every tone in both themes; olive and vermilion are the floor (3.0:1).
+///
+/// Ordered so tones 1 and 3 apart differ strongly (ΔE ≥ 67): ids that differ
+/// only in their last character hash 3 apart. FROZEN AT LAUNCH: changing an
+/// index recolors everyone's people.
 abstract final class PPAvatarTones {
   static const List<Color> all = [
-    Color(0xFF4B5D6B), // slate
-    Color(0xFF6B5444), // walnut
-    Color(0xFF4F6650), // moss
-    Color(0xFF6E4B53), // mulberry
-    Color(0xFF5C5A43), // olive
-    Color(0xFF45556F), // dusk blue
-    Color(0xFF735E3E), // ochre
-    Color(0xFF5A4A64), // heather
-    Color(0xFF3F6262), // verdigris
-    Color(0xFF6A4E3E), // umber
-    Color(0xFF55634A), // sage
-    Color(0xFF64535B), // ash rose
-    Color(0xFF4A5A57), // pewter green
-    Color(0xFF6F5A4E), // clay
-    Color(0xFF4D4F66), // indigo smoke
-    Color(0xFF5F5A50), // stone
+    Color(0xFF3949AB), //  0 indigo       232°  white 7.7:1
+    Color(0xFF6D4C41), //  1 cocoa         15°  7.6:1
+    Color(0xFF8E24AA), //  2 purple       287°  7.0:1
+    Color(0xFF1E6B3A), //  3 forest       142°  6.5:1
+    Color(0xFFE64A19), //  4 vermilion     14°  3.9:1
+    Color(0xFF546E7A), //  5 slate        199°  5.4:1
+    Color(0xFFAD1F8C), //  6 fuchsia      314°  6.3:1
+    Color(0xFF00838F), //  7 cyan         185°  4.5:1
+    Color(0xFFD81B60), //  8 raspberry    338°  5.0:1
+    Color(0xFF0277BD), //  9 ocean        202°  4.8:1
+    Color(0xFFA0522D), // 10 sienna        19°  5.6:1
+    Color(0xFF00876A), // 11 teal         167°  4.5:1
+    Color(0xFF9C1450), // 12 berry        334°  8.0:1
+    Color(0xFF5F9133), // 13 olive         92°  3.7:1 (3.0:1 at 80%)
+    Color(0xFF5E35B1), // 14 violet       260°  8.0:1
+    Color(0xFF2E7D32), // 15 green        123°  5.1:1
   ];
+
+  /// Dark mode lowers brightness slightly (less glare on the near-black
+  /// ground): each tone blended this far toward black.
+  static const double darkDim = .06;
+  static const dimToward = Color(0xFF000000);
 }
 
 abstract final class PPSpaceTokens {
@@ -182,9 +195,6 @@ abstract final class PPSizeTokens {
   static const double heldRing = 2;
   static const double heldRingGap = 2;
 
-  /// The community card's gold border once you've prayed with the list today.
-  static const double cardBorder = 1.5;
-
   /// The gold dot where the thread meets a held intention.
   static const double heldDot = 5;
 
@@ -230,6 +240,9 @@ abstract final class PPMotionTokens {
 
   /// The check's spring — the only spring in the app (design-direction.md §8).
   static const spring = Duration(milliseconds: 420);
+
+  /// The gold bloom on check, settling into the crisp ring.
+  static const bloom = Duration(milliseconds: 360);
   static const haloBreath = Duration(milliseconds: 2400);
 }
 

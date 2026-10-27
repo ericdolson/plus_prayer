@@ -1,4 +1,5 @@
-// Monogram avatars (prayer-flow.md): initials on a muted tone. The default
+// Monogram avatars (prayer-flow.md, design-direction.md §1b): white initials
+// on a bright tone. The default
 // tone comes from a hash of the subject ID (not the name, so renaming doesn't
 // change it); the user can pick another palette index (`avatarTone`).
 

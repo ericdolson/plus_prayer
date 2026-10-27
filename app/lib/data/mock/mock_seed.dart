@@ -83,7 +83,9 @@ class MockSeed {
     final subjects = [
       name('self', 'Jordan Ellis', alias: 'Me', self: true, order: 0, lastPrayedDaysAgo: 1),
       intention('self-1', 'self', 'Patience with the new job', order: 1, lastPrayedDaysAgo: 3),
-      name('dad', 'Gary Olson', alias: 'Dad', order: 1, lastPrayedDaysAgo: 0),
+      // Short mock ids collide in the tone hash (real ids are UUIDs); a few
+      // tones are set as if the user picked them, so Home shows a real mix.
+      name('dad', 'Gary Olson', alias: 'Dad', order: 1, lastPrayedDaysAgo: 0, tone: 0),
       intention('dad-1', 'dad', 'Healing after his surgery', order: 1, lastPrayedDaysAgo: 0),
       intention('dad-2', 'dad', 'Rest for his heart', order: 2, carried: false),
       name('mom', 'Margaret Olson', alias: 'Mom', order: 2, lastPrayedDaysAgo: 2),
@@ -96,8 +98,8 @@ class MockSeed {
         answeredAt: now.subtract(const Duration(days: 16)),
       ),
       name('daniel', 'Daniel Kim', order: 3, lastPrayedDaysAgo: 8),
-      name('parish', 'Our parish', order: 4),
-      name('ukraine', 'Ukraine', order: 5, lastPrayedDaysAgo: 0),
+      name('parish', 'Our parish', order: 4, tone: 13),
+      name('ukraine', 'Ukraine', order: 5, lastPrayedDaysAgo: 0, tone: 14),
       name('bea', 'Beatrice Moreno', alias: 'Aunt Bea', order: 6, carried: false, lastPrayedDaysAgo: 1),
     ];
 

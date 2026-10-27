@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/pp_theme.dart';
 
-/// Initials on a muted, antique tone (prayer-flow.md: monograms at MVP; the
+/// White initials on a bright tone (design-direction.md §1b) (prayer-flow.md: monograms at MVP; the
 /// photo slot comes later via `avatarPath`). Decorative to screen readers —
 /// the row or cluster around it reads the name.
 class MonogramAvatar extends StatelessWidget {

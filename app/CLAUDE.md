@@ -215,7 +215,9 @@ flipped offline to exercise the queue.
 - Light and dark both ship (`AppTheme.light()` / `.dark()`, `PPColors.light`
   / `.dark`). Dark is the default; the mode (System/Light/Dark) is a
   device-local preference (`themeModeProvider`), read before the first frame.
-  Glows are dark-mode only (`heldGlow` is null in light).
+  Held marks (rings, intention dots, the card border) are crisp gold in both
+  themes; `heldGlow` (dark only, null in light) is used solely for the prayer
+  halo and the brief bloom on check (`useBloom`).
 - Bars are `Frosted` (blur on iOS, semi-opaque elsewhere); the list scrolls
   beneath header and footer.
 - Layout from the POC where design-direction.md doesn't say otherwise; move
@@ -224,7 +226,7 @@ flipped offline to exercise the queue.
 
 ### Motion & accessibility
 - Every animation checks `useReduceMotion()` (`MediaQuery.disableAnimations`)
-  — reduced motion swaps springs, pulses, and glows for simple fades.
+  — reduced motion swaps springs, pulses, and the check bloom for simple fades.
 - One signature moment (Amen → the seal). The prayer check's small spring is
   the only spring; everything else is quiet and quick.
 - Screen readers read every name: avatar clusters expose all names in their

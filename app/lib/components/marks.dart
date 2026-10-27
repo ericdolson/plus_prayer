@@ -1,26 +1,32 @@
 // Marks of presence (design-direction.md §5, §7). Rows mark presence, never
 // absence: gold means held. A held avatar wears a gold ring, a held intention
 // a gold dot, both until local midnight; in prayer they appear live as rows
-// are checked. Glows are dark-mode only. Decorative: rows say it in words.
+// are checked. Crisp gold in both themes — no static glow; checking one gives
+// a brief bloom (dark mode) that settles into the crisp mark. Decorative: rows
+// say it in words.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../domain/rules/selection.dart';
+import '../hooks/use_bloom.dart';
 import '../hooks/use_reduce_motion.dart';
 import '../theme/pp_icons.dart';
 import '../theme/pp_theme.dart';
 
-/// A gold ring around an avatar of [diameter]: 2 pt ring, 2 pt gap, always
-/// solid — holding a name is whole, however you prayed for them (partial is
-/// only the prayer-mode check). Drawn outside the child's bounds, so it never
-/// shifts layout. Fades in and out.
+/// The held mark around a name's avatar — or, with [borderRadius], around
+/// the community card: 2 pt crisp gold, 2 pt gap, always solid (holding is
+/// whole, however you prayed; partial is only the prayer-mode check). Drawn
+/// outside the child's bounds, so it never shifts layout. Fades in and out,
+/// and blooms briefly when it turns on — the same for a name and the card.
 class HeldRing extends HookWidget {
-  const HeldRing({super.key, required this.held, required this.diameter, required this.child});
+  const HeldRing({super.key, required this.held, required this.child, this.borderRadius});
 
   final bool held;
-  final double diameter;
   final Widget child;
+
+  /// The child's corners; null for a round child (an avatar).
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -28,20 +34,20 @@ class HeldRing extends HookWidget {
     final c = pp.colors;
     final reduceMotion = useReduceMotion();
     final ring = pp.size.heldRing;
-    final gap = pp.size.heldRingGap;
-    final outset = ring + gap;
-    final glow = reduceMotion ? null : c.heldGlow;
+    final outset = ring + pp.size.heldRingGap;
+    final bloom = useBloom(held, pp.motion.bloom);
+    final glow = c.heldGlow;
+    final radius = borderRadius;
 
     return Stack(
       clipBehavior: Clip.none,
-      alignment: Alignment.center,
       children: [
-        // Under the child, so a glow can't wash over the avatar.
+        // Under the child, so the bloom can't wash over it.
         Positioned(
           left: -outset,
           top: -outset,
-          width: diameter + outset * 2,
-          height: diameter + outset * 2,
+          right: -outset,
+          bottom: -outset,
           child: IgnorePointer(
             child: AnimatedOpacity(
               opacity: held ? 1 : 0,
@@ -49,9 +55,13 @@ class HeldRing extends HookWidget {
               curve: Curves.easeOut,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  shape: radius == null ? BoxShape.circle : BoxShape.rectangle,
+                  // Concentric with the child's corners.
+                  borderRadius: radius?.add(BorderRadius.circular(outset)),
                   border: Border.all(color: c.heldGold, width: ring),
-                  boxShadow: glow == null ? null : [BoxShadow(color: glow, blurRadius: diameter * .3)],
+                  boxShadow: glow == null || bloom == 0
+                      ? null
+                      : [BoxShadow(color: glow.withValues(alpha: glow.a * bloom), blurRadius: pp.space.lg)],
                 ),
               ),
             ),
@@ -64,7 +74,7 @@ class HeldRing extends HookWidget {
 }
 
 /// The small gold dot where the thread meets a held intention. Holds its
-/// space when not shown.
+/// space when not shown. Crisp; blooms briefly when it turns on.
 class HeldDot extends HookWidget {
   const HeldDot({super.key, required this.held});
 
@@ -76,7 +86,8 @@ class HeldDot extends HookWidget {
     final c = pp.colors;
     final reduceMotion = useReduceMotion();
     final d = pp.size.heldDot;
-    final glow = reduceMotion ? null : c.heldGlow;
+    final bloom = useBloom(held, pp.motion.bloom);
+    final glow = c.heldGlow;
     return IgnorePointer(
       child: AnimatedOpacity(
         opacity: held ? 1 : 0,
@@ -88,7 +99,9 @@ class HeldDot extends HookWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: c.heldGold,
-            boxShadow: glow == null ? null : [BoxShadow(color: glow, blurRadius: d * 1.6, spreadRadius: d * .2)],
+            boxShadow: glow == null || bloom == 0
+                ? null
+                : [BoxShadow(color: glow.withValues(alpha: glow.a * bloom), blurRadius: d * 1.6, spreadRadius: d * .2)],
           ),
         ),
       ),
