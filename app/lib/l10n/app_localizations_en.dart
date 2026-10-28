@@ -111,14 +111,23 @@ class L10nEn extends L10n {
   String get clusterYou => 'You';
 
   @override
-  String clusterOthers(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '+ $count others',
-      one: '+ 1 other',
-    );
-    return '$_temp0';
+  String clusterTwo(String first, String second) {
+    return '$first and $second';
+  }
+
+  @override
+  String clusterCounted(String first, String second, int count) {
+    return '$first, $second + $count';
+  }
+
+  @override
+  String clusterAndOthers(String first, String second) {
+    return '$first, $second and others';
+  }
+
+  @override
+  String clusterOverflow(int count) {
+    return '+$count';
   }
 
   @override
@@ -229,7 +238,22 @@ class L10nEn extends L10n {
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return 'with $countString others';
+    return 'with $countString';
+  }
+
+  @override
+  String prayingWithSpoken(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Praying with $countString others',
+      one: 'Praying with 1 other',
+    );
+    return '$_temp0';
   }
 
   @override

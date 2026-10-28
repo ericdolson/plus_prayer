@@ -10,7 +10,7 @@ import '../theme/pp_theme.dart';
 /// The decaying ring shared by the pray button and the list invitation
 /// (prayer-flow.md: "same visual language"). The disc is the POC's FAB: solid
 /// primary blue, white icon. From [startedAt] a ring just outside the disc
-/// (in the footer's notch gap) decays over [duration] (the 5 s minimum); then
+/// decays over [duration] (the 5 s minimum); then
 /// [complete] appears and the button becomes tappable. Before that, taps do
 /// nothing and the disc is dimmed.
 ///
@@ -26,6 +26,7 @@ class RingButton extends HookWidget {
     this.complete,
     this.onPressed,
     this.size,
+    this.ringGap,
     this.clock = DateTime.now,
   });
 
@@ -36,8 +37,10 @@ class RingButton extends HookWidget {
   final Duration duration;
   final VoidCallback? onPressed;
 
-  /// Diameter of the disc; the ring sits outside it.
+  /// Diameter of the disc; the ring sits outside it, [ringGap] out
+  /// (default `ringGap`).
   final double? size;
+  final double? ringGap;
   final DateTime Function() clock;
 
   @override
@@ -67,7 +70,7 @@ class RingButton extends HookWidget {
         child: CustomPaint(
           foregroundPainter: _RingPainter(
             remaining: running ? 1 - progress : 0,
-            gap: pp.size.notchMargin,
+            gap: ringGap ?? pp.size.ringGap,
             track: c.hairline,
             ring: c.primary,
           ),

@@ -1,4 +1,4 @@
-// Navigation (screens.md): Home is the only screen with the footer; every
+// Navigation (screens.md): Home is the only screen with the floating bar; every
 // other screen pushes with a back arrow. Prayer mode is a state of Home, not
 // a route. You is a full-height sheet over Home (features/you), as in the POC.
 

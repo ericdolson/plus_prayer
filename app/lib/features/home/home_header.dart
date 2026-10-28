@@ -1,8 +1,7 @@
 // Home header (design-direction.md §4): left = your avatar (→ You) with the
-// streak badge; right = filter only. Search is hidden until you pull the list
-// down (iOS Mail), then stays across nav and prayer modes until closed. The
-// bar is frosted: the list scrolls beneath it. In prayer the nav side steps
-// away for the POC's pulsing praying hands.
+// streak badge; right = filter only (search is in the floating bar). The bar
+// is frosted: the list scrolls beneath it. In prayer the nav side steps away
+// for the POC's pulsing praying hands.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -37,8 +36,6 @@ class HomeHeader extends HookConsumerWidget {
     final showFilters = useState(false);
     final reduceMotion = useReduceMotion();
     final duration = reduceMotion ? Duration.zero : pp.motion.settle;
-    // Pull-down isn't reachable with a screen reader: offer a button then.
-    final accessible = MediaQuery.accessibleNavigationOf(context);
 
     final bar = Row(
       children: [
@@ -53,13 +50,6 @@ class HomeHeader extends HookConsumerWidget {
               : const _SelfAndStreak(key: ValueKey('self')),
         ),
         const Spacer(),
-        if (accessible && !query.searchOpen)
-          IconButton(
-            tooltip: l10n.search,
-            iconSize: pp.size.headerIcon,
-            icon: const Icon(PPIcons.search),
-            onPressed: queryCtl.openSearch,
-          ),
         IconButton(
           tooltip: l10n.filter,
           iconSize: pp.size.headerIcon,
@@ -107,11 +97,6 @@ class HomeHeader extends HookConsumerWidget {
                       )
                     : const SizedBox(width: double.infinity),
               ),
-              AnimatedSize(
-                duration: duration,
-                alignment: AlignmentDirectional.topStart,
-                child: query.searchOpen ? const _SearchField() : const SizedBox(width: double.infinity),
-              ),
             ],
           ),
         ),
@@ -124,44 +109,6 @@ class HomeHeader extends HookConsumerWidget {
         HomeFilter.unprayedToday => l10n.filterUnprayed,
         HomeFilter.carried => l10n.filterCarried,
       };
-}
-
-class _SearchField extends HookConsumerWidget {
-  const _SearchField();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pp = context.pp;
-    final l10n = L10n.of(context);
-    final queryCtl = ref.read(homeQueryProvider.notifier);
-    final search = useTextEditingController(text: ref.read(homeQueryProvider).text);
-    return Padding(
-      padding: EdgeInsetsDirectional.only(top: pp.space.sm, start: pp.space.xs),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: search,
-              autofocus: true,
-              textInputAction: TextInputAction.search,
-              onChanged: queryCtl.setText,
-              decoration: InputDecoration(
-                hintText: l10n.search,
-                prefixIcon: Icon(PPIcons.search, size: pp.size.rowIcon),
-                isDense: true,
-              ),
-            ),
-          ),
-          IconButton(
-            tooltip: l10n.closeSearch,
-            iconSize: pp.size.headerIcon,
-            icon: const Icon(PPIcons.close),
-            onPressed: queryCtl.closeSearch,
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _SelfAndStreak extends ConsumerWidget {
@@ -184,12 +131,13 @@ class _SelfAndStreak extends ConsumerWidget {
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: () => showYouSheet(context),
+            // A 32 pt avatar in a 44 pt target.
             child: Padding(
-              padding: EdgeInsets.all(pp.space.xs),
+              padding: EdgeInsets.all(pp.space.xs + pp.space.xxs),
               child: MonogramAvatar(
                 initials: self == null ? '' : monogramOf(self),
                 tone: self == null ? 0 : avatarToneOf(self),
-                size: pp.size.avatarSmall + pp.space.sm,
+                size: pp.size.headerAvatar,
               ),
             ),
           ),

@@ -1,5 +1,5 @@
 // One add sheet, two entry points (screens.md):
-// - From the footer ＋: "Add name" (40); can switch to an intention, which
+// - From the bar's ＋: "Add name" (40); can switch to an intention, which
 //   reveals a name picker (default "Me").
 // - From a name (long-press its row; its detail page at step 5): "Add
 //   intention for {alias}" (80), picker hidden.

@@ -7,13 +7,14 @@ import '../theme/pp_theme.dart';
 
 /// Bar material (design-direction.md §4): content scrolling beneath shows
 /// through, blurred, on iOS; elsewhere (Android, low-end) a semi-opaque fill.
-/// [clipper] shapes it (the footer's notch); otherwise it fills its box.
+/// [borderRadius] rounds it (the floating bar's pill); otherwise it fills its
+/// box.
 class Frosted extends StatelessWidget {
-  const Frosted({super.key, required this.color, required this.child, this.clipper});
+  const Frosted({super.key, required this.color, required this.child, this.borderRadius});
 
   final Color color;
   final Widget child;
-  final CustomClipper<Path>? clipper;
+  final BorderRadius? borderRadius;
 
   static bool get blurs => defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS;
 
@@ -24,6 +25,7 @@ class Frosted extends StatelessWidget {
     if (blurs) {
       content = BackdropFilter(filter: ImageFilter.blur(sigmaX: bars.blur, sigmaY: bars.blur), child: content);
     }
-    return clipper == null ? ClipRect(child: content) : ClipPath(clipper: clipper, child: content);
+    final radius = borderRadius;
+    return radius == null ? ClipRect(child: content) : ClipRRect(borderRadius: radius, child: content);
   }
 }

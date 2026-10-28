@@ -34,7 +34,7 @@ abstract final class PPDarkPalette {
   static const ground = Color(0xFF0E1012); // scaffold
   static const sheet = Color(0xFF16191D); // sheets and dialogs, a slight lift (iOS-style)
   static const card = Color(0xFF1A1D21); // the community card, settings groups (1.13:1 step)
-  static const raised = Color(0xFF23272D); // fields, pills, the footer bar
+  static const raised = Color(0xFF23272D); // fields, pills, the floating bar
   static const raisedHigh = Color(0xFF2E333A);
   static const hairline = Color(0xFF2A2E35); // also the intention thread
 
@@ -162,8 +162,9 @@ abstract final class PPSpaceTokens {
   static const double gutter = 20;
   static const double inset = 20;
 
-  /// Between one name (with its intentions) and the next.
-  static const double groupGap = 12;
+  /// Between one name (with its intentions) and the next: generous, so each
+  /// person reads as one unit (design-direction.md §3, ~24–28 pt).
+  static const double groupGap = 24;
 }
 
 abstract final class PPRadiusTokens {
@@ -174,21 +175,35 @@ abstract final class PPRadiusTokens {
 
   /// The community card.
   static const double card = 22;
-
-  /// Top corners of the footer bar.
-  static const double footer = 16;
 }
 
 abstract final class PPSizeTokens {
-  /// Name rows (design-direction.md §3: one line, ~64 pt, ~44 pt avatar).
+  /// Name rows (design-direction.md §3: one line, ~44 pt avatar): the
+  /// avatar and its held ring's room. Intention rows: a ~40 pt pitch, all of
+  /// it tap target; the small type, hung at the top of the row, makes the
+  /// group look tight. The space goes between groups ([PPSpaceTokens.groupGap]).
   static const double avatar = 44;
-  static const double nameRow = 64;
-  static const double intentionRow = 44;
+  static const double nameRow = 52;
+  static const double intentionRow = 40;
 
   /// The profile at the top of You.
   static const double avatarLarge = 72;
   static const double avatarSmall = 28;
   static const double avatarTiny = 20;
+
+  /// Your avatar in the Home header: smaller than the list's, so it doesn't
+  /// compete (design-direction.md §4).
+  static const double headerAvatar = 32;
+
+  /// Grouped avatars (§6): the community card's, and the larger ones on the
+  /// Amen invitation.
+  static const double clusterAvatar = 24;
+  static const double clusterAvatarLarge = 32;
+
+  /// The smallest a monogram's letters get (§6): below it two initials drop
+  /// to one, and a disc too small for one is color only. 24 pt → one letter;
+  /// 32 pt → two.
+  static const double initialsMinGlyph = 11;
   static const double seal = 44;
 
   /// Held ring: width and gap from the avatar (§5).
@@ -210,11 +225,22 @@ abstract final class PPSizeTokens {
   /// The streak badge's logo seal.
   static const double badgeSeal = 24;
 
-  /// The pray button (the POC's 85 pt FAB), docked in the footer's notch.
+  /// The invitation's ring button (the POC's 85 pt FAB).
   static const double fab = 85;
-  static const double footerHeight = 56;
-  static const double notchMargin = 8;
-  static const double footerIcon = 28;
+
+  /// The countdown ring's distance outside a ring button's disc.
+  static const double ringGap = 8;
+
+  /// Home's floating bar (§4): the pill and the round pray button beside it
+  /// share this height; they float this far from the screen's edges.
+  static const double bar = 58;
+  static const double barInset = 16;
+  static const double barIcon = 26;
+
+  /// The search field docked above the keyboard (or the bar), and the
+  /// compact pray button it carries while the keyboard hides the bar.
+  static const double searchBar = 48;
+  static const double prayCompact = 40;
   static const double headerIcon = 24;
 
   /// Minimum height of a settings row.
@@ -228,9 +254,6 @@ abstract final class PPSizeTokens {
 
   /// The wordmark at the foot of You.
   static const double wordmark = 22;
-
-  /// Pull past this to reveal search (iOS Mail).
-  static const double pullToSearch = 64;
 }
 
 abstract final class PPMotionTokens {

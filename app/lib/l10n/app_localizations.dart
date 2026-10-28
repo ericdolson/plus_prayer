@@ -195,11 +195,29 @@ abstract class L10n {
   /// **'You'**
   String get clusterYou;
 
-  /// No description provided for @clusterOthers.
+  /// Grouped avatars, two people: 'You and Dad are on List 52'.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{+ 1 other} other{+ {count} others}}'**
-  String clusterOthers(int count);
+  /// **'{first} and {second}'**
+  String clusterTwo(String first, String second);
+
+  /// Grouped avatars, 3–5 people (all shown): 'You, Dad + 3 are on List 52'.
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second} + {count}'**
+  String clusterCounted(String first, String second, int count);
+
+  /// Grouped avatars, more than 5 people (the +N disc carries the count): 'You, Dad and others are on List 52'.
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second} and others'**
+  String clusterAndOthers(String first, String second);
+
+  /// The gray disc after 4 grouped avatars.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count}'**
+  String clusterOverflow(int count);
 
   /// No description provided for @closesSoon.
   ///
@@ -321,11 +339,17 @@ abstract class L10n {
   /// **'Amen'**
   String get amen;
 
-  /// No description provided for @prayingWith.
+  /// In the prayer bar: '3:12 · with 229' (others in prayer now).
   ///
   /// In en, this message translates to:
-  /// **'with {count} others'**
+  /// **'with {count}'**
   String prayingWith(int count);
+
+  /// Screen reader label for 'with 229' in the prayer bar.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Praying with 1 other} other{Praying with {count} others}}'**
+  String prayingWithSpoken(int count);
 
   /// Screen reader label for ✕ in the prayer bar.
   ///

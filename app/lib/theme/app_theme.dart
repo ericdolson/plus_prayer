@@ -145,7 +145,7 @@ abstract final class AppTheme {
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
-        // The POC's app bar and footer icons: full ink.
+        // The POC's header and bar icons: full ink.
         style: IconButton.styleFrom(foregroundColor: c.ink, minimumSize: const Size(48, 48)),
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(
@@ -214,13 +214,6 @@ abstract final class AppTheme {
           padding: const EdgeInsetsDirectional.symmetric(horizontal: PPSpaceTokens.md),
         ),
       ),
-      bottomAppBarTheme: BottomAppBarThemeData(
-        color: c.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        height: PPSizeTokens.footerHeight,
-        padding: const EdgeInsetsDirectional.symmetric(horizontal: PPSpaceTokens.sm),
-      ),
     );
   }
 
@@ -256,8 +249,8 @@ abstract final class AppTheme {
       titleLarge: body(20, FontWeight.w600, c.ink, tracking: -.45),
       // Names on Home and "List 52".
       titleMedium: display(19, FontWeight.w700),
-      // Intentions on Home: smaller sans, muted.
-      titleSmall: body(15, FontWeight.w400, c.inkMuted, tracking: -.23),
+      // Intentions on Home: smaller sans, muted (design-direction.md §2).
+      titleSmall: body(13, FontWeight.w400, c.inkMuted, tracking: -.08),
       bodyLarge: body(17, FontWeight.w400, c.ink, tracking: -.43),
       bodyMedium: body(15, FontWeight.w400, c.ink, tracking: -.23),
       // Secondary lines, captions.

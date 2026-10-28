@@ -29,6 +29,7 @@ class ThreadPainter extends CustomPainter {
     required this.textDirection,
     this.avatarDiameter = 0,
     this.avatarClearance = 0,
+    this.branchY,
     this.radius = 10,
   });
 
@@ -45,6 +46,9 @@ class ThreadPainter extends CustomPainter {
   /// below it (the held ring's room).
   final double avatarDiameter;
   final double avatarClearance;
+
+  /// Branch rows: where the branch meets the dot (default: the middle).
+  final double? branchY;
   final double radius;
 
   @override
@@ -64,7 +68,7 @@ class ThreadPainter extends CustomPainter {
       return;
     }
 
-    final cy = size.height / 2;
+    final cy = branchY ?? size.height / 2;
     final r = math.min(radius, cy);
     final ex = x(endX);
     final dir = rtl ? -1.0 : 1.0;
@@ -87,5 +91,6 @@ class ThreadPainter extends CustomPainter {
       old.textDirection != textDirection ||
       old.avatarDiameter != avatarDiameter ||
       old.avatarClearance != avatarClearance ||
+      old.branchY != branchY ||
       old.radius != radius;
 }

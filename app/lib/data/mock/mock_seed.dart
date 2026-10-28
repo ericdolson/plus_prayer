@@ -150,7 +150,7 @@ class MockSeed {
     final myStatus = MyListStatus(
       listId: list.id,
       entries: [
-        for (final id in ['self', 'dad', 'mom', 'daniel', 'parish']) printed(id)
+        for (final id in ['self', 'dad', 'mom', 'daniel', 'parish', 'bea']) printed(id)
       ],
     );
 

@@ -138,7 +138,7 @@ class PrayerSessionController extends Notifier<PrayerSessionState> {
     final tz = await ref.read(timezoneProvider.future);
     var selection = PrayerSelection(listIncluded: withList && list != null);
     final tree = _tree;
-    if (focusId != null && tree != null) selection = selection.hold(focusId, tree);
+    if (focusId != null && tree != null) selection = selection.hold(focusId, tree).stampedAt(now);
     state = PrayerSessionState(
       phase: PrayerPhase.praying,
       prayerId: ref.read(idGeneratorProvider)(),
@@ -157,7 +157,7 @@ class PrayerSessionController extends Notifier<PrayerSessionState> {
   void toggle(String subjectId) {
     final tree = _tree;
     if (!state.isActive || tree == null) return;
-    state = state.copyWith(selection: state.selection.toggle(subjectId, tree));
+    state = state.copyWith(selection: state.selection.toggle(subjectId, tree).stampedAt(_now));
     _writeDraft();
   }
 
@@ -168,8 +168,7 @@ class PrayerSessionController extends Notifier<PrayerSessionState> {
     _writeDraft();
   }
 
-  bool canAmen(DateTime now) =>
-      state.startedAt != null && now.difference(state.startedAt!) >= _config.minPrayer;
+  bool canAmen(DateTime now) => state.startedAt != null && now.difference(state.startedAt!) >= _config.minPrayer;
 
   /// The FAB's Amen.
   Future<void> amen() async {
@@ -271,7 +270,9 @@ class PrayerSessionController extends Notifier<PrayerSessionState> {
     final tree = _tree;
     var selection = PrayerSelection(listIncluded: draft.listIncluded);
     for (final id in draft.itemIds) {
-      if (tree?[id] != null) selection = PrayerSelection(held: {...selection.held, id}, listIncluded: selection.listIncluded);
+      if (tree?[id] != null) {
+        selection = PrayerSelection(held: {...selection.held, id}, listIncluded: selection.listIncluded);
+      }
     }
     state = PrayerSessionState(
       phase: PrayerPhase.praying,
@@ -319,6 +320,10 @@ class PrayerSessionController extends Notifier<PrayerSessionState> {
       communityListId: s.selection.listIncluded ? s.listId : null,
       listContextNumber: s.listNumber ?? 0,
       subjectIds: held,
+      checkedAt: {
+        for (final id in held)
+          if (s.selection.checkedAt[id] case final at?) id: at,
+      },
     );
     state = s.copyWith(phase: PrayerPhase.closing, logged: prayer, awaitingWelcomeBack: false);
     await ref.read(prayerRepositoryProvider).logPrayer(prayer);

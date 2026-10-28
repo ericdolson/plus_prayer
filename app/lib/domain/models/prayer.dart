@@ -12,6 +12,7 @@ class NewPrayer {
     required this.timezone,
     required this.listContextNumber,
     required this.subjectIds,
+    this.checkedAt = const {},
     this.communityListId,
     this.note,
   });
@@ -38,6 +39,12 @@ class NewPrayer {
   /// Held items. The server also links each intention's name.
   final List<String> subjectIds;
 
+  /// When each held item was checked (subject id → time), for
+  /// `PrayerSubjectLink.checkedAt` (schema-brief §12). Sent per item once the
+  /// regenerated SDK's `logPrayer` takes it. An item restored from an older
+  /// draft may have none.
+  final Map<String, DateTime> checkedAt;
+
   bool get includesList => communityListId != null;
 
   Map<String, Object?> toJson() => {
@@ -51,6 +58,7 @@ class NewPrayer {
         'listContextNumber': listContextNumber,
         'note': note,
         'subjectIds': subjectIds,
+        'checkedAt': {for (final e in checkedAt.entries) e.key: e.value.toUtc().toIso8601String()},
       };
 
   factory NewPrayer.fromJson(Map<String, Object?> json) => NewPrayer(
@@ -64,5 +72,10 @@ class NewPrayer {
         listContextNumber: json['listContextNumber'] as int,
         note: json['note'] as String?,
         subjectIds: [...(json['subjectIds'] as List).cast<String>()],
+        // Absent on writes queued before checkedAt existed.
+        checkedAt: {
+          for (final e in (json['checkedAt'] as Map? ?? const {}).entries)
+            e.key as String: DateTime.parse(e.value as String),
+        },
       );
 }

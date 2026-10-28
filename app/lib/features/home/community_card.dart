@@ -4,7 +4,7 @@
 //   (seal)  List 52
 //           4,345 people · 31,208 prayers
 //           ● 258 praying now                 (by the ladder; never 0)
-//   (JE) You, (D) Dad ●●● + 3 are on List 52  today's list (hidden if you aren't on it)
+//   (●●●●●) You, Dad + 3 are on List 52      today's list (hidden if you aren't on it)
 //   Pray to carry them onto List 53            tomorrow, from the gate
 //
 // Held = the same gold ring as a held name (2 pt, 2 pt gap, same fade and

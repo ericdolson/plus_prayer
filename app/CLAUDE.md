@@ -145,7 +145,7 @@ lib/
   `domain/rules` functions inside providers, not inside widgets.
 
 ### Navigation
-- `go_router`. Home (`/`) is the only screen with the footer; everything else
+- `go_router`. Home (`/`) is the only screen with the floating bar; everything else
   pushes with a back arrow (`/subject/:id`, `/history`, `/list`, …).
 - You (settings) is the POC's full-height sheet over Home, opened from the
   header avatar (`features/you`), not a route.
@@ -219,7 +219,7 @@ flipped offline to exercise the queue.
   themes; `heldGlow` (dark only, null in light) is used solely for the prayer
   halo and the brief bloom on check (`useBloom`).
 - Bars are `Frosted` (blur on iOS, semi-opaque elsewhere); the list scrolls
-  beneath header and footer.
+  beneath the header and the floating bar (pill + pray button, §4).
 - Layout from the POC where design-direction.md doesn't say otherwise; move
   its inline styles into tokens.
 - Layout uses `EdgeInsetsDirectional` / `AlignmentDirectional` (RTL later).

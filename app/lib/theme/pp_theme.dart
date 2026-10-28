@@ -13,6 +13,7 @@ class PPColors {
     required this.backgroundLow,
     required this.surface,
     required this.surfaceRaised,
+    required this.clusterOverflow,
     required this.cardSurface,
     required this.sheet,
     required this.hairline,
@@ -42,11 +43,15 @@ class PPColors {
   /// A step below the ground (pressed rows, splashes).
   final Color backgroundLow;
 
-  /// Text fields, pills, the footer bar.
+  /// Text fields, pills, the floating bar.
   final Color surface;
 
   /// Menus and controls on a surface.
   final Color surfaceRaised;
+
+  /// The neutral "+N" disc after grouped avatars (design-direction.md §6):
+  /// raisedHigh in dark; hairline in light, where white vanishes on the card.
+  final Color clusterOverflow;
 
   /// The community card and settings groups: a flat tonal step up from the
   /// ground (no shadow, no border).
@@ -113,6 +118,7 @@ class PPColors {
     backgroundLow: PPDarkPalette.groundLow,
     surface: PPDarkPalette.raised,
     surfaceRaised: PPDarkPalette.raisedHigh,
+    clusterOverflow: PPDarkPalette.raisedHigh,
     cardSurface: PPDarkPalette.card,
     sheet: PPDarkPalette.sheet,
     hairline: PPDarkPalette.hairline,
@@ -140,6 +146,7 @@ class PPColors {
     backgroundLow: PPLightPalette.groundLow,
     surface: PPLightPalette.raised,
     surfaceRaised: PPLightPalette.raisedHigh,
+    clusterOverflow: PPLightPalette.hairline,
     cardSurface: PPLightPalette.card,
     sheet: PPLightPalette.sheet,
     hairline: PPLightPalette.hairline,
@@ -170,9 +177,7 @@ class PPColors {
   /// themes, a touch dimmer in dark.
   Color avatarTone(int tone) {
     final base = PPAvatarTones.all[tone % PPAvatarTones.all.length];
-    return brightness == Brightness.dark
-        ? Color.lerp(base, PPAvatarTones.dimToward, PPAvatarTones.darkDim)!
-        : base;
+    return brightness == Brightness.dark ? Color.lerp(base, PPAvatarTones.dimToward, PPAvatarTones.darkDim)! : base;
   }
 
   PPColors lerp(PPColors other, double t) => PPColors(
@@ -181,6 +186,7 @@ class PPColors {
         backgroundLow: Color.lerp(backgroundLow, other.backgroundLow, t)!,
         surface: Color.lerp(surface, other.surface, t)!,
         surfaceRaised: Color.lerp(surfaceRaised, other.surfaceRaised, t)!,
+        clusterOverflow: Color.lerp(clusterOverflow, other.clusterOverflow, t)!,
         cardSurface: Color.lerp(cardSurface, other.cardSurface, t)!,
         sheet: Color.lerp(sheet, other.sheet, t)!,
         hairline: Color.lerp(hairline, other.hairline, t)!,
@@ -232,6 +238,10 @@ class PPSizes {
   double get avatarLarge => PPSizeTokens.avatarLarge;
   double get avatarSmall => PPSizeTokens.avatarSmall;
   double get avatarTiny => PPSizeTokens.avatarTiny;
+  double get headerAvatar => PPSizeTokens.headerAvatar;
+  double get clusterAvatar => PPSizeTokens.clusterAvatar;
+  double get clusterAvatarLarge => PPSizeTokens.clusterAvatarLarge;
+  double get initialsMinGlyph => PPSizeTokens.initialsMinGlyph;
   double get seal => PPSizeTokens.seal;
   double get heldRing => PPSizeTokens.heldRing;
   double get heldRingGap => PPSizeTokens.heldRingGap;
@@ -241,20 +251,21 @@ class PPSizes {
   double get liveDot => PPSizeTokens.liveDot;
   double get badgeSeal => PPSizeTokens.badgeSeal;
   double get fab => PPSizeTokens.fab;
-  double get footerHeight => PPSizeTokens.footerHeight;
-  double get notchMargin => PPSizeTokens.notchMargin;
-  double get footerIcon => PPSizeTokens.footerIcon;
+  double get ringGap => PPSizeTokens.ringGap;
+  double get bar => PPSizeTokens.bar;
+  double get barInset => PPSizeTokens.barInset;
+  double get barIcon => PPSizeTokens.barIcon;
+  double get searchBar => PPSizeTokens.searchBar;
+  double get prayCompact => PPSizeTokens.prayCompact;
   double get headerIcon => PPSizeTokens.headerIcon;
   double get settingsRow => PPSizeTokens.settingsRow;
   double get rowIcon => PPSizeTokens.rowIcon;
   double get wheelPicker => PPSizeTokens.wheelPicker;
   double get wordmark => PPSizeTokens.wordmark;
-  double get pullToSearch => PPSizeTokens.pullToSearch;
   double get radiusSm => PPRadiusTokens.sm;
   double get radiusMd => PPRadiusTokens.md;
   double get radiusLg => PPRadiusTokens.lg;
   double get radiusCard => PPRadiusTokens.card;
-  double get radiusFooter => PPRadiusTokens.footer;
 }
 
 @immutable

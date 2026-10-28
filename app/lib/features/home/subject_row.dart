@@ -1,7 +1,10 @@
 // Home rows (design-direction.md §3, §5). One line each, no dividers, no
-// chevrons. Names: a 44 pt avatar and the name in the serif, ~64 pt tall.
-// Intentions: smaller muted sans on a thread from the name's avatar, their
-// text aligned with the name's, ~44 pt tall.
+// chevrons. Names: a 44 pt avatar and the name in the serif, 52 pt (the
+// avatar and its ring's room). Intentions: smaller muted sans on a thread
+// from the name's avatar, their text aligned with the name's, on a ~40 pt
+// pitch that is all tap target. An intention's line sits at the top of its
+// row, so the first one hangs ~5 pt under its name and the group reads as
+// one unit; the space goes between groups.
 //
 // Held today = the gold ring (names) or gold dot (intentions) until local
 // midnight; in prayer the same marks appear live as rows are checked, and a
@@ -9,6 +12,8 @@
 // exceptional states ("Answered · Oct 6", "Not on the list …").
 //
 // Tap → the item's own page (in prayer: check). Long-press → quick actions.
+
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -98,9 +103,15 @@ class SubjectRow extends ConsumerWidget {
             ),
           );
 
+    // An intention's first line, as tall as the check, at the top of the
+    // row: its dot, the thread's branch and the check line up on it.
+    final lineStyle = context.text.titleSmall!;
+    final line = MediaQuery.textScalerOf(context).scale(lineStyle.fontSize!) * (lineStyle.height ?? 1);
+    final band = math.max(pp.size.check, line);
+
     final content = s.isName
         ? _NameContent(subject: s, held: held, secondary: secondary)
-        : _IntentionContent(subject: s, held: held, secondary: secondary);
+        : _IntentionContent(subject: s, held: held, band: band, line: line, secondary: secondary);
 
     final threadPart = thread;
     final textStart = pp.space.gutter + pp.size.avatar + pp.space.md;
@@ -127,6 +138,7 @@ class SubjectRow extends ConsumerWidget {
                     endX: textStart - pp.space.sm - pp.size.heldDot / 2,
                     avatarDiameter: pp.size.avatar,
                     avatarClearance: pp.size.heldRing + pp.size.heldRingGap,
+                    branchY: pp.space.xxs + band / 2,
                     textDirection: Directionality.of(context),
                   ),
             child: ConstrainedBox(
@@ -137,15 +149,24 @@ class SubjectRow extends ConsumerWidget {
                   padding: EdgeInsetsDirectional.only(
                     start: s.isName ? pp.space.gutter : 0,
                     end: pp.space.gutter,
-                    top: pp.space.xs,
-                    bottom: pp.space.xs,
+                    // A name: room for the held ring. An intention: its line at
+                    // the top; the rest of the pitch is below it.
+                    top: s.isName ? pp.space.xs : pp.space.xxs,
+                    bottom: s.isName ? pp.space.xs : pp.space.sm,
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(child: content),
-                      SizedBox(width: pp.space.md),
-                      PrayerCheck(inPrayer: inPrayer, state: hold),
-                    ],
+                  child: Align(
+                    alignment: AlignmentDirectional.topStart,
+                    child: Row(
+                      crossAxisAlignment: s.isName ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: content),
+                        SizedBox(width: pp.space.md),
+                        SizedBox(
+                          height: s.isName ? null : band,
+                          child: Center(child: PrayerCheck(inPrayer: inPrayer, state: hold)),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -198,10 +219,20 @@ class _NameContent extends StatelessWidget {
 /// The dot column ends where the thread does; the text lines up with the
 /// name's.
 class _IntentionContent extends StatelessWidget {
-  const _IntentionContent({required this.subject, required this.held, this.secondary});
+  const _IntentionContent({
+    required this.subject,
+    required this.held,
+    required this.band,
+    required this.line,
+    this.secondary,
+  });
 
   final Subject subject;
   final bool held;
+
+  /// The first line's band (≥ the check) and the text's line height in it.
+  final double band;
+  final double line;
   final Widget? secondary;
 
   @override
@@ -209,9 +240,11 @@ class _IntentionContent extends StatelessWidget {
     final pp = context.pp;
     final textStart = pp.space.gutter + pp.size.avatar + pp.space.md;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
           width: textStart - pp.space.sm,
+          height: band,
           child: Align(alignment: AlignmentDirectional.centerEnd, child: HeldDot(held: held)),
         ),
         SizedBox(width: pp.space.sm),
@@ -220,7 +253,11 @@ class _IntentionContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(subject.label, maxLines: 2, overflow: TextOverflow.ellipsis, style: context.text.titleSmall),
+              Padding(
+                padding: EdgeInsetsDirectional.only(top: (band - line) / 2),
+                child:
+                    Text(subject.label, maxLines: 2, overflow: TextOverflow.ellipsis, style: context.text.titleSmall),
+              ),
               if (secondary != null) ...[SizedBox(height: pp.space.xxs), secondary!],
             ],
           ),

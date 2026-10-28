@@ -1,12 +1,11 @@
 // Home = the prayer screen (screens.md, design-direction.md): the community
 // card on top, then your names and their intentions. The only screen with the
-// footer. Prayer happens here, in place: the gold halo forms, the header's
-// nav steps away, the footer becomes the prayer bar, checks fade into the rows
-// — search and filter stay as they were. Header and footer are frosted; the
-// list scrolls beneath both. Pull down to search.
+// floating bar. Prayer happens here, in place: the gold halo forms, the
+// header's nav steps away, the bar becomes the prayer bar, checks fade into
+// the rows — search and filter stay as they were. Header and bar are frosted;
+// the list scrolls beneath both. Nothing waits under a pull-down for now.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../components/halo.dart';
@@ -19,7 +18,7 @@ import '../../theme/pp_theme.dart';
 import '../prayer/closing_sheet.dart';
 import '../prayer/invitation_sheet.dart';
 import '../prayer/welcome_back_dialog.dart';
-import 'home_footer.dart';
+import 'home_bar.dart';
 import 'home_header.dart';
 import 'community_card.dart';
 import 'subject_row.dart';
@@ -31,6 +30,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pp = context.pp;
     final inPrayer = ref.watch(prayerSessionProvider.select((s) => s.isActive));
+    final searchOpen = ref.watch(homeQueryProvider.select((q) => q.searchOpen));
 
     ref.listen(prayerSessionProvider, (previous, next) {
       if (next.phase == PrayerPhase.invitation && previous?.phase != PrayerPhase.invitation) {
@@ -44,42 +44,31 @@ class HomeScreen extends ConsumerWidget {
       }
     });
 
-    // Pull down past the threshold to reveal search (iOS Mail).
-    bool onScroll(ScrollUpdateNotification n) {
-      final query = ref.read(homeQueryProvider);
-      if (!query.searchOpen && n.dragDetails != null && n.metrics.pixels < -pp.size.pullToSearch) {
-        HapticFeedback.selectionClick();
-        ref.read(homeQueryProvider.notifier).openSearch();
-      }
-      return false;
-    }
-
     return Halo(
       active: inPrayer,
       child: Scaffold(
-        // The list scrolls under the frosted footer, its corners and notch.
-        extendBody: true,
-        body: NotificationListener<ScrollUpdateNotification>(
-          onNotification: onScroll,
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-            slivers: [
-              const PinnedHeaderSliver(child: HomeHeader()),
-              SliverToBoxAdapter(child: SizedBox(height: pp.space.sm)),
-              const SliverToBoxAdapter(child: CommunityCard()),
-              SliverToBoxAdapter(child: SizedBox(height: pp.space.xl)),
-              const _SubjectRows(),
-              // Clear of the footer and the docked button.
-              SliverSafeArea(
-                top: false,
-                sliver: SliverToBoxAdapter(child: SizedBox(height: pp.size.fab / 2 + pp.space.xl)),
-              ),
-            ],
-          ),
+        // The bar docks search above the keyboard itself.
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          children: [
+            CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              slivers: [
+                const PinnedHeaderSliver(child: HomeHeader()),
+                SliverToBoxAdapter(child: SizedBox(height: pp.space.sm)),
+                const SliverToBoxAdapter(child: CommunityCard()),
+                SliverToBoxAdapter(child: SizedBox(height: pp.space.xl)),
+                const _SubjectRows(),
+                // The last row scrolls fully clear of the floating bar.
+                SliverToBoxAdapter(
+                  child: SizedBox(height: homeBarClearance(context, searchOpen: searchOpen) + pp.space.xl),
+                ),
+              ],
+            ),
+            const PositionedDirectional(start: 0, end: 0, bottom: 0, child: HomeBar()),
+          ],
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: const HomePrayButton(),
-        bottomNavigationBar: const HomeFooter(),
       ),
     );
   }
