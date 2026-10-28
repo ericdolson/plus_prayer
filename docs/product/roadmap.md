@@ -130,7 +130,7 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
 - Private photo of a user's portion on the physical list
 
 ## Stage 4+ — Future (shape early decisions now)
-- **Private, non-anonymous prayer groups** — tier-2 counts, group presence
+- **Private, non-anonymous prayer groups** (UI direction: groups-design-note.md) — tier-2 counts, group presence
   showing who, real names (aliases stay owner-only)
 - **Tap-to-pray feed** of opt-in requests, unlocked by praying for the list
   (reuse the moderation pipeline)

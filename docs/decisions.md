@@ -770,3 +770,13 @@ invitation (larger avatars allowed there). While typing, the docked search row
 carries a compact pray/Amen button so Pray is always reachable. Cluster avatars
 at 24 pt show a single initial (≥11 pt) or color only. App sends `checkedAt` per
 checked item once the regenerated SDK includes it.
+
+### Note: Prayer groups UI direction (future)
+**Timestamp:** 2026-10-28
+A group appears on Home as a top-level row (group picture + name) with members'
+shared items threaded beneath, each showing the sharer's small avatar. Prayers
+log to the member's item. Any item may be shared (not only under "Me"), with an
+optional group-facing label chosen at share time (future `Share.displayLabel`)
+and a confirmation of what the group will see. Value: tier-2 counts, "Mom prayed
+for…" pushes, shared Answered moments. Sharing never changes printing. Not built;
+see docs/product/groups-design-note.md.

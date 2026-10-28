@@ -329,3 +329,12 @@ value of the app.
 - Streak badge glyph → the new logo as a wax seal.
 - Color rule: blue = action, gold = held, everything else neutral.
 - Muted/antique avatar tones → bright avatar palette (§1b).
+
+---
+
+## 11. Future: prayer groups
+Direction recorded 2026-10-28 in `groups-design-note.md`: a group is a top-level
+row (group picture + name); shared items sit on its thread with the sharer's
+small avatar; same gestures, prayers logged to the member's item; any item can be
+shared, with a group-facing label chosen at share time and a confirmation of
+what the group will see.
