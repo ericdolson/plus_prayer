@@ -159,12 +159,26 @@ gold.
   today → muted seal + number; zero → muted seal, no number.
 - **Header (right): filter** (revised again 2026-10-28):
   - Default: a filter icon.
-  - Tap → a **small pull-down menu anchored to the icon** (native iOS menu /
-    Material dropdown): *All · Unprayed today · Carried*, checkmark on the
-    current one. No inline chip row (it hid "All" with no scroll affordance and
+  - Tap → a **small custom menu anchored to the icon** (styled to the app; must
+    keep menu semantics for VoiceOver/TalkBack: announced as a menu, "selected"
+    on the checked item, focus moves in, tap-outside/swipe dismiss): *All ·
+    Still to hold · Carried*, checkmark on the current one.
+  - **Labels** (2026-10-28): "Unprayed today" → **"Still to hold"** (menu and
+    chip; translates cleanly, uses the "hold" vocabulary; "today" is taught by
+    the midnight reset and the empty state). **"Carried"** stays plain — no list
+    number (today's vs tomorrow's list would be ambiguous and the number shifts
+    at the flip). **No icons** in the menu (a hollow ring reads as an unchecked
+    box).
+  - **Counts in the menu only**, right-aligned and muted, on all three (All 12 ·
+    Still to hold 3 · Carried 6). When Still to hold reaches 0, show a small
+    **gold check** instead of "0". Never on the main screen.
+  - **Empty state** for Still to hold: "Everyone's been held today."
+  - **Linger then fold:** under Still to hold, rows held in a prayer show their
+    gold ring for ~1–1.5 s after Amen, then gently fold away (Reduce Motion:
+    fade). No inline chip row (it hid "All" with no scroll affordance and
     put two ✕ buttons side by side). A bottom sheet only if filters grow later.
   - Active filter (anything but All) → **a single chip replaces the icon**:
-    `[ Unprayed today × ]` with the **× inside the chip**. Tap × → All; tap the
+    `[ Still to hold × ]` with the **× inside the chip**. Tap × → All; tap the
     label → reopen the menu. Neutral active style (ink on `raised`), not blue.
   - Filters remain available in prayer mode.
   - Unprayed filter: a held name with an unprayed intention shows dimmed, with
@@ -173,8 +187,8 @@ gold.
   ```
   Normal:     ( History  🔎  ＋ )   ( 🙏 )
   In prayer:  ( 3:12 · with 229    🔎 )   ( Amen )
-  Header normal:     [avatar][✱ 6] ………… [filter]  or  [Unprayed today ×]
-  Header in prayer:  [Cancel] ……………………… [filter]  or  [Unprayed today ×]
+  Header normal:     [avatar][✱ 6] ………… [filter]  or  [Still to hold ×]
+  Header in prayer:  [Cancel] ……………………… [filter]  or  [Still to hold ×]
   ```
   - The pill is fully rounded, translucent/blurred (semi-opaque fallback on
     Android/low-end), ~56–60 pt tall, floating with a small gap from the

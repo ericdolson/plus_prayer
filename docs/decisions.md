@@ -822,3 +822,13 @@ Carried, checkmark). An active filter shows as one chip replacing the icon, with
 the × inside it (× clears; label reopens the menu). Prayer-mode cancel is a text
 "Cancel" button top-left (confirm over ~30 s), so it can't be confused with the
 chip's ×.
+
+### Decision: Filter menu labels, counts, and linger-then-fold
+**Timestamp:** 2026-10-28
+"Unprayed today" becomes "Still to hold" (menu and chip). "Carried" stays plain,
+without a list number. No menu icons. The menu shows muted counts on all three
+options, with a gold check when Still to hold reaches zero (progressive
+disclosure for people who like a to-do feel; never on the main screen). Empty
+state: "Everyone's been held today." Under the filter, held rows linger with
+their ring ~1–1.5 s after Amen before folding away. Custom menu keeps menu
+accessibility semantics.
