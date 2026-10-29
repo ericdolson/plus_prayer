@@ -157,16 +157,15 @@ gold.
   small wax seal, never a "+" (seal art is a separate upcoming task). States:
   prayed with the list today → seal in today's wax + number; alive but not yet
   today → muted seal + number; zero → muted seal, no number.
-- **Header (right): filter** (revised 2026-10-28):
-  - Default: a filter icon; chips hidden.
-  - Tap → chips slide in **inline in the header** as a horizontally scrolling
-    group with a small ✕ at the end: `[All][Unprayed today][Carried] ✕`. No
-    second row.
-  - Pick one → the header collapses, and **the active filter replaces the icon
-    as a chip** (`[Unprayed today ✕]`) so filtering is always visible; ✕ returns
-    to All.
-  - Active state is **neutral** (filled chip, ink on `raised`) — blue is action
-    only.
+- **Header (right): filter** (revised again 2026-10-28):
+  - Default: a filter icon.
+  - Tap → a **small pull-down menu anchored to the icon** (native iOS menu /
+    Material dropdown): *All · Unprayed today · Carried*, checkmark on the
+    current one. No inline chip row (it hid "All" with no scroll affordance and
+    put two ✕ buttons side by side). A bottom sheet only if filters grow later.
+  - Active filter (anything but All) → **a single chip replaces the icon**:
+    `[ Unprayed today × ]` with the **× inside the chip**. Tap × → All; tap the
+    label → reopen the menu. Neutral active style (ink on `raised`), not blue.
   - Filters remain available in prayer mode.
   - Unprayed filter: a held name with an unprayed intention shows dimmed, with
     the unprayed intention at full strength (keep).
@@ -174,7 +173,8 @@ gold.
   ```
   Normal:     ( History  🔎  ＋ )   ( 🙏 )
   In prayer:  ( 3:12 · with 229    🔎 )   ( Amen )
-  Header in prayer:  [ ✕ ] ……………………… [ filter ]
+  Header normal:     [avatar][✱ 6] ………… [filter]  or  [Unprayed today ×]
+  Header in prayer:  [Cancel] ……………………… [filter]  or  [Unprayed today ×]
   ```
   - The pill is fully rounded, translucent/blurred (semi-opaque fallback on
     Android/low-end), ~56–60 pt tall, floating with a small gap from the
@@ -184,7 +184,8 @@ gold.
     the countdown ring in place.
   - In prayer mode the pill becomes the prayer bar in place: elapsed time ·
     "with N" · **🔎 search stays available** (2026-10-28).
-  - **Cancel lives in the header, top-left** (2026-10-28): a ✕ replaces the
+  - **Cancel lives in the header, top-left** (2026-10-28): a **text button
+    "Cancel"** (not a ✕ — avoids confusion with the filter chip's ×) replaces the
     avatar/streak. No praying-hands icon (the halo already says "praying"). Keeps
     cancel out of the thumb zone next to Amen. **If the prayer is over ~30 s,
     confirm: "Discard this prayer?"**; under that, discard immediately.
@@ -204,6 +205,30 @@ gold.
 - "+" means **Add** and nothing else.
 - **The pray button stays action blue** (2026-10-28). A dark button with gold
   hands reads as disabled and puts gold (= held) on an action.
+
+### Scroll edges and glass (2026-10-28, iOS 26)
+- **No header slab and no divider line.** The list scrolls beneath the header
+  and dissolves into the top of the screen: what's beneath **blurs and dims
+  toward the screen's edge**, and is fully sharp again by the header's bottom.
+- **The same at the bottom:** a separate edge (~120 pt from the bottom of the
+  screen) under the floating bar, so rows dissolve into the bottom too instead
+  of hitting the pill.
+- **Smooth falloff, no visible start or end.** One eased curve for both blur
+  and dim, flat at both ends, bowed so the effect builds early from the inner
+  end. The dim fades to the screen's `ground`, not to black.
+- **The blur stays slight**: words beneath stay readable, just softened. It
+  grows toward the screen's edge (heavier blur nearer the edge).
+- **Top and bottom are tuned independently.** The top dims almost fully at
+  the screen's edge (under the status bar); the bottom dims less, since the
+  floating bar already covers most of it. Values chosen on device and kept as
+  tokens (`PPMaterialTokens.topEdge` / `bottomEdge`).
+- **Controls float on their own glass:** the streak badge, the filter, the
+  pill and the docked search field each sit on a fully rounded frosted shape
+  with a hairline edge, so they hold their shape over any row. The pray button
+  stays solid action blue. The header's glass matches the ~32 pt header
+  avatar. An active filter raises the glass's tint (neutral, never blue).
+- **Fallback:** where the blur isn't available (Android, low-end), the edges
+  are the dim alone, on the same curve, and glass is semi-opaque.
 
 ---
 
@@ -365,6 +390,8 @@ value of the app.
 - Header right "search + filter" → filter only; search from the pill (docked
   above the keyboard), not pull-down (revised 2026-10-27).
 - Footer slab with notched pray button → floating pill + separate pray button.
+- Frosted header bar → no bar; scroll edges blur and dim what's beneath at the
+  top and bottom of the screen, and controls sit on their own glass (§4).
 - Ember "glow" as the check → crisp gold ring/dot (§5); glow only in the
   prayer halo and the transient check bloom.
 - Gold rims on community-card cluster avatars → a gold card border, day-scoped (§6).

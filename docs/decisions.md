@@ -804,3 +804,21 @@ filter stays visible as a neutral chip with ✕. In prayer, cancel moves to the
 header top-left (confirmation over ~30 s) and the pill keeps search; the
 praying-hands header icon is removed. Intentions get ~7:1 contrast / regular
 weight; "Answered" is never larger than its intention.
+
+### Decision: Scroll edges instead of a frosted header; controls on glass
+**Timestamp:** 2026-10-28 (revises the frosted header bar)
+Following iOS 26, Home's header has no slab or divider: the list blurs and dims
+into the top of the screen on one smooth curve with no visible start or end,
+sharp again by the header's bottom. A separate, independently tuned edge does
+the same under the floating bar. The blur stays slight so text beneath stays
+readable. The streak badge, filter, pill and search field float on their own
+rounded glass; the pray button stays solid blue. Where blur isn't supported,
+the edges are the dim alone. Values tuned on device. See design-direction.md §4.
+
+### Decision: Filter menu + single active chip; "Cancel" as text in prayer
+**Timestamp:** 2026-10-28 (REPLACES the same-day inline chip row)
+The filter icon opens a small anchored pull-down menu (All / Unprayed today /
+Carried, checkmark). An active filter shows as one chip replacing the icon, with
+the × inside it (× clears; label reopens the menu). Prayer-mode cancel is a text
+"Cancel" button top-left (confirm over ~30 s), so it can't be confused with the
+chip's ×.
