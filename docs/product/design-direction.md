@@ -219,8 +219,11 @@ gold.
     **With a filter active** (2026-10-28): if the query has no matches in the
     current filter **but does match under All**, say so instead —
     > Nothing in "Still to hold" matches "Robe". 2 matches in All.
-    > [ Show all ]
-    (tap clears the filter, keeps the query). Only offer this when clearing
+    > [ Show all ]   (primary — clears the filter, keeps the query)
+    > or
+    > [ + Add someone ]   (secondary, quieter — prefilled as usual)
+    The matches likely already exist, so Show all leads; Add someone stays
+    available (the match in All may be a different Robert). Only offer this when clearing
     would actually reveal matches; if nothing matches anywhere, show the normal
     empty state (Add someone) plus a quiet "Clear filter" link.
     If the query matches **archived** items, show them under "In your archive"
