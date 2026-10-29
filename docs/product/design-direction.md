@@ -222,12 +222,18 @@ gold.
     - Show the empty state only after typing pauses (~500–700 ms) to avoid
       flicker while typing.
     - **Filter hiding matches:** if a filter is active and the query matches
-      under **All**, add **one glass card** below the button (same frosted
-      surface as the pill, fully rounded, one line):
+      under **All**, add **one match hint** below the button: a flat
+      **`cardSurface`** container (not glass — it's content, not a floating
+      control; see "Glass vs. surface" below), radius ~16 pt (not fully
+      rounded, so it never reads as a field or pill), no border/shadow/blur,
+      one line:
       > 1 match in All            Show →
-      Count + label in secondary; **"Show"** in blue clears the filter (→ All)
-      and keeps the query. Show the count, not the rows (the Gmail/Slack
-      "widen the scope" pattern; keeps the screen calm).
+      Count + label in secondary; **"Show →"** in blue. The **whole container
+      is the tap target** (one action; "Show →" is the visible affordance),
+      with a subtle pressed state, exposed to accessibility as one button
+      ("Show 1 match in All"). Tapping clears the filter (→ All) and keeps the
+      query. Show the count, not the rows (the Gmail/Slack "widen the scope"
+      pattern; keeps the screen calm).
     - **Nothing matches anywhere:** no card and **no "Clear filter" link**
       (clearing can't help; the filter chip's ✕ already clears it).
     - No "or" separator, no second big button.
@@ -269,6 +275,12 @@ gold.
   with a hairline edge, so they hold their shape over any row. The pray button
   stays solid action blue. The header's glass matches the ~32 pt header
   avatar. An active filter raises the glass's tint (neutral, never blue).
+- **Glass vs. surface (2026-10-29):** glass is only for **controls that float
+  over content** (streak badge, filter, pill, docked search field). Anything
+  that **lives in the content** and scrolls or sits with it (community card,
+  search match hint, future in-content cards) is a flat **`cardSurface`**,
+  never glass. Fully rounded capsules are reserved for the floating controls;
+  in-content containers use a softer radius.
 - **Fallback:** where the blur isn't available (Android, low-end), the edges
   are the dim alone, on the same curve, and glass is semi-opaque.
 

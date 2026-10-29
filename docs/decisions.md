@@ -871,3 +871,13 @@ Rejected: showing the hidden rows inside the card (uncommon; Gmail/Slack/Mail
 show a count + scope link instead; crowds a calm screen); "Show all" as the
 primary pill in the filtered case (inconsistent primary); "+ Add '{q}'" (reads
 oddly for partial queries, rejected 2026-10-28); "+ Add name or intention" (too long).
+
+### Decision: Glass only for floating controls; match hint on cardSurface
+**Timestamp:** 2026-10-29 (revises the same-day search empty state entry)
+Glass is reserved for controls floating over content (streak badge, filter,
+pill, docked search field); in-content containers (community card, search match
+hint) are flat `cardSurface` with a softer, non-capsule radius. The "N match in
+All · Show →" hint moves from glass to `cardSurface`, radius ~16 pt, and the
+whole container is the tap target (one action, one accessibility button).
+Why: on glass the hint read as a second search field; the community card was
+already the right model. Whole-container tap: single action, larger target.
