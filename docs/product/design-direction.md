@@ -216,6 +216,13 @@ gold.
     by default (switchable to an intention; normal caps and validation apply).
     Show the empty state only after typing pauses (~500–700 ms) to avoid
     flicker while typing.
+    **With a filter active** (2026-10-28): if the query has no matches in the
+    current filter **but does match under All**, say so instead —
+    > Nothing in "Still to hold" matches "Robe". 2 matches in All.
+    > [ Show all ]
+    (tap clears the filter, keeps the query). Only offer this when clearing
+    would actually reveal matches; if nothing matches anywhere, show the normal
+    empty state (Add someone) plus a quiet "Clear filter" link.
     If the query matches **archived** items, show them under "In your archive"
     with a Restore action instead of (or above) the add shortcut. Search
     matches both aliases and real names. In prayer mode, the add shortcut is

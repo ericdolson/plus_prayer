@@ -850,3 +850,9 @@ mode, only the line shows.
 **Timestamp:** 2026-10-28 (revises same-day copy)
 'Nothing matches "{query}".' with [+ Add someone], opening the add sheet with the
 query prefilled and the cursor at the end; shown after a ~500–700 ms typing pause.
+
+### Decision: Search empty state accounts for an active filter
+**Timestamp:** 2026-10-28
+If a filtered search finds nothing but All has matches: 'Nothing in "{filter}"
+matches "{q}". N matches in All.' with [Show all] (clears filter, keeps query).
+If nothing matches anywhere: the normal empty state plus a quiet "Clear filter".
