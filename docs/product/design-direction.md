@@ -263,7 +263,7 @@ gold.
 - **Secondary text only when it means something:** "Answered · Oct 6" (in
   `heldGoldText`), "Not printed on List 53 · {category}. Edit to include it next
   time." Otherwise, no second line.
-- The **"Unprayed today" filter** still exists; it just isn't painted on rows.
+- The **"Still to hold" filter** still exists; it just isn't painted on rows.
 - History and "last prayed" live on the detail page (bead strand).
 
 ### Intentions on a thread

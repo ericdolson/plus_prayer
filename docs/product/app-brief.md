@@ -86,7 +86,7 @@ idea), not a pattern to follow.
   under their name on a thread (design-direction.md §5). One line; secondary
   text only for exceptional states ("Answered · Oct 3", "Not printed…"). Held
   today = gold ring / gold dot. No unprayed dot, no chevrons, no carried badge.
-- **Search + filter** (All · Unprayed today · Carried) persist across modes.
+- **Search + filter** (All · Still to hold · Carried; see design-direction.md §4) persist across modes.
 - **Presence:** inside the community card, using the ladder (live ≥10 → last
   hour ≥10 → today ≥10 → hidden). Never 0.
 - Nav mode: tap row → detail. In prayer: tap row → check.
