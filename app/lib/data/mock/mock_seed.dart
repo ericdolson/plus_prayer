@@ -81,7 +81,7 @@ class MockSeed {
         );
 
     final subjects = [
-      name('self', 'Jordan Ellis', alias: 'Me', self: true, order: 0, lastPrayedDaysAgo: 1),
+      name('self', 'Eric Olson', alias: 'Me', self: true, order: 0, lastPrayedDaysAgo: 1),
       intention('self-1', 'self', 'Patience with the new job', order: 1, lastPrayedDaysAgo: 3),
       // Short mock ids collide in the tone hash (real ids are UUIDs); a few
       // tones are set as if the user picked them, so Home shows a real mix.

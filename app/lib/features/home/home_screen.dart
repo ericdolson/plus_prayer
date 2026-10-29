@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../components/halo.dart';
+import '../../components/scroll_edge.dart';
 import '../../components/thread.dart';
 import '../../domain/rules/home_filter.dart';
 import '../../state/home_state.dart';
@@ -65,6 +66,14 @@ class HomeScreen extends ConsumerWidget {
                   child: SizedBox(height: homeBarClearance(context, searchOpen: searchOpen) + pp.space.xl),
                 ),
               ],
+            ),
+            // What scrolls under the floating bar dissolves into the bottom of the screen.
+            PositionedDirectional(
+              start: 0,
+              end: 0,
+              bottom: 0,
+              height: pp.bars.bottomEdgeHeight,
+              child: ScrollEdge(ground: pp.colors.background, look: pp.bars.bottomEdge, bottom: true),
             ),
             const PositionedDirectional(start: 0, end: 0, bottom: 0, child: HomeBar()),
           ],

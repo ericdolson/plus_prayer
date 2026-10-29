@@ -122,7 +122,7 @@ class PPColors {
     cardSurface: PPDarkPalette.card,
     sheet: PPDarkPalette.sheet,
     hairline: PPDarkPalette.hairline,
-    thread: PPDarkPalette.hairline,
+    thread: PPDarkPalette.thread,
     ink: PPDarkPalette.ink,
     inkMuted: PPDarkPalette.inkMuted,
     inkFaint: PPDarkPalette.inkFaint,
@@ -150,7 +150,7 @@ class PPColors {
     cardSurface: PPLightPalette.card,
     sheet: PPLightPalette.sheet,
     hairline: PPLightPalette.hairline,
-    thread: PPLightPalette.hairline,
+    thread: PPLightPalette.thread,
     ink: PPLightPalette.ink,
     inkMuted: PPLightPalette.inkMuted,
     inkFaint: PPLightPalette.inkFaint,
@@ -242,11 +242,14 @@ class PPSizes {
   double get clusterAvatar => PPSizeTokens.clusterAvatar;
   double get clusterAvatarLarge => PPSizeTokens.clusterAvatarLarge;
   double get initialsMinGlyph => PPSizeTokens.initialsMinGlyph;
+  double get initialsScale => PPSizeTokens.initialsScale;
+  double get initialsTracking => PPSizeTokens.initialsTracking;
   double get seal => PPSizeTokens.seal;
   double get heldRing => PPSizeTokens.heldRing;
   double get heldRingGap => PPSizeTokens.heldRingGap;
   double get heldDot => PPSizeTokens.heldDot;
   double get thread => PPSizeTokens.thread;
+  double get threadRadius => PPSizeTokens.threadRadius;
   double get check => PPSizeTokens.check;
   double get liveDot => PPSizeTokens.liveDot;
   double get badgeSeal => PPSizeTokens.badgeSeal;
@@ -258,6 +261,7 @@ class PPSizes {
   double get searchBar => PPSizeTokens.searchBar;
   double get prayCompact => PPSizeTokens.prayCompact;
   double get headerIcon => PPSizeTokens.headerIcon;
+  double get headerGlass => PPSizeTokens.headerGlass;
   double get settingsRow => PPSizeTokens.settingsRow;
   double get rowIcon => PPSizeTokens.rowIcon;
   double get wheelPicker => PPSizeTokens.wheelPicker;
@@ -287,6 +291,9 @@ class PPBars {
   double get blur => PPMaterialTokens.barBlur;
   double get tint => PPMaterialTokens.barTint;
   double get opaque => PPMaterialTokens.barOpaque;
+  PPEdgeLook get topEdge => PPMaterialTokens.topEdge;
+  PPEdgeLook get bottomEdge => PPMaterialTokens.bottomEdge;
+  double get bottomEdgeHeight => PPMaterialTokens.bottomEdgeHeight;
 }
 
 /// One extension carrying every +Prayer token group.

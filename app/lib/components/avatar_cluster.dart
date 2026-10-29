@@ -23,6 +23,8 @@ class ClusterPerson {
 ///
 /// Thin rings in [surface] separate the overlaps. 24 pt avatars on the card;
 /// larger ones (with initials) where there's room, like the invitation.
+/// Text that won't fit on one line beside the avatars runs full-width below
+/// them instead (2026-10-28), so "List 52" never wraps beside the cluster.
 /// Screen readers hear every name.
 class AvatarCluster extends StatelessWidget {
   const AvatarCluster({
@@ -32,6 +34,7 @@ class AvatarCluster extends StatelessWidget {
     required this.surface,
     this.style,
     this.avatarSize,
+    this.centered = false,
   });
 
   final List<ClusterPerson> people;
@@ -45,6 +48,9 @@ class AvatarCluster extends StatelessWidget {
 
   /// Default: `clusterAvatar` (24 pt).
   final double? avatarSize;
+
+  /// Center the avatars and text when the text runs below (the invitation).
+  final bool centered;
 
   @override
   Widget build(BuildContext context) {
@@ -64,63 +70,91 @@ class AvatarCluster extends StatelessWidget {
       _ => l10n.clusterTwo(named[0].name, named[1].name),
     };
 
+    final text = '$names $trailing';
+    final textStyle = style ?? context.text.bodySmall;
+    final avatarsWidth = d + step * (discs - 1);
+    final avatars = SizedBox(
+      width: avatarsWidth,
+      height: d,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          for (var i = 0; i < layout.avatars.length; i++)
+            PositionedDirectional(
+              start: step * i,
+              child: MonogramAvatar(
+                initials: layout.avatars[i].initials,
+                tone: layout.avatars[i].tone,
+                size: d,
+                ring: true,
+                ringColor: surface,
+              ),
+            ),
+          if (layout.overflow > 0)
+            PositionedDirectional(
+              start: step * layout.avatars.length,
+              child: Container(
+                width: d,
+                height: d,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: c.clusterOverflow,
+                  border: Border.all(color: surface, width: d * .07),
+                ),
+                child: Text(
+                  l10n.clusterOverflow(layout.overflow),
+                  maxLines: 1,
+                  textScaler: TextScaler.noScaling,
+                  // Scales with the disc, like a monogram's initials.
+                  style: context.text.labelMedium!.copyWith(color: c.inkMuted, fontSize: d * .4, height: 1),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+
     return Semantics(
       label: '${people.map((p) => p.name).join(', ')} $trailing',
       excludeSemantics: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: d + step * (discs - 1),
-            height: d,
-            child: Stack(
-              clipBehavior: Clip.none,
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final beside = box.maxWidth - avatarsWidth - pp.space.sm;
+          final painter = TextPainter(
+            text: TextSpan(text: text, style: textStyle),
+            textDirection: Directionality.of(context),
+            textScaler: MediaQuery.textScalerOf(context),
+            maxLines: 1,
+          )..layout(maxWidth: beside > 0 ? beside : 0);
+          final fits = beside > 0 && !painter.didExceedMaxLines;
+          painter.dispose();
+          if (fits) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                for (var i = 0; i < layout.avatars.length; i++)
-                  PositionedDirectional(
-                    start: step * i,
-                    child: MonogramAvatar(
-                      initials: layout.avatars[i].initials,
-                      tone: layout.avatars[i].tone,
-                      size: d,
-                      ring: true,
-                      ringColor: surface,
-                    ),
-                  ),
-                if (layout.overflow > 0)
-                  PositionedDirectional(
-                    start: step * layout.avatars.length,
-                    child: Container(
-                      width: d,
-                      height: d,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: c.clusterOverflow,
-                        border: Border.all(color: surface, width: d * .07),
-                      ),
-                      child: Text(
-                        l10n.clusterOverflow(layout.overflow),
-                        maxLines: 1,
-                        textScaler: TextScaler.noScaling,
-                        // Scales with the disc, like a monogram's initials.
-                        style: context.text.labelMedium!.copyWith(color: c.inkMuted, fontSize: d * .4, height: 1),
-                      ),
-                    ),
-                  ),
+                avatars,
+                SizedBox(width: pp.space.sm),
+                Flexible(child: Text(text, style: textStyle, maxLines: 1))
               ],
-            ),
-          ),
-          SizedBox(width: pp.space.sm),
-          Flexible(
-            child: Text(
-              '$names $trailing',
-              style: style ?? context.text.bodySmall,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
+            );
+          }
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: centered ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+            children: [
+              avatars,
+              SizedBox(height: pp.space.xs),
+              Text(
+                text,
+                style: textStyle,
+                textAlign: centered ? TextAlign.center : TextAlign.start,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          );
+        },
       ),
     );
   }

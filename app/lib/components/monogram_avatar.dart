@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../theme/pp_theme.dart';
 
-/// White initials on a bright tone (design-direction.md §1b) (prayer-flow.md: monograms at MVP; the
-/// photo slot comes later via `avatarPath`). Decorative to screen readers —
+/// White initials on a bright tone (design-direction.md §1b) in the body
+/// sans, semibold, about 40% of the disc (§2) (prayer-flow.md: monograms at
+/// MVP; the photo slot comes later via `avatarPath`). Decorative to screen readers —
 /// the row or cluster around it reads the name. Small discs keep the letters
 /// legible (`initialsMinGlyph`): two initials become one, and a disc too
 /// small even for one is color only.
@@ -35,11 +36,13 @@ class MonogramAvatar extends StatelessWidget {
     final min = pp.size.initialsMinGlyph;
     final letters = initials.characters;
     // Initials scale with the disc, not with the text theme.
-    final (String, double)? glyph = letters.length > 1 && d * .36 >= min
-        ? (initials, d * .36)
+    final scaled = d * pp.size.initialsScale;
+    final (String, double)? glyph = letters.length > 1 && scaled >= min
+        ? (initials, scaled)
         : letters.isEmpty || min > d * .5
             ? null
-            : (letters.first, d * .44 < min ? min : d * .44);
+            : (letters.first, scaled < min ? min : scaled);
+    final pair = glyph != null && glyph.$1.characters.length > 1;
     return ExcludeSemantics(
       child: Container(
         width: d,
@@ -57,7 +60,14 @@ class MonogramAvatar extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.clip,
                 textScaler: TextScaler.noScaling,
-                style: context.text.titleMedium!.copyWith(color: pp.colors.onAvatar, fontSize: glyph.$2, height: 1),
+                // Even leading centers the cap height in the disc.
+                style: context.text.labelLarge!.copyWith(
+                  color: pp.colors.onAvatar,
+                  fontSize: glyph.$2,
+                  height: 1,
+                  leadingDistribution: TextLeadingDistribution.even,
+                  letterSpacing: pair ? glyph.$2 * pp.size.initialsTracking : 0,
+                ),
               ),
       ),
     );

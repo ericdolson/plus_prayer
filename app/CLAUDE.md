@@ -218,8 +218,11 @@ flipped offline to exercise the queue.
   Held marks (rings, intention dots, the card border) are crisp gold in both
   themes; `heldGlow` (dark only, null in light) is used solely for the prayer
   halo and the brief bloom on check (`useBloom`).
-- Bars are `Frosted` (blur on iOS, semi-opaque elsewhere); the list scrolls
-  beneath the header and the floating bar (pill + pray button, §4).
+- Controls float on `Glass` (`Frosted`: blur on iOS, semi-opaque elsewhere,
+  fully rounded): the floating bar's pill and pray button, the header's badge
+  and filter. The header has no slab: `ScrollEdge` blurs and dims what
+  scrolls beneath toward the top of the screen with a smooth falloff
+  (`shaders/scroll_edge.frag`), never a line (§4).
 - Layout from the POC where design-direction.md doesn't say otherwise; move
   its inline styles into tokens.
 - Layout uses `EdgeInsetsDirectional` / `AlignmentDirectional` (RTL later).

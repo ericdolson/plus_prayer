@@ -1,13 +1,15 @@
 // Home header (design-direction.md §4): left = your avatar (→ You) with the
-// streak badge; right = filter only (search is in the floating bar). The bar
-// is frosted: the list scrolls beneath it. In prayer the nav side steps away
-// for the POC's pulsing praying hands.
+// streak badge; right = filter only (search is in the floating bar). No bar:
+// the list scrolls beneath and dissolves into the top of the screen (the
+// scroll edge); the badge and filter sit on their own glass. In prayer the
+// nav side steps away for the POC's pulsing praying hands.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../components/frosted.dart';
+import '../../components/scroll_edge.dart';
+import '../../components/glass.dart';
 import '../../components/monogram_avatar.dart';
 import '../../components/praying_pulse.dart';
 import '../../components/streak_badge.dart';
@@ -50,25 +52,39 @@ class HomeHeader extends HookConsumerWidget {
               : const _SelfAndStreak(key: ValueKey('self')),
         ),
         const Spacer(),
-        IconButton(
-          tooltip: l10n.filter,
-          iconSize: pp.size.headerIcon,
-          isSelected: query.filter != HomeFilter.all,
-          style: IconButton.styleFrom(
-            backgroundColor: query.filter != HomeFilter.all ? pp.colors.surface : null,
+        Semantics(
+          button: true,
+          selected: query.filter != HomeFilter.all,
+          child: Tooltip(
+            message: l10n.filter,
+            // The glass inside a 44 pt target.
+            child: SizedBox.square(
+              dimension: pp.size.avatar,
+              child: Center(
+                child: Glass(
+                  height: pp.size.headerGlass,
+                  width: pp.size.headerGlass,
+                  selected: query.filter != HomeFilter.all,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => showFilters.value = !showFilters.value,
+                    child: Icon(PPIcons.filter, size: pp.size.headerIcon, color: pp.colors.ink),
+                  ),
+                ),
+              ),
+            ),
           ),
-          icon: const Icon(PPIcons.filter),
-          onPressed: () => showFilters.value = !showFilters.value,
         ),
       ],
     );
 
-    return Frosted(
-      color: pp.colors.background,
+    return ScrollEdge(
+      ground: pp.colors.background,
+      look: pp.bars.topEdge,
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(pp.space.md, pp.space.xs, pp.space.sm, pp.space.sm),
+          padding: EdgeInsetsDirectional.fromSTEB(pp.space.md, pp.space.xs, pp.space.sm, pp.space.sm + 10),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -142,12 +158,19 @@ class _SelfAndStreak extends ConsumerWidget {
             ),
           ),
         ),
-        StreakBadge(
-          state: streakBadgeState(header, today),
-          days: effectiveStreak(header, today),
-          todayVariant: today.weekdayFromSunday,
-          // Build step 5: the streak sheet.
-          onTap: () {},
+        SizedBox(width: pp.space.xxs),
+        Glass(
+          height: pp.size.headerGlass,
+          child: Padding(
+            padding: EdgeInsetsDirectional.symmetric(horizontal: pp.space.xs),
+            child: StreakBadge(
+              state: streakBadgeState(header, today),
+              days: effectiveStreak(header, today),
+              todayVariant: today.weekdayFromSunday,
+              // Build step 5: the streak sheet.
+              onTap: () {},
+            ),
+          ),
         ),
       ],
     );

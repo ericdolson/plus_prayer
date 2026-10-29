@@ -12,7 +12,8 @@
 // list filters live behind it. The keyboard hides the bar, so the field then
 // carries a compact pray button (Amen with its ring in prayer): Pray is never
 // out of reach. With the keyboard down the field sits above the bar, so a
-// prayer started mid-search keeps it until it's closed.
+// prayer started mid-search keeps it until it's closed; left empty, it
+// closes itself when it loses focus.
 
 import 'dart:math' as math;
 
@@ -23,7 +24,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app/router.dart';
-import '../../components/frosted.dart';
+import '../../components/glass.dart';
 import '../../components/ring_button.dart';
 import '../../domain/rules/presence.dart';
 import '../../hooks/use_elapsed.dart';
@@ -106,30 +107,6 @@ class HomeBar extends HookConsumerWidget {
   }
 }
 
-/// Frosted, fully rounded, with a hairline edge so it holds its shape over
-/// any row.
-class _Glass extends StatelessWidget {
-  const _Glass({required this.height, required this.child});
-
-  final double height;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.pp.colors;
-    final radius = BorderRadius.circular(height / 2);
-    return DecoratedBox(
-      position: DecorationPosition.foreground,
-      decoration: BoxDecoration(borderRadius: radius, border: Border.all(color: c.hairline, width: .5)),
-      child: Frosted(
-        color: c.surface,
-        borderRadius: radius,
-        child: SizedBox(height: height, child: child),
-      ),
-    );
-  }
-}
-
 class _Pill extends HookConsumerWidget {
   const _Pill({required this.onSearch});
 
@@ -143,7 +120,7 @@ class _Pill extends HookConsumerWidget {
     final reduceMotion = useReduceMotion();
     final inPrayer = _inPrayer(session);
 
-    return _Glass(
+    return Glass(
       height: pp.size.bar,
       child: AnimatedSwitcher(
         duration: reduceMotion ? Duration.zero : pp.motion.settle,
@@ -307,8 +284,17 @@ class _SearchField extends HookConsumerWidget {
     final l10n = L10n.of(context);
     final queryCtl = ref.read(homeQueryProvider.notifier);
     final search = useTextEditingController(text: ref.read(homeQueryProvider).text);
+    // Leaving the field empty closes it.
+    useEffect(() {
+      void onFocus() {
+        if (!focus.hasFocus && search.text.trim().isEmpty) queryCtl.closeSearch();
+      }
+
+      focus.addListener(onFocus);
+      return () => focus.removeListener(onFocus);
+    }, [focus]);
     const none = InputBorder.none;
-    return _Glass(
+    return Glass(
       height: pp.size.searchBar,
       child: Row(
         children: [

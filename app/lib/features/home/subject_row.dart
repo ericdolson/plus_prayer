@@ -134,6 +134,7 @@ class SubjectRow extends ConsumerWidget {
                     part: threadPart,
                     color: pp.colors.thread,
                     strokeWidth: pp.size.thread,
+                    radius: pp.size.threadRadius,
                     trunkX: pp.space.gutter + pp.size.avatar / 2,
                     endX: textStart - pp.space.sm - pp.size.heldDot / 2,
                     avatarDiameter: pp.size.avatar,

@@ -15,11 +15,13 @@
 
 import 'package:flutter/painting.dart';
 
+const headerControlsHeight = 32.0;
+
 /// Shared by both palettes.
 abstract final class PPPalette {
   /// Initials on an avatar tone: white at 80%, so the letters lightly take
   /// on the tone (still ≥ 3:1 on every tone).
-  static const onAvatar = Color(0xCCFFFFFF);
+  static const onAvatar = Color(0xB3FFFFFF);
 
   /// Drop shadows and wax shading.
   static const shadow = Color(0xFF000000);
@@ -36,12 +38,14 @@ abstract final class PPDarkPalette {
   static const card = Color(0xFF1A1D21); // the community card, settings groups (1.13:1 step)
   static const raised = Color(0xFF23272D); // fields, pills, the floating bar
   static const raisedHigh = Color(0xFF2E333A);
-  static const hairline = Color(0xFF2A2E35); // also the intention thread
+  static const hairline = Color(0xFF2A2E35);
+  static const thread = Color(0xFF3A3F47); // the intention thread
 
-  // Ink — the POC's onSurface, stepped down toward the ground.
-  static const ink = Color(0xFFD7E0EE); // 14.3:1 on ground
-  static const inkMuted = Color(0xFF9097A1); // 6.5:1 on ground, 5.7:1 on card, 5.1:1 on raised
-  static const inkFaint = Color(0xFF676D75); // decorative only
+  // Ink — neutral near-white on the surfaces' hue (216°), stepped down
+  // (design-direction.md §1c, 2026-10-28; the POC's #D7E0EE read blue).
+  static const ink = Color(0xFFE8EAED); // 15.8:1 on ground, 14.0:1 on card, 12.4:1 on raised
+  static const inkMuted = Color(0xFF9A9EA4); // 7.1:1 on ground, 6.3:1 on card, 5.6:1 on raised
+  static const inkFaint = Color(0xFF6C7076); // decorative only (3.8:1 on ground)
 
   // The POC's (and brand's) electric blue with white, as the pray button had
   // it. White on it is 3.8:1: fine for the glyph (≥3:1), short of 4.5:1 for
@@ -71,6 +75,7 @@ abstract final class PPLightPalette {
   static const card = raised;
   static const raisedHigh = Color(0xFFFFFFFF);
   static const hairline = Color(0xFFD3DAE8);
+  static const thread = Color(0xFFC3CCDD);
 
   // Ink — the POC's dark blue onSurface, stepped up toward the ground.
   static const ink = Color(0xFF05294A); // 12.7:1 on ground
@@ -193,7 +198,7 @@ abstract final class PPSizeTokens {
 
   /// Your avatar in the Home header: smaller than the list's, so it doesn't
   /// compete (design-direction.md §4).
-  static const double headerAvatar = 32;
+  static const double headerAvatar = headerControlsHeight;
 
   /// Grouped avatars (§6): the community card's, and the larger ones on the
   /// Amen invitation.
@@ -204,6 +209,11 @@ abstract final class PPSizeTokens {
   /// to one, and a disc too small for one is color only. 24 pt → one letter;
   /// 32 pt → two.
   static const double initialsMinGlyph = 11;
+
+  /// Initials (§2, 2026-10-28): the body sans at this share of the disc's
+  /// diameter, two letters tracked apart by this share of their size.
+  static const double initialsScale = .40;
+  static const double initialsTracking = .04;
   static const double seal = 44;
 
   /// Held ring: width and gap from the avatar (§5).
@@ -215,6 +225,10 @@ abstract final class PPSizeTokens {
 
   /// The intention thread's stroke.
   static const double thread = 1;
+
+  /// The thread's bend into each intention (no larger than half the row or
+  /// the branch's length).
+  static const double threadRadius = 12;
 
   /// The prayer-mode check in a row's trailing slot.
   static const double check = 24;
@@ -242,6 +256,9 @@ abstract final class PPSizeTokens {
   static const double searchBar = 48;
   static const double prayCompact = 40;
   static const double headerIcon = 24;
+
+  /// The glass behind the header's controls (the streak badge, filter).
+  static const double headerGlass = headerControlsHeight;
 
   /// Minimum height of a settings row.
   static const double settingsRow = 56;
@@ -271,13 +288,58 @@ abstract final class PPMotionTokens {
 
 /// Translucent bars (design-direction.md §4).
 abstract final class PPMaterialTokens {
-  static const double barBlur = 24;
+  static const double barBlur = 18;
 
   /// Fill over the blur.
-  static const double barTint = .72;
+  static const double barTint = .42;
 
   /// Fill where blur isn't used (Android, low-end).
   static const double barOpaque = .94;
+
+  /// The scroll edges (components/scroll_edge.dart): what scrolls under the
+  /// header, and under the floating bar, blurs and dims toward the screen's
+  /// edge. Tuned independently.
+  static const topEdge = PPEdgeLook(
+    dim: .97,
+    curve: 6,
+    blurs: [
+      (sigma: 1.0, from: .5, to: 1.0),
+      (sigma: 2.0, from: .15, to: .8),
+    ],
+  );
+  static const bottomEdge = PPEdgeLook(
+    dim: .8,
+    curve: 6,
+    blurs: [
+      (sigma: 1.0, from: .5, to: 1.0),
+      (sigma: 2.0, from: .15, to: .8),
+    ],
+  );
+
+  /// The bottom edge's height, up from the bottom of the screen (the top
+  /// edge is the header's own height).
+  static const double bottomEdgeHeight = 120;
+}
+
+/// One scroll edge's look. Positions run 0 = the screen's edge to 1 = the
+/// edge's inner end (the header's bottom; the top of the bottom overlay).
+class PPEdgeLook {
+  const PPEdgeLook({required this.dim, required this.curve, required this.blurs});
+
+  /// How much the ground covers what's beneath at the screen's edge, easing
+  /// to none at the inner end.
+  final double dim;
+
+  /// The bow of the falloff (dim and blur alike), seamless at both ends:
+  /// 1 = an even S-curve; higher = darkening and blur build sooner from the
+  /// inner end.
+  final double curve;
+
+  /// The blur, kept slight (words stay readable, just softening). Flutter has
+  /// no variable blur, so light to heavier layers, each eased out between
+  /// `from` and `to`; heavier ones stop nearer the screen's edge, so the blur
+  /// grows toward it.
+  final List<({double sigma, double from, double to})> blurs;
 }
 
 abstract final class PPFontTokens {

@@ -76,6 +76,7 @@ class InvitationSheet extends HookConsumerWidget {
               style: context.text.bodyMedium?.copyWith(color: pp.colors.heldGoldText),
               surface: pp.colors.sheet,
               avatarSize: pp.size.clusterAvatarLarge,
+              centered: true,
             ),
             SizedBox(height: pp.space.xxl),
             RingButton(

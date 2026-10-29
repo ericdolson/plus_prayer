@@ -30,7 +30,7 @@ class ThreadPainter extends CustomPainter {
     this.avatarDiameter = 0,
     this.avatarClearance = 0,
     this.branchY,
-    this.radius = 10,
+    required this.radius,
   });
 
   final ThreadPart part;
@@ -69,7 +69,7 @@ class ThreadPainter extends CustomPainter {
     }
 
     final cy = branchY ?? size.height / 2;
-    final r = math.min(radius, cy);
+    final r = math.min(radius, math.min(cy, endX - trunkX));
     final ex = x(endX);
     final dir = rtl ? -1.0 : 1.0;
     final path = Path()
