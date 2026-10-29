@@ -101,6 +101,20 @@ The gold held-ring's 2 pt gap keeps it legible on every tone: the ring sits
 on the ground (8.8:1 dark, 3.5:1 light), and every tone is ≥ ΔE 28 from the
 gold.
 
+## 1c. Dark-mode neutrals (2026-10-28)
+- **Keep a very slight cool tint** on dark surfaces (`#0E1012` ground →
+  `#1A1D21` card, etc.) — it matches the blue-tinted light theme, makes the
+  brand-blue pray button feel native, and lets gold rings pop. Not pure gray.
+- **Neutralize the dark ink:** `#D7E0EE` reads noticeably blue on large type.
+  Move `ink` toward a clean near-white (~`#E8EAED`) and step `inkMuted` /
+  `inkFaint` down from it (re-verify contrast).
+- **All neutrals share one hue** (the same faint cool tint) — no mismatched
+  grays.
+- **Decide on device:** add a temporary developer toggle comparing (a) current
+  tinted surfaces + blue ink, (b) pure neutral gray, (c) tinted surfaces +
+  neutral ink; review in a dim room. (c) is the recommendation. Remove the
+  toggle after choosing.
+
 ## 2. Typography
 - **Serif (Roca)** only for: names on Home, list numbers ("List 52"), and big
   lines (splash, invitation, section titles on detail pages).
@@ -110,6 +124,11 @@ gold.
 - **Intentions are sans**, clearly smaller than names (2026-10-27: one more step
   down than the first build), in `inkMuted` — readable, clearly secondary.
   Names are the landmarks.
+- **Avatar initials use the body sans, not the serif** (2026-10-28): serif
+  initials repeat the serif name beside them ("D Dad") and blur at small
+  sizes; sans reads as a badge, keeps the serif special for names, and suits
+  the bright palette. Medium/semibold weight, ~40% of the avatar diameter,
+  slight letter-spacing on two letters, optically centered.
 - Respect Dynamic Type / font scaling; layouts must not clip at large sizes.
 
 ---
@@ -166,6 +185,8 @@ gold.
   quiet rotating line (faith-neutral by default, brand voice; ~30 lines written
   by Eric). Not in MVP.
 - "+" means **Add** and nothing else.
+- **The pray button stays action blue** (2026-10-28). A dark button with gold
+  hands reads as disabled and puts gold (= held) on an action.
 
 ---
 
@@ -251,6 +272,10 @@ value of the app.
       List 52".
     - **The count appears exactly once** — in the disc when there is one,
       otherwise in the text. Screen readers read every name.
+    - **Card text beside the cluster must not wrap awkwardly:** if "You, Dad
+      and others are on List 52" doesn't fit beside the avatars, let the text
+      run full-width below the cluster rather than breaking "List 52" onto a
+      second line next to it.
     - **One shared cluster component everywhere** (card, Amen invitation, Today's
       list, Your portion). Larger contexts (e.g. the invitation) may use
       28–32 pt avatars with initials.

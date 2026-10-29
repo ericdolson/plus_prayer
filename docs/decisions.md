@@ -780,3 +780,12 @@ optional group-facing label chosen at share time (future `Share.displayLabel`)
 and a confirmation of what the group will see. Value: tier-2 counts, "Mom prayed
 for…" pushes, shared Answered moments. Sharing never changes printing. Not built;
 see docs/product/groups-design-note.md.
+
+### Decision: Sans avatar initials, blue pray button, dark-mode neutrals
+**Timestamp:** 2026-10-28
+Avatar initials use the body sans (medium/semibold, ~40% of diameter) so they
+don't compete with serif names. The pray button stays action blue (dark/gold
+reads disabled and misuses gold). Dark mode keeps a faint, single-hue cool tint
+on surfaces but neutralizes the ink toward ~#E8EAED; confirm on device with a
+temporary 3-way toggle (current / pure gray / tinted + neutral ink). Card status
+text runs full-width rather than wrapping beside the cluster.
