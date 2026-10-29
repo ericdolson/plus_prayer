@@ -188,7 +188,83 @@ class L10nEn extends L10n {
   String get filterAll => 'All';
 
   @override
-  String get filterUnprayed => 'Unprayed today';
+  String get filterStillToHold => 'Still to hold';
+
+  @override
+  String searchNoMatches(String query) {
+    return 'No matches for “$query”';
+  }
+
+  @override
+  String get searchAdd => 'Add';
+
+  @override
+  String searchMatchesInAll(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString matches in All',
+      one: '1 match in All',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchShow => 'Show →';
+
+  @override
+  String searchShowMatchesSpoken(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show $countString matches in All',
+      one: 'Show 1 match in All',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get carriedHelperMeaning =>
+      'Carried means printed on the daily list, and held by everyone who prays it.';
+
+  @override
+  String get carriedHelperKeep =>
+      'Pray with the list each day to keep them carried.';
+
+  @override
+  String get carriedHelperChoose => 'Choose who\'s carried';
+
+  @override
+  String get yourPortion => 'Your portion';
+
+  @override
+  String get filterEmptyStillToHold => 'Everyone\'s been held today.';
+
+  @override
+  String filterCountSpoken(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filterAllHeldSpoken => 'all held';
 
   @override
   String get filterCarried => 'Carried';
@@ -198,6 +274,9 @@ class L10nEn extends L10n {
 
   @override
   String get filter => 'Filter';
+
+  @override
+  String get clearFilter => 'Show all';
 
   @override
   String get closeSearch => 'Close search';
@@ -258,6 +337,15 @@ class L10nEn extends L10n {
 
   @override
   String get discardPrayer => 'End without saving';
+
+  @override
+  String get cancelPrayer => 'Cancel';
+
+  @override
+  String get discardPrayerQuestion => 'Discard this prayer?';
+
+  @override
+  String get keepPraying => 'Keep praying';
 
   @override
   String timeInPrayer(String time) {

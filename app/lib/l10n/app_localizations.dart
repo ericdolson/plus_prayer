@@ -267,11 +267,83 @@ abstract class L10n {
   /// **'All'**
   String get filterAll;
 
-  /// No description provided for @filterUnprayed.
+  /// No description provided for @filterStillToHold.
   ///
   /// In en, this message translates to:
-  /// **'Unprayed today'**
-  String get filterUnprayed;
+  /// **'Still to hold'**
+  String get filterStillToHold;
+
+  /// Search empty state, every no-results case. Always one line: the query truncates with …, never the sentence.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches for “{query}”'**
+  String searchNoMatches(String query);
+
+  /// Search empty state: blue, with a + icon; opens the add sheet prefilled with the query. Type-neutral (names or intentions). Hidden in prayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get searchAdd;
+
+  /// Match hint (flat card) under the search empty state when a filter hides matches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 match in All} other{{count} matches in All}}'**
+  String searchMatchesInAll(int count);
+
+  /// On the match hint: switches the filter to All, keeps the search. Flip the arrow for right-to-left languages.
+  ///
+  /// In en, this message translates to:
+  /// **'Show →'**
+  String get searchShow;
+
+  /// Screen-reader label for the whole match hint (one button).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Show 1 match in All} other{Show {count} matches in All}}'**
+  String searchShowMatchesSpoken(int count);
+
+  /// No description provided for @carriedHelperMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Carried means printed on the daily list, and held by everyone who prays it.'**
+  String get carriedHelperMeaning;
+
+  /// No description provided for @carriedHelperKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Pray with the list each day to keep them carried.'**
+  String get carriedHelperKeep;
+
+  /// Under the Carried filter when it holds only you: opens Your portion.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose who\'s carried'**
+  String get carriedHelperChoose;
+
+  /// No description provided for @yourPortion.
+  ///
+  /// In en, this message translates to:
+  /// **'Your portion'**
+  String get yourPortion;
+
+  /// Home, under the Still to hold filter, when nothing is left.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone\'s been held today.'**
+  String get filterEmptyStillToHold;
+
+  /// Screen reader: the count beside a filter in the menu.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String filterCountSpoken(int count);
+
+  /// Screen reader: the gold check beside Still to hold when nothing is left.
+  ///
+  /// In en, this message translates to:
+  /// **'all held'**
+  String get filterAllHeldSpoken;
 
   /// No description provided for @filterCarried.
   ///
@@ -290,6 +362,12 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Filter'**
   String get filter;
+
+  /// Screen reader label for × inside the active filter chip (returns to All).
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get clearFilter;
 
   /// No description provided for @closeSearch.
   ///
@@ -351,11 +429,29 @@ abstract class L10n {
   /// **'{count, plural, =1{Praying with 1 other} other{Praying with {count} others}}'**
   String prayingWithSpoken(int count);
 
-  /// Screen reader label for ✕ in the prayer bar.
+  /// Screen reader hint for Cancel in the header during prayer.
   ///
   /// In en, this message translates to:
   /// **'End without saving'**
   String get discardPrayer;
+
+  /// Top-left of the header during prayer: ends the prayer without saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelPrayer;
+
+  /// Asked when ✕ ends a prayer that has run over ~30 seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this prayer?'**
+  String get discardPrayerQuestion;
+
+  /// Declines discarding the prayer. Not in the spec yet: for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep praying'**
+  String get keepPraying;
 
   /// No description provided for @timeInPrayer.
   ///

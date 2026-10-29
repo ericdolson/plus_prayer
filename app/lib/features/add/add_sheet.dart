@@ -3,6 +3,8 @@
 //   reveals a name picker (default "Me").
 // - From a name (long-press its row; its detail page at step 5): "Add
 //   intention for {alias}" (80), picker hidden.
+// - From search's empty state: "Add name", prefilled with the query, cursor
+//   at the end ("Robe" → "Robert"); still switchable to an intention.
 // Optional alias for names. New items go to the bottom. After adding a name,
 // offer once: "Add an intention for Dad?".
 // Names and intentions can't include contact info or links — inline, as the
@@ -20,17 +22,21 @@ import '../../state/home_state.dart';
 import '../../state/providers.dart';
 import '../../theme/pp_theme.dart';
 
-Future<void> showAddSheet(BuildContext context, {String? forNameId}) => showModalBottomSheet<void>(
+Future<void> showAddSheet(BuildContext context, {String? forNameId, String? initialText}) =>
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => AddSheet(forNameId: forNameId),
+      builder: (_) => AddSheet(forNameId: forNameId, initialText: initialText),
     );
 
 class AddSheet extends HookConsumerWidget {
-  const AddSheet({super.key, this.forNameId});
+  const AddSheet({super.key, this.forNameId, this.initialText});
 
   /// Set when opened from a name: intention for that name, picker hidden.
   final String? forNameId;
+
+  /// Prefills the text (search's empty state), cursor at the end.
+  final String? initialText;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,7 +53,10 @@ class AddSheet extends HookConsumerWidget {
     final offered = useState(false);
     final busy = useState(false);
     final serverError = useState<String?>(null);
-    final text = useTextEditingController();
+    final text = useTextEditingController.fromValue(TextEditingValue(
+      text: initialText ?? '',
+      selection: TextSelection.collapsed(offset: initialText?.length ?? 0),
+    ));
     final alias = useTextEditingController();
     useListenable(text);
 

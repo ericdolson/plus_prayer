@@ -45,6 +45,8 @@ abstract final class PPDarkPalette {
   // (design-direction.md §1c, 2026-10-28; the POC's #D7E0EE read blue).
   static const ink = Color(0xFFE8EAED); // 15.8:1 on ground, 14.0:1 on card, 12.4:1 on raised
   static const inkMuted = Color(0xFF9A9EA4); // 7.1:1 on ground, 6.3:1 on card, 5.6:1 on raised
+  // Intentions on Home: between inkMuted and ink (design-direction.md §2, 2026-10-28).
+  static const inkIntention = Color(0xFFA9ADB3); // 8.5:1 on ground, 7.5:1 on card
   static const inkFaint = Color(0xFF6C7076); // decorative only (3.8:1 on ground)
 
   // The POC's (and brand's) electric blue with white, as the pray button had
@@ -80,6 +82,7 @@ abstract final class PPLightPalette {
   // Ink — the POC's dark blue onSurface, stepped up toward the ground.
   static const ink = Color(0xFF05294A); // 12.7:1 on ground
   static const inkMuted = Color(0xFF566D83); // 4.6:1 on ground (the POC's #5C748C was 4.2)
+  static const inkIntention = Color(0xFF3A5169); // 7.1:1 on ground, 7.7:1 on card
   static const inkFaint = Color(0xFF8A9BB0); // decorative only
 
   static const primary = Color(0xFF0573E0);
@@ -180,6 +183,10 @@ abstract final class PPRadiusTokens {
 
   /// The community card.
   static const double card = 22;
+
+  /// Small in-content containers (the search match hint): softer than a
+  /// capsule, so they never read as a field or a pill.
+  static const double hint = 16;
 }
 
 abstract final class PPSizeTokens {
@@ -260,6 +267,16 @@ abstract final class PPSizeTokens {
   /// The glass behind the header's controls (the streak badge, filter).
   static const double headerGlass = headerControlsHeight;
 
+  /// Pull-down menu rows (iOS: 44 pt, the menu ~250 pt wide).
+  static const double menuRow = 44;
+  static const double menuWidth = 250;
+
+  /// The gold check in place of "0" beside Still to hold.
+  static const double menuCheck = 16;
+
+  /// The × inside the active filter chip.
+  static const double chipClose = 15;
+
   /// Minimum height of a settings row.
   static const double settingsRow = 56;
 
@@ -283,6 +300,14 @@ abstract final class PPMotionTokens {
 
   /// The gold bloom on check, settling into the crisp ring.
   static const bloom = Duration(milliseconds: 360);
+
+  /// Under Still to hold, rows just held stay this long after Amen, then fold
+  /// away over [fold] (design-direction.md §4).
+  static const linger = Duration(milliseconds: 1200);
+  static const fold = Duration(milliseconds: 480);
+
+  /// Search's empty state waits for typing to pause this long (no flicker).
+  static const searchPause = Duration(milliseconds: 600);
   static const haloBreath = Duration(milliseconds: 2400);
 }
 
@@ -295,6 +320,17 @@ abstract final class PPMaterialTokens {
 
   /// Fill where blur isn't used (Android, low-end).
   static const double barOpaque = .94;
+
+  /// Pull-down menus (components/frosted_menu.dart): heavier than the bars'
+  /// glass, so the rows read over a busy list.
+  static const double menuBlur = 15;
+  static const double menuTint = .42;
+
+  /// Ink over a menu row or an in-content container while it's pressed.
+  static const double pressed = .08;
+
+  /// The menu's lift off the screen.
+  static const menuShadow = BoxShadow(color: Color(0x59000000), blurRadius: 32, offset: Offset(0, 8));
 
   /// The scroll edges (components/scroll_edge.dart): what scrolls under the
   /// header, and under the floating bar, blurs and dims toward the screen's

@@ -12,6 +12,7 @@ abstract final class Routes {
   static String subject(String id) => '/subject/$id';
   static const todaysList = '/list';
   static const history = '/history';
+  static const portion = '/portion';
 }
 
 GoRouter buildRouter() => GoRouter(
@@ -32,6 +33,8 @@ GoRouter buildRouter() => GoRouter(
             GoRoute(path: 'list', builder: (context, state) => const PlaceholderScreen.todaysList()),
             // Build step 5.
             GoRoute(path: 'history', builder: (context, state) => const PlaceholderScreen.history()),
+            // Build step 6: Your portion (who's carried, plan limits).
+            GoRoute(path: 'portion', builder: (context, state) => const PlaceholderScreen.portion()),
           ],
         ),
       ],

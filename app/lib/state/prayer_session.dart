@@ -2,10 +2,14 @@
 //
 // idle ──start──▶ praying ──Amen──▶ (invitation) ──Amen──▶ closing ──▶ idle
 //                    │                    │
-//                    └──✕ (discard)───────┘
+//                    └──Cancel (discard)──┘
+//
+// - Cancel lives in the header, top-left (design-direction.md §4): past
+//   ~30 s it asks "Discard this prayer?" first; under that, it discards at
+//   once.
 //
 // - Prayer happens in place: Home stays, the mode changes.
-// - Amen is available after the minimum (5 s, `/config`); before it only ✕
+// - Amen is available after the minimum (5 s, `/config`); before it only Cancel
 //   exits, and nothing is logged.
 // - Amen without the list (when the user hasn't prayed with it today) opens
 //   the invitation. Tapping it holds the list and runs the same 5 s ring; the
@@ -209,7 +213,13 @@ class PrayerSessionController extends Notifier<PrayerSessionState> {
     await _finish(now);
   }
 
-  /// ✕ — discard. Nothing is logged.
+  /// Past this, Cancel asks before discarding.
+  static const confirmDiscardAfter = Duration(seconds: 30);
+
+  bool shouldConfirmDiscard(DateTime now) =>
+      state.startedAt != null && now.difference(state.startedAt!) > confirmDiscardAfter;
+
+  /// Cancel — discard. Nothing is logged.
   Future<void> cancel() async {
     if (!state.isActive) return;
     _heartbeat?.cancel();

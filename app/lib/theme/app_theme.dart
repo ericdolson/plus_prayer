@@ -249,8 +249,8 @@ abstract final class AppTheme {
       titleLarge: body(20, FontWeight.w600, c.ink, tracking: -.45),
       // Names on Home and "List 52".
       titleMedium: display(19, FontWeight.w700),
-      // Intentions on Home: smaller sans, muted (design-direction.md §2).
-      titleSmall: body(13, FontWeight.w400, c.inkMuted, tracking: -.08),
+      // Intentions on Home: smaller sans, regular, ~7:1 (design-direction.md §2).
+      titleSmall: body(13, FontWeight.w400, c.inkIntention, tracking: -.08),
       bodyLarge: body(17, FontWeight.w400, c.ink, tracking: -.43),
       bodyMedium: body(15, FontWeight.w400, c.ink, tracking: -.23),
       // Secondary lines, captions.

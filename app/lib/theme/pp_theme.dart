@@ -20,6 +20,7 @@ class PPColors {
     required this.thread,
     required this.ink,
     required this.inkMuted,
+    required this.inkIntention,
     required this.inkFaint,
     required this.primary,
     required this.onPrimary,
@@ -70,6 +71,10 @@ class PPColors {
 
   /// Secondary text, intentions (≥ 4.5:1 on ground and card).
   final Color inkMuted;
+
+  /// Intentions on Home: ~7:1, between [inkMuted] and [ink], so the small
+  /// text stays legible (design-direction.md §2).
+  final Color inkIntention;
 
   /// Decorative only: placeholders, unchecked marks. Never essential text.
   final Color inkFaint;
@@ -125,6 +130,7 @@ class PPColors {
     thread: PPDarkPalette.thread,
     ink: PPDarkPalette.ink,
     inkMuted: PPDarkPalette.inkMuted,
+    inkIntention: PPDarkPalette.inkIntention,
     inkFaint: PPDarkPalette.inkFaint,
     primary: PPDarkPalette.primary,
     onPrimary: PPDarkPalette.onPrimary,
@@ -153,6 +159,7 @@ class PPColors {
     thread: PPLightPalette.thread,
     ink: PPLightPalette.ink,
     inkMuted: PPLightPalette.inkMuted,
+    inkIntention: PPLightPalette.inkIntention,
     inkFaint: PPLightPalette.inkFaint,
     primary: PPLightPalette.primary,
     onPrimary: PPLightPalette.onPrimary,
@@ -167,6 +174,10 @@ class PPColors {
     deepest: PPLightPalette.deepest,
     unsealed: PPLightPalette.unsealed,
   );
+
+  /// Pull-down menus, frosted (iOS) and Material alike (the Material one's
+  /// background is [surfaceRaised] in app_theme.dart).
+  Color get menu => surfaceRaised;
 
   /// Wax color for a seal variant (0 = Sunday … 6 = Saturday); null = unsealed.
   Color wax(int? sealVariant) => sealVariant == null ? unsealed : PPWax.base[sealVariant % PPWax.base.length];
@@ -193,6 +204,7 @@ class PPColors {
         thread: Color.lerp(thread, other.thread, t)!,
         ink: Color.lerp(ink, other.ink, t)!,
         inkMuted: Color.lerp(inkMuted, other.inkMuted, t)!,
+        inkIntention: Color.lerp(inkIntention, other.inkIntention, t)!,
         inkFaint: Color.lerp(inkFaint, other.inkFaint, t)!,
         primary: Color.lerp(primary, other.primary, t)!,
         onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
@@ -262,6 +274,10 @@ class PPSizes {
   double get prayCompact => PPSizeTokens.prayCompact;
   double get headerIcon => PPSizeTokens.headerIcon;
   double get headerGlass => PPSizeTokens.headerGlass;
+  double get chipClose => PPSizeTokens.chipClose;
+  double get menuRow => PPSizeTokens.menuRow;
+  double get menuWidth => PPSizeTokens.menuWidth;
+  double get menuCheck => PPSizeTokens.menuCheck;
   double get settingsRow => PPSizeTokens.settingsRow;
   double get rowIcon => PPSizeTokens.rowIcon;
   double get wheelPicker => PPSizeTokens.wheelPicker;
@@ -270,6 +286,7 @@ class PPSizes {
   double get radiusMd => PPRadiusTokens.md;
   double get radiusLg => PPRadiusTokens.lg;
   double get radiusCard => PPRadiusTokens.card;
+  double get radiusHint => PPRadiusTokens.hint;
 }
 
 @immutable
@@ -281,6 +298,9 @@ class PPMotion {
   Duration get calm => PPMotionTokens.calm;
   Duration get spring => PPMotionTokens.spring;
   Duration get bloom => PPMotionTokens.bloom;
+  Duration get linger => PPMotionTokens.linger;
+  Duration get fold => PPMotionTokens.fold;
+  Duration get searchPause => PPMotionTokens.searchPause;
   Duration get haloBreath => PPMotionTokens.haloBreath;
 }
 
@@ -294,6 +314,10 @@ class PPBars {
   PPEdgeLook get topEdge => PPMaterialTokens.topEdge;
   PPEdgeLook get bottomEdge => PPMaterialTokens.bottomEdge;
   double get bottomEdgeHeight => PPMaterialTokens.bottomEdgeHeight;
+  double get menuBlur => PPMaterialTokens.menuBlur;
+  double get menuTint => PPMaterialTokens.menuTint;
+  double get pressed => PPMaterialTokens.pressed;
+  BoxShadow get menuShadow => PPMaterialTokens.menuShadow;
 }
 
 /// One extension carrying every +Prayer token group.

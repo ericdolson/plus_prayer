@@ -3,10 +3,11 @@
 // same height. No slab, no notch. Both change in place in prayer:
 //
 //   Normal:     ( History  🔎  ＋ )   ( 🙏 )
-//   In prayer:  ( 3:12 · with 229   ✕ )   ( Amen )
+//   In prayer:  ( 3:12 · with 229   🔎 )   ( Amen )
 //
 // The button carries the decaying 5 s ring, then becomes Amen; before that
-// only ✕ exits (nothing logged).
+// only the header's Cancel exits (nothing logged). Search stays in reach in
+// prayer; Cancel is kept away from Amen.
 //
 // Search: 🔎 opens a field docked just above the keyboard (Slack-style); the
 // list filters live behind it. The keyboard hides the bar, so the field then
@@ -125,7 +126,7 @@ class _Pill extends HookConsumerWidget {
       child: AnimatedSwitcher(
         duration: reduceMotion ? Duration.zero : pp.motion.settle,
         child: inPrayer
-            ? _PrayerBar(key: const ValueKey('prayer'), startedAt: session.startedAt)
+            ? _PrayerBar(key: const ValueKey('prayer'), startedAt: session.startedAt, onSearch: onSearch)
             : Row(
                 key: const ValueKey('nav'),
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -203,11 +204,12 @@ class _BarIcon extends StatelessWidget {
   }
 }
 
-/// "3:12 · with 229   ✕"
+/// "3:12 · with 229   🔎"
 class _PrayerBar extends ConsumerWidget {
-  const _PrayerBar({super.key, required this.startedAt});
+  const _PrayerBar({super.key, required this.startedAt, required this.onSearch});
 
   final DateTime? startedAt;
+  final VoidCallback onSearch;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -238,12 +240,7 @@ class _PrayerBar extends ConsumerWidget {
             ),
           ],
           const Spacer(),
-          IconButton(
-            tooltip: l10n.discardPrayer,
-            iconSize: pp.size.barIcon,
-            icon: Icon(PPIcons.close, color: pp.colors.inkMuted),
-            onPressed: () => ref.read(prayerSessionProvider.notifier).cancel(),
-          ),
+          _BarIcon(icon: PPIcons.search, label: l10n.search, onPressed: onSearch),
           SizedBox(width: pp.space.xs),
         ],
       ),
