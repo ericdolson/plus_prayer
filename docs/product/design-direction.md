@@ -105,15 +105,12 @@ gold.
 - **Keep a very slight cool tint** on dark surfaces (`#0E1012` ground →
   `#1A1D21` card, etc.) — it matches the blue-tinted light theme, makes the
   brand-blue pray button feel native, and lets gold rings pop. Not pure gray.
-- **Neutralize the dark ink:** `#D7E0EE` reads noticeably blue on large type.
-  Move `ink` toward a clean near-white (~`#E8EAED`) and step `inkMuted` /
-  `inkFaint` down from it (re-verify contrast).
-- **All neutrals share one hue** (the same faint cool tint) — no mismatched
-  grays.
-- **Decide on device:** add a temporary developer toggle comparing (a) current
-  tinted surfaces + blue ink, (b) pure neutral gray, (c) tinted surfaces +
-  neutral ink; review in a dim room. (c) is the recommendation. Remove the
-  toggle after choosing.
+- **Neutral dark ink** (decided on device 2026-10-28, over the old blue ink
+  and pure gray): `#D7E0EE` read noticeably blue on large type. `ink`
+  `#E8EAED`, `inkMuted` `#9A9EA4`, `inkFaint` `#6C7076` (decorative) — 15.8:1,
+  7.1:1 and 3.8:1 on the ground; muted is ≥ 5.6:1 on every surface.
+- **All neutrals share one hue** (the surfaces' faint cool tint, ~216°) — no
+  mismatched grays.
 
 ## 2. Typography
 - **Serif (Roca)** only for: names on Home, list numbers ("List 52"), and big
@@ -121,9 +118,12 @@ gold.
 - **Body sans = the platform system font**: SF Pro on iOS (via the system
   font), Roboto on Android. Roboto on iOS is the biggest thing making it feel
   like an Android port.
-- **Intentions are sans**, clearly smaller than names (2026-10-27: one more step
-  down than the first build), in `inkMuted` — readable, clearly secondary.
-  Names are the landmarks.
+- **Intentions are sans**, clearly smaller than names (13 pt), clearly
+  secondary but **easy to read** (2026-10-28): aim for ~7:1 contrast (between
+  `inkMuted` and the neutralized `ink`) and/or regular weight rather than
+  light. Names are the landmarks.
+- **"Answered · {date}" is never larger than its intention:** same 13 pt or one
+  step smaller, in `heldGoldText` (gold carries the emphasis).
 - **Avatar initials use the body sans, not the serif** (2026-10-28): serif
   initials repeat the serif name beside them ("D Dad") and blur at small
   sizes; sans reads as a badge, keeps the serif special for names, and suits
@@ -157,11 +157,24 @@ gold.
   small wax seal, never a "+" (seal art is a separate upcoming task). States:
   prayed with the list today → seal in today's wax + number; alive but not yet
   today → muted seal + number; zero → muted seal, no number.
-- **Header (right):** filter only.
+- **Header (right): filter** (revised 2026-10-28):
+  - Default: a filter icon; chips hidden.
+  - Tap → chips slide in **inline in the header** as a horizontally scrolling
+    group with a small ✕ at the end: `[All][Unprayed today][Carried] ✕`. No
+    second row.
+  - Pick one → the header collapses, and **the active filter replaces the icon
+    as a chip** (`[Unprayed today ✕]`) so filtering is always visible; ✕ returns
+    to All.
+  - Active state is **neutral** (filled chip, ink on `raised`) — blue is action
+    only.
+  - Filters remain available in prayer mode.
+  - Unprayed filter: a held name with an unprayed intention shows dimmed, with
+    the unprayed intention at full strength (keep).
 - **Bottom bar — floating pill + separate pray button** (iOS 26 pattern):
   ```
   Normal:     ( History  🔎  ＋ )   ( 🙏 )
-  In prayer:  ( 3:12 · with 229   ✕ )   ( Amen )
+  In prayer:  ( 3:12 · with 229    🔎 )   ( Amen )
+  Header in prayer:  [ ✕ ] ……………………… [ filter ]
   ```
   - The pill is fully rounded, translucent/blurred (semi-opaque fallback on
     Android/low-end), ~56–60 pt tall, floating with a small gap from the
@@ -170,7 +183,11 @@ gold.
     blue, on the **right** (thumb side). No notch/cradle. It becomes Amen with
     the countdown ring in place.
   - In prayer mode the pill becomes the prayer bar in place: elapsed time ·
-    "with N" · ✕.
+    "with N" · **🔎 search stays available** (2026-10-28).
+  - **Cancel lives in the header, top-left** (2026-10-28): a ✕ replaces the
+    avatar/streak. No praying-hands icon (the halo already says "praying"). Keeps
+    cancel out of the thumb zone next to Amen. **If the prayer is over ~30 s,
+    confirm: "Discard this prayer?"**; under that, discard immediately.
 - **Search:** 🔎 in the pill opens a search field **docked just above the
   keyboard** (Slack-style); the list filters live behind it. If a prayer starts
   with search active, the field stays, docked above the prayer bar (search

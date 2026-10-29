@@ -789,3 +789,18 @@ reads disabled and misuses gold). Dark mode keeps a faint, single-hue cool tint
 on surfaces but neutralizes the ink toward ~#E8EAED; confirm on device with a
 temporary 3-way toggle (current / pure gray / tinted + neutral ink). Card status
 text runs full-width rather than wrapping beside the cluster.
+
+### Decision: Dark mode uses neutral ink on tinted surfaces
+**Timestamp:** 2026-10-28
+Chosen on device from the 3-way comparison (current blue ink / pure gray /
+tinted surfaces + neutral ink): tinted surfaces + neutral ink. Dark `ink`
+#E8EAED, `inkMuted` #9A9EA4, `inkFaint` #6C7076, all on the surfaces' hue; the
+temporary toggle is removed. See design-direction.md §1c.
+
+### Decision: Inline filters, cancel in the header during prayer, intention legibility
+**Timestamp:** 2026-10-28
+Filter icon expands chips inline in the header (scrolling, with ✕); an active
+filter stays visible as a neutral chip with ✕. In prayer, cancel moves to the
+header top-left (confirmation over ~30 s) and the pill keeps search; the
+praying-hands header icon is removed. Intentions get ~7:1 contrast / regular
+weight; "Answered" is never larger than its intention.
