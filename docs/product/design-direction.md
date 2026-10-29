@@ -208,10 +208,14 @@ gold.
   with search active, the field stays, docked above the prayer bar (search
   persists across modes). **Replaces pull-down search.**
   - **Search empty state** (2026-10-28): one quiet line + an add shortcut:
-    > No one named "Gary" yet.
-    > [ Add "Gary" ]
-    The button opens the add sheet prefilled with the query as a **name**
-    (switchable to an intention; normal caps and input validation apply).
+    > Nothing matches "Robe".
+    > [ + Add someone ]
+    (Revised 2026-10-28: partial queries made "No one named 'Robe' / Add 'Robe'"
+    read oddly.) The button opens the add sheet **prefilled with the query,
+    cursor at the end**, so "Robe" becomes "Robert" naturally; it's a **name**
+    by default (switchable to an intention; normal caps and validation apply).
+    Show the empty state only after typing pauses (~500–700 ms) to avoid
+    flicker while typing.
     If the query matches **archived** items, show them under "In your archive"
     with a Restore action instead of (or above) the add shortcut. Search
     matches both aliases and real names. In prayer mode, the add shortcut is

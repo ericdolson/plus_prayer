@@ -845,3 +845,8 @@ Your portion — explanatory, never an upgrade prompt.
 No results shows 'No one named "{query}" yet.' with [Add "{query}"], opening the
 add sheet prefilled as a name. Archived matches appear with Restore. In prayer
 mode, only the line shows.
+
+### Decision: Search empty state copy handles partial queries
+**Timestamp:** 2026-10-28 (revises same-day copy)
+'Nothing matches "{query}".' with [+ Add someone], opening the add sheet with the
+query prefilled and the cursor at the end; shown after a ~500–700 ms typing pause.
