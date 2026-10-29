@@ -856,3 +856,18 @@ query prefilled and the cursor at the end; shown after a ~500–700 ms typing pa
 If a filtered search finds nothing but All has matches: 'Nothing in "{filter}"
 matches "{q}". N matches in All.' with [Show all] (clears filter, keeps query).
 If nothing matches anywhere: the normal empty state plus a quiet "Clear filter".
+
+### Decision: One search empty state; filter extra in a glass card
+**Timestamp:** 2026-10-29 (supersedes the two 2026-10-28 filter/copy entries above)
+Every no-results case uses the same layout: one line 'No matches for "{q}"'
+(query truncated with "…", never wraps) + a blue [ + Add ] (prefilled add sheet,
+name by default). When a filter hides matches, a one-line glass card below adds
+'N match(es) in All   Show →' (Show clears the filter, keeps the query). When
+nothing matches anywhere, no card and no "Clear filter" link.
+Why: the two screens felt like different experiences; the filtered copy wrapped;
+"Clear filter" was a dead end when All has no matches; "+ Add someone" read as
+people-only though the sheet also adds intentions.
+Rejected: showing the hidden rows inside the card (uncommon; Gmail/Slack/Mail
+show a count + scope link instead; crowds a calm screen); "Show all" as the
+primary pill in the filtered case (inconsistent primary); "+ Add '{q}'" (reads
+oddly for partial queries, rejected 2026-10-28); "+ Add name or intention" (too long).

@@ -207,25 +207,30 @@ gold.
   keyboard** (Slack-style); the list filters live behind it. If a prayer starts
   with search active, the field stays, docked above the prayer bar (search
   persists across modes). **Replaces pull-down search.**
-  - **Search empty state** (2026-10-28): one quiet line + an add shortcut:
-    > Nothing matches "Robe".
-    > [ + Add someone ]
-    (Revised 2026-10-28: partial queries made "No one named 'Robe' / Add 'Robe'"
-    read oddly.) The button opens the add sheet **prefilled with the query,
-    cursor at the end**, so "Robe" becomes "Robert" naturally; it's a **name**
-    by default (switchable to an intention; normal caps and validation apply).
-    Show the empty state only after typing pauses (~500–700 ms) to avoid
-    flicker while typing.
-    **With a filter active** (2026-10-28): if the query has no matches in the
-    current filter **but does match under All**, say so instead —
-    > Nothing in "Still to hold" matches "Robe". 2 matches in All.
-    > [ Show all ]   (primary — clears the filter, keeps the query)
-    > or
-    > [ + Add someone ]   (secondary, quieter — prefilled as usual)
-    The matches likely already exist, so Show all leads; Add someone stays
-    available (the match in All may be a different Robert). Only offer this when clearing
-    would actually reveal matches; if nothing matches anywhere, show the normal
-    empty state (Add someone) plus a quiet "Clear filter" link.
+  - **Search empty state** (revised 2026-10-29): **one layout for every
+    no-results case** — one quiet line + one blue add button:
+    > No matches for "Robe"
+    > [ + Add ]
+    - The line is **always one line** (17pt system sans, secondary). If the
+      query is long, truncate the **query** with "…", never wrap the sentence.
+    - **[ + Add ]** is blue (action) and the only primary, in every case. The
+      label stays type-neutral ("+ Add someone" read as people-only; echoing
+      the query was rejected 2026-10-28 for partial queries). It opens the add
+      sheet **prefilled with the query, cursor at the end**, so "Robe" becomes
+      "Robert" naturally; it's a **name** by default (switchable to an
+      intention; normal caps and validation apply).
+    - Show the empty state only after typing pauses (~500–700 ms) to avoid
+      flicker while typing.
+    - **Filter hiding matches:** if a filter is active and the query matches
+      under **All**, add **one glass card** below the button (same frosted
+      surface as the pill, fully rounded, one line):
+      > 1 match in All            Show →
+      Count + label in secondary; **"Show"** in blue clears the filter (→ All)
+      and keeps the query. Show the count, not the rows (the Gmail/Slack
+      "widen the scope" pattern; keeps the screen calm).
+    - **Nothing matches anywhere:** no card and **no "Clear filter" link**
+      (clearing can't help; the filter chip's ✕ already clears it).
+    - No "or" separator, no second big button.
     If the query matches **archived** items, show them under "In your archive"
     with a Restore action instead of (or above) the add shortcut. Search
     matches both aliases and real names. In prayer mode, the add shortcut is
