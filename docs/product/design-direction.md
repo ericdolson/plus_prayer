@@ -359,6 +359,22 @@ value of the app.
 - **Presence:** shown here to *invite*; prayer mode reveals more as the reward
   (the count moving live; later, richer presence such as countries).
 - The separate floating "258 praying now" line above the list is removed.
+- **Card under filters and search** (2026-10-28):
+  - **All:** shown.
+  - **Still to hold:** shown only if you haven't prayed with the list today;
+    once held, it lingers with its gold border then folds away like a row.
+  - **Carried:** shown.
+  - **Search active:** hidden (results only).
+  - **Prayer mode + Still to hold:** same rules — checkable until held, then
+    lingers and folds.
+- **Carried teaching helper** (2026-10-28): when the Carried view shows only
+  you (self name + your free intention) — or, rarely, nothing — show quietly
+  below the list (or as the empty state):
+  > Carried means printed on the daily list, and held by everyone who prays it.
+  > Pray with the list each day to keep them carried.
+  > [ Choose who's carried ] → Your portion
+  Explains, never sells: no "Upgrade" here; plan limits are handled in Your
+  portion.
 
 ---
 

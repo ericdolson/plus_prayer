@@ -832,3 +832,10 @@ disclosure for people who like a to-do feel; never on the main screen). Empty
 state: "Everyone's been held today." Under the filter, held rows linger with
 their ring ~1–1.5 s after Amen before folding away. Custom menu keeps menu
 accessibility semantics.
+
+### Decision: Community card follows filters; Carried teaching helper
+**Timestamp:** 2026-10-28
+The card shows under All and Carried, under Still to hold only until the list
+is held today (then lingers and folds), and hides during search. When Carried
+shows only the user's own items, a quiet helper explains carrying and links to
+Your portion — explanatory, never an upgrade prompt.
