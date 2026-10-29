@@ -21,7 +21,7 @@ _Last updated: 2026-10-17_
   history). PURGED ≠ data erase.
 - **Ordering is manual (user-decided)** (2026-10-18): drag to reorder names, and
   intentions within a name; self row pinned top. No automatic ordering — the
-  header filter (e.g. Unprayed today) covers that need. `sortOrder` orders the main list; carrying is chosen separately
+  header filter (e.g. Still to hold) covers that need. `sortOrder` orders the main list; carrying is chosen separately
   via `isCarried` (see monetization.md).
 - **Souls/Intentions distinction is an app-layer feature** (structured input).
   Collapsed to one undifferentiated list on social.
