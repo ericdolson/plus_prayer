@@ -207,6 +207,15 @@ gold.
   keyboard** (Slack-style); the list filters live behind it. If a prayer starts
   with search active, the field stays, docked above the prayer bar (search
   persists across modes). **Replaces pull-down search.**
+  - **Search empty state** (2026-10-28): one quiet line + an add shortcut:
+    > No one named "Gary" yet.
+    > [ Add "Gary" ]
+    The button opens the add sheet prefilled with the query as a **name**
+    (switchable to an intention; normal caps and input validation apply).
+    If the query matches **archived** items, show them under "In your archive"
+    with a Restore action instead of (or above) the add shortcut. Search
+    matches both aliases and real names. In prayer mode, the add shortcut is
+    hidden (adding mid-prayer isn't a goal) — show the line only.
   - While the keyboard is up, the bar hides, so the docked row carries a
     **compact pray button** (Amen in prayer mode) at the right end of the
     search field — Pray is never unreachable.

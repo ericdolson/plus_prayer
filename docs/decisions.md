@@ -839,3 +839,9 @@ The card shows under All and Carried, under Still to hold only until the list
 is held today (then lingers and folds), and hides during search. When Carried
 shows only the user's own items, a quiet helper explains carrying and links to
 Your portion — explanatory, never an upgrade prompt.
+
+### Decision: Search empty state with add shortcut
+**Timestamp:** 2026-10-28
+No results shows 'No one named "{query}" yet.' with [Add "{query}"], opening the
+add sheet prefilled as a name. Archived matches appear with Restore. In prayer
+mode, only the line shows.
