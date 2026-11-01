@@ -902,3 +902,30 @@ two states for current vs next list (unreadable at font size; competes with
 gold = held); marks only when a list is mixed (the meaning would flicker as
 items are added); marking private items instead (absence marking); gold or
 blue mark (gold = held, blue = action).
+
+### Decision: Carried mark is a quiet background mark, below 3:1
+**Timestamp:** 2026-11-01 (revises the same-day carried mark entry's
+`carriedMark` = `inkFaint`, ≥3:1)
+`carriedMark` gets its own value halfway between `thread` and `inkFaint`:
+dark `#53585E` (2.7:1 on ground), light `#A6B4C6` (1.8:1). The mark is a
+secondary cue, like the thread: noticed when you look, not scanned for. The
+Carried filter is the reliable way to see what's carried; screen readers hear
+", carried".
+Why: at `inkFaint` the filled glyph read too loud beside the names.
+Rejected: tying it to `thread` (1.8:1 dark, 1.4:1 light: nearly invisible in
+light at 9 pt, and retuning the thread would silently move the mark); keeping
+≥3:1 and quieting it by size or shape instead (may revisit with the D1 bloom).
+
+### Decision: One symbol, two materials — ink bloom = carried, wax bloom = sealed
+**Timestamp:** 2026-11-01 (refines the same-day carried mark entry)
+The bloom is the only brand mark on Home. Flat neutral ("ink") on rows means
+carried — this will be printed. Pressed into the day's wax, it is the seal on
+the community card and the streak badge — an event (the list was sealed; you
+sealed your day). The 7 wax-stamp vectors become the bloom in wax, replacing
+the circled-"+" placeholder (design to-do D2).
+Why: the placeholder stamp (circled "+") and the row bloom read as two
+competing marks for "+Prayer". Matches the ritual: names are printed in ink,
+the whole sheet gets one seal.
+Rejected: wax on rows for items on a sealed list — on paper names aren't
+individually sealed; the row mark is a standing choice, not a dated record
+(that record is the bead strand, already in wax colors).

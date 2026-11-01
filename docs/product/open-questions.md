@@ -15,6 +15,7 @@ decisions.md. **MVP** = blocks MVP build._
 | # | Item | Area |
 |---|---|---|
 | D1 | Draw a dedicated **bloom without the "+"** for the carried mark; until then it uses the logo glyph (`+prayer_icon.svg`). See design-direction §5 Carried mark | design |
+| D2 | Draw the **7 wax-stamp vectors as the bloom pressed into wax** (one per weekday wax), replacing the painted circled-"+" placeholder in `WaxSeal`. Same bloom as D1, so ink (carried) and wax (sealed) read as one symbol. See list-lifecycle and design-direction §5 | design |
 
 ## Resolved
 | # | Resolution | Date |

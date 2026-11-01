@@ -74,7 +74,10 @@ _Last updated: 2026-10-17_
   Ad-free, own player, cacheable offline.
 - **Placement:** full-bleed on the list's detail page, sound off until tapped.
 - **List row avatar = the day's wax seal** (2026-10-18), not a video thumbnail.
-  7 custom wax-stamp vectors in the real wax colors. Before the ritual the row
+  7 custom wax-stamp vectors in the real wax colors, each **the bloom pressed
+  into wax** (2026-11-01; not a circled "+" — the current painted placeholder
+  stays until the art exists; see design-direction §5 "One symbol, two
+  materials"). Before the ritual the row
   shows an unsealed state ("being filmed"); once published it is sealed with
   that day's stamp. Video poster frame is used on the detail page.
 - **`PrayerList.sealVariant` (0–6) is stored**, set by the publish step. Colors

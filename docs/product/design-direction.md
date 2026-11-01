@@ -46,7 +46,7 @@ white; dark grounds taken about halfway to black; `sheet` added._
 | `unprayedRose` | **delete** | **delete** | The pink dot is gone; remove the token so it isn't reused |
 | `inkMuted` | `#9097A1` | `#566D83` (was `#5C748C`) | Secondary text. Dark 6.5:1 on ground; light darkened to pass 4.5:1 (4.6:1) |
 | `inkFaint` | decorative only | decorative only | ~3.7:1 dark, ~2.4:1 light — never essential text. Secondary text uses `inkMuted` |
-| `carriedMark` (new, 2026-11-01) | = `inkFaint` | between `inkFaint` and `inkMuted`, ≥3:1 on `ground` | The carried mark (§5). Carries meaning, so it needs non-text contrast ≥3:1; light `inkFaint` (2.4:1) fails. Pick and check the light value in `tokens.dart` |
+| `carriedMark` (new, 2026-11-01; revised same day) | `#53585E` (2.7:1) | `#A6B4C6` (1.8:1) | The carried mark (§5): its own value, halfway between `thread` and `inkFaint`. A quiet secondary cue, below 3:1 on purpose (`inkFaint` read too loud); the Carried filter is the reliable way to see what's carried |
 
 Contrast is computed (WCAG AA: 4.5:1 body text, 3:1 large text and non-text
 UI); the figures in `app/lib/theme/tokens.dart` are the checked ones.
@@ -335,10 +335,21 @@ list shows at a glance what goes on the printed list.
     x-height.
   - Names: ~11 pt glyph after the Roca name, 6 pt gap, centered on the
     x-height.
-- **Color:** `carriedMark` (neutral, never gold, never blue).
+- **Color:** `carriedMark` (neutral, never gold, never blue): a background
+  mark like the thread, a step above it, below `inkFaint`. Below 3:1 on
+  purpose: a secondary cue you notice when you look, not a signal you scan
+  for; the Carried filter (and the ", carried" label) is the reliable path.
 - **Accessibility:** append ", carried" to the row's label.
 - **Teaching:** the same glyph appears in the Your portion preview and the
   Carried teaching helper (§6).
+- **One symbol, two materials** (2026-11-01): the bloom is the only brand mark
+  on Home. **Ink** (flat, neutral) = carried, "this will be printed" — rows.
+  **Wax** (the bloom pressed into the day's wax) = sealed, an event — the
+  community card's seal and the streak badge. The record of an item having
+  been on sealed lists is the detail page's bead strand (wax colors). Rows
+  never wear wax: on paper each name is printed in ink and the whole sheet
+  gets one seal, and the carried mark is a standing promise, not a dated
+  record.
 
 ```
  (EO)  Me ✻
