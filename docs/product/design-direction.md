@@ -46,6 +46,7 @@ white; dark grounds taken about halfway to black; `sheet` added._
 | `unprayedRose` | **delete** | **delete** | The pink dot is gone; remove the token so it isn't reused |
 | `inkMuted` | `#9097A1` | `#566D83` (was `#5C748C`) | Secondary text. Dark 6.5:1 on ground; light darkened to pass 4.5:1 (4.6:1) |
 | `inkFaint` | decorative only | decorative only | ~3.7:1 dark, ~2.4:1 light — never essential text. Secondary text uses `inkMuted` |
+| `carriedMark` (new, 2026-11-01) | = `inkFaint` | between `inkFaint` and `inkMuted`, ≥3:1 on `ground` | The carried mark (§5). Carries meaning, so it needs non-text contrast ≥3:1; light `inkFaint` (2.4:1) fails. Pick and check the light value in `tokens.dart` |
 
 Contrast is computed (WCAG AA: 4.5:1 body text, 3:1 large text and non-text
 UI); the figures in `app/lib/theme/tokens.dart` are the checked ones.
@@ -153,10 +154,12 @@ gold.
 
 ## 4. Header, bottom bar, search (revised 2026-10-27)
 - **Header (left):** your avatar at **~32 pt** (smaller than list avatars, so it
-  doesn't compete) with the **streak badge** beside it. Badge = the logo as a
-  small wax seal, never a "+" (seal art is a separate upcoming task). States:
-  prayed with the list today → seal in today's wax + number; alive but not yet
-  today → muted seal + number; zero → muted seal, no number.
+  doesn't compete) with the **streak badge** beside it. Badge = **the day's wax
+  stamp** (2026-11-01: the same `WaxSeal` as the community card, at badge
+  size), no longer the tinted logo glyph — that glyph is now the carried mark
+  (§5). States: prayed with the list today → stamp in today's wax + number;
+  alive but not yet today → muted stamp + number; zero → muted stamp, no
+  number.
 - **Header (right): filter** (revised again 2026-10-28):
   - Default: a filter icon.
   - Tap → a **small custom menu anchored to the icon** (styled to the app; must
@@ -306,11 +309,51 @@ gold.
 - The **"Still to hold" filter** still exists; it just isn't painted on rows.
 - History and "last prayed" live on the detail page (bead strand).
 
+### Carried mark (2026-11-01)
+A tiny neutral glyph **after** every carried name and intention, so a long
+list shows at a glance what goes on the printed list.
+- **Meaning = carried**, the same set the Carried filter shows: the owner chose
+  it for the list (intention effectively carried = intention ∧ its name). It is
+  **not time-indexed**: no "on List 52" vs "staged for List 53" per row. The
+  gate is per user, so the community card owns timing ("Pray to carry them
+  onto List 53" / "They'll be on List 53", "Mom joins you on List 53"); the
+  detail page's bead strand owns history. The mark does not change when the
+  user prays or lapses.
+- **Name carried, intention not:** the name has the mark, the intention
+  doesn't. An intention can't be carried without its name, so the mark never
+  appears on an intention under an unmarked name.
+- **"Me" is marked too** — always on, which is how the glyph is learned.
+- **Absence is never marked:** private items simply have no mark.
+- **Glyph (for now):** the same logo glyph the streak badge used
+  (`assets/img/+prayer_icon.svg`, the bloom with the "+" cut out), as a flat
+  neutral silhouette — no wax, no sheen. Later: a dedicated bloom without the
+  "+" (Eric to draw; see open-questions D1).
+- **Placement:** trailing, inline with the text (an inline span, so it never
+  wraps alone onto its own line; with single-line truncation it follows the
+  ellipsis). The leading slot stays the gold held dot.
+  - Intentions: ~9 pt glyph after the 13 pt text, 4 pt gap, centered on the
+    x-height.
+  - Names: ~11 pt glyph after the Roca name, 6 pt gap, centered on the
+    x-height.
+- **Color:** `carriedMark` (neutral, never gold, never blue).
+- **Accessibility:** append ", carried" to the row's label.
+- **Teaching:** the same glyph appears in the Your portion preview and the
+  Carried teaching helper (§6).
+
+```
+ (EO)  Me ✻
+   ╰── Patience with the new job ✻
+ ((D)) Dad ✻
+   ╰─● Healing after his surgery ✻      ● = held today (gold)
+   ╰── Rest for his heart               (private: no mark)
+```
+
 ### Intentions on a thread
 - A thin neutral `thread` line drops from the **bottom-center of the name's
   avatar** and curves to each intention (like a prayer strand — the same
   metaphor as the bead history).
-- **Intention text is left-aligned with the name text.** No bullets, no icons.
+- **Intention text is left-aligned with the name text.** No bullets, no icons
+  — except the trailing carried mark (§5).
 - **Held today:** a small **gold dot (~5 pt)** where the thread meets the
   intention (crisp, solid, both themes — no glow). The thread itself never
   changes color or weight.
@@ -451,8 +494,9 @@ value of the app.
 - "Rows: title + one secondary line" → secondary text only for exceptional
   states (§5).
 - "Unprayed dot (POC pink)" → removed; presence is marked with gold instead.
-- "Small mark if carried on the next list" on rows → removed (carried lives in
-  the community card, Your portion, and the detail page).
+- "Small mark if carried on the next list" on rows → removed 2026-10-23,
+  **restored 2026-11-01 in a new form**: a trailing neutral carried mark that
+  means "carried", not "on the next list" (§5).
 - "Rows' `>` becomes a checkbox" → no chevrons; the checkbox fades into the
   empty trailing slot.
 - "Pinned list row" → the community card (§6).
@@ -465,7 +509,8 @@ value of the app.
 - Ember "glow" as the check → crisp gold ring/dot (§5); glow only in the
   prayer halo and the transient check bloom.
 - Gold rims on community-card cluster avatars → a gold card border, day-scoped (§6).
-- Streak badge glyph → the new logo as a wax seal.
+- Streak badge glyph → the day's wax stamp (`WaxSeal`, 2026-11-01); the logo
+  glyph moves to the carried mark (§5).
 - Color rule: blue = action, gold = held, everything else neutral.
 - Muted/antique avatar tones → bright avatar palette (§1b).
 

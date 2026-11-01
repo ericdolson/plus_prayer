@@ -881,3 +881,24 @@ All · Show →" hint moves from glass to `cardSurface`, radius ~16 pt, and the
 whole container is the tap target (one action, one accessibility button).
 Why: on glass the hint read as a second search field; the community card was
 already the right model. Whole-container tap: single action, larger target.
+
+### Decision: Carried mark on rows; streak badge becomes the wax stamp
+**Timestamp:** 2026-11-01 (revises 2026-10-23 "no carried badges" / "small mark
+if carried" removal)
+A tiny neutral glyph trails every carried name and intention on Home (same set
+as the Carried filter; intention = intention ∧ name). It means "carried", not
+"on List 52" or "staged for List 53": the gate is per user, so per-row timing
+would repeat the community card's line on every row, and the only per-item
+differences (edits since the flip) are already named on the card. "Me" is
+marked too. Private items have no mark (absence is never marked). For now the
+glyph is the logo glyph the streak badge used; a bloom without the "+" is a
+later design to-do (open-questions D1). The streak badge switches now to the
+day's wax stamp (`WaxSeal`), so the two don't read as the same thing.
+Why: without a mark, a long list where only some items are carried was
+unreadable except through the Carried filter (e.g. "Rest for his heart" under
+a carried Dad).
+Rejected: a leading mark (collides with the gold held dot, breaks alignment);
+two states for current vs next list (unreadable at font size; competes with
+gold = held); marks only when a list is mixed (the meaning would flicker as
+items are added); marking private items instead (absence marking); gold or
+blue mark (gold = held, blue = action).

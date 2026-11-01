@@ -11,6 +11,11 @@ decisions.md. **MVP** = blocks MVP build._
 | Q18 | Link a social participant's handle to their app account? | list-lifecycle | Later |
 | Q20 | Physical printing at app scale: how is a list with 100k+ names printed/sealed? | list-lifecycle | Stage 2 |
 
+## Design to-dos (not blocking)
+| # | Item | Area |
+|---|---|---|
+| D1 | Draw a dedicated **bloom without the "+"** for the carried mark; until then it uses the logo glyph (`+prayer_icon.svg`). See design-direction §5 Carried mark | design |
+
 ## Resolved
 | # | Resolution | Date |
 |---|---|---|

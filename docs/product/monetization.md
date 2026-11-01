@@ -65,7 +65,8 @@ _Last updated: 2026-10-17_
   choices about who is carried.
 - **Auto-carry** (2026-10-17): new names/intentions are carried automatically
   while the pool has room. When the pool is full, a new item is saved for
-  private prayer and clearly marked as not on the list (never silently).
+  private prayer and the add sheet says so (never silently); on Home it simply
+  has no carried mark (design-direction §5 — absence is never marked).
 
 ## OPEN (product meeting)
 - **Price.** Earlier target $20–30/yr ("membership, not paywall"). Later idea
