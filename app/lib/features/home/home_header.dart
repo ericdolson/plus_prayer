@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../components/claim_outside_tap.dart';
 import '../../components/frosted_menu.dart';
 import '../../components/scroll_edge.dart';
 import '../../components/glass.dart';
@@ -189,7 +190,7 @@ class _FilterMenu extends ConsumerWidget {
             child: Text(filterLabel(l10n, f)),
           ),
       ],
-      builder: (context, menu, _) => anchor(menu),
+      builder: (context, menu, _) => ClaimOutsideTap(groupId: menu, open: menu.isOpen, child: anchor(menu)),
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../hooks/use_reduce_motion.dart';
 import '../theme/pp_icons.dart';
 import '../theme/pp_theme.dart';
+import 'claim_outside_tap.dart';
 import 'frosted.dart';
 
 /// One row of a [FrostedMenu]; [selected] gets the check. [trailing] sits at
@@ -35,8 +36,9 @@ class FrostedMenuItem {
 ///
 /// Screen readers get a menu: announced as one, named [semanticLabel], each
 /// row a radio item ("selected" on the checked one). Focus moves in on open
-/// (to the checked row); tapping outside, the escape gesture (VoiceOver's
-/// two-finger scrub) and scrolling what's beneath dismiss it.
+/// (to the checked row); tapping outside (the tap goes no further), the
+/// escape gesture (VoiceOver's two-finger scrub) and scrolling what's
+/// beneath (in the same drag) dismiss it.
 class FrostedMenu extends HookWidget {
   const FrostedMenu({super.key, required this.items, required this.semanticLabel, required this.builder});
 
@@ -58,7 +60,7 @@ class FrostedMenu extends HookWidget {
         anim.forward();
       },
       onCloseRequested: (hide) => anim.reverse().whenCompleteOrCancel(hide),
-      builder: (context, menu, _) => builder(context, menu),
+      builder: (context, menu, _) => ClaimOutsideTap(groupId: menu, open: menu.isOpen, child: builder(context, menu)),
       overlayBuilder: (context, info) {
         final rtl = Directionality.of(context) == TextDirection.rtl;
         // Line up with the anchor's nearer side of the screen.

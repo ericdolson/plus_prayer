@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/pp_icons.dart';
 import '../theme/pp_theme.dart';
+import 'claim_outside_tap.dart';
 
 /// A titled (or untitled) card of rows, hairlines between them.
 class SettingsSection extends StatelessWidget {
@@ -208,11 +209,15 @@ class SettingsMenuTile<T> extends StatelessWidget {
             child: Text(text),
           ),
       ],
-      builder: (context, menu, _) => SettingsTile(
-        title: title,
-        value: label,
-        accessory: SettingsAccessory.menu,
-        onTap: () => menu.isOpen ? menu.close() : menu.open(),
+      builder: (context, menu, _) => ClaimOutsideTap(
+        groupId: menu,
+        open: menu.isOpen,
+        child: SettingsTile(
+          title: title,
+          value: label,
+          accessory: SettingsAccessory.menu,
+          onTap: () => menu.isOpen ? menu.close() : menu.open(),
+        ),
       ),
     );
   }

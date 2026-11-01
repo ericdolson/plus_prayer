@@ -144,10 +144,7 @@ class _SubjectRows extends HookConsumerWidget {
       );
     }
     // Nothing left, the list included.
-    if (rows.isEmpty &&
-        query.filter == HomeFilter.stillToHold &&
-        query.text.trim().isEmpty &&
-        !ref.watch(communityCardShownProvider)) {
+    if (ref.watch(allHeldShownProvider)) {
       return SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsetsDirectional.symmetric(horizontal: pp.space.gutter, vertical: pp.space.xl),
@@ -352,7 +349,16 @@ class _Fold extends HookWidget {
     final shown = ReverseAnimation(CurvedAnimation(parent: anim, curve: Curves.easeInOut));
     final faded = FadeTransition(opacity: shown, child: child);
     if (reduceMotion) return faded;
-    return SizeTransition(sizeFactor: shown, alignment: AlignmentDirectional.topStart, child: faded);
+    // Clip only while folding: at rest, held rings (drawn outside the card
+    // and the avatars) must show whole.
+    return AnimatedBuilder(
+      animation: shown,
+      builder: (context, child) => ClipRect(
+        clipBehavior: anim.isDismissed ? Clip.none : Clip.hardEdge,
+        child: Align(alignment: AlignmentDirectional.topStart, heightFactor: shown.value, child: child),
+      ),
+      child: faded,
+    );
   }
 }
 

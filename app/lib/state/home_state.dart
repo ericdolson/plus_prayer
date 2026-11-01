@@ -111,6 +111,18 @@ final communityCardShownProvider = Provider<bool>((ref) {
   return card != null && (!card.prayedWithList || ref.watch(lingerProvider).containsKey(cardLingerKey));
 });
 
+/// Under Still to hold with nothing left, the list included: "Everyone's
+/// been held today."
+final allHeldShownProvider = Provider<bool>((ref) {
+  final query = ref.watch(homeQueryProvider);
+  final rows = ref.watch(homeRowsProvider).value;
+  return rows != null &&
+      rows.isEmpty &&
+      query.filter == HomeFilter.stillToHold &&
+      query.text.trim().isEmpty &&
+      !ref.watch(communityCardShownProvider);
+});
+
 /// Folding away under Still to hold, after the list was held.
 final communityCardFoldingProvider =
     Provider<bool>((ref) => ref.watch(lingerProvider)[cardLingerKey] == LingerPhase.folding);
