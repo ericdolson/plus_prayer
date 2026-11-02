@@ -967,3 +967,26 @@ Rejected: icons for the counts (person / praying hands, even neutral) — reads
 as engagement metrics, and the hands should stay a verb; an intention count on
 the card (Today's list has it); presence on its own line or outside the card;
 a fixed 4-avatar cap.
+
+### Decision: Community card — answers to the app agent's build questions
+**Timestamp:** 2026-11-02 (refines the same-day card redesign)
+- Avatar row always shown (you're always carried); only-you copy: "Pray to be
+  on List 53" / "You'll be on List 53" / "Your next prayer puts you on List 54".
+- Presence lower rungs: no dot (dot = now), keep the verb — "640 prayed this
+  hour", "4,113 prayed today"; hide the marker if it can't fit whole.
+- Unsealed seal: unpressed neutral blank (`raisedHigh` + relief) with a faint
+  debossed bloom; no dashed ring, no circled "+".
+- Bloom kept visible by rendering wax body and impression as separate layers
+  (impression centered on the visible part); D2 art to ship as layers.
+- Monday navy accepted as distinct from action blue; gold border beside
+  Sunday's gold wax to be checked on device.
+- Changes ("joins" / "isn't carried") are named only in Your portion; the
+  earlier "named at the Amen invitation" was a spec error.
+- Closing notice when only you are carried: "List 52 closes in 3 min · pray to
+  be on List 53"; no clock icon.
+- Long text: never shrink below the user's type size; status may wrap to two
+  lines (no mid-sentence "…"); counts wrap at the middle dot; presence hides
+  first; at accessibility sizes the world block may drop below the stamp.
+Rejected: hiding the avatar row when not on today's list (hides it from anyone
+who skipped a day); "640 this hour" (verbless, reads as live); truncating the
+status with "…" or shrinking the counts (breaks Dynamic Type).

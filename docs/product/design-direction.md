@@ -406,9 +406,16 @@ on Today's list or Your portion.
   card's inner radius so **~75% is visible** and the wax runs into the rounded
   corner. It is the card's anchor and its distinctive mark; the crop hints
   there's more inside (Today's list shows the full seal uncropped).
-- Keep the **impressed bloom readable inside the visible portion** (place it
-  slightly down/right of the seal's center rather than cropping geometrically).
-- Unsealed ("being filmed") state must look intentional at this size.
+- Keep the **impressed bloom readable inside the visible portion**: render
+  the wax body and the impression as **separate layers** — the body crops into
+  the corner, the bloom is centered on the *visible* part. Stopgap until then:
+  a smaller offset. The D2 stamp art should be delivered as body + impression
+  layers for this reason.
+- **Unsealed ("being filmed") state** (2026-11-02): no dashed ring, no "+"
+  (the circled "+" is retired). Render the same seal shape as an unpressed
+  neutral blank — `raisedHigh` body with the same relief shading — with the
+  bloom glyph faintly debossed (`inkFaint`), as if waiting for wax. Real art
+  comes with the stamp set (open-questions D2).
 - The Amen stamp moment lands here.
 - **Check before committing:** the 7 wax colors at this size (a wax close to
   action blue could read as a button — deepen/desaturate it if so), and the
@@ -419,7 +426,10 @@ on Today's list or Your portion.
 - **Title row:** "List 52" (Roca), with **presence as a small live marker on
   the right of the same row**: "● 239 praying" (the live dot, `inkMuted`
   text). Display ladder unchanged (live ≥10 → last hour ≥10 → today ≥10 →
-  hidden; never 0); lower rungs use their short forms and must fit the row.
+  hidden; never 0). **Lower rungs have no dot** (the dot means *now*) and
+  keep their verb: "640 prayed this hour", "4,113 prayed today"; screen
+  readers hear the long forms. If the marker doesn't fit the row whole, hide
+  it — never truncate a number.
   **In prayer mode the marker hides** (the pill already shows "with N").
 - **Counts row:** "4,345 people · 3,881 prayers" — **words, not icons**
   (icon + number reads as engagement metrics; the praying hands stay a verb).
@@ -432,7 +442,10 @@ on Today's list or Your portion.
 
 ### The you block (full width, below)
 - **Avatar row = your carried people** (who goes onto the next list): you
-  first, then the user's order; intentions have no avatars. **Fill the card's
+  first, then the user's order; intentions have no avatars. **Always shown**
+  (2026-11-02) — you are always carried, so a new user or someone who skipped
+  yesterday still sees at least their own avatar. It is not "who was on
+  today's list". **Fill the card's
   width**; add the neutral **"+N" overflow disc only when the faces don't
   fit** (measured, not a fixed cap). 24 pt avatars, single initial (≥11 pt; if
   it can't reach 11 pt, color only), thin `cardSurface` separator ring on
@@ -447,16 +460,25 @@ on Today's list or Your portion.
   - prayed with the list today but the next list isn't covered yet (some
     time zones after the flip) → "Your next prayer carries them onto List 54";
   - not prayed → "Pray to carry them onto List 53".
-  New user / nothing carried yet: no avatar row; "Pray to be on List 53" →
-  "You'll be on List 53".
+  **Only you carried** (new user, or no one else carried): "Pray to be on
+  List 53" → "You'll be on List 53"; after-flip case "Your next prayer puts
+  you on List 54".
+- **Long text / large type** (2026-11-02): never shrink text below the user's
+  size. The status line may wrap to a second line (meaning beats line count;
+  no "…" mid-sentence), keeping "List 53" unbroken. The counts row wraps at the
+  middle dot (people / prayers on separate lines). The presence marker hides
+  first. At accessibility sizes the world block may move below the stamp.
 - **Closing notice replaces the status line** (doesn't add one), only if you
   haven't prayed with the list today: "List 52 closes in 5 min · pray to carry
-  them".
+  them" (only you carried: "List 52 closes in 3 min · pray to be on List 53").
+  No clock icon.
 - **Removed from the card (2026-11-02):** the "You, Dad and others are on
   List 52" line (the avatars show who; who was on today's list lives on Today's
   list) and the **differences lines** ("Mom joins you…", "Aunt Bea isn't
-  carried…") — the carried mark on rows (§5) now shows this; changes are named
-  at the Amen invitation and in Your portion.
+  carried…") — the carried mark on rows (§5) now shows this; changes are
+  named in **Your portion** only. (Correction 2026-11-02: the Amen invitation
+  appears only when a prayer ended without the list and states who will be
+  carried; it does not name changes.)
 - **No extra "you held this list yesterday" icon or count** (2026-10-24).
 
 ### Card behavior
