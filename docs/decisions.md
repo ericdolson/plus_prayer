@@ -1022,3 +1022,11 @@ Kim). Dark theme only: stamps get a ~1 pt rim light on visible edges and a
 modest body lift, since most ritual waxes sink into the dark card; light theme
 and wax identities unchanged. Status gap stays 8 pt; padding was already
 equal (the imbalance was optical — no change).
+
+### Decision: Dark-theme wax separation — scope and details
+**Timestamp:** 2026-11-02
+The rim/lift lives in the `WaxSeal` component, so every seal on a dark surface
+gets it (card, Amen invitation, Today's list); beads under ~24 pt get the lift
+only. Even rim accepted until layered D2 art allows a directional one. Sunday's
+gold gets no lift (keeps it apart from the held border). The unsealed blank
+gets a subtle neutral rim, no lift.

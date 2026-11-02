@@ -431,6 +431,15 @@ on Today's list or Your portion.
   its visible edges** (the wax's sheen color, partial opacity) and allow a
   modest per-theme lift of the body color so the silhouette separates from the
   card. The wax names and light-theme colors stay true to the physical wax.
+  - **Scope:** part of the `WaxSeal` component (theme-aware), so it applies
+    wherever a seal sits on a dark surface — card, Amen invitation, Today's
+    list. Below ~24 pt (beads) the lift applies but no rim.
+  - **Rim:** an even rim (outline copy behind the seal) is fine for now, kept
+    subtle; a directional rim on the lit edge comes with the layered D2 art.
+  - **Lift only waxes that need it:** Sunday's gold gets no lift (it already
+    separates, and lifting pushes it toward the gold held border).
+  - **Unsealed blank:** no lift (it isn't wax), but give it the same subtle
+    rim in a lighter neutral so it separates from `cardSurface`.
 - **Check before committing:** the 7 wax colors at this size (a wax close to
   action blue could read as a button — deepen/desaturate it if so), and the
   gold held border beside non-gold wax in both themes.
