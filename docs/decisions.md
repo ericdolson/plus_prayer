@@ -929,3 +929,19 @@ the whole sheet gets one seal.
 Rejected: wax on rows for items on a sealed list — on paper names aren't
 individually sealed; the row mark is a standing choice, not a dated record
 (that record is the bead strand, already in wax colors).
+
+### Decision: Streak badge is a neutral pewter seal; the number carries the state
+**Timestamp:** 2026-11-01 (revises the same-day "streak badge becomes the wax stamp")
+The badge uses the stamp shape unwaxed, in pewter (`inkMuted` + relief), never
+gold or a wax color. Prayed today → number in `ink`; alive, not yet today →
+number in `inkMuted`, seal dimmer; zero → dim seal, no number.
+Why: in the build, the badge repeated the card's gold seal right above it —
+duplicative and loud, with the card's gold border already saying "prayed
+today". And the clocks don't match: the badge clears at local midnight but the
+wax changes at the flip, so a colored badge would either show a retired list's
+wax after the flip or claim a new list not yet prayed. Wax color belongs to
+lists (card, Today's list, beads), never to the user.
+Rejected: today's-weekday wax (mismatches the list's wax across time zones);
+the wax of the last list prayed (stale after the flip); switching to the new
+list's wax at the flip (claims a list not yet prayed); gold (gold = held, and
+the card border already holds that signal).

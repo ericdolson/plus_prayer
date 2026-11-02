@@ -154,12 +154,16 @@ gold.
 
 ## 4. Header, bottom bar, search (revised 2026-10-27)
 - **Header (left):** your avatar at **~32 pt** (smaller than list avatars, so it
-  doesn't compete) with the **streak badge** beside it. Badge = **the day's wax
-  stamp** (2026-11-01: the same `WaxSeal` as the community card, at badge
-  size), no longer the tinted logo glyph — that glyph is now the carried mark
-  (§5). States: prayed with the list today → stamp in today's wax + number;
-  alive but not yet today → muted stamp + number; zero → muted stamp, no
-  number.
+  doesn't compete) with the **streak badge** beside it. Badge = **a neutral
+  pewter seal** (2026-11-01, revised same day): the same stamp shape as
+  `WaxSeal`, unwaxed, tinted `inkMuted` with its relief shading so it reads as
+  a pressed seal (not the flat ink carried mark, §5), ~22 pt. **Never gold,
+  never a wax color** — wax color belongs to a list, not to you. **The number
+  carries the state:** prayed with the list today → number in `ink`; alive
+  but not yet today → number in `inkMuted`, seal one step dimmer; zero → dim
+  seal, no number. Why neutral: the badge clears at local midnight but the
+  list's wax changes at the flip, so a colored badge is wrong for part of
+  every day; and the card's gold border already says "prayed today".
 - **Header (right): filter** (revised again 2026-10-28):
   - Default: a filter icon.
   - Tap → a **small custom menu anchored to the icon** (styled to the app; must
@@ -345,7 +349,8 @@ list shows at a glance what goes on the printed list.
 - **One symbol, two materials** (2026-11-01): the bloom is the only brand mark
   on Home. **Ink** (flat, neutral) = carried, "this will be printed" — rows.
   **Wax** (the bloom pressed into the day's wax) = sealed, an event — the
-  community card's seal and the streak badge. The record of an item having
+  community card's seal (and Today's list). The streak badge is the same
+  seal **unwaxed, in pewter** (§4). The record of an item having
   been on sealed lists is the detail page's bead strand (wax colors). Rows
   never wear wax: on paper each name is printed in ink and the whole sheet
   gets one seal, and the carried mark is a standing promise, not a dated
@@ -520,8 +525,8 @@ value of the app.
 - Ember "glow" as the check → crisp gold ring/dot (§5); glow only in the
   prayer halo and the transient check bloom.
 - Gold rims on community-card cluster avatars → a gold card border, day-scoped (§6).
-- Streak badge glyph → the day's wax stamp (`WaxSeal`, 2026-11-01); the logo
-  glyph moves to the carried mark (§5).
+- Streak badge glyph → a neutral pewter seal (`WaxSeal` shape, unwaxed,
+  2026-11-01); the logo glyph moves to the carried mark (§5).
 - Color rule: blue = action, gold = held, everything else neutral.
 - Muted/antique avatar tones → bright avatar palette (§1b).
 

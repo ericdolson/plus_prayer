@@ -69,9 +69,11 @@ _Last updated: 2026-10-17_
   personal-only days. Nothing shown as empty or wrong.
 - **Badge = icon + number only** in the header; the sheet explains what it means.
   Badge states (DECIDED 2026-10-18; replaces "hidden at 0" so the sheet is always
-  reachable): streak N + prayed with the list today → seal in wax color + N;
-  streak N, not yet today → muted seal + N (still alive); streak 0 → muted
-  seal, **no number** (never shows "0"). Tapping always opens the streak sheet
+  reachable): the seal is always **neutral pewter** (2026-11-01; never wax
+  color — see design-direction §4); streak N + prayed with the list today →
+  number in `ink`; streak N, not yet today → number in `inkMuted`, seal one
+  step dimmer (still alive); streak 0 → dim seal, **no number** (never
+  shows "0"). Tapping always opens the streak sheet
   (best streak, grace days, month view). The sheet is also reachable from History.
 - **After a break:** first open shows "Welcome back. {name} is still here." — no
   zero, no broken icon; the badge returns quietly on the next day with the world.

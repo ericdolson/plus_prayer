@@ -168,8 +168,9 @@ min"), what it held, note indicator. Header: "Time in prayer · 2h 14m this week
 What it held, duration, note (editable — the only editable field).
 
 ### Streak badge & sheet (streaks-reminders.md)
-- Badge states: prayed with the list today → seal in today's wax + N; streak
-  alive, not yet today → muted seal + N; zero → muted seal, **no number**.
+- Badge states (seal always neutral pewter, design-direction §4): prayed with
+  the list today → N in `ink`; streak alive, not yet today → N in `inkMuted`,
+  dimmer seal; zero → dim seal, **no number**.
   Always tappable.
 - Sheet: what the badge means ("days with the world"), current + best, grace
   days held (up to 2 marks), month view with **sealed** marks (list days, wax
