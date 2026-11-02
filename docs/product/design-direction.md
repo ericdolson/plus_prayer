@@ -412,12 +412,18 @@ on Today's list or Your portion.
   the wax body and the impression as **separate layers** — the body crops into
   the corner, the bloom is centered on the *visible* part. Stopgap until then:
   a smaller offset. The D2 stamp art should be delivered as body + impression
-  layers for this reason.
+  layers for this reason. **Until D2** (2026-11-02): the impression is baked
+  into the stamp image, so use the full −36/−32 offset anyway; clipping the
+  outer petals is fine (it reads as a crop) as long as **the bloom's center
+  stays visible**. Back off only as far as needed to keep the center in view.
 - **Unsealed ("being filmed") state** (2026-11-02): no dashed ring, no "+"
   (the circled "+" is retired). Render the same seal shape as an unpressed
-  neutral blank — `raisedHigh` body with the same relief shading — with the
-  bloom glyph faintly debossed (`inkFaint`), as if waiting for wax. Real art
-  comes with the stamp set (open-questions D2).
+  neutral blank — the existing **`unsealed` token** body (dark `#30353D`,
+  light `#C9D1DF`; purpose-named, keep it) with the same relief shading — with
+  the bloom faintly debossed, as if waiting for wax. **Until D2:** use the
+  stamp image's own impression (with its small "+" and inner ring) rendered
+  in this neutral; the "+"-free bloom arrives with the stamp art
+  (open-questions D1/D2).
 - The Amen stamp moment lands here.
 - **Check before committing:** the 7 wax colors at this size (a wax close to
   action blue could read as a button — deepen/desaturate it if so), and the
@@ -472,10 +478,12 @@ on Today's list or Your portion.
   List 53" → "You'll be on List 53"; after-flip case "Your next prayer puts
   you on List 54".
 - **Long text / large type** (2026-11-02): never shrink text below the user's
-  size. The status line may wrap to a second line (meaning beats line count;
-  no "…" mid-sentence), keeping "List 53" unbroken. The counts row wraps at the
-  middle dot (people / prayers on separate lines). The presence marker hides
-  first. At accessibility sizes the world block may move below the stamp.
+  size. The status line **wraps as needed, no line cap** (two or three lines at
+  the largest sizes; meaning beats line count; never "…" mid-sentence),
+  keeping "List 53" unbroken. The counts row wraps at the middle dot (people /
+  prayers on separate lines). The presence line hides first. **The world block
+  moves below the stamp when the title or either count can't fit on one line
+  beside it.**
 - **Closing notice replaces the status line** (doesn't add one), only if you
   haven't prayed with the list today: "List 52 closes in 5 min · pray to carry
   them" (only you carried: "List 52 closes in 3 min · pray to be on List 53").

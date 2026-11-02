@@ -1003,3 +1003,12 @@ Why: on device the right-aligned marker floated on a different baseline and
 broke the left column, while the space beside the stamp under the counts sat
 empty; the avatars read tiny beside 44 pt rows; the stamp crop wasn't decisive
 enough; the done-state sentence competed with the gold border.
+
+### Decision: Community card — second round of build answers
+**Timestamp:** 2026-11-02
+Unsealed body uses the existing `unsealed` token (kept), not `raisedHigh`;
+until D2 it shows the stamp image's own impression (with its "+") in that
+neutral. Until layered art exists, use the full deeper offset anyway — outer
+petals may clip, but the bloom's center must stay visible. Status line wraps
+with no cap (no "…"). World block moves below the stamp when the title or
+either count can't fit on one line beside it.
