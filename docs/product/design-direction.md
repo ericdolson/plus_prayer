@@ -385,19 +385,81 @@ A **flat tonal surface** (`cardSurface`), no shadow, no border, radius ~20–24
 pt, generous padding (~16–20 pt). Clearly different from the rows; it is the
 value of the app.
 
+**Redesigned 2026-11-02** (was seven lines). The card answers two questions
+at a glance: **is the list alive?** (the world) and **are my people going onto
+the next list?** (you — the one thing you can act on). Everything else lives
+on Today's list or Your portion.
+
 ```
-╭──────────────────────────────────────────────╮  gold border when you've
-│  (seal)  List 52                              │  prayed with the list TODAY
-│          4,345 people · 31,208 prayers        │
-│          ● 258 praying now                    │
-│                                               │
-│  (JE) You, (D) Dad ●●● + 3  are on List 52    │  today's list (plain avatars)
-│  Pray to carry them onto List 53              │  tomorrow (text, own line)
-╰──────────────────────────────────────────────╯
+╭───────────────────────────────────────────╮  gold border when you've
+│▓▓▓▓▓▓▓    List 52             ● 239 praying│  prayed with the list TODAY
+│▓ seal ▓   4,345 people · 3,881 prayers     │  ← the world
+│▓▓▓▓▓      (stamp ~75% visible, cropped    │
+│           into the top-left corner)       │
+│ (E)(D)(M)(D)(A)(R)(J)(K)(L)(B)            │  ← you: carried people,
+│ Pray to carry them onto List 53           │    full width, status below
+╰───────────────────────────────────────────╯
 ```
-- **Scale first** (people · prayers), then **presence** with a small live dot
-  (display ladder: live ≥10 → last hour ≥10 → today ≥10 → hidden; never 0),
-  then **your carry status** with the avatar cluster.
+
+### The stamp — large, cropped into the corner
+- The day's seal at **~104 pt**, offset **~−26 pt up and left**, clipped by the
+  card's inner radius so **~75% is visible** and the wax runs into the rounded
+  corner. It is the card's anchor and its distinctive mark; the crop hints
+  there's more inside (Today's list shows the full seal uncropped).
+- Keep the **impressed bloom readable inside the visible portion** (place it
+  slightly down/right of the seal's center rather than cropping geometrically).
+- Unsealed ("being filmed") state must look intentional at this size.
+- The Amen stamp moment lands here.
+- **Check before committing:** the 7 wax colors at this size (a wax close to
+  action blue could read as a button — deepen/desaturate it if so), and the
+  gold held border beside non-gold wax in both themes.
+- Decorative for screen readers; the card's label carries "List 52, sealed".
+
+### The world block (beside the stamp)
+- **Title row:** "List 52" (Roca), with **presence as a small live marker on
+  the right of the same row**: "● 239 praying" (the live dot, `inkMuted`
+  text). Display ladder unchanged (live ≥10 → last hour ≥10 → today ≥10 →
+  hidden; never 0); lower rungs use their short forms and must fit the row.
+  **In prayer mode the marker hides** (the pill already shows "with N").
+- **Counts row:** "4,345 people · 3,881 prayers" — **words, not icons**
+  (icon + number reads as engagement metrics; the praying hands stay a verb).
+  Numbers in `ink` with tabular figures, labels in `inkMuted`, a thin middle
+  dot with a little extra space. The prayer count matters: everyone on the
+  list is held by every prayer for it. When it rises live, **crossfade only the
+  changed digits** (no rolling counter — Amen → seal stays the one signature
+  motion).
+- No intention count on the card (Today's list has the full breakdown).
+
+### The you block (full width, below)
+- **Avatar row = your carried people** (who goes onto the next list): you
+  first, then the user's order; intentions have no avatars. **Fill the card's
+  width**; add the neutral **"+N" overflow disc only when the faces don't
+  fit** (measured, not a fixed cap). 24 pt avatars, single initial (≥11 pt; if
+  it can't reach 11 pt, color only), thin `cardSurface` separator ring on
+  overlaps. Overflow disc: dark `raisedHigh`, light `hairline` `#D3DAE8`,
+  `inkMuted` text. Screen readers read every name. **Cluster avatars stay
+  plain** (no rims).
+- **Status line below the avatars** (one line, never two). With a single
+  avatar (e.g. free user, only you) the status may sit beside it instead.
+  Computed from the real gate:
+  - qualifying prayer for the next list exists → "They'll be on List 53"
+    (+ small seal stamp at Amen — part of the signature moment);
+  - prayed with the list today but the next list isn't covered yet (some
+    time zones after the flip) → "Your next prayer carries them onto List 54";
+  - not prayed → "Pray to carry them onto List 53".
+  New user / nothing carried yet: no avatar row; "Pray to be on List 53" →
+  "You'll be on List 53".
+- **Closing notice replaces the status line** (doesn't add one), only if you
+  haven't prayed with the list today: "List 52 closes in 5 min · pray to carry
+  them".
+- **Removed from the card (2026-11-02):** the "You, Dad and others are on
+  List 52" line (the avatars show who; who was on today's list lives on Today's
+  list) and the **differences lines** ("Mom joins you…", "Aunt Bea isn't
+  carried…") — the carried mark on rows (§5) now shows this; changes are named
+  at the Amen invitation and in Your portion.
+- **No extra "you held this list yesterday" icon or count** (2026-10-24).
+
+### Card behavior
 - **Held = the card's border, not the avatars** (2026-10-24): when you've prayed
   with the list **today (your local day)**, the card gets the **same held ring
   as a name** (2026-10-27): 2 pt crisp `heldGold` with a 2 pt gap, outside the
@@ -405,58 +467,16 @@ value of the app.
   card in prayer feels exactly like tapping a name.
   It lights live when the card is checked in prayer mode and clears
   at **local midnight** — the same clock as the streak and the row rings, never
-  the flip (a border that survived until the flip would make a user think
-  they'd prayed today and break their streak). **Cluster avatars stay plain**
-  (no rims — too busy at small sizes).
-- **Two groups, two lines:**
-  - **Avatar row = yours on today's list** (the list shown on the card). New
-    user / not on today's list: no avatar row. Layout (2026-10-27):
-    - **Grouped, overlapping avatars first**, then text that begins with names.
-      You first, then the user's order. A thin ring in `cardSurface` separates
-      overlaps. **At 24 pt, show a single initial** (first letter, ≥11 pt);
-      two-letter initials (~8.6 pt) are too small. If a single letter can't
-      reach 11 pt, color only.
-    - **≤5 people:** show all avatars; text names the first one or two and
-      counts the rest — "You and Dad are on List 52", "You, Dad + 3 are on
-      List 52".
-    - **>5 people:** 4 avatars + a **neutral gray overflow disc "+N"** (N = the
-      rest beyond the 4; fill: dark `raisedHigh`, **light `hairline`
-      `#D3DAE8`** (white disappears on the light card); `inkMuted` text; same
-      separator ring as the avatars). Text names the
-      first one or two **without a number** — "You, Dad and others are on
-      List 52".
-    - **The count appears exactly once** — in the disc when there is one,
-      otherwise in the text. Screen readers read every name.
-    - **Card text beside the cluster must not wrap awkwardly:** if "You, Dad
-      and others are on List 52" doesn't fit beside the avatars, let the text
-      run full-width below the cluster rather than breaking "List 52" onto a
-      second line next to it.
-    - **One shared cluster component everywhere** (card, Amen invitation, Today's
-      list, Your portion). Larger contexts (e.g. the invitation) may use
-      28–32 pt avatars with initials.
-  - **Status line = tomorrow**, on its own line, computed from the real gate:
-    - qualifying prayer for the next list exists → "They'll be on List 53"
-      (+ small seal stamp at Amen — part of the signature moment);
-    - prayed with the list today but the next list isn't covered yet (some
-      time zones after the flip) → "Your next prayer carries them onto List 54";
-    - not prayed → "Pray to carry them onto List 53".
-    New user: "Pray to be on List 53" → "You'll be on List 53".
-  - **Only differences are named:** "Mom joins you on List 53"; "Aunt Jo isn't
-    carried on List 53" (tap → Your portion).
-  - **No extra "you held this list yesterday" icon or count** (2026-10-24): the
-    status line already says they're covered ("They'll be on List 53"), and a
-    dot or prayer count would compete with today's nudge. Per-list prayer
-    counts live on the Today's list page.
+  the flip.
 - **Never break "List" from its number:** use a non-breaking space ("List 53")
   everywhere.
-- Wax seal: unsealed + "being filmed" before publish; sealed in the day's wax
-  after.
-- The 5-minute **closing notice** ("List 52 closes in 5 minutes") lives inside
-  the card, only if you haven't prayed with the list today.
 - **Tap → Today's list.** **In prayer mode the whole card is the checkable
   "hold the list" target.**
 - **Presence:** shown here to *invite*; prayer mode reveals more as the reward
-  (the count moving live; later, richer presence such as countries).
+  (the count moving live in the pill; later, richer presence such as countries).
+- **Shared cluster component:** the card uses its full-width fill mode; other
+  contexts (Amen invitation, Today's list, Your portion) may use 28–32 pt
+  avatars and their own layouts.
 - The separate floating "258 praying now" line above the list is removed.
 - **Card under filters and search** (2026-10-28):
   - **All:** shown.

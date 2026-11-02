@@ -14,10 +14,10 @@ _Last updated: 2026-10-18_
 ## DECIDED
 - **Avatar cluster component** (2026-10-18), reused on the list row, Amen
   invitation, Today's list page, and Your portion: you first, then carried names
-  in the user's order (intentions have no avatars). The first one or two are
-  named with their avatar beside each name; additional names are tightly
-  overlapped, up to 5 total, then "+ N others". e.g. "(●) You, (●) Daniel ●●● + 4
-  others will be on List 53". Free user: "4,345 people, including you".
+  in the user's order (intentions have no avatars). On the community card
+  (2026-11-02) it fills the card's width with a "+N" disc only on measured
+  overflow, and no names in text — the status line follows below
+  (design-direction §6). Other contexts may name the first one or two.
   Screen readers read every name.
 - **Copy rule:** wherever the app says "the list", it says who's on it.
 - **Home = the prayer screen** (personal list + pinned today's-list row). It is

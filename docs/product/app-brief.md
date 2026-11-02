@@ -76,12 +76,12 @@ idea), not a pattern to follow.
   → [Use my existing account] / [Merge both] with a duplicates warning.
 
 ### Home (prayer-flow.md, screens.md)
-- **Community card** (top — see design-direction.md §6; formerly the pinned list row): wax-seal avatar (unsealed + "being filmed" before
-  publish; sealed in that day's wax after), "List 52", avatar cluster + carry
-  line: not yet → "You, Dad ●●● + 4 others are not yet carried on List 53"
-  (muted); prayed → "…will be on List 53" (soft green/gold). During the 5-min
-  close window: quiet "List 52 closes in 5 minutes" banner (only if not prayed
-  with the list today).
+- **Community card** (top — **design-direction.md §6 is authoritative**,
+  redesigned 2026-11-02): large day's seal cropped into the top-left corner;
+  "List 52" with a live "● N praying" marker; "N people · N prayers"; your
+  carried people as a full-width avatar row; one status line ("Pray to carry
+  them onto List 53" / "They'll be on List 53"). The closing notice replaces
+  the status line.
 - **Rows:** names (manual drag order; self "Me" pinned top), intentions indented
   under their name on a thread (design-direction.md §5). One line; secondary
   text only for exceptional states ("Answered · Oct 3", "Not printed…"). Held
@@ -204,9 +204,9 @@ to free → second invite if still over. Same flow when a subscription lapses
 ## 4. Shared components
 - **Monogram avatar:** white initials on a bright tone (design-direction.md §1b; `avatarTone` index;
   default from id hash); photo slot reserved for later.
-- **Avatar cluster:** you first, then carried names in user order; first one or
-  two named with their avatar beside each name; more overlapped, max 5, then
-  "+ N others". Screen readers read every name.
+- **Avatar cluster:** you first, then carried names in user order; on the
+  community card it fills the width with "+N" only on overflow (design-direction
+  §6). Screen readers read every name.
 - **Wax seal / bead:** 7 vector stamps (wax colors fixed by weekday via
   `sealVariant`); unsealed state.
 - **Ring button:** the FAB's 5s decaying ring and the invitation's ring share one

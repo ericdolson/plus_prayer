@@ -945,3 +945,25 @@ Rejected: today's-weekday wax (mismatches the list's wax across time zones);
 the wax of the last list prayed (stale after the flip); switching to the new
 list's wax at the flip (claims a list not yet prayed); gold (gold = held, and
 the card border already holds that signal).
+
+### Decision: Community card redesign — stamp in the corner, two blocks, three-ish lines
+**Timestamp:** 2026-11-02 (supersedes the 2026-10-27 cluster layout and the
+"only differences are named" card lines)
+The card answers two questions: is the list alive (world) and are my people
+going onto the next list (you). World block beside a large day's seal (~104 pt,
+cropped ~75% into the top-left corner): "List 52" with a live "● N praying"
+marker on the right of the title row (hidden in prayer mode — the pill shows
+"with N"), then "N people · N prayers" in words (numbers `ink` tabular, labels
+`inkMuted`; changed digits crossfade). You block full width: carried people's
+avatars filling the width (+N only on measured overflow), then one status line.
+The closing notice replaces the status line.
+Why: seven lines of text made the card busy. The differences lines are now
+redundant with the carried mark on rows; "are on List 52" repeated what the
+avatars show and isn't actionable. The prayer count stays because every prayer
+for the list holds everyone on it — your people's number. The cropped stamp
+gives the app's most valuable surface a distinctive anchor and stages the
+Amen stamp moment.
+Rejected: icons for the counts (person / praying hands, even neutral) — reads
+as engagement metrics, and the hands should stay a verb; an intention count on
+the card (Today's list has it); presence on its own line or outside the card;
+a fixed 4-avatar cap.
