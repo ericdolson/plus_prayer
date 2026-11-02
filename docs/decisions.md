@@ -990,3 +990,16 @@ a fixed 4-avatar cap.
 Rejected: hiding the avatar row when not on today's list (hides it from anyone
 who skipped a day); "640 this hour" (verbless, reads as live); truncating the
 status with "…" or shrinking the counts (breaks Dynamic Type).
+
+### Decision: Community card — first-build tuning
+**Timestamp:** 2026-11-02 (refines the same-day card redesign)
+Stamp crop deeper (offset ~−36 pt left / ~−32 pt up, ~65% visible; bloom kept
+on the visible part via separate layers). Presence moves from the right of the
+title row to its own left-aligned third line beside the stamp ("● N praying
+now"). Status line weight follows state: `ink` until covered, `inkMuted` once
+covered. Card avatars 24 → 28 pt. Status sits ~6–8 pt under the avatars;
+bottom padding equals top (~20 pt).
+Why: on device the right-aligned marker floated on a different baseline and
+broke the left column, while the space beside the stamp under the counts sat
+empty; the avatars read tiny beside 44 pt rows; the stamp crop wasn't decisive
+enough; the done-state sentence competed with the gold border.

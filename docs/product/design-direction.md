@@ -382,7 +382,7 @@ list shows at a glance what goes on the printed list.
 
 ## 6. The community card (replaces the "pinned list row")
 A **flat tonal surface** (`cardSurface`), no shadow, no border, radius ~20–24
-pt, generous padding (~16–20 pt). Clearly different from the rows; it is the
+pt, generous padding (~16–20 pt; **bottom padding equals top**, ~20 pt). Clearly different from the rows; it is the
 value of the app.
 
 **Redesigned 2026-11-02** (was seven lines). The card answers two questions
@@ -392,18 +392,20 @@ on Today's list or Your portion.
 
 ```
 ╭───────────────────────────────────────────╮  gold border when you've
-│▓▓▓▓▓▓▓    List 52             ● 239 praying│  prayed with the list TODAY
-│▓ seal ▓   4,345 people · 3,881 prayers     │  ← the world
-│▓▓▓▓▓      (stamp ~75% visible, cropped    │
-│           into the top-left corner)       │
+│▓▓▓▓▓▓   List 52                           │  prayed with the list TODAY
+│▓ seal ▓  4,345 people · 3,881 prayers     │  ← the world
+│▓▓▓▓     ● 239 praying now                 │
+│         (stamp ~65% visible, cropped      │
+│          into the top-left corner)        │
 │ (E)(D)(M)(D)(A)(R)(J)(K)(L)(B)            │  ← you: carried people,
 │ Pray to carry them onto List 53           │    full width, status below
 ╰───────────────────────────────────────────╯
 ```
 
 ### The stamp — large, cropped into the corner
-- The day's seal at **~104 pt**, offset **~−26 pt up and left**, clipped by the
-  card's inner radius so **~75% is visible** and the wax runs into the rounded
+- The day's seal at **~104 pt**, offset **~−36 pt left and ~−32 pt up**
+  (revised 2026-11-02 after the first build), clipped by the card's inner
+  radius so **~65% is visible** and the wax runs into the rounded
   corner. It is the card's anchor and its distinctive mark; the crop hints
   there's more inside (Today's list shows the full seal uncropped).
 - Keep the **impressed bloom readable inside the visible portion**: render
@@ -423,13 +425,14 @@ on Today's list or Your portion.
 - Decorative for screen readers; the card's label carries "List 52, sealed".
 
 ### The world block (beside the stamp)
-- **Title row:** "List 52" (Roca), with **presence as a small live marker on
-  the right of the same row**: "● 239 praying" (the live dot, `inkMuted`
-  text). Display ladder unchanged (live ≥10 → last hour ≥10 → today ≥10 →
+- **Three left-aligned lines beside the stamp** (revised 2026-11-02: the
+  right-aligned marker in the title row floated on a different baseline and
+  broke the column): "List 52" (Roca) → counts → **presence**: "● 239 praying
+  now" (live dot, `inkMuted` text), filling the space beside the stamp. Display ladder unchanged (live ≥10 → last hour ≥10 → today ≥10 →
   hidden; never 0). **Lower rungs have no dot** (the dot means *now*) and
   keep their verb: "640 prayed this hour", "4,113 prayed today"; screen
-  readers hear the long forms. If the marker doesn't fit the row whole, hide
-  it — never truncate a number.
+  readers hear the long forms. If the line doesn't fit whole, hide it — never
+  truncate a number.
   **In prayer mode the marker hides** (the pill already shows "with N").
 - **Counts row:** "4,345 people · 3,881 prayers" — **words, not icons**
   (icon + number reads as engagement metrics; the praying hands stay a verb).
@@ -447,12 +450,17 @@ on Today's list or Your portion.
   yesterday still sees at least their own avatar. It is not "who was on
   today's list". **Fill the card's
   width**; add the neutral **"+N" overflow disc only when the faces don't
-  fit** (measured, not a fixed cap). 24 pt avatars, single initial (≥11 pt; if
-  it can't reach 11 pt, color only), thin `cardSurface` separator ring on
+  fit** (measured, not a fixed cap). **28 pt avatars** (2026-11-02, up from
+  24 — too small beside the 44 pt rows), single initial (~13 pt; never below
+  11 pt, else color only), thin `cardSurface` separator ring on
   overlaps. Overflow disc: dark `raisedHigh`, light `hairline` `#D3DAE8`,
   `inkMuted` text. Screen readers read every name. **Cluster avatars stay
   plain** (no rims).
-- **Status line below the avatars** (one line, never two). With a single
+- **Status line below the avatars**, **~6–8 pt** under them so faces and
+  sentence read as one unit (the larger gap sits above the avatars, between
+  the two blocks). **Weight follows state** (2026-11-02): not yet covered →
+  `ink` (the one actionable thing); covered ("They'll be on List 53" /
+  "You'll be on List 53") → `inkMuted` (done; the gold border celebrates). With a single
   avatar (e.g. free user, only you) the status may sit beside it instead.
   Computed from the real gate:
   - qualifying prayer for the next list exists → "They'll be on List 53"
