@@ -403,9 +403,11 @@ on Today's list or Your portion.
 ```
 
 ### The stamp — large, cropped into the corner
-- The day's seal at **~104 pt**, offset **~−36 pt left and ~−32 pt up**
-  (revised 2026-11-02 after the first build), clipped by the card's inner
-  radius so **~65% is visible** and the wax runs into the rounded
+- The day's seal at **~104 pt**, clipped by the card's inner radius so
+  **~70% is visible** (revised twice 2026-11-02: ~88% wasn't decisive; the
+  −36/−32 build hid too much). **Tune by outcome, not offset:** start near
+  −24 pt left / −20 pt up; the whole bloom center and most petals must be
+  visible, with only the outer wax and petal tips cropped and the wax runs into the rounded
   corner. It is the card's anchor and its distinctive mark; the crop hints
   there's more inside (Today's list shows the full seal uncropped).
 - Keep the **impressed bloom readable inside the visible portion**: render
@@ -413,9 +415,8 @@ on Today's list or Your portion.
   the corner, the bloom is centered on the *visible* part. Stopgap until then:
   a smaller offset. The D2 stamp art should be delivered as body + impression
   layers for this reason. **Until D2** (2026-11-02): the impression is baked
-  into the stamp image, so use the full −36/−32 offset anyway; clipping the
-  outer petals is fine (it reads as a crop) as long as **the bloom's center
-  stays visible**. Back off only as far as needed to keep the center in view.
+  into the stamp image; the ~70% target above already keeps the bloom
+  readable.
 - **Unsealed ("being filmed") state** (2026-11-02): no dashed ring, no "+"
   (the circled "+" is retired). Render the same seal shape as an unpressed
   neutral blank — the existing **`unsealed` token** body (dark `#30353D`,
@@ -476,7 +477,8 @@ on Today's list or Your portion.
   person's row avatar** (2026-11-02: "DK" for Daniel Kim, "D" for Dad, "EO"
   for you — single initials made Dad and Daniel identical, and matching the
   rows aids recognition); text ~11–13 pt, never below 11 pt (else color only), thin `cardSurface` separator ring on
-  overlaps. Overflow disc: dark `raisedHigh`, light `hairline` `#D3DAE8`,
+  overlaps. **Overlap ≤ ~4–5 pt** (2026-11-02) so two-letter initials are
+  never covered by the next avatar — the full-width row has the room. Overflow disc: dark `raisedHigh`, light `hairline` `#D3DAE8`,
   `inkMuted` text. Screen readers read every name. **Cluster avatars stay
   plain** (no rims).
 - **Status line below the avatars**, **~6–8 pt** under them so faces and
