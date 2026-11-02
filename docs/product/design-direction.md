@@ -425,6 +425,12 @@ on Today's list or Your portion.
   in this neutral; the "+"-free bloom arrives with the stamp art
   (open-questions D1/D2).
 - The Amen stamp moment lands here.
+- **Dark-theme wax separation** (2026-11-02): the ritual's waxes are mostly
+  dark (navy, deep red, garnet, green, brown) and sink into `cardSurface` in
+  dark mode. In **dark theme only**, give the stamp a ~1 pt **rim light along
+  its visible edges** (the wax's sheen color, partial opacity) and allow a
+  modest per-theme lift of the body color so the silhouette separates from the
+  card. The wax names and light-theme colors stay true to the physical wax.
 - **Check before committing:** the 7 wax colors at this size (a wax close to
   action blue could read as a button — deepen/desaturate it if so), and the
   gold held border beside non-gold wax in both themes.
@@ -457,8 +463,10 @@ on Today's list or Your portion.
   today's list". **Fill the card's
   width**; add the neutral **"+N" overflow disc only when the faces don't
   fit** (measured, not a fixed cap). **28 pt avatars** (2026-11-02, up from
-  24 — too small beside the 44 pt rows), single initial (~13 pt; never below
-  11 pt, else color only), thin `cardSurface` separator ring on
+  24 — too small beside the 44 pt rows), **the same initials as that
+  person's row avatar** (2026-11-02: "DK" for Daniel Kim, "D" for Dad, "EO"
+  for you — single initials made Dad and Daniel identical, and matching the
+  rows aids recognition); text ~11–13 pt, never below 11 pt (else color only), thin `cardSurface` separator ring on
   overlaps. Overflow disc: dark `raisedHigh`, light `hairline` `#D3DAE8`,
   `inkMuted` text. Screen readers read every name. **Cluster avatars stay
   plain** (no rims).
@@ -509,7 +517,10 @@ on Today's list or Your portion.
 - **Never break "List" from its number:** use a non-breaking space ("List 53")
   everywhere.
 - **Tap → Today's list.** **In prayer mode the whole card is the checkable
-  "hold the list" target.**
+  "hold the list" target.** The checkbox sits in the trailing slot **aligned
+  to the "List 52" title line** (2026-11-02), as a row's checkbox aligns to
+  its name. The baseline issue that moved presence was about text; a control
+  in the trailing slot is consistent with rows.
 - **Presence:** shown here to *invite*; prayer mode reveals more as the reward
   (the count moving live in the pill; later, richer presence such as countries).
 - **Shared cluster component:** the card uses its full-width fill mode; other

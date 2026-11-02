@@ -1012,3 +1012,13 @@ neutral. Until layered art exists, use the full deeper offset anyway — outer
 petals may clip, but the bloom's center must stay visible. Status line wraps
 with no cap (no "…"). World block moves below the stamp when the title or
 either count can't fit on one line beside it.
+
+### Decision: Community card — third round of build answers
+**Timestamp:** 2026-11-02
+Prayer-mode checkbox stays in the trailing slot, aligned to the title line (like
+a row's checkbox to its name). Card avatars use the same initials as their row
+avatars ("DK", "D", "EO"), ≥11 pt, since single initials collided (Dad / Daniel
+Kim). Dark theme only: stamps get a ~1 pt rim light on visible edges and a
+modest body lift, since most ritual waxes sink into the dark card; light theme
+and wax identities unchanged. Status gap stays 8 pt; padding was already
+equal (the imbalance was optical — no change).
