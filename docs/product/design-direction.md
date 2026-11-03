@@ -426,6 +426,29 @@ on Today's list or Your portion.
   in this neutral; the "+"-free bloom arrives with the stamp art
   (open-questions D1/D2).
 - The Amen stamp moment lands here.
+- **Photographed seals (PLANNED 2026-11-02 — Eric will shoot them):** at
+  large sizes (≥ ~40 pt: community card, Today's list, Amen invitation) the
+  seal becomes a **real macro photo** of each weekday's stamp, cut out as a
+  transparent image, bundled in the app (one per `sealVariant`). Vectors stay
+  for small sizes (beads; the pewter streak badge). `WaxSeal` keeps its API
+  and picks photo vs vector by size. It is the only photographed thing in the
+  UI. Later, the day's own seal from the ritual can replace the set.
+  - **Shoot guide:** all 7 in one session; same soft light from the upper
+    left (matches the code's sheen), same lens, height and pour size; gray
+    card for white balance.
+  - **Pour for the crop:** spread the wax toward the upper left and press the
+    stamp slightly low-right of center, so the corner crop takes wax, not
+    petals (no layered art needed for photos).
+  - **Cutout:** clean edge, no baked drop shadow (add a contact shadow in code
+    if needed) so it sits on light and dark cards.
+  - **Unsealed:** photograph a blank unpressed pour in a neutral wax
+    (preferred over mixing a vector blank with photo seals).
+  - **Amen moment:** crossfade unsealed → sealed photo with a small scale
+    settle.
+  - **Assets:** ~330 px square (104 pt @3×), WebP/PNG with alpha, ~50–150 KB
+    each.
+  - Real wax highlights should separate dark waxes on their own; the dark-theme
+    rim/lift below may then be dropped for photos (judge on device).
 - **Dark-theme wax separation** (2026-11-02): the ritual's waxes are mostly
   dark (navy, deep red, garnet, green, brown) and sink into `cardSurface` in
   dark mode. In **dark theme only**, give the stamp a ~1 pt **rim light along

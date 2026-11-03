@@ -1037,3 +1037,19 @@ Stamp crop targets ~70% visible, tuned by outcome (whole bloom center and most
 petals visible), starting near −24 / −20 pt; the −36/−32 build hid too much.
 Card avatar overlap ≤ ~4–5 pt so two-letter initials ("EO", "DK") aren't
 covered; the full-width row has room.
+
+### Decision: Photographed wax seals at large sizes (planned)
+**Timestamp:** 2026-11-02
+Eric will shoot macro photos of each weekday's stamp (plus an unsealed blank),
+cut out with transparency, and bundle them for large seal sizes (≥ ~40 pt:
+community card, Today's list, Amen invitation). Vectors remain for small sizes
+(beads, pewter streak badge). `WaxSeal` keeps its API and chooses by size. Shoot
+guide in design-direction §6. Later, the day's own ritual seal can replace the
+set.
+Why: the seal is the real on-camera object, which the design scopes as the
+place for the physical/antique look; one photographed object in a flat UI
+reads premium; it makes "ink vs wax" literal; real highlights separate dark
+waxes in dark mode better than a drawn rim.
+Rejected: photos at small sizes (turn to mush); mixing a vector unsealed blank
+with photo seals; photographic textures anywhere else in the UI.
+Not yet built: no app work until the photos exist (open-questions D3).

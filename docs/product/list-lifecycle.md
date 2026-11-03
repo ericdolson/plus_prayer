@@ -74,6 +74,8 @@ _Last updated: 2026-10-17_
   Ad-free, own player, cacheable offline.
 - **Placement:** full-bleed on the list's detail page, sound off until tapped.
 - **List row avatar = the day's wax seal** (2026-10-18), not a video thumbnail.
+  At large sizes, **real macro photos** of the 7 stamps (planned 2026-11-02,
+  design-direction §6 "Photographed seals"); vectors for small sizes. The
   7 custom wax-stamp vectors in the real wax colors, each **the bloom pressed
   into wax** (2026-11-01; not a circled "+" — the current painted placeholder
   stays until the art exists; see design-direction §5 "One symbol, two
