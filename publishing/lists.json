@@ -7,12 +7,213 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "68": {
+      "soul_count": 4543,
+      "intention_count": 0,
+      "notes": "Contains 11 who prayed and 4532 missing children",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F68.mp4?alt=media&token=4598c703-c918-4f0a-a4c7-4f51dbe4b189",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F68_thumbnail.png?alt=media&token=aad4447b-a62a-4f0a-bcc1-73fc0da011bc",
+      "date": "2026-11-01",
+      "published": {
+        "scheduled_for": "2026-11-01T19:07:00Z",
+        "platforms": {
+          "youtube": {
+            "post_id": "6ae78d32f739ed4d6d2cdaac",
+            "status": "published",
+            "platform_post_id": "rR9Y2q8SEwk",
+            "platform_post_url": "https://www.youtube.com/watch?v=rR9Y2q8SEwk"
+          },
+          "facebook": {
+            "post_id": "6ae78d35b45578f9c07d4717",
+            "status": "published",
+            "platform_post_id": "1103653835741370",
+            "platform_post_url": "https://www.facebook.com/watch/?v=1103653835741370"
+          },
+          "instagram": {
+            "post_id": "6ae78d39b45578f9c07d473e",
+            "status": "published",
+            "platform_post_id": "18126812203916217",
+            "platform_post_url": "https://www.instagram.com/reel/DfNctQpgkot/"
+          },
+          "threads": {
+            "post_id": "6ae78d3df739ed4d6d2cdabe",
+            "status": "published",
+            "platform_post_id": "18145124917588595",
+            "platform_post_url": "https://www.threads.com/@plusprayer/post/DfNcyNnEcyA"
+          },
+          "tiktok": {
+            "post_id": "6ae78d40b45578f9c07d4772",
+            "status": "unconfirmed",
+            "platform_post_id": "7703281754085379342"
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "UgylNABKB6nAbyjtSNp4AaABAg",
+            "mechanic_at": "2026-11-01T19:10:30Z",
+            "prayer_id": "Ugy3vvx3vPGymA10iDV4AaABAg",
+            "prayer_at": "2026-11-01T19:10:30Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122141660744983291_2579027522525256",
+            "mechanic_at": "2026-11-01T19:10:30Z",
+            "prayer_id": "122141660744983291_1126176360374615",
+            "prayer_at": "2026-11-01T19:10:30Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "18076139804564443",
+            "mechanic_at": "2026-11-01T19:14:09Z",
+            "prayer_id": "18222125326351234",
+            "prayer_at": "2026-11-01T19:14:09Z",
+            "closeout": "pending",
+            "retired_id": null
+          }
+        }
+      }
+    },
+    "67": {
+      "soul_count": 4548,
+      "intention_count": 0,
+      "notes": "Contains 8 who prayed and 4540 missing children",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F67.mp4?alt=media&token=d3cc4275-fe41-45e3-ba60-ef50481b06c6",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F67_thumbnail.png?alt=media&token=f571290b-139e-41cd-9818-6d71b7b35804",
+      "date": "2026-10-31",
+      "published": {
+        "scheduled_for": "2026-10-31T18:25:00Z",
+        "platforms": {
+          "youtube": {
+            "post_id": "6ae631daaffe019da7cef3e6",
+            "status": "published",
+            "platform_post_id": "KwcHot2Q5qE",
+            "platform_post_url": "https://www.youtube.com/watch?v=KwcHot2Q5qE"
+          },
+          "facebook": {
+            "post_id": "6ae631dd9d26c98e68230acc",
+            "status": "published",
+            "platform_post_id": "1761174941829711",
+            "platform_post_url": "https://www.facebook.com/watch/?v=1761174941829711"
+          },
+          "instagram": {
+            "post_id": "6ae631e1affe019da7cef3ea",
+            "status": "published",
+            "platform_post_id": "18378290263209380",
+            "platform_post_url": "https://www.instagram.com/reel/DfKzArQlQ5N/"
+          },
+          "threads": {
+            "post_id": "6ae631e49d26c98e68230ad8",
+            "status": "published",
+            "platform_post_id": "18117720806093052",
+            "platform_post_url": "https://www.threads.com/@plusprayer/post/DfKzJJHDOck"
+          },
+          "tiktok": {
+            "post_id": "6ae631e76121004086615fdb",
+            "status": "published",
+            "platform_post_id": "7702899808679349518",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7702899808679349518",
+            "note": "Confirmed via analytics 2026-11-01 (latePostId match, 8 views)."
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "UgwNha4cVHOYklqwqlB4AaABAg",
+            "mechanic_at": "2026-10-31T18:28:41Z",
+            "prayer_id": "UgwUoCkY6hDJF8ihSqN4AaABAg",
+            "prayer_at": "2026-10-31T18:28:41Z",
+            "closeout": "done",
+            "retired_id": "Ugz5GKTCPoQC0dYAhhZ4AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "122141539070983291_1654626583008303",
+            "mechanic_at": "2026-10-31T18:28:41Z",
+            "prayer_id": "122141539070983291_1745556876546865",
+            "prayer_at": "2026-10-31T18:28:41Z",
+            "closeout": "done",
+            "retired_id": "122141539070983291_869014559602490"
+          },
+          "instagram": {
+            "mechanic_id": "18034917014892959",
+            "mechanic_at": "2026-10-31T18:28:41Z",
+            "prayer_id": "18125480441515164",
+            "prayer_at": "2026-10-31T18:28:41Z",
+            "closeout": "done",
+            "retired_id": "18027419705938999"
+          }
+        }
+      }
+    },
     "66": {
       "soul_count": 4526,
       "intention_count": 0,
       "notes": "Contains 2 who prayed and 4524 missing children",
-      "video_url": "",
-      "thumbnail_url": ""
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F66.mp4?alt=media&token=19f1b97c-eba3-46ca-97e3-82e9aaf8fdc8",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F66_thumbnail.png?alt=media&token=4903c6fe-5279-4bf0-a8a6-5d033cbca526",
+      "date": "2026-10-30",
+      "published": {
+        "scheduled_for": "2026-10-30T22:37:00Z",
+        "platforms": {
+          "youtube": {
+            "post_id": "6ae51b7840495b61c40a2b88",
+            "status": "published",
+            "platform_post_id": "ehFrPqdY9ws",
+            "platform_post_url": "https://www.youtube.com/watch?v=ehFrPqdY9ws"
+          },
+          "facebook": {
+            "post_id": "6ae51b7c89e6572c3946edb1",
+            "status": "published",
+            "platform_post_id": "1681380956871820",
+            "platform_post_url": "https://www.facebook.com/watch/?v=1681380956871820"
+          },
+          "instagram": {
+            "post_id": "6ae51b8089e6572c3946edd0",
+            "status": "published",
+            "platform_post_id": "18576124846075769",
+            "platform_post_url": "https://www.instagram.com/reel/DfIrCuSFKTS/"
+          },
+          "threads": {
+            "post_id": "6ae51b8389e6572c3946edf1",
+            "status": "published",
+            "platform_post_id": "18131724373832548",
+            "platform_post_url": "https://www.threads.com/@plusprayer/post/DfIrMJ4FcNf"
+          },
+          "tiktok": {
+            "post_id": "6ae51b8789e6572c3946ee10",
+            "status": "published",
+            "platform_post_id": "7702593743605550349",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7702593743605550349",
+            "note": "Confirmed via analytics 2026-10-31 (latePostId match, 11 views)."
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "UgwivhlxCLLtVzqEyD14AaABAg",
+            "mechanic_at": "2026-10-30T22:40:59Z",
+            "prayer_id": "Ugw6NHaQFZ4a3Zzz3od4AaABAg",
+            "prayer_at": "2026-10-30T22:40:59Z",
+            "closeout": "done",
+            "retired_id": "Ugwmpa-X8X1RGttJfUt4AaABAg"
+          },
+          "facebook": {
+            "mechanic_id": "122141441132983291_1529091745930873",
+            "mechanic_at": "2026-10-30T22:40:59Z",
+            "prayer_id": "122141441132983291_1140109478900800",
+            "prayer_at": "2026-10-30T22:40:59Z",
+            "closeout": "done",
+            "retired_id": "122141441132983291_2001956850495331"
+          },
+          "instagram": {
+            "mechanic_id": "17951275872342978",
+            "mechanic_at": "2026-10-30T22:40:59Z",
+            "prayer_id": "18133021687685020",
+            "prayer_at": "2026-10-30T22:40:59Z",
+            "closeout": "done",
+            "retired_id": "17941619958395013"
+          }
+        }
+      }
     },
     "65": {
       "soul_count": 4521,
@@ -62,24 +263,24 @@
             "mechanic_at": "2026-10-25T18:07:16Z",
             "prayer_id": "UgzFyFNHpzqd5hkjnhd4AaABAg",
             "prayer_at": "2026-10-25T18:07:16Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "UgwrBq2n1hL4hayqSMt4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122140907678983291_1086106860882662",
             "mechanic_at": "2026-10-25T18:07:16Z",
             "prayer_id": "122140907678983291_1784174256033948",
             "prayer_at": "2026-10-25T18:07:16Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122140907678983291_1674429514195923"
           },
           "instagram": {
             "mechanic_id": "18121007350968542",
             "mechanic_at": "2026-10-25T18:07:16Z",
             "prayer_id": "17926327479431720",
             "prayer_at": "2026-10-25T18:07:16Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "18132780523757770"
           }
         }
       }
