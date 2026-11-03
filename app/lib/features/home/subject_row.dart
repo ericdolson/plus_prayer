@@ -21,6 +21,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app/router.dart';
+import '../../components/carried_mark.dart';
 import '../../components/marks.dart';
 import '../../components/monogram_avatar.dart';
 import '../../components/thread.dart';
@@ -66,6 +67,7 @@ class SubjectRow extends ConsumerWidget {
       poolLimit: ref.watch(poolLimitProvider),
     );
     final held = prayedToday(s, today) || (inPrayer && hold != HoldState.none);
+    final carried = showsCarriedMark(s, tree);
     final statusText = switch (status) {
       AnsweredStatus(:final on) => l10n.statusAnswered(on),
       NotCarriedPoolFullStatus(:final limit) => l10n.statusNotCarriedFull(limit),
@@ -86,8 +88,9 @@ class SubjectRow extends ConsumerWidget {
     }
 
     // One sentence for screen readers, every name included.
+    final named = s.alias != null && s.alias != s.publicName ? '${s.label}, ${s.publicName}' : s.publicName;
     final spoken = [
-      if (s.alias != null && s.alias != s.publicName) '${s.label}, ${s.publicName}' else s.publicName,
+      if (carried) l10n.rowCarried(named) else named,
       if (statusText != null) statusText,
       if (held && !inPrayer) l10n.heldToday,
     ].join('. ');
@@ -110,8 +113,15 @@ class SubjectRow extends ConsumerWidget {
     final band = math.max(pp.size.check, line);
 
     final content = s.isName
-        ? _NameContent(subject: s, held: held, secondary: secondary)
-        : _IntentionContent(subject: s, held: held, band: band, line: line, secondary: secondary);
+        ? _NameContent(subject: s, held: held, carried: carried, secondary: secondary)
+        : _IntentionContent(
+            subject: s,
+            held: held,
+            carried: carried,
+            band: band,
+            line: line,
+            secondary: secondary,
+          );
 
     final threadPart = thread;
     final textStart = pp.space.gutter + pp.size.avatar + pp.space.md;
@@ -180,10 +190,11 @@ class SubjectRow extends ConsumerWidget {
 }
 
 class _NameContent extends StatelessWidget {
-  const _NameContent({required this.subject, required this.held, this.secondary});
+  const _NameContent({required this.subject, required this.held, required this.carried, this.secondary});
 
   final Subject subject;
   final bool held;
+  final bool carried;
   final Widget? secondary;
 
   @override
@@ -202,8 +213,13 @@ class _NameContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                s.isSelf ? (s.alias ?? s.publicName) : s.label,
+              Text.rich(
+                CarriedMark.after(
+                  s.isSelf ? (s.alias ?? s.publicName) : s.label,
+                  carried: carried,
+                  size: pp.size.carriedMarkName,
+                  gap: pp.size.carriedMarkNameGap,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.text.titleMedium,
@@ -223,6 +239,7 @@ class _IntentionContent extends StatelessWidget {
   const _IntentionContent({
     required this.subject,
     required this.held,
+    required this.carried,
     required this.band,
     required this.line,
     this.secondary,
@@ -230,6 +247,7 @@ class _IntentionContent extends StatelessWidget {
 
   final Subject subject;
   final bool held;
+  final bool carried;
 
   /// The first line's band (≥ the check) and the text's line height in it.
   final double band;
@@ -256,8 +274,17 @@ class _IntentionContent extends StatelessWidget {
             children: [
               Padding(
                 padding: EdgeInsetsDirectional.only(top: (band - line) / 2),
-                child:
-                    Text(subject.label, maxLines: 2, overflow: TextOverflow.ellipsis, style: context.text.titleSmall),
+                child: Text.rich(
+                  CarriedMark.after(
+                    subject.label,
+                    carried: carried,
+                    size: pp.size.carriedMarkIntention,
+                    gap: pp.size.carriedMarkIntentionGap,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.titleSmall,
+                ),
               ),
               if (secondary != null) ...[SizedBox(height: pp.space.xxs), secondary!],
             ],

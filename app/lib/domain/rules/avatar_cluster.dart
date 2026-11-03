@@ -33,3 +33,16 @@ ClusterLayout<T> layoutCluster<T>(List<T> people, {int maxAvatars = 5, int maxNa
     counted: fits ? people.length - named.length : 0,
   );
 }
+
+/// How many overlapping discs of [size], each [step] after the last, fit in
+/// [width].
+int discCapacity(double width, double size, double step) => width < size ? 0 : ((width - size) / step).floor() + 1;
+
+/// The card's full-width fill (design-direction.md §6, 2026-11-02): everyone
+/// when they fit; otherwise as many as fit less one, then a "+N" disc for the
+/// rest. Measured, never a fixed cap.
+({int shown, int overflow}) fillRow(int people, int capacity) {
+  if (people <= capacity) return (shown: people, overflow: 0);
+  final shown = capacity > 0 ? capacity - 1 : 0;
+  return (shown: shown, overflow: people - shown);
+}

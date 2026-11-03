@@ -69,9 +69,10 @@ void main() {
   testWidgets('screen readers hear every carried name on the list row', (tester) async {
     final handle = tester.ensureSemantics();
     await pumpHome(tester);
-    // Seed: you + 5 carried names → 5 avatars shown; the rest folded into "+ N".
+    await settle(tester);
+    // Seed: you + 5 carried names, all in the card's avatar row.
     expect(
-      find.bySemanticsLabel(RegExp('You, Dad, Mom, Daniel Kim, Our parish, Ukraine are not yet carried on List 53')),
+      find.bySemanticsLabel(RegExp('You, Dad, Mom, Daniel Kim, Our parish, Ukraine\\. Pray to carry them')),
       findsOneWidget,
     );
     handle.dispose();

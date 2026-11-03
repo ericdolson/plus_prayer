@@ -11,7 +11,8 @@
 // Contrast checked (WCAG): ink and inkMuted ≥ 4.5:1 on ground and card;
 // heldGold ≥ 3:1 (non-text); heldGoldText ≥ 4.5:1; onPrimary on primary
 // 4.6:1 light, 3.8:1 dark (glyphs and large text). inkFaint is decorative
-// only (~3:1 and below).
+// only (~3:1 and below); carriedMark is a quiet secondary cue, below 3:1 on
+// purpose (design-direction.md §5).
 
 import 'package:flutter/painting.dart';
 
@@ -48,6 +49,9 @@ abstract final class PPDarkPalette {
   // Intentions on Home: between inkMuted and ink (design-direction.md §2, 2026-10-28).
   static const inkIntention = Color(0xFFA9ADB3); // 8.5:1 on ground, 7.5:1 on card
   static const inkFaint = Color(0xFF6C7076); // decorative only (3.8:1 on ground)
+  // The carried mark (design-direction.md §5): a background mark, halfway
+  // between thread and inkFaint.
+  static const carriedMark = Color(0xFF53585E); // 2.7:1 on ground
 
   // The POC's (and brand's) electric blue with white, as the pray button had
   // it. White on it is 3.8:1: fine for the glyph (≥3:1), short of 4.5:1 for
@@ -83,7 +87,9 @@ abstract final class PPLightPalette {
   static const ink = Color(0xFF05294A); // 12.7:1 on ground
   static const inkMuted = Color(0xFF566D83); // 4.6:1 on ground (the POC's #5C748C was 4.2)
   static const inkIntention = Color(0xFF3A5169); // 7.1:1 on ground, 7.7:1 on card
-  static const inkFaint = Color(0xFF8A9BB0); // decorative only
+  static const inkFaint = Color(0xFF8A9BB0); // decorative only (2.4:1 on ground)
+  // The carried mark: halfway between thread and inkFaint.
+  static const carriedMark = Color(0xFFA6B4C6); // 1.8:1 on ground
 
   static const primary = Color(0xFF0573E0);
   static const onPrimary = Color(0xFFFFFFFF); // 4.6:1
@@ -117,6 +123,19 @@ abstract final class PPWax {
     Color(0xFFC2A86A),
     Color(0xFF8C654E),
   ];
+
+  /// Dark theme only (design-direction.md §6): dark waxes sink into dark
+  /// surfaces, so each seal lifts its body this far toward its sheen (by
+  /// `sealVariant`; 0 = only the waxes that need it: Sunday's gold stays
+  /// apart from the gold held border, Friday's brass already separates) and
+  /// gets a thin, even rim light in its sheen color. Light theme and the wax
+  /// identities are unchanged.
+  static const List<double> darkLift = [0, .2, .2, .2, .2, 0, .2];
+  static const double darkRimOpacity = .5;
+  static const double rimWidth = 1;
+
+  /// Smaller seals (beads) get the lift but no rim.
+  static const double rimMinSize = 24;
 }
 
 /// Monogram avatar tones, indexed by `PrayerSubject.avatarTone` (0–15, the
@@ -223,6 +242,21 @@ abstract final class PPSizeTokens {
   static const double initialsTracking = .04;
   static const double seal = 44;
 
+  /// The community card's stamp: the day's seal, offset up and left so the
+  /// card's corner crops it (design-direction.md §6).
+  static const double cardStamp = 110;
+
+  /// ~70% visible, tuned by eye: the whole bloom center and most petals
+  /// show; only the outer wax and petal tips crop (until the D2 art's
+  /// separate layers).
+  static const double cardStampOffsetX = 23;
+  static const double cardStampOffsetY = 15;
+
+  /// The card's avatar row (2026-11-02, up from 24), overlapping only this
+  /// much so two-letter initials are never covered.
+  static const double cardAvatar = 28;
+  static const double cardAvatarOverlap = 4;
+
   /// Held ring: width and gap from the avatar (§5).
   static const double heldRing = 2;
   static const double heldRingGap = 2;
@@ -243,8 +277,15 @@ abstract final class PPSizeTokens {
   /// The live dot beside "praying now".
   static const double liveDot = 6;
 
-  /// The streak badge's logo seal.
-  static const double badgeSeal = 24;
+  /// The streak badge's pewter seal.
+  static const double badgeSeal = 22;
+
+  /// The carried mark after a name (Roca) and after an intention, and its
+  /// gap from the text (design-direction.md §5). Scaled with the text.
+  static const double carriedMarkName = 11;
+  static const double carriedMarkNameGap = 6;
+  static const double carriedMarkIntention = 9;
+  static const double carriedMarkIntentionGap = 4;
 
   /// The invitation's ring button (the POC's 85 pt FAB).
   static const double fab = 85;

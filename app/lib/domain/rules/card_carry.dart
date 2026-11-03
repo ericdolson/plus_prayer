@@ -1,13 +1,13 @@
-// The community card's two lines (design-direction.md §6, 2026-10-24):
+// The community card's you block (design-direction.md §6, 2026-11-02):
 //
-//   avatar row = yours on TODAY's list   "You, Dad + 3 are on List 52"
-//   status     = TOMORROW, from the gate "Pray to carry them onto List 53"
+//   avatar row = your carried people (who goes onto the next list)
+//   status     = the next list, from the gate "Pray to carry them onto List 53"
 //
 // The gate (list-lifecycle.md): a prayer with the current list, started before
 // its cutoff, carries you and your carried names onto the next list. (The ~30 h
 // window is a server-side safety net; the next cutoff isn't known ahead, so the
-// app never promises it.) Only differences between today and tomorrow are
-// named: who joins, who isn't carried.
+// app never promises it.) The card names no differences (who joins, who
+// isn't carried): the carried mark on rows shows them, Your portion names them.
 
 import '../models/local_date.dart';
 import '../models/prayer.dart';
@@ -31,28 +31,15 @@ enum TomorrowStatus {
 }
 
 class CardCarry {
-  const CardCarry({
-    required this.onToday,
-    required this.status,
-    this.joining = const [],
-    this.notCarried = const [],
-  });
+  const CardCarry({required this.carried, required this.status});
 
-  /// Your names printed on today's list, you first, then in your order.
-  /// Empty when you aren't on it (new user): no avatar row.
-  final List<Subject> onToday;
+  /// The avatar row, always shown: you first, then your carried names in
+  /// your order.
+  final List<Subject> carried;
   final TomorrowStatus status;
 
-  /// Carried tomorrow but not on today's list: "Mom joins you on List 53".
-  final List<Subject> joining;
-
-  /// On today's list but not carried tomorrow: "Aunt Jo isn't carried on
-  /// List 53".
-  final List<Subject> notCarried;
-
-  /// Speak about "you" rather than "them": nobody of yours but you on today's
-  /// list (or not even you).
-  bool get aboutYouOnly => onToday.every((s) => s.isSelf);
+  /// Speak about "you" rather than "them": nobody carried but you.
+  bool get aboutYouOnly => carried.every((s) => s.isSelf);
 }
 
 /// True when the next list is already earned: the server has a prayer with
@@ -71,17 +58,6 @@ CardCarry cardCarry({
   required UserHeader? header,
   required LocalDate today,
 }) {
-  final printedIds = {
-    if (status != null && status.listId == list.id)
-      for (final e in status.entries)
-        if (e.isName && e.subjectId != null) e.subjectId!,
-  };
-  // Today's names in your order (self first), only those still in your list.
-  final onToday = [
-    for (final s in tree.names)
-      if (printedIds.contains(s.id)) s,
-  ];
-
   final TomorrowStatus tomorrow;
   if (nextListCovered(list, status, localPrayers)) {
     tomorrow = TomorrowStatus.covered;
@@ -90,21 +66,5 @@ CardCarry cardCarry({
   } else {
     tomorrow = TomorrowStatus.prayToCarry;
   }
-
-  final carried = carriedNames(tree);
-  final carriedIds = {for (final s in carried) s.id};
-  return CardCarry(
-    onToday: onToday,
-    status: tomorrow,
-    joining: onToday.isEmpty
-        ? const []
-        : [
-            for (final s in carried)
-              if (!s.isSelf && !printedIds.contains(s.id)) s
-          ],
-    notCarried: [
-      for (final s in onToday)
-        if (!s.isSelf && !carriedIds.contains(s.id)) s
-    ],
-  );
+  return CardCarry(carried: carriedNames(tree), status: tomorrow);
 }

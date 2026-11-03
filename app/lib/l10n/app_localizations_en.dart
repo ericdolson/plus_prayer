@@ -29,6 +29,39 @@ class L10nEn extends L10n {
   }
 
   @override
+  String listPeople(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString people',
+      one: '$countString person',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String listPrayers(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString prayers',
+      one: '$countString prayer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get countsSeparator => '·';
+
+  @override
   String listBeingFilmed(int number) {
     return 'List $number, being filmed';
   }
@@ -41,16 +74,6 @@ class L10nEn extends L10n {
   @override
   String carryWillBe(int number) {
     return 'will be on List $number';
-  }
-
-  @override
-  String cardOnListAre(int number) {
-    return 'are on List $number';
-  }
-
-  @override
-  String cardOnListIs(int number) {
-    return 'is on List $number';
   }
 
   @override
@@ -70,7 +93,7 @@ class L10nEn extends L10n {
 
   @override
   String cardNextPrayerYou(int number) {
-    return 'Your next prayer carries you onto List $number';
+    return 'Your next prayer puts you on List $number';
   }
 
   @override
@@ -81,30 +104,6 @@ class L10nEn extends L10n {
   @override
   String cardPrayToBe(int number) {
     return 'Pray to be on List $number';
-  }
-
-  @override
-  String cardJoins(String name, int others, int number) {
-    String _temp0 = intl.Intl.pluralLogic(
-      others,
-      locale: localeName,
-      other: '$name and $others others join you on List $number',
-      one: '$name and 1 other join you on List $number',
-      zero: '$name joins you on List $number',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String cardNotCarried(String name, int others, int number) {
-    String _temp0 = intl.Intl.pluralLogic(
-      others,
-      locale: localeName,
-      other: '$name and $others others aren\'t carried on List $number',
-      one: '$name and 1 other aren\'t carried on List $number',
-      zero: '$name isn\'t carried on List $number',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -132,13 +131,12 @@ class L10nEn extends L10n {
 
   @override
   String closesSoon(int number, int minutes) {
-    String _temp0 = intl.Intl.pluralLogic(
-      minutes,
-      locale: localeName,
-      other: '$minutes minutes',
-      one: '1 minute',
-    );
-    return 'List $number closes in $_temp0';
+    return 'List $number closes in $minutes min · pray to carry them';
+  }
+
+  @override
+  String closesSoonYou(int number, int minutes, int next) {
+    return 'List $number closes in $minutes min · pray to be on List $next';
   }
 
   @override
@@ -157,6 +155,15 @@ class L10nEn extends L10n {
     final String countString = countNumberFormat.format(count);
 
     return '$countString prayed in the last hour';
+  }
+
+  @override
+  String presenceShortLastHour(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString prayed this hour';
   }
 
   @override
@@ -183,6 +190,11 @@ class L10nEn extends L10n {
 
   @override
   String get heldToday => 'Held today';
+
+  @override
+  String rowCarried(String name) {
+    return '$name, carried';
+  }
 
   @override
   String get filterAll => 'All';

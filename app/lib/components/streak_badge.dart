@@ -3,26 +3,22 @@ import 'package:flutter/material.dart';
 import '../domain/rules/streak.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/pp_theme.dart';
-import 'logo_seal.dart';
+import 'wax_seal.dart';
 
-/// Header streak badge (streaks-reminders.md): the logo as a small wax seal
-/// (design-direction.md §4, never a "+") and the number.
-/// Prayed with the list today → seal in today's wax + N; alive → muted seal +
-/// N; zero → muted seal, no number (never "0"). Always tappable.
+/// Header streak badge (streaks-reminders.md, design-direction.md §4): a
+/// neutral pewter seal and the number, which carries the state.
+/// Prayed with the list today → seal + N in ink; alive → seal one step dimmer
+/// + N in inkMuted; zero → dim seal, no number (never "0"). Always tappable.
 class StreakBadge extends StatelessWidget {
   const StreakBadge({
     super.key,
     required this.state,
     required this.days,
-    required this.todayVariant,
     this.onTap,
   });
 
   final StreakBadgeState state;
   final int days;
-
-  /// Today's wax (0 = Sunday … 6 = Saturday).
-  final int todayVariant;
   final VoidCallback? onTap;
 
   @override
@@ -41,7 +37,7 @@ class StreakBadge extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              LogoSeal(variant: todayVariant, size: pp.size.badgeSeal, muted: state != StreakBadgeState.sealedToday),
+              PewterSeal(size: pp.size.badgeSeal, dimmed: state != StreakBadgeState.sealedToday),
               if (showNumber) ...[
                 SizedBox(width: pp.space.xs),
                 Text(

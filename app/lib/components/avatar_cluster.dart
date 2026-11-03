@@ -56,10 +56,9 @@ class AvatarCluster extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = L10n.of(context);
     final pp = context.pp;
-    final c = pp.colors;
     final d = avatarSize ?? pp.size.clusterAvatar;
     final layout = layoutCluster(people);
-    final step = d * .7;
+    final step = d * _overlap;
     final discs = layout.avatars.length + (layout.overflow > 0 ? 1 : 0);
 
     final named = layout.named;
@@ -73,47 +72,7 @@ class AvatarCluster extends StatelessWidget {
     final text = '$names $trailing';
     final textStyle = style ?? context.text.bodySmall;
     final avatarsWidth = d + step * (discs - 1);
-    final avatars = SizedBox(
-      width: avatarsWidth,
-      height: d,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          for (var i = 0; i < layout.avatars.length; i++)
-            PositionedDirectional(
-              start: step * i,
-              child: MonogramAvatar(
-                initials: layout.avatars[i].initials,
-                tone: layout.avatars[i].tone,
-                size: d,
-                ring: true,
-                ringColor: surface,
-              ),
-            ),
-          if (layout.overflow > 0)
-            PositionedDirectional(
-              start: step * layout.avatars.length,
-              child: Container(
-                width: d,
-                height: d,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: c.clusterOverflow,
-                  border: Border.all(color: surface, width: d * .07),
-                ),
-                child: Text(
-                  l10n.clusterOverflow(layout.overflow),
-                  maxLines: 1,
-                  textScaler: TextScaler.noScaling,
-                  // Scales with the disc, like a monogram's initials.
-                  style: context.text.labelMedium!.copyWith(color: c.inkMuted, fontSize: d * .4, height: 1),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
+    final avatars = _Discs(people: layout.avatars, overflow: layout.overflow, size: d, surface: surface);
 
     return Semantics(
       label: '${people.map((p) => p.name).join(', ')} $trailing',
@@ -155,6 +114,122 @@ class AvatarCluster extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+/// The community card's avatar row (design-direction.md §6, 2026-11-02): your
+/// carried people filling the width, the "+N" disc only when they don't fit
+/// (measured). Screen readers hear every name.
+class AvatarRow extends StatelessWidget {
+  const AvatarRow({
+    super.key,
+    required this.people,
+    required this.surface,
+    required this.avatarSize,
+    required this.overlap,
+  });
+
+  final List<ClusterPerson> people;
+  final Color surface;
+  final double avatarSize;
+
+  /// How far each disc overlaps the last, in points.
+  final double overlap;
+
+  @override
+  Widget build(BuildContext context) {
+    final d = avatarSize;
+    return Semantics(
+      label: people.map((p) => p.name).join(', '),
+      excludeSemantics: true,
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final fill = fillRow(people.length, discCapacity(box.maxWidth, d, d - overlap));
+          return Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: _Discs(
+              people: people.take(fill.shown).toList(),
+              overflow: fill.overflow,
+              size: d,
+              surface: surface,
+              step: d - overlap,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Each disc starts this far (× its size) after the last.
+const _overlap = .7;
+
+/// Overlapping avatars, then the "+N" disc. Thin rings in [surface] separate
+/// the overlaps.
+class _Discs extends StatelessWidget {
+  const _Discs({
+    required this.people,
+    required this.overflow,
+    required this.size,
+    required this.surface,
+    this.step,
+  });
+
+  final List<ClusterPerson> people;
+  final int overflow;
+  final double size;
+  final Color surface;
+
+  /// From one disc's start to the next; default ×[_overlap] of the size.
+  final double? step;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.pp.colors;
+    final d = size;
+    final step = this.step ?? d * _overlap;
+    final discs = people.length + (overflow > 0 ? 1 : 0);
+    return SizedBox(
+      width: discs == 0 ? 0 : d + step * (discs - 1),
+      height: d,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          for (var i = 0; i < people.length; i++)
+            PositionedDirectional(
+              start: step * i,
+              child: MonogramAvatar(
+                initials: people[i].initials,
+                tone: people[i].tone,
+                size: d,
+                ring: true,
+                ringColor: surface,
+              ),
+            ),
+          if (overflow > 0)
+            PositionedDirectional(
+              start: step * people.length,
+              child: Container(
+                width: d,
+                height: d,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: c.clusterOverflow,
+                  border: Border.all(color: surface, width: d * .07),
+                ),
+                child: Text(
+                  L10n.of(context).clusterOverflow(overflow),
+                  maxLines: 1,
+                  textScaler: TextScaler.noScaling,
+                  // Scales with the disc, like a monogram's initials.
+                  style: context.text.labelMedium!.copyWith(color: c.inkMuted, fontSize: d * .4, height: 1),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

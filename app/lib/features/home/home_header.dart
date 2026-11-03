@@ -332,7 +332,6 @@ class _SelfAndStreak extends ConsumerWidget {
             child: StreakBadge(
               state: streakBadgeState(header, today),
               days: effectiveStreak(header, today),
-              todayVariant: today.weekdayFromSunday,
               // Build step 5: the streak sheet.
               onTap: () {},
             ),

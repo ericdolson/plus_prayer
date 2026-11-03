@@ -22,6 +22,7 @@ class PPColors {
     required this.inkMuted,
     required this.inkIntention,
     required this.inkFaint,
+    required this.carriedMark,
     required this.primary,
     required this.onPrimary,
     required this.heldGold,
@@ -79,6 +80,11 @@ class PPColors {
   /// Decorative only: placeholders, unchecked marks. Never essential text.
   final Color inkFaint;
 
+  /// The carried mark after carried names and intentions: a quiet
+  /// background mark between [thread] and [inkFaint]; neutral, never gold or
+  /// blue.
+  final Color carriedMark;
+
   /// Blue = do this: the pray button, Amen, the invitation, primary buttons.
   /// Never status, toggles, or checks.
   final Color primary;
@@ -132,6 +138,7 @@ class PPColors {
     inkMuted: PPDarkPalette.inkMuted,
     inkIntention: PPDarkPalette.inkIntention,
     inkFaint: PPDarkPalette.inkFaint,
+    carriedMark: PPDarkPalette.carriedMark,
     primary: PPDarkPalette.primary,
     onPrimary: PPDarkPalette.onPrimary,
     heldGold: PPDarkPalette.heldGold,
@@ -161,6 +168,7 @@ class PPColors {
     inkMuted: PPLightPalette.inkMuted,
     inkIntention: PPLightPalette.inkIntention,
     inkFaint: PPLightPalette.inkFaint,
+    carriedMark: PPLightPalette.carriedMark,
     primary: PPLightPalette.primary,
     onPrimary: PPLightPalette.onPrimary,
     heldGold: PPLightPalette.heldGold,
@@ -184,6 +192,18 @@ class PPColors {
 
   Color waxSheen(int? sealVariant) => sealVariant == null ? unsealed : PPWax.sheen[sealVariant % PPWax.sheen.length];
 
+  /// A seal's wax body: in dark, the waxes that need it lift toward their
+  /// sheen so they separate from dark surfaces; in light, the wax itself.
+  Color waxLifted(int sealVariant) => brightness == Brightness.dark
+      ? Color.lerp(wax(sealVariant), waxSheen(sealVariant), PPWax.darkLift[sealVariant % PPWax.darkLift.length])!
+      : wax(sealVariant);
+
+  /// A seal's rim light, dark theme only (null in light): its sheen, or for
+  /// the unsealed blank a lighter neutral.
+  Color? waxRim(int? sealVariant) => brightness == Brightness.dark
+      ? (sealVariant == null ? inkFaint : waxSheen(sealVariant)).withValues(alpha: PPWax.darkRimOpacity)
+      : null;
+
   /// Monogram tone by palette index (`avatarTone`): the same palette in both
   /// themes, a touch dimmer in dark.
   Color avatarTone(int tone) {
@@ -206,6 +226,7 @@ class PPColors {
         inkMuted: Color.lerp(inkMuted, other.inkMuted, t)!,
         inkIntention: Color.lerp(inkIntention, other.inkIntention, t)!,
         inkFaint: Color.lerp(inkFaint, other.inkFaint, t)!,
+        carriedMark: Color.lerp(carriedMark, other.carriedMark, t)!,
         primary: Color.lerp(primary, other.primary, t)!,
         onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
         heldGold: Color.lerp(heldGold, other.heldGold, t)!,
@@ -257,6 +278,13 @@ class PPSizes {
   double get initialsScale => PPSizeTokens.initialsScale;
   double get initialsTracking => PPSizeTokens.initialsTracking;
   double get seal => PPSizeTokens.seal;
+  double get cardStamp => PPSizeTokens.cardStamp;
+  double get cardStampOffsetX => PPSizeTokens.cardStampOffsetX;
+  double get cardStampOffsetY => PPSizeTokens.cardStampOffsetY;
+  double get cardAvatar => PPSizeTokens.cardAvatar;
+  double get cardAvatarOverlap => PPSizeTokens.cardAvatarOverlap;
+  double get waxRim => PPWax.rimWidth;
+  double get waxRimMinSize => PPWax.rimMinSize;
   double get heldRing => PPSizeTokens.heldRing;
   double get heldRingGap => PPSizeTokens.heldRingGap;
   double get heldDot => PPSizeTokens.heldDot;
@@ -265,6 +293,10 @@ class PPSizes {
   double get check => PPSizeTokens.check;
   double get liveDot => PPSizeTokens.liveDot;
   double get badgeSeal => PPSizeTokens.badgeSeal;
+  double get carriedMarkName => PPSizeTokens.carriedMarkName;
+  double get carriedMarkNameGap => PPSizeTokens.carriedMarkNameGap;
+  double get carriedMarkIntention => PPSizeTokens.carriedMarkIntention;
+  double get carriedMarkIntentionGap => PPSizeTokens.carriedMarkIntentionGap;
   double get fab => PPSizeTokens.fab;
   double get ringGap => PPSizeTokens.ringGap;
   double get bar => PPSizeTokens.bar;

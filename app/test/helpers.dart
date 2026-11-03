@@ -12,7 +12,7 @@ import 'package:plusprayer/theme/app_theme.dart';
 final testNow = DateTime(2026, 10, 19, 9);
 
 /// Pumps Home on the mock backend (no latency, no live drift, fixed clock).
-Future<MockBackend> pumpHome(WidgetTester tester, {DateTime Function()? clock}) async {
+Future<MockBackend> pumpHome(WidgetTester tester, {DateTime Function()? clock, ThemeData? theme}) async {
   final now = clock ?? () => testNow;
   final backend = MockBackend(now: now, latency: Duration.zero, liveDrift: false);
   final overrides = await mockOverrides(backend);
@@ -24,7 +24,7 @@ Future<MockBackend> pumpHome(WidgetTester tester, {DateTime Function()? clock}) 
       timezoneProvider.overrideWith((ref) async => 'America/Denver'),
     ],
     child: MaterialApp(
-      theme: AppTheme.dark(),
+      theme: theme ?? AppTheme.dark(),
       localizationsDelegates: L10n.localizationsDelegates,
       supportedLocales: L10n.supportedLocales,
       home: const HomeScreen(),

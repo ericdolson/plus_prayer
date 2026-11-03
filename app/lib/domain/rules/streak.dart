@@ -46,13 +46,13 @@ UserHeader afterListPrayer(UserHeader user, LocalDate day) {
 }
 
 enum StreakBadgeState {
-  /// Prayed with the list today: seal in today's wax + N.
+  /// Prayed with the list today: pewter seal + N in ink.
   sealedToday,
 
-  /// Streak alive, not yet today: muted seal + N.
+  /// Streak alive, not yet today: seal one step dimmer + N in inkMuted.
   alive,
 
-  /// Zero: muted seal, no number. Never "0".
+  /// Zero: dim seal, no number. Never "0".
   none,
 }
 

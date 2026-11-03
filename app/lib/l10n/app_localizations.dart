@@ -105,11 +105,29 @@ abstract class L10n {
   /// **'List {number}'**
   String listTitle(int number);
 
-  /// Community card, scale first (design-direction.md §6).
+  /// Community card's screen reader label: the world's scale (design-direction.md §6).
   ///
   /// In en, this message translates to:
   /// **'{people} people · {prayers} prayers'**
   String listScale(int people, int prayers);
+
+  /// Community card counts row: the number is drawn in ink, the words in inkMuted (2026-11-02).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} person} other{{count} people}}'**
+  String listPeople(int count);
+
+  /// Community card counts row, after listPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} prayer} other{{count} prayers}}'**
+  String listPrayers(int count);
+
+  /// The thin middle dot between the card's counts.
+  ///
+  /// In en, this message translates to:
+  /// **'·'**
+  String get countsSeparator;
 
   /// Screen reader label for the unsealed seal before the list is published.
   ///
@@ -129,18 +147,6 @@ abstract class L10n {
   /// **'will be on List {number}'**
   String carryWillBe(int number);
 
-  /// After the avatar row of yours on today's list: 'You, Dad + 3 are on List 52'.
-  ///
-  /// In en, this message translates to:
-  /// **'are on List {number}'**
-  String cardOnListAre(int number);
-
-  /// Avatar row with one name that isn't you.
-  ///
-  /// In en, this message translates to:
-  /// **'is on List {number}'**
-  String cardOnListIs(int number);
-
   /// No description provided for @cardCovered.
   ///
   /// In en, this message translates to:
@@ -159,10 +165,10 @@ abstract class L10n {
   /// **'Your next prayer carries them onto List {number}'**
   String cardNextPrayer(int number);
 
-  /// Not in the spec (the 'you' form of cardNextPrayer); for review.
+  /// Only you carried, after the flip (design-direction.md §6, 2026-11-02).
   ///
   /// In en, this message translates to:
-  /// **'Your next prayer carries you onto List {number}'**
+  /// **'Your next prayer puts you on List {number}'**
   String cardNextPrayerYou(int number);
 
   /// No description provided for @cardPrayToCarry.
@@ -176,18 +182,6 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Pray to be on List {number}'**
   String cardPrayToBe(int number);
-
-  /// Names carried tomorrow that aren't on today's list. The plural forms beyond one name aren't in the spec; for review.
-  ///
-  /// In en, this message translates to:
-  /// **'{others, plural, =0{{name} joins you on List {number}} =1{{name} and 1 other join you on List {number}} other{{name} and {others} others join you on List {number}}}'**
-  String cardJoins(String name, int others, int number);
-
-  /// Names on today's list that won't be carried tomorrow (tap → Your portion). Plural forms are for review.
-  ///
-  /// In en, this message translates to:
-  /// **'{others, plural, =0{{name} isn\'t carried on List {number}} =1{{name} and 1 other aren\'t carried on List {number}} other{{name} and {others} others aren\'t carried on List {number}}}'**
-  String cardNotCarried(String name, int others, int number);
 
   /// No description provided for @clusterYou.
   ///
@@ -219,11 +213,17 @@ abstract class L10n {
   /// **'+{count}'**
   String clusterOverflow(int count);
 
-  /// No description provided for @closesSoon.
+  /// Replaces the card's status line in the last 5 minutes (2026-11-02).
   ///
   /// In en, this message translates to:
-  /// **'List {number} closes in {minutes, plural, =1{1 minute} other{{minutes} minutes}}'**
+  /// **'List {number} closes in {minutes} min · pray to carry them'**
   String closesSoon(int number, int minutes);
+
+  /// closesSoon when only you are carried (2026-11-02).
+  ///
+  /// In en, this message translates to:
+  /// **'List {number} closes in {minutes} min · pray to be on List {next}'**
+  String closesSoonYou(int number, int minutes, int next);
 
   /// No description provided for @presenceNow.
   ///
@@ -236,6 +236,12 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'{count} prayed in the last hour'**
   String presenceLastHour(int count);
+
+  /// The card's presence line, last-hour rung: no dot (design-direction.md §6). Screen readers hear presenceLastHour.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} prayed this hour'**
+  String presenceShortLastHour(int count);
 
   /// No description provided for @presenceToday.
   ///
@@ -260,6 +266,12 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Held today'**
   String get heldToday;
+
+  /// Screen reader: a Home row with the carried mark (design-direction.md §5).
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, carried'**
+  String rowCarried(String name);
 
   /// No description provided for @filterAll.
   ///
