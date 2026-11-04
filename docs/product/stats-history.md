@@ -27,6 +27,8 @@ _Last updated: 2026-10-17_
   getSubjectPrayerHistory, getMyPrayerHistory, getMyArchivedSubjects.
 
 ## Detail-page history — the bead strand (2026-10-18)
+Layout and rendering (dot size, year rows, gaps as thread breaks) are in
+`detail-page.md` (2026-11-03).
 SUPERSEDES the seed's v3 thick/thin/dashed line (seeds/2026-10-11 §4.4–4.7) and
 its per-assembly outcome recording (§5). Applies to names, intentions, and "Me".
 - **Header:** "Held by you · N prayers" (always) and "Carried by the world · N

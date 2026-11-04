@@ -39,6 +39,7 @@ every feature crosses that boundary.
 | [monetization.md](monetization.md) | Free vs premium, pool, trial, paywall | Model decided; price/billing OPEN (Stage 2) |
 | [privacy.md](privacy.md) | Printed-list privacy, retention, age, data | Decided; legal text pending |
 | [screens.md](screens.md) | Navigation, screen map, add sheet, settings | Decided |
+| [detail-page.md](detail-page.md) | Name/intention detail page: layout, bead strand rendering, praying in place | Decided 2026-11-03 |
 | [schema-brief.md](schema-brief.md) | Handoff: every table/field/function change from the meetings | Ready for backend |
 | [design-direction.md](design-direction.md) | Visual system: color roles, type, spacing, Home rows, community card, motion, icons — overrides app-brief | Decided 2026-10-23 |
 | [groups-design-note.md](groups-design-note.md) | Future prayer-groups UI direction (not built) | Stage 4+ note |

@@ -29,8 +29,9 @@ _Last updated: 2026-10-18_
   No second streak anywhere; row secondary text stays carry status, not metrics.
 - **Footer:** [ History ] ( 🙏 ) [ ＋ Add ]. In prayer it becomes the prayer bar
   in place: [ timer ] ( Amen ) [ with N · ✕ ].
-- Starting a prayer from a detail page returns to Home in prayer mode with that
-  item pre-checked.
+- Starting a prayer from a detail page **stays on that page** (revised
+  2026-11-03; was: returns to Home): the page strips down to the subject and
+  its intentions, the subject pre-checked. See `detail-page.md`.
 - **One detail page for names and intentions** — the intention version hides
   what doesn't apply (no nested intentions, no avatar edit) and adds its parent
   name + Answered/Release.

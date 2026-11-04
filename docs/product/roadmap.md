@@ -89,7 +89,7 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
 - [ ] [app] "Your portion" screen: preview, carried meter, include/remove,
       "Not printed" state (exclusions only; no pending state); contact-info input block
 - [ ] [app] Subject detail: lists it's been on, world count (live stitch), my
-      history, gaps in days
+      history, gaps in days; prays in place (detail-page.md, 2026-11-03)
 - [ ] [app] List detail: full-bleed self-hosted video, "being filmed" state
 - [ ] [app] Streak = days with the world (header badge + sheet: sealed/hollow
       marks, monthly personal count), grace offers/bank, milestones

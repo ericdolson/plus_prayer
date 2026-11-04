@@ -1094,3 +1094,24 @@ Why: holding the closing sheet ~1 s would make Amen feel laggy and the
 moment should land on tap; the halo releasing as the sheet arrives reads as
 a natural hand-off. One rule for every committing Amen avoids special cases.
 Rejected: delaying the closing sheet/fold for the halo.
+
+### Decision: Name/intention detail page — layout, beads, praying in place
+**Timestamp:** 2026-11-03
+Spec: `docs/product/detail-page.md`. Order: top section (avatar, name, status) →
+counts → Intentions → History, with a blue "Pray for {alias}" button. Beads are
+plain ~9 pt wax-colored dots (sealVariant, dark-theme lift) on a neutral thread;
+week/month rows show every bead, year rows counts only; gaps are a thread break
+with "Off the list · N days". Mixed weekday colors accepted pending a render.
+**Praying from a detail page stays on the page** (supersedes 2026-10-18 "returns
+to Home in prayer mode"): non-subject sections fade out; the subject is
+pre-checked and credited at Amen; intentions are credited only if checked; "Pray
+for others" goes to Home still in prayer. Amen, the invitation and the closing
+sheet play on the page, then history fades back with updated counts. v1 leaves
+out period expansion into individual prayers.
+Why: you open Dad's page to be with Dad; jumping to everyone's list breaks that
+focus. Stripping the page down (hide, not disable) avoids disabled states
+across many surfaces, and the session is already app-level, so no prayer logic
+is duplicated. Stamp detail can't be seen at bead size, so D2 doesn't block.
+Rejected: navigating to Home pre-checked (context switch); dimming/disabling
+history in place (noise in prayer); beads on year rows (365 dots → texture).
+Revisit later: whether the subject should be lockable as checked on its page.
