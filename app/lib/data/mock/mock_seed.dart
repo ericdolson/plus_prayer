@@ -105,7 +105,7 @@ class MockSeed {
 
     final header = UserHeader(
       id: 'mock-user',
-      displayName: 'Jordan Ellis',
+      displayName: 'Eric Olson',
       selfSubjectId: 'self',
       currentStreak: 6,
       bestStreak: 11,

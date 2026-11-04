@@ -333,7 +333,11 @@ class PPMotion {
   Duration get linger => PPMotionTokens.linger;
   Duration get fold => PPMotionTokens.fold;
   Duration get searchPause => PPMotionTokens.searchPause;
+  Duration get haloFade => PPMotionTokens.haloFade;
   Duration get haloBreath => PPMotionTokens.haloBreath;
+  Duration get haloFlare => PPMotionTokens.haloFlare;
+  Duration get haloFlareRise => PPMotionTokens.haloFlareRise;
+  Duration get haloFlareOffset => PPMotionTokens.haloFlareOffset;
 }
 
 @immutable

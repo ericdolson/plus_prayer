@@ -349,7 +349,20 @@ abstract final class PPMotionTokens {
 
   /// Search's empty state waits for typing to pause this long (no flicker).
   static const searchPause = Duration(milliseconds: 600);
-  static const haloBreath = Duration(milliseconds: 2400);
+
+  /// The prayer halo (design-direction.md §7): fades in/out, one slow breath
+  /// (a full in-and-out cycle is twice [haloBreath]), and the final Amen's
+  /// flare, which runs before the fade-out.
+  static const haloFade = Duration(milliseconds: 400);
+  static const haloBreath = Duration(milliseconds: 4000);
+  static const haloFlare = Duration(milliseconds: 500);
+
+  /// The flare's fast rise; the rest of [haloFlare] is the slower settle.
+  static const haloFlareRise = Duration(milliseconds: 150);
+
+  /// From the final Amen tap to the flare's start. Zero until the seal-stamp
+  /// animation exists; then the time to the stamp's impact.
+  static const haloFlareOffset = Duration.zero;
 }
 
 /// Translucent bars (design-direction.md §4).

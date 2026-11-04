@@ -38,6 +38,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pp = context.pp;
     final inPrayer = ref.watch(prayerSessionProvider.select((s) => s.isActive));
+    final closing = ref.watch(prayerSessionProvider.select((s) => s.phase == PrayerPhase.closing));
     final searchOpen = ref.watch(homeQueryProvider.select((q) => q.searchOpen));
 
     ref.listen(prayerSessionProvider, (previous, next) {
@@ -62,7 +63,15 @@ class HomeScreen extends ConsumerWidget {
     });
 
     return Halo(
-      active: inPrayer,
+      // Reaching closing means an Amen committed the prayer (welcome-back's
+      // too): the halo flares, then fades beneath the closing sheet, which
+      // doesn't wait for it. Cancel and Discard go straight to idle: a plain
+      // fade.
+      mode: inPrayer
+          ? HaloMode.on
+          : closing
+              ? HaloMode.amen
+              : HaloMode.off,
       child: Scaffold(
         // The bar docks search above the keyboard itself.
         resizeToAvoidBottomInset: false,
