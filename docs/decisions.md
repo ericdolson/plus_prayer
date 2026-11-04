@@ -1067,3 +1067,18 @@ avoids reading as Siri, and saves battery over long sessions.
 Rejected: top-edge-only glow (too easy to miss); full-background warm tint
 (washes neutrals, weakens gold = held); glow only on the prayer pill (loses
 the sense of a set-apart space).
+
+### Decision: Prayer-mode halo — build answers
+**Timestamp:** 2026-11-03
+Session end = the final Amen (FAB Amen, or the invitation's Amen when shown);
+the halo stays through the invitation and is gone before the closing phase.
+Flare on the final Amen only: ~500 ms, opacity → 1.0 and reach ~1.3×, then the
+~400 ms fade-out begins (fade waits for flare). Flare starts at the Amen tap
+until a seal-stamp animation exists, then retimes to stamp impact via one
+tunable offset. Fade-out ~400 ms on both cancel and end. The ≤ ~12 pt limit is
+the visible reach from the edge at rest; the flare may exceed it briefly.
+Reduce Motion: static at ~0.75.
+Why: a flare that plays while fading reads as nothing, so they run in
+sequence; opacity alone (+0.15) is too subtle to register, so the flare also
+widens briefly; 0.75 sits mid-breath so the static halo matches what others
+see on average rather than its peak.
