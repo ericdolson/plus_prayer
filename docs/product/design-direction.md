@@ -583,6 +583,19 @@ on Today's list or Your portion.
 ## 7. Prayer mode visuals
 - **Halo is gold** (gold = holding): edge glow in dark mode; a slightly
   stronger gradient in light mode so it doesn't vanish.
+- **Halo behavior** (2026-11-03): it frames the session and is not a second
+  signature motion.
+  - **Enter/exit:** fades in over ~400 ms when the prayer starts; fades out on
+    ✕ cancel or when the session ends.
+  - **At rest:** nearly still. At most a very slow breath (~8 s cycle, opacity
+    ~0.65 ↔ 0.85). No moving, rotating or multicolor gradient (that reads as
+    Siri).
+  - **Amen:** one brief flare (brighten and settle, ~400–600 ms) timed with the
+    seal stamp, in support of the signature moment.
+  - **Inner glow kept tight:** inward blur ≤ ~12 pt so it doesn't muddy the
+    bottom corners behind the prayer pill and Amen button.
+  - **Reduce Motion:** fully static halo (no breath, no flare); enter/exit stay
+    as simple fades.
 - Checkbox fades into the trailing slot of every row and the community card.
   **Checked = gold ring on the avatar / gold dot on the intention**, applied
   live.
@@ -598,7 +611,8 @@ on Today's list or Your portion.
 - Everything else (navigation, sheets, filters) is quiet and quick.
 - **Check moment:** a brief gold bloom (~300–400 ms) as the ring/dot appears,
   settling into the crisp ring — motion, not a lasting glow.
-- Reduce Motion: replace springs and the bloom with simple fades.
+- Reduce Motion: replace springs and the bloom with simple fades; the prayer
+  halo is fully static (§7).
 
 ---
 

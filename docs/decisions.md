@@ -1053,3 +1053,17 @@ waxes in dark mode better than a drawn rim.
 Rejected: photos at small sizes (turn to mush); mixing a vector unsealed blank
 with photo seals; photographic textures anywhere else in the UI.
 Not yet built: no app work until the photos exist (open-questions D3).
+
+### Decision: Prayer-mode halo kept; behavior tuned
+**Timestamp:** 2026-11-03
+Keep the gold screen-edge halo (originally inspired by the Siri edge glow). It
+fades in (~400 ms) on start and out on cancel/end; at rest it is nearly still
+(at most an ~8 s breath, opacity ~0.65 ↔ 0.85); it flares once with the Amen
+seal stamp; inward blur ≤ ~12 pt to keep the pill/Amen corners clean; fully
+static under Reduce Motion. Spec: design-direction §7–§8.
+Why: it is the clearest "you're in prayer" signal and fits gold = held;
+keeping it nearly still protects Amen → seal as the one signature motion,
+avoids reading as Siri, and saves battery over long sessions.
+Rejected: top-edge-only glow (too easy to miss); full-background warm tint
+(washes neutrals, weakens gold = held); glow only on the prayer pill (loses
+the sense of a set-apart space).
