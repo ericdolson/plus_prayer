@@ -15,7 +15,7 @@ decisions.md. **MVP** = blocks MVP build._
 | # | Item | Area |
 |---|---|---|
 | D1 | Draw a dedicated **bloom without the "+"** for the carried mark; until then it uses the logo glyph (`+prayer_icon.svg`). See design-direction §5 Carried mark | design |
-| D2 | Draw the **7 wax-stamp vectors as the bloom pressed into wax** (one per weekday wax), replacing the painted circled-"+" placeholder in `WaxSeal`. Same bloom as D1, so ink (carried) and wax (sealed) read as one symbol. **Scope reduced 2026-11-02:** vectors now only for small sizes (beads); large sizes use photos (D3). See list-lifecycle and design-direction §5–6 | design |
+| D2 | Draw the **7 wax-stamp vectors as the bloom pressed into wax** (one per weekday wax), replacing the painted circled-"+" placeholder in `WaxSeal`. Same bloom as D1, so ink (carried) and wax (sealed) read as one symbol. **Scope reduced 2026-11-02:** vectors now only for small sizes; large sizes use photos (D3). **2026-11-03:** detail-page beads are plain wax-colored dots, so D2 doesn't block them (see detail-page.md). See list-lifecycle and design-direction §5–6 | design |
 | D3 | **Shoot the 7 wax seals (+ an unsealed blank) as macro photos**, cut out with transparency, for large seal sizes. Shoot guide in design-direction §6 "Photographed seals" | design |
 
 ## Resolved
