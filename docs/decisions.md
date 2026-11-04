@@ -1138,3 +1138,19 @@ the present; counts landing in view when the sheet clears is the payoff for
 staying on the page.
 Rejected: storing where a prayer began to restore the detail page (rare,
 adds state); "Pray for Me" / "Pray for {intention text}" labels.
+
+### Decision: Detail page — second round of build answers
+**Timestamp:** 2026-11-03
+Bead strand: one fixed pitch for all rows, left-aligned, wrap on overflow;
+rows newest first, beads oldest → newest within a row (supersedes "gap at the
+end of the newer row" → now its start). Unsealed current bead uses a lighter
+neutral (≥ 3:1) since the `unsealed` body vanishes on dark. Answered hint only
+on the intention's page; an Answered-only period stays. "You prayed once";
+year added to "Begun" for earlier years; ✎ counts lag until notes sync;
+section titles match Home name style. Default mock stays sealed (dev control
+shows unsealed).
+Why: a strand reads like a line of text and grows with time, so the newest
+bead belongs at the right; fixed pitch keeps every bead the same object
+instead of a layout artifact; the answered moment is the gratitude payoff and
+shouldn't disappear on a quiet day.
+Still open: Sunday gold vs held gold, faint dark waxes — needs the render.

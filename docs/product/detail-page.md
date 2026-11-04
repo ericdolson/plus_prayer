@@ -1,6 +1,6 @@
 # Detail Page — names and intentions
 
-_Last updated: 2026-11-03 (build answers round 1)_
+_Last updated: 2026-11-03 (build answers round 2)_
 
 One shared layout for a name (soul) and an intention. Builds on
 `stats-history.md` (bead strand data and counts), `screens.md` (screen map),
@@ -84,12 +84,21 @@ the detail page, this file wins.
 - **Beads = plain wax-colored dots (~9 pt)**, one per list, colored by that
   list's `sealVariant`, with the dark-theme lift from `WaxSeal` (no rim below
   ~24 pt). Stamp detail can't be seen at this size, so **D2 doesn't block this
-  screen.** The current list's bead **while unsealed ("being filmed")** uses
-  the neutral `unsealed` color and becomes its wax once sealed.
+  screen.** The current list's bead **while unsealed ("being filmed")** uses a
+  **lighter neutral than the `unsealed` token** (nearest existing neutral with
+  ≥ 3:1 against the background; the `unsealed` body nearly vanishes on dark),
+  and becomes its wax once sealed.
 - Beads sit on a **thin neutral thread**. Week and month rows show every bead;
   **year rows show counts only, no beads.**
+- **Spacing:** one fixed pitch for every row (~9 pt bead + ~3 pt gap),
+  left-aligned, never stretched to fit. A row that runs out of width wraps to
+  a second line. A short week simply looks short.
+- **Direction:** rows run newest first, top to bottom; **within a row, beads
+  read oldest → newest, left to right**, so this week's strand grows to the
+  right and the current (possibly unsealed) bead sits at its right end.
 - Weekday wax colors mix within a week, like a mixed mala. **Accepted pending a
-  rendered check.**
+  rendered check**, which also covers Sunday's gold bead vs. held gold and the
+  faint dark waxes (navy, garnet, deep green) at 9 pt on dark.
 - **Periods:** week start follows the device locale. "This week", "Last week",
   then "Earlier in {current month}" (only days of the current month not
   already shown; skip the row if none), then one row per earlier month of the
@@ -102,9 +111,21 @@ the detail page, this file wins.
   neutral, no reason given. Only **between** beads: no gap before the first
   bead and no trailing gap from the last bead to today (the status line covers
   the present). A gap that crosses a period boundary is shown once, at the
-  end of the **newer** row's strand, counting all its days.
+  **start (left end) of the newer row's strand**, counting all its days. Gap
+  labels sit centered under their break, inside the row; several gaps in one
+  row stack on separate lines.
 - **"Answered" hint** on the period where it was answered is in v1 (not
-  tappable).
+  tappable), **on the intention's own page only** (the name page's
+  Intentions section already shows "Answered · {date}"). A period that has
+  only the Answered moment (no beads, no prayers) **stays, showing just the
+  hint.**
+- **Wording:** "You prayed once", then "You prayed N times" (2+).
+  "Begun · Sep 12" in the current year; "Begun · Sep 12, 2025" in earlier
+  years.
+- **✎ counts** reflect synced notes; a note added offline appears once it
+  syncs.
+- **Section titles** ("Intentions", "History"): Roca, same size and weight as
+  names on Home.
 
 ### Praying on the page (in place)
 Praying from a detail page **stays on the page**. It does not go to Home.
