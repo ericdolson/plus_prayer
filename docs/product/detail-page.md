@@ -81,17 +81,28 @@ repeated the counts, and its labeled gaps marked absence.)
 - **Row layout:** period label (✎ count and "Answered" hints right-aligned on
   that line) → [this week only: bead strand] → text line in `inkMuted`.
   **No ♡ glyph.**
-- **This week's strand:** one bead per list this week (≤ 7), colored by that
-  list's `sealVariant`, **~12–14 pt** so each reads as an object, with the
+- **This week's strand:** one bead per list this week, colored by that
+  list's `sealVariant`, **~13 pt on a ~22 pt pitch** (tune by eye) so each
+  reads as an object, with the
   `WaxSeal` dark-theme lift (rim only from ~24 pt). Beads read **oldest →
   newest, left to right**, on a thin neutral thread, left-aligned, fixed
   pitch. A full week is the whole set of weekday waxes. The current list's
-  bead **while unsealed ("being filmed")** uses a **lighter neutral than the
-  `unsealed` token** (nearest existing neutral with ≥ 3:1 against the
-  background) and becomes its wax once sealed. Stamp detail isn't drawn, so
+  bead **while unsealed ("being filmed")** is a **hollow ring** (~1.5 pt
+  stroke in `inkMuted`, no fill) in both themes, and fills with its wax once
+  sealed. (A filled gray bead out-shone five of the seven waxes on dark.)
+- **Wax contrast:** the waxes keep their real colors; several sit below 3:1 on
+  dark (Mon/Wed ~1.6:1). That's accepted: the beads are decorative and the
+  counts line beside them carries the meaning. Don't brighten waxes for the
+  strand.
+- **Sunday's gold** bead (amber, darker) reads distinct enough from the held
+  gold ring. No change.
+- **The current list always counts in This week**, even when its date falls
+  in the next local week after a flip (a rare eighth bead is fine). Stamp detail isn't drawn, so
   **D2 doesn't block this screen.**
-- **Missed lists this week:** a quiet break in the thread, **no label**. No
-  break before the first bead or after the last.
+- **Missed lists this week:** a quiet break in the thread, **no label**,
+  always **one spacing step of bare thread** however many lists were missed
+  (the break doesn't measure absence). No break before the first bead or
+  after the last.
 - **No gaps anywhere else.** Older rows state counts only; "Off the list · N
   days" is retired.
 - **No strand this week** (not on any list this week): the row shows text
@@ -176,6 +187,4 @@ Praying from a detail page **stays on the page**. It does not go to Home.
   and avatar tone.
 
 ## OPEN
-- Re-check the larger week beads on dark: Sunday's gold vs held gold, and
-  navy/garnet/deep green visibility.
 - Whether the subject should be lockable as checked on its own page.

@@ -1169,3 +1169,18 @@ week map to the seven weekday seals, so the colors finally mean something,
 and bigger beads fix the faint dark waxes.
 Rejected: monochrome beads on every row (still a dot matrix); dropping beads
 entirely (loses the tie to the physical seals).
+
+### Decision: Week strand — render review answers
+**Timestamp:** 2026-11-03
+Render of the simplified History reads calm. Missed lists = one spacing step
+of bare thread regardless of count. Unsealed current bead = hollow `inkMuted`
+ring in both themes (supersedes "lighter neutral, ≥ 3:1": a filled gray bead
+out-shone five of seven waxes on dark, and no lighter neutral reaches 3:1 in
+light). Waxes keep real colors despite low dark contrast, since the counts
+line carries meaning. Sunday's amber bead is distinct from held gold. The
+current list always counts in This week. 13 pt beads / 22 pt pitch, tune by
+eye. Closes the mixed-color/dark-wax render check.
+Why: the in-progress bead should be the quietest thing on the strand, not the
+loudest; an empty ring says "not sealed yet" the way the unsealed blank does.
+Rejected: brightening waxes (they're the real seal colors); one slot per
+missed list (turns the break into a count of absence).
