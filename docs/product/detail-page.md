@@ -1,6 +1,6 @@
 # Detail Page — names and intentions
 
-_Last updated: 2026-11-03 (build answers round 2)_
+_Last updated: 2026-11-03 (history simplified: one strand, this week only)_
 
 One shared layout for a name (soul) and an intention. Builds on
 `stats-history.md` (bead strand data and counts), `screens.md` (screen map),
@@ -27,14 +27,11 @@ the detail page, this file wins.
 
   History
   This week                         ✎ 2
-  ●─●─●─●─●
+  ●─●─●─●─●          ← the only strand: ~12–14 pt wax beads
   You prayed 6 times · On 5 lists · current
-  Last week
-  ●─●─●   ●─●
+  Last week                         ✎ 1
   You prayed 4 times · On 5 lists
-        Off the list · 2 days
-  Earlier in October
-  ●─●─●─●─●─●─●─●─●
+  October
   You prayed 11 times · On 9 lists
   Begun · Sep 12
 
@@ -77,48 +74,40 @@ the detail page, this file wins.
 ### Pray button label
 - Name: "Pray for {alias}". **Self page and intention pages: "Pray".**
 
-### Bead strand rendering
-- **Row layout (all rows):** period label (with ✎ count and "Answered"
-  hints right-aligned on that line) → bead strand → text line in `inkMuted`.
+### History (simplified 2026-11-03)
+**One bead strand, for this week only. Every older period is text.** (An
+earlier version drew a strand on every row; in the render it read as confetti,
+repeated the counts, and its labeled gaps marked absence.)
+- **Row layout:** period label (✎ count and "Answered" hints right-aligned on
+  that line) → [this week only: bead strand] → text line in `inkMuted`.
   **No ♡ glyph.**
-- **Beads = plain wax-colored dots (~9 pt)**, one per list, colored by that
-  list's `sealVariant`, with the dark-theme lift from `WaxSeal` (no rim below
-  ~24 pt). Stamp detail can't be seen at this size, so **D2 doesn't block this
-  screen.** The current list's bead **while unsealed ("being filmed")** uses a
-  **lighter neutral than the `unsealed` token** (nearest existing neutral with
-  ≥ 3:1 against the background; the `unsealed` body nearly vanishes on dark),
-  and becomes its wax once sealed.
-- Beads sit on a **thin neutral thread**. Week and month rows show every bead;
-  **year rows show counts only, no beads.**
-- **Spacing:** one fixed pitch for every row (~9 pt bead + ~3 pt gap),
-  left-aligned, never stretched to fit. A row that runs out of width wraps to
-  a second line. A short week simply looks short.
-- **Direction:** rows run newest first, top to bottom; **within a row, beads
-  read oldest → newest, left to right**, so this week's strand grows to the
-  right and the current (possibly unsealed) bead sits at its right end.
-- Weekday wax colors mix within a week, like a mixed mala. **Accepted pending a
-  rendered check**, which also covers Sunday's gold bead vs. held gold and the
-  faint dark waxes (navy, garnet, deep green) at 9 pt on dark.
-- **Periods:** week start follows the device locale. "This week", "Last week",
-  then "Earlier in {current month}" (only days of the current month not
-  already shown; skip the row if none), then one row per earlier month of the
-  current year, then one row per earlier year. Last row "Begun · {date}" =
-  the date the subject was created.
-- **Empty halves are left out:** a period with beads but no prayers shows only
-  "On N lists"; prayers but no lists shows only "You prayed N times" with no
-  thread; a period with neither is left out.
-- **Gaps:** a break in the thread with "Off the list · N days" below it,
-  neutral, no reason given. Only **between** beads: no gap before the first
-  bead and no trailing gap from the last bead to today (the status line covers
-  the present). A gap that crosses a period boundary is shown once, at the
-  **start (left end) of the newer row's strand**, counting all its days. Gap
-  labels sit centered under their break, inside the row; several gaps in one
-  row stack on separate lines.
+- **This week's strand:** one bead per list this week (≤ 7), colored by that
+  list's `sealVariant`, **~12–14 pt** so each reads as an object, with the
+  `WaxSeal` dark-theme lift (rim only from ~24 pt). Beads read **oldest →
+  newest, left to right**, on a thin neutral thread, left-aligned, fixed
+  pitch. A full week is the whole set of weekday waxes. The current list's
+  bead **while unsealed ("being filmed")** uses a **lighter neutral than the
+  `unsealed` token** (nearest existing neutral with ≥ 3:1 against the
+  background) and becomes its wax once sealed. Stamp detail isn't drawn, so
+  **D2 doesn't block this screen.**
+- **Missed lists this week:** a quiet break in the thread, **no label**. No
+  break before the first bead or after the last.
+- **No gaps anywhere else.** Older rows state counts only; "Off the list · N
+  days" is retired.
+- **No strand this week** (not on any list this week): the row shows text
+  only, like an older row.
+- **Periods:** rows newest first. Week start follows the device locale. "This
+  week", "Last week", then "Earlier in {current month}" (only days of the
+  current month not already shown; skip the row if none), then one row per
+  earlier month of the current year, then one row per earlier year. Last row
+  "Begun · {date}" = the date the subject was created.
+- **Empty halves are left out:** a period with lists but no prayers shows only
+  "On N lists"; prayers but no lists shows only "You prayed N times"; a period
+  with neither is left out.
 - **"Answered" hint** on the period where it was answered is in v1 (not
   tappable), **on the intention's own page only** (the name page's
   Intentions section already shows "Answered · {date}"). A period that has
-  only the Answered moment (no beads, no prayers) **stays, showing just the
-  hint.**
+  only the Answered moment stays, showing just the hint.
 - **Wording:** "You prayed once", then "You prayed N times" (2+).
   "Begun · Sep 12" in the current year; "Begun · Sep 12, 2025" in earlier
   years.
@@ -187,5 +176,6 @@ Praying from a detail page **stays on the page**. It does not go to Home.
   and avatar tone.
 
 ## OPEN
-- Whether mixed weekday colors in one strand read well (needs a render).
+- Re-check the larger week beads on dark: Sunday's gold vs held gold, and
+  navy/garnet/deep green visibility.
 - Whether the subject should be lockable as checked on its own page.

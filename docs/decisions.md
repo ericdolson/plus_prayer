@@ -1154,3 +1154,18 @@ bead belongs at the right; fixed pitch keeps every bead the same object
 instead of a layout artifact; the answered moment is the gratitude payoff and
 shouldn't disappear on a quiet day.
 Still open: Sunday gold vs held gold, faint dark waxes — needs the render.
+
+### Decision: Detail-page history — one strand, this week only
+**Timestamp:** 2026-11-03
+Supersedes the per-period bead strand (2026-10-18) and today's round-2 rules
+for pitch, wrapping and cross-period gaps. Only "This week" draws beads (≤ 7,
+~12–14 pt, wax colors, oldest → newest); missed lists this week are an
+unlabeled thread break. Older periods are text rows (counts + ✎/Answered
+hints). "Off the list · N days" is retired.
+Why: the first render (Me page, Sep–Nov mock) read as confetti: weekday wax
+colors carry no meaning across 20+ beads, every strand repeated the "On N
+lists" count beneath it, and labeled gaps marked absence. Seven beads in a
+week map to the seven weekday seals, so the colors finally mean something,
+and bigger beads fix the faint dark waxes.
+Rejected: monochrome beads on every row (still a dot matrix); dropping beads
+entirely (loses the tie to the physical seals).
