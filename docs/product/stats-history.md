@@ -34,7 +34,7 @@ its per-assembly outcome recording (§5). Applies to names, intentions, and "Me"
 - **Header:** "Held by you · N prayers" (always) and "Carried by the world · N
   prayers · N lists" (only once ever carried; never "0 lists").
 - **Period rows**, newest first: This week, Last week, Earlier in {month}, then
-  months, then years; last row "Begun · {date}". Each row: "♡ You prayed N
+  months, then years; last row "Begun · {date}". Each row: "You prayed N
   times" (counts only, never ratios) + "On N lists" (+ "· current").
 - **Beads:** one bead per list the item was on, **colored by that list's wax
   (`sealVariant`)**. Prayer beads are cross-faith (rosary, mala, misbaha,

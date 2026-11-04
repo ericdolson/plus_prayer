@@ -1115,3 +1115,26 @@ is duplicated. Stamp detail can't be seen at bead size, so D2 doesn't block.
 Rejected: navigating to Home pre-checked (context switch); dimming/disabling
 history in place (noise in prayer); beads on year rows (365 dots → texture).
 Revisit later: whether the subject should be lockable as checked on its page.
+
+### Decision: Detail page — first round of build answers
+**Timestamp:** 2026-11-03
+Spec updated in `detail-page.md`. Praying on the page uses Home's controls:
+Cancel top-left (the mockup's ✕-in-pill was an error), the capsule morphs into
+the round pray/Amen button, the pill shows timer · "with N" (no search). The
+name gets a trailing checkbox like a Home row; Home's selection rules apply,
+so an intention page credits its parent. System back = "Pray for others" (go
+Home, keep praying). Restored drafts resume on Home. Sections fade back when
+the closing sheet is dismissed. Status lines name the subject ("Dad will be on
+List 53"); no status line when not carried; intention pages have no avatar
+(parent name link + gold held dot); "Pray" on self and intention pages. Bead
+rows: label → strand → text, no ♡; locale week start; empty halves left out;
+gaps only between beads, shown on the newer row; unsealed current bead uses
+the neutral `unsealed` color; Answered hint in v1. ⋯ v1: edit name/alias,
+Answered (no note), Release and Archive with confirm, Archive hidden on self;
+Home's quick actions get the same commands.
+Why: one prayer-mode vocabulary across screens; no trailing gap, since a gap
+up to today reads as a reminder of absence and the status line already states
+the present; counts landing in view when the sheet clears is the payoff for
+staying on the page.
+Rejected: storing where a prayer began to restore the detail page (rare,
+adds state); "Pray for Me" / "Pray for {intention text}" labels.
