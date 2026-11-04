@@ -586,15 +586,18 @@ on Today's list or Your portion.
 - **Halo behavior** (2026-11-03): it frames the session and is not a second
   signature motion.
   - **Enter/exit:** fades in over ~400 ms when the prayer starts; fades out
-    over ~400 ms on ✕ cancel or when the session ends. **Session end = the
-    final Amen** (the one that commits the prayer: the FAB Amen, or the
-    invitation's Amen when the list invitation appears). The halo stays on
-    through the invitation and is gone before the closing phase (note, etc.).
+    over ~400 ms on ✕ cancel, Discard, or when the session ends. **Session end
+    = any Amen that commits the prayer** (the FAB Amen, the invitation's Amen
+    when the list invitation appears, or the welcome-back Amen). The halo stays
+    on through the invitation. The closing phase (closing sheet, Still-to-hold
+    fold) is **not** held back: it starts at once and the flare + fade play
+    beneath it.
   - **At rest:** nearly still. At most a very slow breath (~8 s cycle, opacity
     ~0.65 ↔ 0.85). No moving, rotating or multicolor gradient (that reads as
     Siri).
-  - **Amen flare** (final Amen only): ~500 ms, opacity → 1.0 and glow reach
-    ~1.3× the resting reach, then settle. Sequence: flare → then the ~400 ms
+  - **Amen flare** (committing Amen only): ~500 ms, opacity → ~1.0 (0.99 is
+    fine) and glow reach ~1.3× the resting reach. Shape: fast rise (~150 ms,
+    ease-out), slower settle (~350 ms, ease-in-out). Sequence: flare → then the ~400 ms
     fade-out (the fade waits for the flare). Starts at the Amen tap for now;
     when the seal-stamp animation exists, retime it to the stamp's impact
     (keep the start a single tunable offset).

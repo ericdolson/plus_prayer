@@ -1082,3 +1082,15 @@ Why: a flare that plays while fading reads as nothing, so they run in
 sequence; opacity alone (+0.15) is too subtle to register, so the flare also
 widens briefly; 0.75 sits mid-breath so the static halo matches what others
 see on average rather than its peak.
+
+### Decision: Prayer-mode halo — second round of build answers
+**Timestamp:** 2026-11-03
+Supersedes "gone before the closing phase" from the earlier entry today: the
+closing sheet and Still-to-hold fold start immediately at Amen; the ~900 ms
+flare + fade play beneath them. Any Amen that commits a prayer flares,
+including welcome-back; Discard gets a plain fade. Flare peak 0.99 accepted.
+Flare shape: fast rise (~150 ms ease-out), slower settle (~350 ms).
+Why: holding the closing sheet ~1 s would make Amen feel laggy and the
+moment should land on tap; the halo releasing as the sheet arrives reads as
+a natural hand-off. One rule for every committing Amen avoids special cases.
+Rejected: delaying the closing sheet/fold for the halo.
