@@ -11,6 +11,12 @@ generate:
   swiftSdk:
     outputDir: "../../../apps/ios"
     package: "PlusPrayerConnector"
+    # Offline reads (2026-11-05): results persist on device so Home loads with
+    # no signal; maxAge 0 still fetches fresh results whenever online. Swift
+    # target only. The app clears this cache on sign-out and account deletion.
+    clientCache:
+      maxAge: "0"
+      storage: "persistent"
   dartSdk:
     outputDir: "../../../app/lib/dataconnect_generated"
     package: "plusprayer_connector"

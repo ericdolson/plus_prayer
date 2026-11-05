@@ -6,8 +6,10 @@ import FirebaseDataConnect
 public extension DataConnect {
 
   static let plusprayerConnector: PlusprayerConnector = {
+    let cacheSettings = CacheSettings(storage: .persistent, maxAge: 0)
+    let settings = DataConnectSettings(cacheSettings: cacheSettings)
 
-    let dc = DataConnect.dataConnect(connectorConfig: PlusprayerConnector.connectorConfig, callerSDKType: .generated)
+    let dc = DataConnect.dataConnect(connectorConfig: PlusprayerConnector.connectorConfig, settings: settings, callerSDKType: .generated)
     return PlusprayerConnector(dataConnect: dc)
   }()
 
