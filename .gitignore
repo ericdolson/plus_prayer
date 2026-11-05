@@ -39,6 +39,13 @@ app/build/
 app/.pub-cache/
 app/pubspec.lock
 
+# ---- Xcode / Swift (apps/ios) ----
+xcuserdata/
+DerivedData/
+.build/
+.swiftpm/
+*.xcuserstate
+
 # ---- SQL Connect generated SDK output (regenerated from schema) ----
 **/dataconnect-generated/
 
