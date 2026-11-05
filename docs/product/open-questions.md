@@ -1,6 +1,6 @@
 # Open Questions
 
-_Last updated: 2026-10-17. Resolve here → update the feature file → log in
+_Last updated: 2026-11-05. Resolve here → update the feature file → log in
 decisions.md. **MVP** = blocks MVP build._
 
 | # | Question | Area | MVP? |
@@ -10,6 +10,7 @@ decisions.md. **MVP** = blocks MVP build._
 | Q28 | **KNOWN GAP** — safety handling (self-harm resource card, threat/child-safety policy, lawyer review); see safety.md | safety | Stage 2 (S1–S4 beta) |
 | Q18 | Link a social participant's handle to their app account? | list-lifecycle | Later |
 | Q20 | Physical printing at app scale: how is a list with 100k+ names printed/sealed? | list-lifecycle | Stage 2 |
+| Q29 | **App Check** (added 2026-11-05): adopt Firebase App Check (App Attest on iOS, Play Integrity on Android) so only the genuine apps can call SQL Connect, the Functions callables, RTDB and Storage? Today anyone with the public Firebase config can script calls (auth rules still confine them to their own anonymous account, but they could mass-create accounts and prayers). Needs: the `FirebaseAppCheck` product + App Attest capability in the apps, and enforcement on the backend. Recommended: before public launch, maybe monitor-only in the beta. Not yet in the spec or backend | security | Before launch |
 
 ## Design to-dos (not blocking)
 | # | Item | Area |
