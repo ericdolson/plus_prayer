@@ -11,6 +11,7 @@ import '../../domain/models/prayer.dart';
 import '../../domain/models/prayer_list.dart';
 import '../../domain/models/reminder.dart';
 import '../../domain/models/subject.dart';
+import '../../domain/models/subject_history.dart';
 import '../../domain/models/user_header.dart';
 import '../../domain/rules/carry.dart';
 import '../../domain/rules/streak.dart';
@@ -37,6 +38,9 @@ class MockBackend {
     _list = _seed.list;
     _myStatus = _seed.myStatus ?? (_seed.list == null ? null : MyListStatus(listId: _seed.list!.id));
     _stats = _seed.stats;
+    _closedLists = {for (final l in _seed.pastLists) l.listNumber: l};
+    _onLists = {for (final MapEntry(:key, :value) in _seed.onLists.entries) key: {...value}};
+    _prayers = [..._seed.prayers];
   }
 
   final MockSeed _seed;
@@ -56,7 +60,16 @@ class MockBackend {
   late CurrentList? _list;
   late MyListStatus? _myStatus;
   late LiveStats _stats;
+
+  /// History: closed lists by number, subject id → list numbers it was
+  /// printed on (the current one included), and the user's prayers.
+  late Map<int, ListAppearance> _closedLists;
+  late Map<String, Set<int>> _onLists;
+  late List<SeedPrayer> _prayers;
   final Set<String> _loggedPrayerIds = {};
+
+  /// `User.selfNameChangedAt`.
+  DateTime? _selfNameChangedAt;
   final Map<String, String?> _notes = {};
   PrayerDraft? _draft;
   int _nextId = 1;
@@ -67,6 +80,7 @@ class MockBackend {
   final _listCtl = StreamController<CurrentList?>.broadcast();
   final _myStatusCtl = StreamController<MyListStatus?>.broadcast();
   final _statsCtl = StreamController<LiveStats>.broadcast();
+  final _historyCtl = StreamController<void>.broadcast();
   Timer? _drift;
 
   List<Subject> get subjects => List.unmodifiable(_subjects);
@@ -81,6 +95,45 @@ class MockBackend {
   Stream<List<Reminder>> watchReminders() => _withCurrent(_reminders, _remindersCtl.stream);
   Stream<CurrentList?> watchList() => _withCurrent(_list, _listCtl.stream);
   Stream<MyListStatus?> watchMyStatus() => _withCurrent(_myStatus, _myStatusCtl.stream);
+
+  /// getSubjectDetail's history half, re-read after every write.
+  Stream<SubjectHistory?> watchHistory(String subjectId) async* {
+    yield _historyOf(subjectId);
+    yield* _historyCtl.stream.map((_) => _historyOf(subjectId));
+  }
+
+  SubjectHistory? _historyOf(String id) {
+    if (!_subjects.any((s) => s.id == id)) return null;
+    final list = _list;
+    return SubjectHistory(
+      subjectId: id,
+      entries: [
+        for (final n in _onLists[id] ?? const <int>{})
+          if (list != null && n == list.listNumber)
+            ListAppearance(
+              listId: list.id,
+              listNumber: n,
+              listDate: list.listDate,
+              sealVariant: list.sealVariant,
+              prayerCount: list.prayerCount,
+              isCurrent: true,
+            )
+          else if (_closedLists[n] case final closed?)
+            closed,
+      ],
+      prayers: [
+        for (final p in _prayers)
+          if (p.subjectIds.contains(id))
+            SubjectPrayer(
+              id: p.id,
+              prayedAt: p.prayedAt,
+              localDate: p.localDate,
+              listContextNumber: p.listContextNumber,
+              hasNote: p.note?.trim().isNotEmpty ?? false,
+            ),
+      ],
+    );
+  }
 
   Stream<LiveStats> watchStats() {
     _startDrift();
@@ -121,6 +174,83 @@ class MockBackend {
     _subjects = [..._subjects, subject];
     _subjectsCtl.add(_subjects);
     return AddedSubject(id: subject.id, isCarried: isCarried, sortOrder: sortOrder);
+  }
+
+  /// updateSubject: printed text (contact check) and, for a name, the alias.
+  Future<void> updateSubject(String id, {required String publicName, String? alias}) async {
+    await Future<void>.delayed(latency);
+    if (!online) throw const OfflineError();
+    final s = _subjects.firstWhere((s) => s.id == id && !s.isSelf);
+    final issue = validatePrinted(publicName, s.kind) ?? (s.isName ? validateAlias(alias) : null);
+    if (issue != null) throw SubjectInputError(issue);
+    final cleanAlias = alias == null ? '' : cleanText(alias);
+    _replace(Subject(
+      id: s.id,
+      kind: s.kind,
+      parentId: s.parentId,
+      publicName: cleanText(publicName),
+      alias: s.isName && cleanAlias.isNotEmpty ? cleanAlias : null,
+      note: s.note,
+      isSelf: s.isSelf,
+      isCarried: s.isCarried,
+      sortOrder: s.sortOrder,
+      avatarTone: s.avatarTone,
+      avatarPath: s.avatarPath,
+      resolution: s.resolution,
+      resolvedAt: s.resolvedAt,
+      createdAt: s.createdAt,
+      lastPrayed: s.lastPrayed,
+    ));
+  }
+
+  /// setSelfName as an edit: free until first printed, then once per 7 days.
+  Future<void> setSelfName(String name) async {
+    await Future<void>.delayed(latency);
+    if (!online) throw const OfflineError();
+    final issue = validatePrinted(name, SubjectKind.soul);
+    if (issue != null) throw SubjectInputError(issue);
+    final self = _subjects.firstWhere((s) => s.isSelf);
+    final printed = (_onLists[self.id] ?? const <int>{}).isNotEmpty;
+    final last = _selfNameChangedAt;
+    if (printed && last != null && _now().difference(last) < const Duration(days: 7)) {
+      throw SelfNameTooSoonError(last.add(const Duration(days: 7)));
+    }
+    _selfNameChangedAt = _now();
+    _replace(self.copyWith(publicName: cleanText(name)));
+  }
+
+  Future<void> markAnswered(String intentionId) async {
+    await Future<void>.delayed(latency);
+    if (!online) throw const OfflineError();
+    final s = _subjects.firstWhere((s) => s.id == intentionId && s.isIntention && !s.isResolved);
+    _replace(s.copyWith(resolution: Resolution.answered, resolvedAt: _now()));
+  }
+
+  /// Released + ARCHIVED: gone from the active subjects.
+  Future<void> release(String intentionId) async {
+    await Future<void>.delayed(latency);
+    if (!online) throw const OfflineError();
+    _subjects.firstWhere((s) => s.id == intentionId && s.isIntention && !s.isResolved);
+    _subjects = [for (final s in _subjects) if (s.id != intentionId) s];
+    _subjectsCtl.add(_subjects);
+    _historyCtl.add(null);
+  }
+
+  /// ARCHIVED; a name's intentions go with it (the cascade).
+  Future<void> archive(String id) async {
+    await Future<void>.delayed(latency);
+    if (!online) throw const OfflineError();
+    final s = _subjects.firstWhere((s) => s.id == id);
+    if (s.isSelf) throw ArgumentError('The self is never archived');
+    _subjects = [for (final x in _subjects) if (x.id != id && x.parentId != id) x];
+    _subjectsCtl.add(_subjects);
+    _historyCtl.add(null);
+  }
+
+  void _replace(Subject next) {
+    _subjects = [for (final s in _subjects) s.id == next.id ? next : s];
+    _subjectsCtl.add(_subjects);
+    _historyCtl.add(null);
   }
 
   /// updateMySettings: only the given fields change.
@@ -176,6 +306,18 @@ class MockBackend {
     ];
     _subjectsCtl.add(_subjects);
     _notes[p.id] = p.note;
+    _prayers = [
+      ..._prayers,
+      SeedPrayer(
+        id: p.id,
+        prayedAt: p.prayedAt,
+        localDate: p.localDate,
+        listContextNumber: p.listContextNumber,
+        subjectIds: linked,
+        note: p.note,
+      ),
+    ];
+    _historyCtl.add(null);
 
     if (p.includesList) {
       _header = afterListPrayer(_header, p.localDate);
@@ -197,7 +339,10 @@ class MockBackend {
   }
 
   void applyNote(String prayerId, String? note) {
-    if (_loggedPrayerIds.contains(prayerId)) _notes[prayerId] = note;
+    if (!_loggedPrayerIds.contains(prayerId)) return;
+    _notes[prayerId] = note;
+    _prayers = [for (final p in _prayers) p.id == prayerId ? p.withNote(note) : p];
+    _historyCtl.add(null);
   }
 
   // ---- Presence / draft ----------------------------------------------------
@@ -228,6 +373,29 @@ class MockBackend {
     _listCtl.add(_list);
   }
 
+  /// Seals the current list in its weekday's wax (the video is published),
+  /// or takes it back to "being filmed".
+  void setSealed(bool sealed) {
+    final list = _list;
+    if (list == null) return;
+    _list = CurrentList(
+      id: list.id,
+      listNumber: list.listNumber,
+      listDate: list.listDate,
+      isPublished: sealed,
+      soulCount: list.soulCount,
+      intentionCount: list.intentionCount,
+      prayerCount: list.prayerCount,
+      currentFrom: list.currentFrom,
+      closesAt: list.closesAt,
+      videoPublishedAt: sealed ? (list.videoPublishedAt ?? _now()) : null,
+      videoPath: sealed ? (list.videoPath ?? 'videos/${list.id}.mp4') : null,
+      sealVariant: sealed ? list.listDate.weekdayFromSunday : null,
+    );
+    _listCtl.add(_list);
+    _historyCtl.add(null);
+  }
+
   /// The morning routine, compressed: the current list closes and is
   /// assembled, and the next one becomes current (unsealed until its video).
   /// If you prayed with the closing list, you and your carried names are on
@@ -247,17 +415,37 @@ class MockBackend {
       currentFrom: _now(),
     );
     final tree = SubjectTree.of(_subjects);
+    _closedLists[list.listNumber] = ListAppearance(
+      listId: list.id,
+      listNumber: list.listNumber,
+      listDate: list.listDate,
+      sealVariant: list.sealVariant,
+      prayerCount: list.prayerCount,
+    );
+    // Names print with their carried intentions.
+    final printed = [
+      if (covered) ...[
+        for (final s in carriedNames(tree)) ...[
+          s,
+          for (final i in tree.intentionsOf(s.id))
+            if (isEffectivelyCarried(i, tree)) i,
+        ],
+      ],
+    ];
+    for (final s in printed) {
+      (_onLists[s.id] ??= {}).add(next.listNumber);
+    }
     _list = next;
     _myStatus = MyListStatus(
       listId: next.id,
       entries: [
-        if (covered)
-          for (final s in carriedNames(tree))
-            ListEntry(subjectId: s.id, publicName: s.publicName, isName: true, isSelf: s.isSelf),
+        for (final s in printed)
+          ListEntry(subjectId: s.id, publicName: s.publicName, isName: s.isName, isSelf: s.isSelf),
       ],
     );
     _listCtl.add(_list);
     _myStatusCtl.add(_myStatus);
+    _historyCtl.add(null);
   }
 
   void setStats(LiveStats stats) {
@@ -292,6 +480,7 @@ class MockBackend {
     _listCtl.close();
     _myStatusCtl.close();
     _statsCtl.close();
+    _historyCtl.close();
   }
 }
 
@@ -329,6 +518,25 @@ class MockSubjectRepository implements SubjectRepository {
 
   @override
   Future<AddedSubject> addSubject(NewSubject input) => backend.addSubject(input);
+
+  @override
+  Stream<SubjectHistory?> watchHistory(String subjectId) => backend.watchHistory(subjectId);
+
+  @override
+  Future<void> updateSubject(String id, {required String publicName, String? alias}) =>
+      backend.updateSubject(id, publicName: publicName, alias: alias);
+
+  @override
+  Future<void> setSelfName(String name) => backend.setSelfName(name);
+
+  @override
+  Future<void> markAnswered(String intentionId) => backend.markAnswered(intentionId);
+
+  @override
+  Future<void> release(String intentionId) => backend.release(intentionId);
+
+  @override
+  Future<void> archive(String id) => backend.archive(id);
 }
 
 class MockListRepository implements ListRepository {

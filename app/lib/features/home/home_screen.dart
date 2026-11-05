@@ -11,7 +11,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../app/router.dart';
-import '../../components/halo.dart';
 import '../../components/scroll_edge.dart';
 import '../../components/thread.dart';
 import '../../domain/rules/home_filter.dart';
@@ -25,6 +24,7 @@ import '../../theme/pp_icons.dart';
 import '../add/add_sheet.dart';
 import '../prayer/closing_sheet.dart';
 import '../prayer/invitation_sheet.dart';
+import '../prayer/prayer_halo.dart';
 import '../prayer/welcome_back_dialog.dart';
 import 'home_bar.dart';
 import 'home_header.dart';
@@ -37,10 +37,11 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pp = context.pp;
-    final inPrayer = ref.watch(prayerSessionProvider.select((s) => s.isActive));
-    final closing = ref.watch(prayerSessionProvider.select((s) => s.phase == PrayerPhase.closing));
     final searchOpen = ref.watch(homeQueryProvider.select((q) => q.searchOpen));
 
+    // Home stays mounted beneath every pushed page, so it presents the
+    // session's sheets for a prayer started anywhere (a detail page too):
+    // they open over whatever page is on top.
     ref.listen(prayerSessionProvider, (previous, next) {
       if (next.phase == PrayerPhase.invitation && previous?.phase != PrayerPhase.invitation) {
         showInvitationSheet(context);
@@ -62,16 +63,7 @@ class HomeScreen extends ConsumerWidget {
       }
     });
 
-    return Halo(
-      // Reaching closing means an Amen committed the prayer (welcome-back's
-      // too): the halo flares, then fades beneath the closing sheet, which
-      // doesn't wait for it. Cancel and Discard go straight to idle: a plain
-      // fade.
-      mode: inPrayer
-          ? HaloMode.on
-          : closing
-              ? HaloMode.amen
-              : HaloMode.off,
+    return PrayerHalo(
       child: Scaffold(
         // The bar docks search above the keyboard itself.
         resizeToAvoidBottomInset: false,

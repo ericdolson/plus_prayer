@@ -9,6 +9,7 @@ import '../../domain/models/prayer.dart';
 import '../../domain/models/prayer_list.dart';
 import '../../domain/models/reminder.dart';
 import '../../domain/models/subject.dart';
+import '../../domain/models/subject_history.dart';
 import '../../domain/models/user_header.dart';
 import '../../domain/rules/validation.dart';
 
@@ -22,6 +23,36 @@ abstract interface class SubjectRepository {
   /// automatically while the pool has room. Throws [SubjectInputError] for
   /// text the server rejects, [OfflineError] without a connection.
   Future<AddedSubject> addSubject(NewSubject input);
+
+  /// getSubjectDetail's history half: the lists it was printed on (with
+  /// seal and prayer count) and the user's prayers that held it. Emits again
+  /// after the user's writes land (a prayer, a note, a list flip). Null when
+  /// the subject isn't the user's or is gone.
+  Stream<SubjectHistory?> watchHistory(String subjectId);
+
+  // The detail page's ⋯ and Home's quick actions (detail-page.md ⋯ menu).
+  // Online commands for now, like addSubject: they throw [OfflineError]
+  // without a connection, and the subjects stream reflects them after.
+
+  /// updateSubject: the printed text and, for a name, the alias (null or
+  /// blank clears it). Not the self (see [setSelfName]). Throws
+  /// [SubjectInputError] for text the server rejects.
+  Future<void> updateSubject(String id, {required String publicName, String? alias});
+
+  /// setSelfName as an edit: free until the self is first printed, then once
+  /// per 7 days. Throws [SelfNameTooSoonError] with the next-available date,
+  /// [SubjectInputError].
+  Future<void> setSelfName(String name);
+
+  /// markIntentionAnswered: stays on Home ("Answered · Oct 6"), off the list.
+  Future<void> markAnswered(String intentionId);
+
+  /// releaseIntention: Released and archived, history intact.
+  Future<void> release(String intentionId);
+
+  /// archiveSubject: a name takes its open intentions with it. Never the
+  /// self.
+  Future<void> archive(String id);
 }
 
 class NewSubject {
@@ -131,6 +162,13 @@ class SubjectInputError implements Exception {
 /// The command needs a connection and there isn't one.
 class OfflineError implements Exception {
   const OfflineError();
+}
+
+/// setSelfName refused: the self name was changed less than 7 days ago
+/// (after it was first printed).
+class SelfNameTooSoonError implements Exception {
+  const SelfNameTooSoonError(this.nextAvailable);
+  final DateTime nextAvailable;
 }
 
 /// The ~500-subject abuse cap ("contact us"). Not a paywall.

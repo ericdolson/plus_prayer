@@ -17,7 +17,9 @@ import '../domain/models/prayer.dart';
 import '../domain/models/prayer_list.dart';
 import '../domain/models/reminder.dart';
 import '../domain/models/subject.dart';
+import '../domain/models/subject_history.dart';
 import '../domain/models/user_header.dart';
+import '../domain/rules/history.dart';
 import '../domain/rules/local_prayers.dart';
 import '../domain/rules/subject_tree.dart';
 
@@ -128,5 +130,35 @@ final _configStreamProvider = StreamProvider<AppConfig>(
 final configProvider = Provider<AppConfig>(
   (ref) => ref.watch(_configStreamProvider).value ?? AppConfig.defaults,
 );
+
+// ---- Detail page history ---------------------------------------------------
+
+final _serverHistoryProvider = StreamProvider.autoDispose.family<SubjectHistory?, String>(
+  (ref, id) => ref.watch(subjectRepositoryProvider).watchHistory(id),
+);
+
+/// A subject's history with this device's prayers folded in and the live
+/// current list stitched on (its seal and prayer count). Null when the
+/// subject isn't found.
+final subjectHistoryProvider = Provider.autoDispose.family<AsyncValue<SubjectHistory?>, String>((ref, id) {
+  final local = ref.watch(localPrayersProvider).value ?? const [];
+  final list = ref.watch(currentListProvider).value;
+  final tree = ref.watch(subjectTreeProvider).value;
+  final childIds = {for (final i in tree?.intentionsOf(id) ?? const <Subject>[]) i.id};
+  return ref.watch(_serverHistoryProvider(id)).whenData((h) => h == null
+      ? null
+      : historyWithCurrentList(historyWithLocalPrayers(h, local, childIds: childIds), list));
+});
+
+/// The detail page's counts and period rows. [firstDayOfWeek] (0 = Sunday)
+/// comes from the device locale (`MaterialLocalizations.firstDayOfWeekIndex`).
+final subjectHistoryViewProvider =
+    Provider.autoDispose.family<AsyncValue<SubjectHistoryView?>, ({String id, int firstDayOfWeek})>((ref, key) {
+  final subject = ref.watch(subjectTreeProvider).value?[key.id];
+  final today = ref.watch(todayProvider);
+  return ref.watch(subjectHistoryProvider(key.id)).whenData((h) => h == null || subject == null
+      ? null
+      : subjectHistoryView(subject, h, today: today, firstDayOfWeek: key.firstDayOfWeek));
+});
 
 final queueStateProvider = StreamProvider<QueueState>((ref) => ref.watch(writeQueueProvider).watch());

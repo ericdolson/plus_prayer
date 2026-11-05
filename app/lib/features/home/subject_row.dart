@@ -135,8 +135,7 @@ class SubjectRow extends ConsumerWidget {
         excludeSemantics: true,
         child: InkWell(
           onTap: onTap,
-          // Intentions get theirs (Answered, Release, edit, archive) with build step 5.
-          onLongPress: inPrayer || !s.isName ? null : () => showQuickActions(context, s),
+          onLongPress: inPrayer ? null : () => showQuickActions(context, s),
           child: CustomPaint(
             painter: threadPart == null
                 ? null

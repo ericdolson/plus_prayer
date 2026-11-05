@@ -39,4 +39,6 @@ abstract final class PPIcons {
   static const IconData upgrade = IconData(0xe092, fontFamily: _phosphor); // arrowUpRight
   static const IconData edit = IconData(0xe3b4, fontFamily: _phosphor); // pencilSimple
   static const IconData archive = IconData(0xe00c, fontFamily: _phosphor); // archive
+  static const IconData back = IconData(0xe138, fontFamily: _phosphor, matchTextDirection: true); // caretLeft
+  static const IconData more = IconData(0xe1fe, fontFamily: _phosphor); // dotsThree
 }

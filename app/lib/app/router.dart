@@ -4,6 +4,7 @@
 
 import 'package:go_router/go_router.dart';
 
+import '../features/detail/detail_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/placeholder/placeholder_screen.dart';
 
@@ -15,8 +16,9 @@ abstract final class Routes {
   static const portion = '/portion';
 }
 
-GoRouter buildRouter() => GoRouter(
-      initialLocation: Routes.home,
+/// [initialLocation]: tests start on a pushed page (Home stays beneath it).
+GoRouter buildRouter({String initialLocation = Routes.home}) => GoRouter(
+      initialLocation: initialLocation,
       // Build step 3: redirect to onboarding while the user has no self name
       // (state-based resume, auth-onboarding.md).
       routes: [
@@ -24,10 +26,10 @@ GoRouter buildRouter() => GoRouter(
           path: Routes.home,
           builder: (context, state) => const HomeScreen(),
           routes: [
-            // Build step 5: name / intention detail (bead strand).
+            // Name / intention detail (detail-page.md).
             GoRoute(
               path: 'subject/:id',
-              builder: (context, state) => PlaceholderScreen.subject(state.pathParameters['id']!),
+              builder: (context, state) => DetailScreen(subjectId: state.pathParameters['id']!),
             ),
             // Build step 5: Today's list (seal, video, counts).
             GoRoute(path: 'list', builder: (context, state) => const PlaceholderScreen.todaysList()),

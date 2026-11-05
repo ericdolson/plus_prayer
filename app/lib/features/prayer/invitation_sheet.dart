@@ -43,8 +43,11 @@ class InvitationSheet extends HookConsumerWidget {
     final holdingSince = session.listHoldingSince;
     final elapsed = useElapsed(holdingSince, clock: clock);
 
+    // Leave when the invitation ends. Remove this sheet's own route, not
+    // the top one: Home may already have opened the closing sheet above it.
     ref.listen(prayerSessionProvider.select((s) => s.phase), (_, phase) {
-      if (phase != PrayerPhase.invitation && Navigator.of(context).canPop()) Navigator.of(context).pop();
+      final route = ModalRoute.of(context);
+      if (phase != PrayerPhase.invitation && route != null && route.isActive) Navigator.of(context).removeRoute(route);
     });
 
     if (model == null) return const SizedBox.shrink();

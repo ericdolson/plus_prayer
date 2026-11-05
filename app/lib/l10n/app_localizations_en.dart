@@ -586,4 +586,251 @@ class L10nEn extends L10n {
 
   @override
   String get errorSettingsOffline => 'Changing this needs a connection.';
+
+  @override
+  String get historyThisWeek => 'This week';
+
+  @override
+  String get historyLastWeek => 'Last week';
+
+  @override
+  String historyEarlierIn(DateTime month) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.MMMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return 'Earlier in $monthString';
+  }
+
+  @override
+  String historyMonth(DateTime month) {
+    final intl.DateFormat monthDateFormat = intl.DateFormat.MMMM(localeName);
+    final String monthString = monthDateFormat.format(month);
+
+    return '$monthString';
+  }
+
+  @override
+  String historyYear(DateTime year) {
+    final intl.DateFormat yearDateFormat = intl.DateFormat.y(localeName);
+    final String yearString = yearDateFormat.format(year);
+
+    return '$yearString';
+  }
+
+  @override
+  String historyPrayed(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You prayed $countString times',
+      one: 'You prayed once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String historyOnLists(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'On $countString lists',
+      one: 'On 1 list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String historyCurrent(String onLists) {
+    return '$onLists · current';
+  }
+
+  @override
+  String historyNotesSpoken(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes',
+      one: '1 note',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get historyAnswered => 'Answered';
+
+  @override
+  String historyBegun(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Begun · $dateString';
+  }
+
+  @override
+  String historyBegunYear(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Begun · $dateString';
+  }
+
+  @override
+  String detailCovered(String name, int number) {
+    return '$name will be on List $number';
+  }
+
+  @override
+  String detailNextPrayer(String name, int number) {
+    return 'Your next prayer carries $name onto List $number';
+  }
+
+  @override
+  String detailPrayToCarry(String name, int number) {
+    return 'Pray to carry $name onto List $number';
+  }
+
+  @override
+  String detailCoveredIt(int number) {
+    return 'It\'ll be on List $number';
+  }
+
+  @override
+  String detailNextPrayerIt(int number) {
+    return 'Your next prayer carries it onto List $number';
+  }
+
+  @override
+  String detailPrayToCarryIt(int number) {
+    return 'Pray to carry it onto List $number';
+  }
+
+  @override
+  String detailClosesSoon(int number, int minutes, String name) {
+    return 'List $number closes in $minutes min · pray to carry $name';
+  }
+
+  @override
+  String detailClosesSoonIt(int number, int minutes) {
+    return 'List $number closes in $minutes min · pray to carry it';
+  }
+
+  @override
+  String detailHeldByYou(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Held by you · $countString prayers',
+      one: 'Held by you · 1 prayer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String detailCarriedByWorld(String prayers, String lists) {
+    return 'Carried by the world · $prayers · $lists';
+  }
+
+  @override
+  String detailWorldPrayers(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString prayers',
+      one: '1 prayer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String detailWorldLists(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString lists',
+      one: '1 list',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get detailIntentions => 'Intentions';
+
+  @override
+  String prayFor(String name) {
+    return 'Pray for $name';
+  }
+
+  @override
+  String get prayForOthers => 'Pray for others';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get more => 'More';
+
+  @override
+  String get actionEdit => 'Edit';
+
+  @override
+  String get actionAnswered => 'Answered';
+
+  @override
+  String get actionRelease => 'Release';
+
+  @override
+  String get actionArchive => 'Archive';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get releaseQuestion => 'Release this intention? It moves to Archived.';
+
+  @override
+  String archiveNameQuestion(String name) {
+    return 'Archive $name? Its intentions are archived too.';
+  }
+
+  @override
+  String archiveQuestion(String name) {
+    return 'Archive $name?';
+  }
+
+  @override
+  String get editName => 'Edit name';
+
+  @override
+  String get editIntention => 'Edit intention';
+
+  @override
+  String get errorNeedsConnection => 'This needs a connection.';
+
+  @override
+  String selfNameTooSoon(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.MMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'You can change your name again on $dateString.';
+  }
 }

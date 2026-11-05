@@ -48,6 +48,15 @@ class _MockControls extends HookWidget {
               onTap: backend.flipList,
             ),
             ListTile(
+              title: const Text('Current list: being filmed'),
+              subtitle: const Text('Unsealed: the card\'s blank stamp, a neutral current bead'),
+              onTap: () => backend.setSealed(false),
+            ),
+            ListTile(
+              title: const Text('Current list: sealed'),
+              onTap: () => backend.setSealed(true),
+            ),
+            ListTile(
               title: const Text('Live: busy'),
               onTap: () => backend.setStats(const LiveStats(prayingNow: 213, prayedLastHour: 640, prayedToday: 4113)),
             ),

@@ -293,6 +293,10 @@ class PPSizes {
   double get check => PPSizeTokens.check;
   double get liveDot => PPSizeTokens.liveDot;
   double get badgeSeal => PPSizeTokens.badgeSeal;
+  double get bead => PPSizeTokens.bead;
+  double get beadPitch => PPSizeTokens.beadPitch;
+  double get beadHollowStroke => PPSizeTokens.beadHollowStroke;
+  double get hintIcon => PPSizeTokens.hintIcon;
   double get carriedMarkName => PPSizeTokens.carriedMarkName;
   double get carriedMarkNameGap => PPSizeTokens.carriedMarkNameGap;
   double get carriedMarkIntention => PPSizeTokens.carriedMarkIntention;
@@ -332,6 +336,7 @@ class PPMotion {
   Duration get bloom => PPMotionTokens.bloom;
   Duration get linger => PPMotionTokens.linger;
   Duration get fold => PPMotionTokens.fold;
+  Duration get strip => PPMotionTokens.strip;
   Duration get searchPause => PPMotionTokens.searchPause;
   Duration get haloFade => PPMotionTokens.haloFade;
   Duration get haloBreath => PPMotionTokens.haloBreath;

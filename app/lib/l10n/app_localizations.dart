@@ -836,6 +836,252 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Changing this needs a connection.'**
   String get errorSettingsOffline;
+
+  /// Detail-page history period row (detail-page.md).
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get historyThisWeek;
+
+  /// No description provided for @historyLastWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Last week'**
+  String get historyLastWeek;
+
+  /// Days of the current month not in This week / Last week.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier in {month}'**
+  String historyEarlierIn(DateTime month);
+
+  /// An earlier month of the current year.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}'**
+  String historyMonth(DateTime month);
+
+  /// An earlier year.
+  ///
+  /// In en, this message translates to:
+  /// **'{year}'**
+  String historyYear(DateTime year);
+
+  /// Tier 1, counts only, never ratios (stats-history.md); 'once' per detail-page.md.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{You prayed once} other{You prayed {count} times}}'**
+  String historyPrayed(int count);
+
+  /// No description provided for @historyOnLists.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{On 1 list} other{On {count} lists}}'**
+  String historyOnLists(int count);
+
+  /// The period holds the current list.
+  ///
+  /// In en, this message translates to:
+  /// **'{onLists} · current'**
+  String historyCurrent(String onLists);
+
+  /// Screen reader form of the ✎ N hint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 note} other{{count} notes}}'**
+  String historyNotesSpoken(int count);
+
+  /// Hint on the period where the intention was answered (heldGoldText).
+  ///
+  /// In en, this message translates to:
+  /// **'Answered'**
+  String get historyAnswered;
+
+  /// Last history row: the day the subject was created.
+  ///
+  /// In en, this message translates to:
+  /// **'Begun · {date}'**
+  String historyBegun(DateTime date);
+
+  /// As historyBegun, created in an earlier year.
+  ///
+  /// In en, this message translates to:
+  /// **'Begun · {date}'**
+  String historyBegunYear(DateTime date);
+
+  /// Detail page status line (detail-page.md): a carried name, next list covered.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be on List {number}'**
+  String detailCovered(String name, int number);
+
+  /// No description provided for @detailNextPrayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next prayer carries {name} onto List {number}'**
+  String detailNextPrayer(String name, int number);
+
+  /// No description provided for @detailPrayToCarry.
+  ///
+  /// In en, this message translates to:
+  /// **'Pray to carry {name} onto List {number}'**
+  String detailPrayToCarry(String name, int number);
+
+  /// A carried intention's status line.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'ll be on List {number}'**
+  String detailCoveredIt(int number);
+
+  /// No description provided for @detailNextPrayerIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next prayer carries it onto List {number}'**
+  String detailNextPrayerIt(int number);
+
+  /// No description provided for @detailPrayToCarryIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Pray to carry it onto List {number}'**
+  String detailPrayToCarryIt(int number);
+
+  /// Replaces the status line in the closing window (card rule).
+  ///
+  /// In en, this message translates to:
+  /// **'List {number} closes in {minutes} min · pray to carry {name}'**
+  String detailClosesSoon(int number, int minutes, String name);
+
+  /// No description provided for @detailClosesSoonIt.
+  ///
+  /// In en, this message translates to:
+  /// **'List {number} closes in {minutes} min · pray to carry it'**
+  String detailClosesSoonIt(int number, int minutes);
+
+  /// Tier 1, always shown (stats-history.md).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Held by you · 1 prayer} other{Held by you · {count} prayers}}'**
+  String detailHeldByYou(int count);
+
+  /// Tier 3, only once ever carried. {prayers} = detailWorldPrayers, {lists} = detailWorldLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Carried by the world · {prayers} · {lists}'**
+  String detailCarriedByWorld(String prayers, String lists);
+
+  /// No description provided for @detailWorldPrayers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 prayer} other{{count} prayers}}'**
+  String detailWorldPrayers(int count);
+
+  /// No description provided for @detailWorldLists.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 list} other{{count} lists}}'**
+  String detailWorldLists(int count);
+
+  /// Detail page section title (Roca, the Home name style).
+  ///
+  /// In en, this message translates to:
+  /// **'Intentions'**
+  String get detailIntentions;
+
+  /// A name page's pray button. Self and intention pages say 'Pray'.
+  ///
+  /// In en, this message translates to:
+  /// **'Pray for {name}'**
+  String prayFor(String name);
+
+  /// In prayer on a detail page: go to Home, still praying.
+  ///
+  /// In en, this message translates to:
+  /// **'Pray for others'**
+  String get prayForOthers;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// The detail page's ⋯ (screen readers, tooltip).
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
+
+  /// No description provided for @actionEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get actionEdit;
+
+  /// ⋯ / quick action on an open intention: mark it answered.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered'**
+  String get actionAnswered;
+
+  /// No description provided for @actionRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Release'**
+  String get actionRelease;
+
+  /// No description provided for @actionArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get actionArchive;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// From detail-page.md.
+  ///
+  /// In en, this message translates to:
+  /// **'Release this intention? It moves to Archived.'**
+  String get releaseQuestion;
+
+  /// Not in the spec ('a name's confirm says its intentions go too'): for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive {name}? Its intentions are archived too.'**
+  String archiveNameQuestion(String name);
+
+  /// A name with no intentions, or an intention. Not in the spec: for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive {name}?'**
+  String archiveQuestion(String name);
+
+  /// Edit sheet title for a name or the self. Not in the spec: for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit name'**
+  String get editName;
+
+  /// No description provided for @editIntention.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit intention'**
+  String get editIntention;
+
+  /// An online command (edit, answered, release, archive) failed offline. Not in the spec: for review.
+  ///
+  /// In en, this message translates to:
+  /// **'This needs a connection.'**
+  String get errorNeedsConnection;
+
+  /// R10: once per 7 days after first printed, next-available date shown plainly. Wording for review.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change your name again on {date}.'**
+  String selfNameTooSoon(DateTime date);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

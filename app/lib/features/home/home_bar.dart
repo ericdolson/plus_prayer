@@ -50,7 +50,7 @@ bool _inPrayer(PrayerSessionState s) => s.phase == PrayerPhase.praying || s.phas
 /// The bar floats this far above the bottom edge: just above the keyboard
 /// while it's up (the bar itself steps aside then), else near the home
 /// indicator.
-double _bottomGap(BuildContext context) {
+double barBottomGap(BuildContext context) {
   final pp = context.pp;
   final keyboard = MediaQuery.viewInsetsOf(context).bottom;
   if (keyboard > 0) return keyboard + pp.space.sm;
@@ -63,7 +63,7 @@ double homeBarClearance(BuildContext context, {required bool searchOpen}) {
   final pp = context.pp;
   final keyboard = MediaQuery.viewInsetsOf(context).bottom > 0;
   final search = searchOpen ? pp.size.searchBar + (keyboard ? 0 : pp.space.sm) : 0.0;
-  return _bottomGap(context) + search + (keyboard ? 0 : pp.size.bar);
+  return barBottomGap(context) + search + (keyboard ? 0 : pp.size.bar);
 }
 
 /// Place at the bottom of Home's stack, over the list (`Scaffold` with
@@ -87,7 +87,7 @@ class HomeBar extends HookConsumerWidget {
     }
 
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(pp.size.barInset, 0, pp.size.barInset, _bottomGap(context)),
+      padding: EdgeInsetsDirectional.fromSTEB(pp.size.barInset, 0, pp.size.barInset, barBottomGap(context)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -126,7 +126,7 @@ class _Pill extends HookConsumerWidget {
       child: AnimatedSwitcher(
         duration: reduceMotion ? Duration.zero : pp.motion.settle,
         child: inPrayer
-            ? _PrayerBar(key: const ValueKey('prayer'), startedAt: session.startedAt, onSearch: onSearch)
+            ? PrayerBar(key: const ValueKey('prayer'), startedAt: session.startedAt, onSearch: onSearch)
             : Row(
                 key: const ValueKey('nav'),
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -204,12 +204,13 @@ class _BarIcon extends StatelessWidget {
   }
 }
 
-/// "3:12 · with 229   🔎"
-class _PrayerBar extends ConsumerWidget {
-  const _PrayerBar({super.key, required this.startedAt, required this.onSearch});
+/// The pill's content in prayer: "3:12 · with 229   🔎". Without [onSearch]
+/// (a detail page), timer · "with N" only.
+class PrayerBar extends ConsumerWidget {
+  const PrayerBar({super.key, required this.startedAt, this.onSearch});
 
   final DateTime? startedAt;
-  final VoidCallback onSearch;
+  final VoidCallback? onSearch;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -240,8 +241,10 @@ class _PrayerBar extends ConsumerWidget {
             ),
           ],
           const Spacer(),
-          _BarIcon(icon: PPIcons.search, label: l10n.search, onPressed: onSearch),
-          SizedBox(width: pp.space.xs),
+          if (onSearch case final search?) ...[
+            _BarIcon(icon: PPIcons.search, label: l10n.search, onPressed: search),
+            SizedBox(width: pp.space.xs),
+          ],
         ],
       ),
     );

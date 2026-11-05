@@ -59,7 +59,9 @@ class HomeHeader extends HookConsumerWidget {
             children: [
               AnimatedSwitcher(
                 duration: duration,
-                child: inPrayer ? const _Cancel(key: ValueKey('cancel')) : const _SelfAndStreak(key: ValueKey('self')),
+                child: inPrayer
+                    ? const CancelPrayerButton(key: ValueKey('cancel'))
+                    : const _SelfAndStreak(key: ValueKey('self')),
               ),
               const Spacer(),
               const _FilterMenu(),
@@ -78,9 +80,9 @@ String filterLabel(L10n l10n, HomeFilter f) => switch (f) {
     };
 
 /// "Cancel" on glass: ends the prayer without saving (asks first past
-/// ~30 s).
-class _Cancel extends ConsumerWidget {
-  const _Cancel({super.key});
+/// ~30 s). Home's header and a detail page's, in prayer.
+class CancelPrayerButton extends ConsumerWidget {
+  const CancelPrayerButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

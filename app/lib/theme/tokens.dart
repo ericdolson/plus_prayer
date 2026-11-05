@@ -69,6 +69,7 @@ abstract final class PPDarkPalette {
 
   /// The unsealed seal (before the list is published): bare, unwaxed.
   static const unsealed = Color(0xFF30353D);
+
 }
 
 /// The POC's `lightTheme3`.
@@ -100,6 +101,7 @@ abstract final class PPLightPalette {
 
   static const scrim = Color(0x6605294A);
   static const unsealed = Color(0xFFC9D1DF);
+
 }
 
 /// Wax colors by `PrayerList.sealVariant` (0 = Sunday … 6 = Saturday), from the
@@ -280,6 +282,18 @@ abstract final class PPSizeTokens {
   /// The streak badge's pewter seal.
   static const double badgeSeal = 22;
 
+  /// This week's bead strand (detail-page.md History): ≤ 7 wax beads at
+  /// ~12–14 pt so each reads as an object, on a thread at a fixed pitch. A
+  /// break (lists missed this week) is one pitch of bare space.
+  static const double bead = 13;
+  static const double beadPitch = 22;
+
+  /// The current list's bead while unsealed: a hollow ring this thick.
+  static const double beadHollowStroke = 1.5;
+
+  /// The ✎ glyph in a history row's hints, at the hint text's size.
+  static const double hintIcon = 13;
+
   /// The carried mark after a name (Roca) and after an intention, and its
   /// gap from the text (design-direction.md §5). Scaled with the text.
   static const double carriedMarkName = 11;
@@ -295,7 +309,7 @@ abstract final class PPSizeTokens {
 
   /// Home's floating bar (§4): the pill and the round pray button beside it
   /// share this height; they float this far from the screen's edges.
-  static const double bar = 58;
+  static const double bar = 62;
   static const double barInset = 16;
   static const double barIcon = 26;
 
@@ -346,6 +360,10 @@ abstract final class PPMotionTokens {
   /// away over [fold] (design-direction.md §4).
   static const linger = Duration(milliseconds: 1200);
   static const fold = Duration(milliseconds: 480);
+
+  /// Praying on a detail page: what isn't the subject fades out together,
+  /// and back once the closing sheet is dismissed (detail-page.md).
+  static const strip = Duration(milliseconds: 250);
 
   /// Search's empty state waits for typing to pause this long (no flicker).
   static const searchPause = Duration(milliseconds: 600);
