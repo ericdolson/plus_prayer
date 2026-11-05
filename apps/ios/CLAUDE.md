@@ -18,8 +18,10 @@ items and the project-creation steps are in `PHASE-0.md`. No Xcode project or
 app Swift yet. Build order: `app-brief.md` §6.
 
 ## Stack
-- SwiftUI, **iOS 26** minimum (Liquid Glass), Swift 6 language mode (strict
-  concurrency), Xcode's current release.
+- SwiftUI, **iOS 26** minimum (Liquid Glass), **iPhone only** (2026-11-05),
+  Swift 6 language mode (strict concurrency), Xcode 27 or later (the project
+  file format needs it). The app target isolates to the main actor by default
+  (`SWIFT_DEFAULT_ACTOR_ISOLATION`); mark pure helpers `nonisolated`.
 - **Observation** (`@Observable`) for all shared state. No `ObservableObject`,
   no Combine for new code.
 - Swift Package Manager only (no CocoaPods).

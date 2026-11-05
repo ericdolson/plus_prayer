@@ -181,8 +181,8 @@ cache and the queue clear immediately either way.
 still forbids hand edits; everything goes through Xcode's MCP server. Keep
 that rule, or allow careful hand edits to this format?
 
-**B7. iPad.** The template targets iPhone and iPad (`TARGETED_DEVICE_FAMILY`
-1,2), and the spec never mentions iPad. iPhone only for now?
+**B7. iPad.** _Answered 2026-11-05:_ iPhone only for now; iPad once the
+style is where we love it.
 
 **B8. Xcode 27 is now required.** The project format means anyone building
 the app needs Xcode 27 or later, and so does CI. The app's minimum iOS stays

@@ -1325,3 +1325,9 @@ Answers to the iOS Phase 0 ambiguities (A1–A7):
   iOS derives dark and tinted. Real variants come with D4.
 - **Appearance (A7):** stays device-local; its place in You is fine unless You
   gains a display group, where it would go.
+
+### Decision: iPhone only for now
+**Timestamp:** 2026-11-05
+The iOS app targets iPhone only (`TARGETED_DEVICE_FAMILY` 1). iPad is
+considered once the style and the core experience are where we love them.
+Why: one layout to perfect first; the spec only describes phone screens.
