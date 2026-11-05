@@ -35,7 +35,8 @@ button and its ring countdown · Amen → seal · color roles and tokens · type
 **Tier B — Native chrome (platform component, platform metrics).**
 Use the platform's own component and accept its look: menus, popovers,
 context menus, sheets, alerts, search field, navigation and tool bars and their
-material, switches, pickers, date pickers, the share sheet, keyboards. For these,
+material, switches, pickers, date pickers, the share sheet, keyboards, the
+scroll edge effect, and the platform's symbol set (§9). For these,
 the spec defines **content and behavior only**: items, order, labels, copy,
 counts, checked/active state, and what each does. It does **not** define padding,
 radius, row height or background color. Where a platform can't render a
@@ -77,9 +78,9 @@ white; dark grounds taken about halfway to black; `sheet` added._
 | `heldGoldText` (new) | `#C8AE6E` | ~`#765A1C` | Text like "Answered · Oct 6" (≥4.5:1). `#9A7A30` is only ~3.5:1 on `#E9EEF9` |
 | `heldGlow` | `heldGold` @ 30–40% alpha, wide blur | — (none) | **Only** for the prayer-mode screen halo and the brief bloom on check (2026-10-27). Never a static glow on Home |
 | `cardSurface` (new) | `#1A1D21` (was ~`#23272B`) | `#F5F7FD` (`raised`) | Community card: one clear step above the ground (1.13:1) |
-| `thread` | `hairline` `#2A2E35` (was `#343943`) | `hairline` `#D3DAE8` | Neutral always |
+| `thread` | `#3A3F47` | `#C3CCDD` | Neutral always. Its own value, a step stronger than `hairline` (`#2A2E35` / `#D3DAE8`), as tuned in the Flutter build (2026-11-05) |
 | `unprayedRose` | **delete** | **delete** | The pink dot is gone; remove the token so it isn't reused |
-| `inkMuted` | `#9097A1` | `#566D83` (was `#5C748C`) | Secondary text. Dark 6.5:1 on ground; light darkened to pass 4.5:1 (4.6:1) |
+| `inkMuted` | `#9A9EA4` (§1c) | `#566D83` (was `#5C748C`) | Secondary text. Dark 7.1:1 on ground; light darkened to pass 4.5:1 (4.6:1) |
 | `inkFaint` | decorative only | decorative only | ~3.7:1 dark, ~2.4:1 light — never essential text. Secondary text uses `inkMuted` |
 | `carriedMark` (new, 2026-11-01; revised same day) | `#53585E` (2.7:1) | `#A6B4C6` (1.8:1) | The carried mark (§5): its own value, halfway between `thread` and `inkFaint`. A quiet secondary cue, below 3:1 on purpose (`inkFaint` read too loud); the Carried filter is the reliable way to see what's carried |
 
@@ -101,9 +102,10 @@ prayer experience) — not on avatars.
    buttons. Other blues (indigo, ocean, sky) are fine.
 3. **No true red**: use raspberry / berry / vermilion; pure red reads as an alert.
 
-**Craft:** white initials **at 80% opacity**, so the letters lightly take on
-the tone (2026-10-27), at ≥3:1 contrast (large text) on every tone in both
-themes — roughly Material
+**Craft:** white initials **at 70% opacity** (`0xB3`; 2026-11-05, was 80%),
+so the letters lightly take on the tone. Most tones hold ≥3:1 (large text);
+**vermilion and olive drop to ~2.6–2.9:1** at 70% (they were 3.0:1 at 80%),
+accepted as tuned in the Flutter build. Tones are roughly Material
 600–800 shades, never neon 300s or dull grays. Same palette in light and dark;
 in dark mode lower brightness very slightly to avoid glare on the near-black
 ground. 12–16 colors, well separated in hue so neighbors rarely match
@@ -114,7 +116,8 @@ people); changing it now is free.
 **Final palette** (2026-10-27; frozen at launch). The starting set, tuned —
 berry `#AD1457` → `#9C1450` and teal `#00897B` → `#00876A` to separate them
 from raspberry and cyan; olive `#558B2F` → `#5F9133` (lighter to separate it
-from green, then darkened just enough to hold 3:1 under 80% initials) — plus
+from green, then darkened just enough to hold 3:1 under 80% initials; ~2.7:1
+at today's 70%) — plus
 fuchsia, sienna and forest. Ordered so tones 1 and 3 apart (where similar ids
 land in the FNV-1a hash) differ strongly (ΔE ≥ 67):
 
@@ -237,8 +240,11 @@ gold.
   Header in prayer:  [Cancel] ……………………… [filter]  or  [Still to hold ×]
   ```
   - The pill is fully rounded, translucent/blurred (semi-opaque fallback on
-    Android/low-end), ~56–60 pt tall, floating with a small gap from the
-    screen edges.
+    Android/low-end), **62 pt** tall (2026-11-05, was ~56–60), floating with a
+    small gap from the screen edges.
+  - **Tier (2026-11-05):** the pill and pray button are **Tier A in layout**
+    (our arrangement and sizes) on the **platform's glass material** (iOS 26
+    Liquid Glass).
   - The **pray button** is a separate circle of the **same height**, action
     blue, on the **right** (thumb side). No notch/cradle. It becomes Amen with
     the countdown ring in place.
@@ -253,6 +259,10 @@ gold.
   keyboard** (Slack-style); the list filters live behind it. If a prayer starts
   with search active, the field stays, docked above the prayer bar (search
   persists across modes). **Replaces pull-down search.**
+  - **Tier (2026-11-05):** a sanctioned Tier B exception. The docked row is
+    custom (iOS's own bottom search can't carry the pray button beside it),
+    built from the platform's native text field on glass. Everything inside it
+    stays native.
   - **Search empty state** (revised 2026-10-29): **one layout for every
     no-results case** — one quiet line + one blue add button:
     > No matches for "Robe"
@@ -316,6 +326,9 @@ gold.
   the screen's edge (under the status bar); the bottom dims less, since the
   floating bar already covers most of it. Values chosen on device and kept as
   tokens (`PPMaterialTokens.topEdge` / `bottomEdge`).
+- **iOS (2026-11-05): Tier B.** Use the platform's soft scroll edge effect
+  (iOS 26), not a custom blur and dim; the tuning above doesn't apply. The
+  curve and values above remain the reference for the Android dim fallback.
 - **Controls float on their own glass:** the streak badge, the filter, the
   pill and the docked search field each sit on a fully rounded frosted shape
   with a hairline edge, so they hold their shape over any row. The pray button
@@ -442,10 +455,11 @@ on Today's list or Your portion.
 ```
 
 ### The stamp — large, cropped into the corner
-- The day's seal at **~104 pt**, clipped by the card's inner radius so
+- The day's seal at **110 pt**, clipped by the card's inner radius so
   **~70% is visible** (revised twice 2026-11-02: ~88% wasn't decisive; the
-  −36/−32 build hid too much). **Tune by outcome, not offset:** start near
-  −24 pt left / −20 pt up; the whole bloom center and most petals must be
+  −36/−32 build hid too much). **Tune by outcome, not offset:** tuned on
+  device to **−23 pt left / −15 pt up** (2026-11-05, was ~104 pt at
+  −24/−20); the whole bloom center and most petals must be
   visible, with only the outer wax and petal tips cropped and the wax runs into the rounded
   corner. It is the card's anchor and its distinctive mark; the crop hints
   there's more inside (Today's list shows the full seal uncropped).
@@ -596,9 +610,10 @@ on Today's list or Your portion.
   in the trailing slot is consistent with rows.
 - **Presence:** shown here to *invite*; prayer mode reveals more as the reward
   (the count moving live in the pill; later, richer presence such as countries).
-- **Shared cluster component:** the card uses its full-width fill mode; other
-  contexts (Amen invitation, Today's list, Your portion) may use 28–32 pt
-  avatars and their own layouts.
+- **Shared cluster component:** the card uses its full-width fill mode (28 pt
+  avatars); other contexts use their own layouts with **24 pt** avatars
+  (Today's list, Your portion) or **32 pt** (the Amen invitation)
+  (2026-11-05, was 28–32).
 - The separate floating "258 praying now" line above the list is removed.
 - **Card under filters and search** (2026-10-28):
   - **All:** shown.
@@ -657,7 +672,9 @@ on Today's list or Your portion.
 - **The signature:** Amen → the seal. That's the one big moment; give it the
   care.
 - **Checks:** a small spring on the check + the gold ring/dot fading in, plus a
-  light haptic. This is the only place a bounce/spring is used.
+  light haptic. This is the only place a bounce/spring is used. The spring is
+  **420 ms on an ease-out-back curve** (`cubic-bezier(0.175, 0.885, 0.32,
+  1.275)`, a small overshoot), as tuned in the Flutter build (2026-11-05).
 - Everything else (navigation, sheets, filters) is quiet and quick.
 - **Check moment:** a brief gold bloom (~300–400 ms) as the ring/dot appears,
   settling into the crisp ring — motion, not a lasting glow.
@@ -666,10 +683,17 @@ on Today's list or Your portion.
 
 ---
 
-## 9. Icons
-- **One thin-line icon family** throughout (e.g. Phosphor Light/Regular or
-  Lucide), matched in stroke weight to the custom praying-hands glyph. No
-  mixing with rounded Material icons.
+## 9. Icons (revised 2026-11-05)
+- **The platform's own symbol set at a light weight**: SF Symbols on iOS,
+  Material Symbols Outlined (light weight) on Android. Native chrome (menus,
+  toolbars, search, swipe actions) renders them natively, and they track text
+  weight and Dynamic Type.
+- **Custom glyphs are drawn as platform symbols** to match: the praying hands
+  and the bloom (carried mark) become custom SF Symbols on iOS and vector
+  drawables on Android.
+- One family per platform; no mixing (no Phosphor beside SF Symbols, no
+  rounded Material icons on iOS). _Was: one thin-line family (e.g. Phosphor
+  Light) on both platforms._
 
 ---
 

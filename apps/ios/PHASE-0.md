@@ -6,8 +6,8 @@ approved, answered items move into the spec (`docs/product/`,
 
 What Phase 0 produced:
 - `backend/dataconnect/connector/connector.yaml`: a `swiftSdk` target that
-  generates `apps/ios/PlusPrayerConnector/` (committed separately). **It
-  doesn't compile yet**; see Q2.
+  generates `apps/ios/PlusPrayerConnector/` (committed separately). It builds
+  after the Q2 connector renames.
 - `design/tokens.json`: the W3C design tokens (DTCG 2025.10).
 - `apps/ios/CLAUDE.md`: build conventions.
 - This file: the token codegen proposal, the assets plan, and the open questions.
@@ -86,14 +86,14 @@ vector data and render as templates where tinted.
 
 | Bring | From `app/assets/` | To | Notes |
 |---|---|---|---|
-| Roca Regular, Bold | `fonts/Roca_400.otf`, `Roca_700.otf` | `Resources/Fonts/` (registered at launch) | Only the two weights the type roles use (PostScript `Roca-Regular`, `Roca-Bold`). Add others if a role needs them. **License: Q9** |
+| Roca Regular, Bold | `fonts/Roca_400.otf`, `Roca_700.otf` | `Resources/Fonts/` (registered at launch) | Only the two weights the type roles use (PostScript `Roca-Regular`, `Roca-Bold`). Add others if a role needs them. Licensed for app embedding (Q9) |
 | Praying hands | `unbundled/design/icons/praying_hands.svg` (the glyph `PlusPrayer.ttf` uses for the pray button) | `Assets.xcassets/Symbols/pray.symbolset` (custom SF Symbol) | A custom symbol matches text weight and scales with Dynamic Type. The icon font itself isn't needed: the rest of `PlusPrayer.ttf` is unused or Font Awesome |
 | Bloom (carried mark) | `img/+prayer_icon.svg` | `Assets.xcassets/Marks/CarriedMark` (template, vector) | Tinted `carriedMark`. Replaced by the "+"-free bloom when D1 lands |
 | Stamp | `img/wax_stamps/wax-neutral.png` (512 px) | `Assets.xcassets/Seals/Stamp` | The only stamp Flutter uses: one gray relief, tinted per wax at runtime (face → base, highlights → sheen), and pewter for the streak badge. 512 px covers the 110 pt card stamp at 3×. Replaced by D2 vectors (small sizes) and D3 photos (≥ 40 pt) |
 | Wordmark | `img/+_prayer.svg` | `Assets.xcassets/Brand/Wordmark` (vector) | Foot of You; the launch screen |
 | Launch screen | ground colors + wordmark | `INFOPLIST_KEY_UILaunchScreen` (no storyboard) | Q11 |
 | App icon | `launch_icon.png` (1000 px, flat) | interim `AppIcon` | iOS 26 icons are layered (Icon Composer `.icon`); 1000 px is short of 1024. Q10 |
-| Phosphor Light | `fonts/Phosphor-Light.ttf` | **not brought** if Q1 goes to SF Symbols; otherwise the ~15 used icons as SVG template images from Phosphor's MIT set, not the font | Q1 |
+| Phosphor Light | `fonts/Phosphor-Light.ttf` | **not brought** | SF Symbols instead (Q1) |
 | Google "G" | `img/google_logo.png` | later, with sign-in (build step 3) | Use Google's current branding asset, not this PNG, if it's outdated |
 | Firebase config | `app/ios/Runner/GoogleService-Info.plist` | app target | Same bundle ID, same Firebase iOS app. Eric adds it |
 
@@ -106,45 +106,24 @@ are), `splash_image.png` (a 1424 px raster of the wordmark; the SVG replaces it)
 
 ---
 
-## 3. Questions
+## 3. Answered (2026-11-05, recorded in design-direction.md and decisions.md)
+- **Q1 Icons:** SF Symbols at a light weight, plus custom symbols for the
+  praying hands and bloom. Phosphor isn't brought over.
+- **Q2 SDK:** the connector renames are committed and both SDKs regenerated.
+  The Swift package builds, and the functions tests pass (113/113).
+  **The connector deploy is still pending**: it needs `--force` because
+  `GetMyHeader.self` → `selfSubject` is flagged as breaking (no shipped
+  client uses it). Eric runs it from `backend/`:
+  `firebase deploy --only dataconnect --force`.
+- **Q4 Tokens:** Flutter's tuned values for all of them. The spec and
+  `tokens.json` are updated. Initials at 70% leave vermilion and olive at
+  ~2.6–2.9:1.
+- **Q5, Q6:** the pill and pray button are our layout on native glass; scroll
+  edges are native on iOS; the docked search row is a sanctioned exception.
+- **Q9:** Roca is licensed for app embedding. The license file is still to be
+  added.
 
-Each has my recommendation; nothing here is decided until you say so.
-
-**Q1. Icons: SF Symbols or Phosphor?** §9 says one thin-line family
-throughout, matched to the praying hands. §0 says native chrome (menus,
-toolbars, search) uses the platform component and its look.
-_Recommend:_ **SF Symbols** on iOS (light or regular weight), plus two custom
-symbols drawn from our SVGs (praying hands, bloom). System menus, toolbars,
-`.searchable` and swipe actions render SF Symbols natively, they track text
-weight and Dynamic Type, and Phosphor inside Liquid Glass chrome would read as
-a port. Android would use Material Symbols Outlined at a light weight
-(the same reasoning). §9 then reads "the platform's symbol set at a light
-weight; custom glyphs drawn to match." The alternative is Phosphor in Tier A
-only, but Tier A has almost no generic icons (the check, the ✎ hint).
-
-**Q2. The generated Swift SDK doesn't compile.** This happens with
-firebase-tools 15.22.1 and with 15.35.0 (latest). There are two codegen bugs:
-- `GetMyHeader` aliases a field `self:`. The generator doesn't escape it, and
-  `self` is a Swift keyword.
-- An unaliased nested `parent { … }` inside a `prayerSubject(s)` query
-  generates a `PrayerSubject` struct inside `PrayerSubject` (the
-  `Equatable`/`==` errors). Affected: `GetMySubjects`, `SearchMySubjects`,
-  `GetMyPortion`, `GetSubjectDetail`, `GetMyArchivedSubjects`.
-
-I verified in a scratch copy (not in the repo) that three operation edits
-make the package build cleanly:
-1. `self:` → `selfSubject:` (`GetMyHeader`).
-2. `parent { id }` → `parentId` (`GetMySubjects`, `SearchMySubjects`,
-   `GetMyPortion`).
-3. `parent { id publicName … }` → `parentSubject: parent { … }`
-   (`GetSubjectDetail`, `GetMyArchivedSubjects`).
-
-These change response field names, so the change needs a connector deploy and
-also regenerates the Dart SDK, which breaks the Flutter reference build's
-compile unless its call sites are updated too.
-_Recommend:_ approve the edits as a separate backend change (regenerate both
-SDKs, update the Flutter call sites mechanically so the reference still
-builds, deploy the connector). Also report both bugs to firebase-tools.
+## 4. Open questions
 
 **Q3. Persistent client cache for the Swift SDK?** `connector.yaml` can turn
 on `clientCache` (`storage: persistent`) for the Swift target only. This is a
@@ -153,40 +132,6 @@ a connection, so Home must load offline.
 _Recommend:_ yes, `maxAge: 0` with persistent storage. It serves the last
 result offline and always fetches fresh results online. Our queue still owns
 writes.
-
-**Q4. Token conflicts between the spec and Flutter's `tokens.dart`.** I used
-the values in **bold**; please confirm or correct:
-- a. Avatar initials: spec §1b says white at **80%**; Flutter uses 70%
-  (`0xB3`). At 70%, olive and vermilion likely fall under 3:1.
-- b. `thread`: spec §1 says thread = `hairline` (`#2A2E35` / `#D3DAE8`).
-  Flutter has a separate, stronger thread (**`#3A3F47` / `#C3CCDD`**), which is
-  what the screenshots show.
-- c. Card stamp: spec ~104 pt at about −24/−20. Flutter tuned it on device to
-  **110 pt at −23/−15**.
-- d. Pray button and pill height: spec ~56–60. Flutter **62**.
-- e. Cluster avatars outside the card: Flutter's 24 is stale. Used the spec's
-  **28 / 32**.
-- f. The check's spring: Flutter used `easeOutBack` over 420 ms. Proposed
-  **`.spring(duration: 0.42, bounce: 0.25)`**, to tune on device.
-- g. (Doc fix, not a question.) The §1 table still lists dark `inkMuted`
-  `#9097A1`. §1c (newer) and Flutter use **`#9A9EA4`**.
-
-**Q5. Which tier are the floating bar and the scroll edges?** §4 specifies a
-custom pill, a separate pray button, and scroll-edge blur and dim tuned as
-tokens. iOS 26 has native equivalents: glass via `glassEffect`, and
-`scrollEdgeEffectStyle(.soft)` for edges.
-_Recommend:_ the pill and pray button stay **Tier A in layout** (custom
-arrangement, our sizes) on **native glass material**. The scroll edges become
-**Tier B**: the native soft edge effect, with no custom blur and dim on iOS.
-That's why the edge tokens aren't in `tokens.json`.
-
-**Q6. Search: native or custom docked field?** §4 docks a search field above
-the keyboard (Slack-style), with a compact pray/Amen button at its end. §0
-lists the search field as native chrome. iOS 26 can put `.searchable` in the
-bottom toolbar, but it can't host our pray button beside it.
-_Recommend:_ a custom docked row built from a native `TextField` on glass,
-since it's the only way to keep Pray reachable while typing. Confirm that
-this counts as a sanctioned Tier B exception.
 
 **Q7. Are the Amen invitation, closing sheet and add sheet native sheets?**
 _Recommend:_ yes, native sheets with detents. Tier A components (ring button,
@@ -197,9 +142,6 @@ case an overlay ends up custom.
 line, or the count can sit in the title ("Still to hold · 3"). Both fit "as
 the platform allows". Which one? _Recommend:_ in the title, since it's one
 line and reads like the spec.
-
-**Q9. Roca license.** There's no license file in the repo. Does it cover
-embedding in iOS and Android apps? (Phosphor's MIT license is there.)
 
 **Q10. App icon.** iOS 26 icons are layered (Icon Composer `.icon`, with
 light, dark and tinted variants). Can you supply the layers (bloom, "+",
@@ -214,23 +156,31 @@ the first onboarding screen, not the launch screen.
 System/Light/Dark setting. Native apps usually follow System. Keep Dark as
 the default (app-brief: "Dark theme is the primary design")?
 
-**Q13. Project shape (needs you in Xcode once).** In Phase 1 I'd write
-`Packages/PlusPrayerDomain` (Package.swift and sources) and the folder
-layout. Then, in Xcode, you would:
-1. Create the iOS App project `PlusPrayer` in `apps/ios/` with synchronized
-   folders, plus Unit and UI test targets.
-2. Set the bundle ID and signing.
-3. Add the local packages `PlusPrayerConnector` and `PlusPrayerDomain`.
-4. Add firebase-ios-sdk (FirebaseAuth, FirebaseDatabase, FirebaseAnalytics,
-   FirebaseCrashlytics, FirebaseMessaging).
-5. Add capabilities: Sign in with Apple, Push, Background Modes (remote
-   notifications).
-The alternative is a project generator (XcodeGen or Tuist) that writes
-`project.pbxproj` from a checked-in spec, so agents never touch it and you
-only do signing and capabilities. That adds a tool, and it gives up
-synchronized folders. _Recommend:_ you create it in Xcode, once.
-I'd also add Xcode ignores (`xcuserdata/`, `DerivedData/`, `.build/`,
-`.swiftpm/`) to the root `.gitignore` in Phase 1.
+**Q13. Creating the project: through the Xcode MCP.** Xcode ships an MCP
+server (`xcrun mcpbridge`) that can create projects, targets and
+synchronized folders, set build settings and entitlements, build, run tests
+and render previews. Xcode writes the project itself, so the
+"never hand-edit `project.pbxproj`" rule holds. Steps:
+1. **Eric:** with Xcode open, connect it to Claude Code:
+   `claude mcp add --transport stdio xcode -- xcrun mcpbridge`. Then
+   restart the Claude Code session so the tools load. Xcode may ask you to
+   allow the connection.
+2. **Agent (via MCP):** create the iOS App project `PlusPrayer` in
+   `apps/ios/` (SwiftUI, Swift Testing, iOS 26, bundle ID
+   `dev.hammock.plusprayer`). Add the unit and UI test targets and the
+   synchronized folders from `CLAUDE.md`. Set Swift 6 mode. Write
+   `Packages/PlusPrayerDomain/`. Add Xcode ignores to the root `.gitignore`.
+3. **Eric (Xcode UI; the MCP has no package tool):**
+   - In File › Add Package Dependencies, add `apps/ios/PlusPrayerConnector`
+     and `apps/ios/Packages/PlusPrayerDomain` (via Add Local…).
+   - Add firebase-ios-sdk with FirebaseAuth, FirebaseDatabase,
+     FirebaseAnalytics, FirebaseCrashlytics and FirebaseMessaging.
+   - Set the team and signing, and add the Sign in with Apple, Push and
+     Background Modes (remote notifications) capabilities.
+   - Drop in `GoogleService-Info.plist`.
+4. **Agent:** build through the MCP and confirm a blank app runs on the
+   iOS 26.5 simulator. Then build order step 1 (tokens, components, mock)
+   starts.
 
 **Q14. Reference screenshots.** The 8 PNGs in `docs/product/reference/` are
 untracked, and their names don't follow the README's

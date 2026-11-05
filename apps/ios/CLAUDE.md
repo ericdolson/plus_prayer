@@ -13,8 +13,9 @@ patterns: hooks, Riverpod, Material theming, and the custom chrome Flutter
 needed (frosted menus, shader scroll edges) all have native answers here.
 
 ## Status
-Phase 0 (conventions, tokens, assets plan) awaiting Eric's approval. No Xcode
-project or app Swift yet. Build order: `app-brief.md` §6.
+Phase 0 (conventions, tokens, assets plan) is mostly answered; the open
+items and the project-creation steps are in `PHASE-0.md`. No Xcode project or
+app Swift yet. Build order: `app-brief.md` §6.
 
 ## Stack
 - SwiftUI, **iOS 26** minimum (Liquid Glass), Swift 6 language mode (strict
@@ -191,11 +192,17 @@ compose queries; if an operation is missing, ask for a backend change.
   Don't build a custom replacement without a spec decision.
 - Floating controls sit on Liquid Glass (`glassEffect`, grouped in a
   `GlassEffectContainer`): the pill, the header's badge and filter, the
-  docked search field. The pray button stays solid action blue. In-content
+  docked search field. The pill and pray button are our layout and sizes on
+  native glass. The pray button stays solid action blue. In-content
   containers (community card, search match hint) are flat `cardSurface`,
   never glass.
-- Icons come only through `PPIcon` (one file), so the icon family can change
-  in one place.
+- Scroll edges are native: the soft scroll edge effect, no custom blur or dim.
+- The search row docked above the keyboard is the one sanctioned custom
+  chrome: a native `TextField` on glass with the compact pray/Amen button at
+  its end (design-direction §4).
+- Icons: **SF Symbols** at a light weight, plus our custom symbols (praying
+  hands, bloom) in the asset catalog, all through `PPIcon` (one file). No
+  Phosphor, no other family.
 - Layout uses leading/trailing, never left/right (RTL later).
 
 ## Motion and accessibility

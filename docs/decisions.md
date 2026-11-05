@@ -1226,3 +1226,52 @@ retired. Screenshots of approved screens go in `docs/product/reference/` as
 reference only; the spec wins when they differ.
 Why: separate native roots keep path-scoped CI simple and leave the Flutter
 build intact to look back at.
+
+### Decision: Icons are the platform's symbol set (SF Symbols on iOS)
+**Timestamp:** 2026-11-05 (SUPERSEDES design-direction §9 "one thin-line family, e.g. Phosphor")
+iOS uses SF Symbols at a light weight, Android uses Material Symbols Outlined
+at a light weight. The praying hands and the bloom are drawn as custom
+symbols on each platform to match. One family per platform, no mixing.
+Why: native chrome (menus, toolbars, search, swipe actions) renders the
+platform's symbols, which track text weight and Dynamic Type; Phosphor inside
+Liquid Glass chrome would read as a port. Tier A has almost no generic icons.
+
+### Decision: Flutter's tuned values win over the spec's earlier figures
+**Timestamp:** 2026-11-05
+Where `app/lib/theme/tokens.dart` and design-direction differed, the
+values tuned on device in the Flutter build are adopted and the spec updated:
+avatar initials at 70% white (was 80%; vermilion and olive drop to ~2.6–2.9:1,
+accepted); `thread` its own value `#3A3F47` / `#C3CCDD` (was = `hairline`);
+card stamp 110 pt at −23/−15 (was ~104 at −24/−20); pill and pray button
+62 pt (was ~56–60); cluster avatars 24 pt (Today's list, Your portion) and
+32 pt (Amen invitation) (was 28–32); the check's spring 420 ms on
+ease-out-back. `design/tokens.json` holds these values.
+Why: they were tuned by eye on device; the spec's figures were starting points.
+
+### Decision: Floating bar on native glass; scroll edges and search tiers
+**Timestamp:** 2026-11-05
+Answers to the iOS Phase 0 tier questions (design-direction §0, §4):
+- The pill and pray button are Tier A in layout (our arrangement and sizes)
+  on the platform's glass material.
+- On iOS the scroll edges are Tier B: the platform's soft scroll edge effect,
+  no custom blur and dim. The tuned curve stays the reference for Android's
+  dim fallback.
+- The search field docked above the keyboard is a sanctioned Tier B
+  exception: a custom row (so the compact pray button sits beside it) built
+  from the platform's native text field on glass.
+Why: native where the platform already does it well; custom only where the
+spec's behavior (Pray always reachable) needs it.
+
+### Decision: Connector renames for the Swift SDK
+**Timestamp:** 2026-11-05
+`GetMyHeader.self` → `selfSubject`; `parent { id }` → `parentId` in
+GetMySubjects, SearchMySubjects and GetMyPortion; `parentSubject: parent { … }`
+in GetSubjectDetail and GetMyArchivedSubjects.
+Why: firebase-tools 15.x Swift codegen doesn't escape the `self` keyword and
+nests a same-named struct for a `parent` selection, so the generated package
+didn't compile. No shipped client used these operations.
+
+### Decision: Roca is licensed for app embedding
+**Timestamp:** 2026-11-05
+Eric confirmed the Roca license covers embedding in the iOS and Android apps.
+The license file is still to be added to the repo.
