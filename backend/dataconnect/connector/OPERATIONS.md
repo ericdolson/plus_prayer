@@ -9,7 +9,9 @@ behind user actions. This is the spec; the `.gql` connector files and the
 Cloud Functions are implemented from this.
 
 **Implemented (2026-10-18):** client connector `connector/queries.gql`,
-`connector/mutations.gql` (Dart SDK → `app/lib/dataconnect_generated`);
+`connector/mutations.gql` (Swift SDK → `apps/ios/PlusPrayerConnector`, the
+native iOS app; Dart SDK → `app/lib/dataconnect_generated`, the Flutter
+reference build);
 server-only connector `../admin/*.gql` (NO_ACCESS, called by the functions);
 Cloud Functions in `backend/functions/src` (one module per area; `index.ts`
 wires triggers and callables). Operation names below are in `camelCase`; the

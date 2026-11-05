@@ -1,8 +1,9 @@
 # connector/ — client operations (queries & mutations)
 
-The ONLY operations the app can call, via the generated typed SDK
-(`app/lib/dataconnect_generated`, regenerate with
-`firebase dataconnect:sdk:generate` from `backend/`). Each declares its own
+The ONLY operations the apps can call, via the generated typed SDKs
+(Swift → `apps/ios/PlusPrayerConnector`, the native iOS app; Dart →
+`app/lib/dataconnect_generated`, the Flutter reference build). Regenerate
+both with `firebase dataconnect:sdk:generate` from `backend/`. Each declares its own
 `@auth`; that is the security model.
 
 - `queries.gql` — reads (`USER_ANON`, every row scoped to `auth.uid`; list

@@ -1,7 +1,16 @@
 connectorId: "plusprayer"
-# Client connector: the only operations the app can call (USER_ANON, scoped to
-# auth.uid). Generated Dart SDK lands in the Flutter app.
+# Client connector: the only operations the apps can call (USER_ANON, scoped to
+# auth.uid). Generated SDKs:
+#   swiftSdk — the native iOS app: a local Swift package. The generator nests
+#              it under outputDir by package name, so it lands in
+#              apps/ios/PlusPrayerConnector/.
+#   dartSdk  — the Flutter reference build (app/, tag flutter-reference); keep
+#              until app/ is retired.
+# A kotlinSdk target for apps/android/ is added when that app starts.
 generate:
+  swiftSdk:
+    outputDir: "../../../apps/ios"
+    package: "PlusPrayerConnector"
   dartSdk:
     outputDir: "../../../app/lib/dataconnect_generated"
     package: "plusprayer_connector"
