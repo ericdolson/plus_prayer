@@ -301,4 +301,6 @@ compose queries; if an operation is missing, ask for a backend change.
 - `.heldRing(_:cornerRadius:)`, `HeldDot` — gold held marks with the check bloom.
 - `CarriedLabel` (single-line rows: the mark follows the ellipsis) and
   `CarriedMark.after` (inline, for text that wraps).
+- `NameRow`, `IntentionRow`, `SecondaryLine`: Home rows on plain values; each
+  row draws its part of the intention thread (`.thread(_:)`, `ThreadShape`).
 - `ComponentGallery` is the temporary root until Home exists.
