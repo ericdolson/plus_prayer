@@ -7,7 +7,11 @@ import SwiftUI
 // smaller sans on the thread, their text aligned with the name's, on a ~40 pt
 // pitch. An intention's first line sits at the top of its row, so it hangs
 // just under its name and the group reads as one unit; the space goes
-// between groups (`space.groupGap`, added by the list).
+// between groups. `space.groupGap` is the *visible* gap (the last row's ink
+// to the next avatar); the list adds `GroupSpacing.above(afterIntention:)`,
+// which subtracts the rows' own insets. The last intention drops the 40 pt
+// minimum (its empty bottom would add ~17 pt to the gap) and keeps a 40 pt
+// tap target by reaching into the gap below it.
 //
 // Held today = the gold ring (names) or dot (intentions). Secondary text only
 // for exceptional states ("Answered · Oct 19", "Not on the list …").
@@ -72,6 +76,7 @@ struct IntentionRow: View {
     /// the branch and the check line up on it.
     @ScaledMetric(relativeTo: .footnote) private var lineHeight = UIFont.preferredFont(forTextStyle: .footnote, compatibleWith: .init(preferredContentSizeCategory: .large)).lineHeight
     private var band: CGFloat { max(PP.size.check, lineHeight) }
+    private var isLast: Bool { thread == .lastBranch }
 
     var body: some View {
         HStack(alignment: .top, spacing: PP.space.sm) {
@@ -91,9 +96,24 @@ struct IntentionRow: View {
         .padding(.trailing, PP.space.gutter)
         .padding(.top, PP.space.xxs)
         .padding(.bottom, PP.space.sm)
-        .frame(minHeight: PP.size.row.intention, alignment: .top)
+        .frame(minHeight: isLast ? nil : PP.size.row.intention, alignment: .top)
         .thread(thread, branchY: PP.space.xxs + band / 2)
-        .rowInteraction(label: accessibilityLabel, check: check, onTap: onTap)
+        .rowInteraction(label: accessibilityLabel, check: check,
+                        tapReach: isLast ? max(0, PP.size.row.intention - (PP.space.xxs + band + PP.space.sm)) : 0,
+                        onTap: onTap)
+    }
+}
+
+/// The space a list adds above a name group (not the first) so the visible
+/// gap, from the previous row's ink to the next avatar, is `space.groupGap`.
+nonisolated enum GroupSpacing {
+    /// - Parameter afterIntention: the previous group ends with an intention
+    ///   (else with a name that has none).
+    static func above(afterIntention: Bool) -> CGFloat {
+        // A name row's vertical padding above its avatar; below the previous
+        // row's ink, the intention's bottom padding or the name's own.
+        let previous = afterIntention ? PP.space.sm : PP.space.xs
+        return max(0, PP.space.groupGap - PP.space.xs - previous)
     }
 }
 
@@ -132,14 +152,24 @@ struct CheckSlot: View {
 extension View {
     /// The whole row is one element: a button in nav mode, a toggle in prayer
     /// (held / partly held / not held), one sentence to VoiceOver.
-    func rowInteraction(label: String, check: HoldState?, onTap: @escaping () -> Void) -> some View {
+    /// `tapReach` extends the tap target below the row (into empty space).
+    func rowInteraction(label: String, check: HoldState?, tapReach: CGFloat = 0,
+                        onTap: @escaping () -> Void) -> some View {
         frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
+            .contentShape(ExtendedRect(bottom: tapReach))
             .onTapGesture(perform: onTap)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(label)
             .accessibilityValue(check.map(\.spoken) ?? "")
             .accessibilityAddTraits(check == nil ? .isButton : .isToggle)
+    }
+}
+
+/// A rectangle reaching `bottom` points past the view's bottom edge.
+private struct ExtendedRect: Shape {
+    let bottom: CGFloat
+    nonisolated func path(in rect: CGRect) -> Path {
+        Path(CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: rect.height + bottom))
     }
 }
 
@@ -163,7 +193,7 @@ extension HoldState {
 
             NameRow(initials: "D", tone: 0, label: "Dad", carried: true, held: true,
                     hasIntentions: true, accessibilityLabel: "Dad, carried. Held today")
-                .padding(.top, PP.space.groupGap)
+                .padding(.top, GroupSpacing.above(afterIntention: true))
             IntentionRow(text: "Healing after his surgery", carried: true, held: true,
                          thread: .branch, accessibilityLabel: "Healing after his surgery, carried. Held today")
             IntentionRow(text: "Rest for his heart", carried: false, held: false,
@@ -171,14 +201,14 @@ extension HoldState {
 
             NameRow(initials: "M", tone: 8, label: "Mom", carried: true, held: false,
                     hasIntentions: true, accessibilityLabel: "Mom, carried")
-                .padding(.top, PP.space.groupGap)
+                .padding(.top, GroupSpacing.above(afterIntention: true))
             IntentionRow(text: "A safe delivery for Ruth", carried: false, held: false,
                          secondary: SecondaryLine(text: "Answered · Oct 19", kind: .answered),
                          thread: .lastBranch, accessibilityLabel: "A safe delivery for Ruth. Answered, October 19")
 
             NameRow(initials: "DK", tone: 10, label: "Daniel Kim", carried: true, held: false,
                     accessibilityLabel: "Daniel Kim, carried")
-                .padding(.top, PP.space.groupGap)
+                .padding(.top, GroupSpacing.above(afterIntention: true))
         }
         .padding(.vertical, PP.space.xl)
     }

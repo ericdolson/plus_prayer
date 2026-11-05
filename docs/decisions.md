@@ -1372,3 +1372,12 @@ Your avatar in Home's header (→ You) sits on interactive Liquid Glass tinted
 with your avatar tone, like the pray button on blue.
 Why: it's a floating control like the others and should give under the
 finger the same way; the tint keeps it reading as your avatar.
+
+### Decision: The gap between name groups is measured as seen
+**Timestamp:** 2026-11-05
+The ~24–28 pt between name groups (design-direction §3) is the visible gap,
+from the last row's text to the next avatar. The rows' own padding counts
+toward it, and the last intention in a group doesn't add its 40 pt pitch's
+empty space below it (its tap target still reaches 40 pt, into the gap).
+Why: on device the gap came out ~45 pt (24 pt added on top of ~17 pt of
+empty row and the name row's 4 pt inset), so groups read as far apart.

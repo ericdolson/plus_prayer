@@ -186,7 +186,11 @@ gold.
   tightness.
 - **Tight within a group, generous between groups** (2026-10-27, Gestalt
   proximity): ~4–8 pt from a name to its first intention, intentions on the
-  ~40 pt pitch with no extra gap, **~24–28 pt between name groups**; ~24 pt between the community
+  ~40 pt pitch with no extra gap, **~24–28 pt between name groups**
+  (2026-11-05: the visible gap, from the last row's text to the next avatar;
+  rows' own padding counts toward it, and the last intention in a group
+  doesn't add the 40 pt pitch's empty space below it, though its tap target
+  still reaches 40 pt); ~24 pt between the community
   card and the list. Each person reads as one unit.
 - **Bottom padding** so the last row scrolls fully clear of the floating bar.
 - **No chevrons anywhere on Home.** The whole row is tappable. The trailing

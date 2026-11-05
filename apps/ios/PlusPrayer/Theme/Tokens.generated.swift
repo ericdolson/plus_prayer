@@ -141,7 +141,7 @@ nonisolated enum PP {
         static let gutter: CGFloat = 20
         /// Card padding (top = bottom).
         static let inset: CGFloat = 20
-        /// Between one name group and the next (~24–28).
+        /// The visible gap between one name group and the next (~24–28): the last row's ink to the next avatar. The list subtracts the rows' own insets.
         static let groupGap: CGFloat = 24
         /// Community card to the first row.
         static let cardToList: CGFloat = 24

@@ -23,7 +23,7 @@ struct ComponentGallery: View {
                 NameRow(initials: "D", tone: 0, label: "Dad", carried: true, held: dadHeld,
                         hasIntentions: true, accessibilityLabel: "Dad, carried",
                         onTap: { dadHeld.toggle() })
-                    .padding(.top, PP.space.groupGap)
+                    .padding(.top, GroupSpacing.above(afterIntention: true))
                 IntentionRow(text: "Healing after his surgery", carried: true, held: dadHeld,
                              thread: .branch, accessibilityLabel: "Healing after his surgery, carried",
                              onTap: { dadHeld.toggle() })
@@ -32,14 +32,14 @@ struct ComponentGallery: View {
 
                 NameRow(initials: "M", tone: 8, label: "Mom", carried: true, held: false,
                         hasIntentions: true, accessibilityLabel: "Mom, carried")
-                    .padding(.top, PP.space.groupGap)
+                    .padding(.top, GroupSpacing.above(afterIntention: true))
                 IntentionRow(text: "A safe delivery for Ruth", carried: false, held: false,
                              secondary: SecondaryLine(text: "Answered · Oct 19", kind: .answered),
                              thread: .lastBranch, accessibilityLabel: "A safe delivery for Ruth. Answered, October 19")
 
                 NameRow(initials: "DK", tone: 10, label: "Daniel Kim", carried: true, held: false,
                         accessibilityLabel: "Daniel Kim, carried")
-                    .padding(.top, PP.space.groupGap)
+                    .padding(.top, GroupSpacing.above(afterIntention: true))
 
                 // Glyph sampler (not the real bar; that comes with the Home shell).
                 HStack(spacing: PP.space.lg) {

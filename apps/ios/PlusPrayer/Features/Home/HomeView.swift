@@ -21,7 +21,8 @@ struct HomeView: View {
                 card
                 ForEach(Array(Sample.groups.enumerated()), id: \.element.id) { index, group in
                     groupRows(group)
-                        .padding(.top, index == 0 ? 0 : PP.space.groupGap)
+                        .padding(.top, index == 0 ? 0 : GroupSpacing.above(
+                            afterIntention: !Sample.groups[index - 1].intentions.isEmpty))
                 }
             }
             .padding(.top, PP.space.xl)
