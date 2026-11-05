@@ -647,7 +647,7 @@ on Today's list or Your portion.
 - **Halo is gold** (gold = holding): edge glow in dark mode; a slightly
   stronger gradient in light mode so it doesn't vanish.
 - **Halo = a solid edge line + a glow** (2026-11-05, as in the Flutter build):
-  a steady **3 pt** gold line on the screen's very edge says "holding"; the
+  a steady **2 pt** gold line on the screen's very edge says "holding"; the
   glow over it only accents it. Only the glow breathes and flares; the line
   just fades in and out with the session.
 - **Halo behavior** (2026-11-03): it frames the session and is not a second

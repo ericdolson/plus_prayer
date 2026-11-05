@@ -1351,7 +1351,7 @@ force a user migration).
 ### Decision: Halo edge line, a breath you can see, a glass pray button
 **Timestamp:** 2026-11-05
 From the first look at prayer mode on device (iOS):
-- **Halo = a solid 3 pt gold line on the screen's edge + the glow over it**,
+- **Halo = a solid 2 pt gold line on the screen's edge + the glow over it**,
   as in the Flutter build. The line is steady (it fades in and out with the
   session only); the glow breathes and flares.
 - **The glow's breath is quicker and deeper:** ~5 s cycle (was ~8 s), glow

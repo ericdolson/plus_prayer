@@ -254,7 +254,7 @@ nonisolated enum PP {
             /// The halo's stroke at rest.
             static let glowWidth: CGFloat = 6
             /// The solid gold line on the screen's edge, under the glow. Steady: only the glow breathes.
-            static let edge: CGFloat = 3
+            static let edge: CGFloat = 2
             /// At rest the visible glow stays within this distance of the screen edge.
             static let maxInwardReach: CGFloat = 12
         }

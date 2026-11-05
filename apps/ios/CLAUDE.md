@@ -314,7 +314,7 @@ compose queries; if an operation is missing, ask for a backend change.
   gate; held ring as its border. Rules in PlusPrayerDomain (`Card.swift`).
 - Prayer mode: `PrayerSession` (State/, @Observable; selection rules in
   PlusPrayerDomain `Selection.swift`), `PrayerCheck` in each row's trailing
-  slot and the card's, `Halo` (a steady 3 pt edge line + a breathing glow; ConcentricRectangle follows the display's
+  slot and the card's, `Halo` (a steady 2 pt edge line + a breathing glow; ConcentricRectangle follows the display's
   corners; breath, Amen flare, Reduce Motion static), `PrayButton` with the
   5 s ring countdown to Amen, Cancel in the header (confirm past 30 s), the
   prayer bar (timer · "with N" · search).
