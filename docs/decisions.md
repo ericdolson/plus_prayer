@@ -1331,3 +1331,19 @@ Answers to the iOS Phase 0 ambiguities (A1–A7):
 The iOS app targets iPhone only (`TARGETED_DEVICE_FAMILY` 1). iPad is
 considered once the style and the core experience are where we love them.
 Why: one layout to perfect first; the spec only describes phone screens.
+
+### Decision: +Prayer publishes from its own LLC's developer account
+**Timestamp:** 2026-11-05
++Prayer will be published under a new LLC, enrolled as an Organization in the
+Apple Developer Program (and its own Google Play account), not under Eric's
+existing account. The bundle ID will likely change to the LLC's (e.g.
+`com.plusprayer.app`; final value open, Q30).
+- Development continues under the current team with `dev.hammock.plusprayer`.
+- **No App Store Connect app record and no TestFlight upload under the
+  current account.** Switch the team and bundle ID before the first upload.
+Why: the App Store groups every app from one account (developer page, "More
+by this developer", seller name), with no per-app hiding, and +Prayer must
+stand alone, apart from Eric's fitness app. Switching before the beta avoids
+an app transfer (only possible after a release) and keeps Sign in with Apple
+user IDs stable (they're scoped to the developer team, so a later move would
+force a user migration).

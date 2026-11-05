@@ -28,12 +28,17 @@ app Swift yet. Build order: `app-brief.md` §6.
 - Firebase iOS SDK: Auth (Apple, Google, Anonymous), Realtime Database,
   Analytics, Crashlytics, Messaging. SQL Connect through the generated
   `PlusPrayerConnector` package.
-- Bundle ID **`dev.hammock.plusprayer`** (the same Firebase iOS app as the
-  Flutter build). Don't change it.
+- Bundle ID **`dev.hammock.plusprayer`** for now (the same Firebase iOS app as
+  the Flutter build). Agents don't change it. It's expected to move to the new
+  LLC's account and ID (e.g. `com.plusprayer.app`) before the first TestFlight
+  upload; open-questions Q30, decisions.md 2026-11-05.
 
 ## Ownership — Eric only
 - **Signing, team, capabilities, entitlements** (Sign in with Apple, push,
   background modes, App Groups), provisioning, App Store Connect.
+- **Never create the App Store Connect app record or upload a build to
+  TestFlight** under the current (personal) team. +Prayer ships from the new
+  LLC's account.
 - Adding a **package dependency** to the Xcode project (Xcode's MCP server
   has no tool for it). Agents ask, naming the package, version and products.
 - `GoogleService-Info.plist` (build input; lives in the app target, not

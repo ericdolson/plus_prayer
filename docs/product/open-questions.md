@@ -11,6 +11,7 @@ decisions.md. **MVP** = blocks MVP build._
 | Q18 | Link a social participant's handle to their app account? | list-lifecycle | Later |
 | Q20 | Physical printing at app scale: how is a list with 100k+ names printed/sealed? | list-lifecycle | Stage 2 |
 | Q29 | **App Check** (added 2026-11-05): adopt Firebase App Check (App Attest on iOS, Play Integrity on Android) so only the genuine apps can call SQL Connect, the Functions callables, RTDB and Storage? Today anyone with the public Firebase config can script calls (auth rules still confine them to their own anonymous account, but they could mass-create accounts and prayers). Needs: the `FirebaseAppCheck` product + App Attest capability in the apps, and enforcement on the backend. Recommended: before public launch, maybe monitor-only in the beta. Not yet in the spec or backend | security | Before launch |
+| Q30 | **Publishing entity and bundle ID** (added 2026-11-05): +Prayer ships from a new LLC's Apple Developer account (Organization). Final bundle ID (e.g. `com.plusprayer.app`; Android package to match?) and when to switch. Switching before the first TestFlight upload means: register the App ID and capabilities under the LLC team; a new Firebase iOS app (new `GoogleService-Info.plist`); the LLC's APNs key and Sign in with Apple config in Firebase; the project's team and bundle ID. Needs the LLC's D-U-N-S number and enrollment first | publishing | Before beta |
 
 ## Design to-dos (not blocking)
 | # | Item | Area |
