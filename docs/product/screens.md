@@ -50,6 +50,8 @@ _Last updated: 2026-10-18_
   (trial, upgrade, restore), reminders, notifications (incl. "Show names in
   notifications"), notifications, grace offers toggle, appearance
   (System/Light/Dark, default System; device-local, 2026-11-05),
-  Archived, privacy & terms, delete account, about the ritual. Settings are
-  stored on the User record (sync across devices), except appearance.
-  Location consent: later.
+  Archived, privacy & terms, delete account, about the ritual, and **Sign
+  out** at the very bottom (only once the account is linked; never for an
+  anonymous account; auth-onboarding.md). Settings are stored on the User
+  record (sync across devices), except appearance (device-local; if You gains
+  a display group, appearance moves into it). Location consent: later.

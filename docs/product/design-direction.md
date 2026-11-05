@@ -221,11 +221,14 @@ gold.
   - **Counts in the menu only**, on all three, **in the item's title**
     (2026-11-05, native menu, Tier B §0): "All · 12", "Still to hold · 3",
     "Carried · 6". Never on the main screen.
-  - **Still to hold at 0** (2026-11-05): no count and no check (in a system
-    menu the check means "the active filter"). Instead the item carries the
-    subtitle **"Everyone's held today."**
+  - **Never show 0** (2026-11-05): at 0 the count is dropped and the title is
+    the bare label ("Carried"). No check either (in a system menu the check
+    means "the active filter").
+  - **Still to hold at 0** also carries the subtitle **"Everyone's been held
+    today."** No other item gets a subtitle.
     _Was: trailing muted counts, and a small gold check in place of "0"._
-  - **Empty state** for Still to hold: "Everyone's been held today."
+  - **Empty state** for Still to hold: "Everyone's been held today." (the same
+    line as the menu's subtitle at 0).
   - **Linger then fold:** under Still to hold, rows held in a prayer show their
     gold ring for ~1–1.5 s after Amen, then gently fold away (Reduce Motion:
     fade). No inline chip row (it hid "All" with no scroll affordance and

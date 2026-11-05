@@ -20,7 +20,8 @@ _Last updated: 2026-10-17_
 - **Launch screen** (2026-11-05): the wordmark centered on `ground`, in light
   and dark. It's the platform's static launch screen, not step 1 below.
 - **Flow:**
-  1. Splash: "Your name, carried by the world."
+  1. Splash: "Your name, carried by the world." With a quiet link: **"Already
+     have an account? Sign in"** (2026-11-05).
   2. One plain screen: "Pray for today's list. Tomorrow, you're on it."
   3. **"What's your name?"** — a personal, getting-to-know-you step (not
      "what name should be carried"). Helper text conveys that their name will be
@@ -38,7 +39,19 @@ _Last updated: 2026-10-17_
   subjects, prayers. Past list entries are stripped of name/owner but list
   counts remain. Tell users to cancel subscriptions in their store account.
   The device's cached data is cleared too (privacy.md).
-- **Sign-out clears the device's cached data** (2026-11-05; privacy.md).
+- **Sign out** (2026-11-05):
+  - Only for a linked account: no Sign out row while the account is
+    anonymous. Once linked, "Sign out" sits at the bottom of You.
+  - Confirmation: "Your names stay with your account. Sign in to bring them
+    back."
+  - The offline queue is flushed first. If prayers still haven't synced, ask:
+    "1 prayer hasn't synced yet. Sign out anyway?" Unsynced prayers are never
+    dropped silently.
+  - Signing out clears the device's cached data (privacy.md), and the user
+    lands at the start of onboarding (step 1, with its "Already have an
+    account? Sign in" link).
+- **Account deletion and the device:** the offline queue is discarded (not
+  flushed), and the device's cached data is cleared (privacy.md).
 - **Names are never shown in recordings.** Privacy always holds; the filmed list
   is never legible.
 

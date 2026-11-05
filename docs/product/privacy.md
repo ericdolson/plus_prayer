@@ -30,5 +30,10 @@ _Last updated: 2026-10-18. Not legal advice — final text via a policy generato
 - **Deletion:** immediate; past list entries lose name/owner; counts remain;
   subscriptions cancelled via the store.
 - **On-device cache** (2026-11-05): the iOS app keeps the user's last query
-  results on the device (names, intentions, history) so it works offline. It
-  is cleared on sign-out and on account deletion.
+  results on the device (names, intentions, history) so it works offline.
+  - **Cleared** on sign-out and on account deletion: the SQL Connect cache,
+    the Realtime Database local cache, and the offline queue. The queue is
+    flushed before sign-out and discarded on deletion.
+  - **Never in iCloud backups:** the SQL Connect and Realtime Database caches
+    and the offline queue are excluded from backup. (The queue lives in
+    Application Support, not Caches, so iOS never purges unsent prayers.)

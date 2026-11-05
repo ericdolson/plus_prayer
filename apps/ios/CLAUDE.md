@@ -163,14 +163,21 @@ compose queries; if an operation is missing, ask for a backend change.
   server and refresh the cache; offline, repositories fall back to
   `execute(fetchPolicy: .cacheOnly)`. That's how Home opens with no signal.
 - The SDK scopes its cache file by Firebase uid, under
-  `Documents/com.google.firebase.dataconnect/`. **Clear it on sign-out and on
-  account deletion** (privacy.md): one `DeviceDataWiper` deletes that folder,
-  the queue file, the RTDB local cache and any app caches. It runs before
-  `Auth.signOut()` and after `deleteAccount` succeeds. The SDK (11.12) has no
-  public clear-cache API, so this relies on its folder name; a test asserts
-  the folder exists after a cached query, so an SDK change fails loudly.
-- OPEN (`PHASE-0.md` A3): whether that folder and the queue file are
-  excluded from iCloud backup.
+  `Documents/com.google.firebase.dataconnect/`. The SDK (11.12) has no public
+  clear-cache API, so clearing deletes that folder; a test asserts the folder
+  exists after a cached query, so an SDK change fails loudly.
+- **`DeviceDataWiper`** is the one place that clears device data (privacy.md):
+  the SQL Connect cache folder, the RTDB local cache, and the offline queue.
+  - **Sign-out** (linked accounts only): flush the queue; if prayers are still
+    unsent, confirm ("1 prayer hasn't synced yet. Sign out anyway?",
+    pluralized in the catalog). Never drop them without that answer. Then
+    wipe, `Auth.signOut()`, and route to the start of onboarding.
+  - **Account deletion:** after `deleteAccount` succeeds, discard the queue
+    (don't flush), then wipe.
+- **Backups:** the SQL Connect and RTDB cache folders and the queue file are
+  excluded from iCloud backup (`isExcludedFromBackup`), set at launch. The
+  queue lives in **Application Support** (never Caches, which iOS may purge).
+
 ## Mock backend and environments
 - `AppEnvironment` picks one at launch from the scheme's launch argument
   `-PPEnvironment mock|emulator|firebase`. Debug defaults to **mock**.

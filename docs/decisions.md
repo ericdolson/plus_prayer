@@ -1299,3 +1299,29 @@ The license file is still to be added to the repo.
   (screens.md).
 - **Reference screenshots** are renamed `<screen>-<state>-<theme>.png` and
   indexed in `docs/product/reference/README.md`.
+
+### Decision: Sign-out, device data, and the filter menu's zeros
+**Timestamp:** 2026-11-05
+Answers to the iOS Phase 0 ambiguities (A1–A7):
+- **Sign-out (A1):** no Sign out row while anonymous. Once linked, "Sign out"
+  sits at the bottom of You, with the confirmation "Your names stay with your
+  account. Sign in to bring them back." The offline queue is flushed first;
+  if prayers are still unsynced, ask "1 prayer hasn't synced yet. Sign out
+  anyway?" Never drop them silently. Afterwards the user lands at the start
+  of onboarding, which gets a quiet "Already have an account? Sign in" link
+  (auth-onboarding.md, screens.md).
+- **Clearing device data (A2):** sign-out and deletion clear the SQL Connect
+  cache (by deleting the SDK's cache folder, guarded by a test, since the SDK
+  has no clear API), the Realtime Database local cache, and the offline
+  queue. The queue is flushed on sign-out and discarded on deletion.
+- **Backups (A3):** the SQL Connect and RTDB caches and the offline queue are
+  excluded from iCloud backup. The queue stays in Application Support (not
+  Caches) so iOS never purges it (privacy.md).
+- **One line at zero (A4):** "Everyone's been held today." for both the menu
+  subtitle and the Still to hold empty state.
+- **Never show 0 (A5)** (SUPERSEDES "Carried · 0"-style counts): at 0 the
+  count is dropped ("Carried"). Only Still to hold gets the subtitle.
+- **Interim icon (A6):** the SVG's own colors (brand, not UI), a single layer;
+  iOS derives dark and tinted. Real variants come with D4.
+- **Appearance (A7):** stays device-local; its place in You is fine unless You
+  gains a display group, where it would go.

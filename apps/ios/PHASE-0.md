@@ -133,46 +133,48 @@ are), `splash_image.png` (a 1424 px raster of the wordmark; the SVG replaces it)
 - **Q12 Theme:** follows the system; the System/Light/Dark setting stays.
 - **Q14 Screenshots:** renamed and indexed in `docs/product/reference/README.md`.
 
-## 4. Ambiguities from the 2026-11-05 answers (not resolved)
+## 4. Ambiguities A1–A7: answered 2026-11-05
+Recorded in auth-onboarding.md, screens.md, privacy.md, design-direction §4
+and decisions.md. In short: Sign out only for linked accounts (bottom of You,
+flush first, ask before leaving unsynced prayers); sign-out and deletion
+clear the SQL Connect cache, the RTDB cache and the queue; all three are kept
+out of iCloud backup; one line at zero ("Everyone's been held today."); never
+show 0; the interim icon uses the SVG's own colors in a single layer;
+appearance stays device-local.
 
-**A1. Sign-out doesn't exist in the spec.** Q3 clears the cache "on
-sign-out", but You only lists "sign-in/link" (anonymous-first, linking keeps
-the same uid). Is there a Sign out row once an account is linked? If so,
-where does it sit, and what does the app show afterwards (a fresh anonymous
-user going through onboarding, or a sign-in screen)?
+### New ambiguities (not resolved)
 
-**A2. Clearing the cache relies on an SDK internal.** Data Connect iOS 11.12
-has no public clear-cache API. It keeps one SQLite file per uid in
-`Documents/com.google.firebase.dataconnect/` and never deletes old ones. The
-plan (`CLAUDE.md`, "Offline reads") deletes that folder before sign-out and
-after deletion, with a test that fails if the SDK moves it. Is that
-acceptable until Firebase adds an API? Should "cached data" also cover the
-RTDB local cache and the offline queue? The plan assumes yes.
+**B1. "Sign out anyway?": what happens to the unsent prayers?** If the user
+confirms, are they discarded, or kept on the device and sent when that
+account signs back in? They're tied to the old account's sign-in, so a new
+anonymous user can't send them.
 
-**A3. iCloud backup.** That cache lives in `Documents/`, which iOS backs up
-to iCloud by default, so names and intentions would land in the user's
-backups. Exclude it (and the queue file) from backup? Doing so means a
-restored phone re-downloads everything on first launch.
+**B2. Unsynced writes that aren't prayers.** The queue also carries prayer
+note edits. If only a note edit is pending, should sign-out ask too? If so,
+with what wording? And when both are pending, does "1 prayer" count only
+prayers?
 
-**A4. Two near-identical lines.** The filter menu's subtitle at 0 is
-"Everyone's held today." The Still to hold empty state (§4) is "Everyone's
-been held today." Keep both as written, or use one wording?
+**B3. Copy for the two sign-out dialogs.** What are the titles and button
+labels? I'd assume:
+- First dialog: title "Sign out?", message "Your names stay with your
+  account. Sign in to bring them back.", buttons [Sign out] [Cancel].
+- Second dialog: title "1 prayer hasn't synced yet. Sign out anyway?" (plural
+  "{n} prayers haven't synced yet."), buttons [Sign out] [Cancel].
+Confirm or replace.
 
-**A5. Counts on All and Carried.** Q8 gave the format for Still to hold. I
-applied the same title format to the others ("All · 12", "Carried · 6").
-Confirm, and confirm that a 0 under Carried just shows "Carried · 0" (the
-"no count at 0" rule was stated for Still to hold only).
+**B4. The interim icon's background and padding.** `+prayer_icon.svg` is
+the bloom alone in brand blue (`#0082FF`) on a transparent canvas, and it
+runs to the canvas edges. An iOS icon must be opaque and gets its corners
+masked, so it needs:
+- a background color: none comes from the SVG (white? dark `ground` as on
+  the launch screen?);
+- some padding, so the petals aren't clipped.
 
-**A6. Interim icon details.** `+prayer_icon.svg` is the bloom alone. For the
-interim icon:
-- What color is the bloom, and on what background? The launch screenshot
-  uses the action blue on dark ground, but blue means "do this" in the app.
-- Should it include iOS 26's dark and tinted variants, or a single image?
-
-**A7. Appearance setting placement and storage.** I added it to the You list
-after "grace offers toggle", and marked it device-local, the one setting not
-synced on the User record (as in the Flutter build). Confirm the position and
-that it stays device-local.
+**B5. Clearing the RTDB cache may wait for the next launch** (to verify in
+Phase 1). Firebase's iOS Realtime Database may not let its on-disk cache be
+deleted while it's running. If so, the RTDB part of the wipe would finish at
+the next launch, before RTDB starts. Is that acceptable? The SQL Connect
+cache and the queue clear immediately either way.
 
 ## 5. Next: Q13
 
