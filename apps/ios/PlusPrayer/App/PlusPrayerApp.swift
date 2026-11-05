@@ -8,8 +8,7 @@ struct PlusPrayerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            // Build step 1: the component gallery until Home exists.
-            ComponentGallery()
+            HomeView()
         }
     }
 }

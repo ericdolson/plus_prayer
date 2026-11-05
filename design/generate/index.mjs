@@ -266,7 +266,7 @@ ${swiftDimensions(tokens.radius, "        ")}    }
 ${swiftDimensions(tokens.size, "        ")}    }
 
     enum number {
-${swiftNumbers(tokens.number, "        ", ["waxDarkLift", "waxDarkRimOpacity", "avatarDarkDim"])}    }
+${swiftNumbers(tokens.number, "        ", ["waxDarkLift", "avatarDarkDim"])}    }
 
     enum type {
 ${swiftTypography()}    }

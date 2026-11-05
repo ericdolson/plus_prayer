@@ -1,0 +1,192 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@%@%@": {
+      "comment": "Not copy: joins a name or intention, a space and the carried mark (CarriedMark.after).",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@%2$@%3$@"
+          }
+        }
+      },
+      "shouldTranslate": false
+    },
+    "home.bar.add": {
+      "comment": "Accessibility label: the + in Home's floating bar (opens the add sheet).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        }
+      }
+    },
+    "home.bar.history": {
+      "comment": "Accessibility label: the history button in Home's floating bar.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "History"
+          }
+        }
+      }
+    },
+    "home.bar.pray": {
+      "comment": "Accessibility label: the blue pray button beside Home's floating bar.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pray"
+          }
+        }
+      }
+    },
+    "home.bar.search": {
+      "comment": "Accessibility label: the search button in Home's floating bar.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
+          }
+        }
+      }
+    },
+    "home.filter": {
+      "comment": "Accessibility label: the filter button in Home's header (opens the filter menu).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter"
+          }
+        }
+      }
+    },
+    "home.filter.all": {
+      "comment": "Filter menu item: show everything.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        }
+      }
+    },
+    "home.filter.allHeld": {
+      "comment": "Subtitle on the Still to hold menu item when everyone has been held today (also the empty state).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everyone's been held today."
+          }
+        }
+      }
+    },
+    "home.filter.carried": {
+      "comment": "Filter menu item: what's carried (printed on the daily list). No list number.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carried"
+          }
+        }
+      }
+    },
+    "home.filter.clear": {
+      "comment": "Accessibility label: the × inside the active filter chip (back to All).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show all"
+          }
+        }
+      }
+    },
+    "home.filter.stillToHold": {
+      "comment": "Filter menu item and chip: names and intentions not yet held today.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Still to hold"
+          }
+        }
+      }
+    },
+    "home.filter.withCount": {
+      "comment": "Filter menu item with its count, e.g. “Still to hold · 3”. Never shown at 0. %1$@ = the filter, %2$lld = the count.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$lld"
+          }
+        }
+      }
+    },
+    "home.header.streak": {
+      "comment": "Accessibility label for the streak badge. 0 = no streak (no number is shown).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld day with the world"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld days with the world"
+                }
+              },
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Days with the world"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "home.header.you": {
+      "comment": "Accessibility label: your avatar in Home's header (opens You).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

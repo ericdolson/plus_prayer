@@ -256,9 +256,29 @@ nonisolated enum PP {
             /// At rest the visible glow stays within this distance of the screen edge.
             static let maxInwardReach: CGFloat = 12
         }
+        /// Home's floating bar (design-direction §4; Tier A layout on the platform's glass, 2026-11-05).
+        enum bar {
+            /// The pill's height: the same as the round pray button beside it.
+            static let height: CGFloat = 62
+            /// History, Search and + in the pill.
+            static let icon: CGFloat = 26
+            /// The bar's gap from the screen's side edges.
+            static let inset: CGFloat = 16
+            /// Between the pill and the pray button.
+            static let gap: CGFloat = 12
+        }
+        /// Home's header controls, each on its own glass (§4).
+        enum header {
+            /// The glass behind the streak badge and the filter: as tall as your header avatar.
+            static let control: CGFloat = 32
+            /// The filter glyph and the chip's ×.
+            static let icon: CGFloat = 20
+        }
     }
 
     enum number {
+        /// Dark theme only: the seal's rim light (its sheen; the unsealed blank uses color.dark.unsealedRim) at this opacity.
+        static let waxDarkRimOpacity: Double = 0.5
         /// Ink over an in-content container (the search match hint) while pressed.
         static let pressed: Double = 0.08
         /// Avatar initials: body sans at this share of the disc's diameter.

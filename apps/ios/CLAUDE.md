@@ -303,4 +303,13 @@ compose queries; if an operation is missing, ask for a backend change.
   `CarriedMark.after` (inline, for text that wraps).
 - `NameRow`, `IntentionRow`, `SecondaryLine`: Home rows on plain values; each
   row draws its part of the intention thread (`.thread(_:)`, `ThreadShape`).
-- `ComponentGallery` is the temporary root until Home exists.
+- `WaxSeal` (7 waxes by sealVariant, unsealed blank, dark-theme lift and rim)
+  and `PewterSeal`: one gray stamp tinted with Core Image color matrices in
+  sRGB (no Metal: the toolchain isn't installed by default).
+- `StreakBadge`; Home shell: `HomeHeader`, `HomeFilterControl` (native menu,
+  chip when active), `HomeBar` + `PrayButton`, placed with `safeAreaBar` so
+  the native soft scroll edge applies.
+- `HomeView` is the root (sample rows until the mock data source exists);
+  `ComponentGallery` stays for previews.
+- Strings: `App/L10n.swift` over `Resources/Localizable.xcstrings` (explicit
+  keys, plural variations).
