@@ -1,3 +1,5 @@
+REFERENCE ONLY (2026-11-05). The app is now native: see apps/ios/. Tagged flutter-reference. Don’t add features here.
+
 # app/ — Flutter App Context
 
 Inherits all brand-wide truths from the root CLAUDE.md. Product behavior lives
