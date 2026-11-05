@@ -39,10 +39,16 @@ struct CommunityCard: View {
     /// Minutes until the cutoff, when the closing notice should replace the
     /// status line (only if you haven't prayed with the list today).
     var closingMinutes: Int? = nil
-    /// Prayed with the list today (local day): the held ring around the card.
-    var heldToday = false
-    var inPrayer = false
+    /// Prayed with the list today (local day), or held in this prayer: the
+    /// held ring around the card.
+    var held = false
+    /// In prayer: whether the list is checked. nil = nav mode. The whole card
+    /// is the checkable "hold the list" target; its check sits in the
+    /// trailing slot, aligned to the title line.
+    var check: Bool? = nil
     var onTap: () -> Void = {}
+
+    private var inPrayer: Bool { check != nil }
 
     private var nextList: Int { listNumber + 1 }
     private var aboutYouOnly: Bool { carried.allSatisfy(\.isSelf) }
@@ -76,15 +82,20 @@ struct CommunityCard: View {
             }
             .padding(PP.space.inset)
         }
+        .overlay(alignment: .topTrailing) {
+            CheckSlot(check: check.map { $0 ? .held : .none })
+                .padding([.top, .trailing], PP.space.inset)
+        }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(PP.color.cardSurface)
         .clipShape(RoundedRectangle(cornerRadius: PP.radius.card, style: .continuous))
-        .heldRing(heldToday, cornerRadius: PP.radius.card)
+        .heldRing(held, cornerRadius: PP.radius.card)
         .contentShape(RoundedRectangle(cornerRadius: PP.radius.card, style: .continuous))
         .onTapGesture(perform: onTap)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(spokenSummary)
-        .accessibilityAddTraits(.isButton)
+        .accessibilityValue(check.map { ($0 ? HoldState.held : .none).spoken } ?? "")
+        .accessibilityAddTraits(inPrayer ? .isToggle : .isButton)
     }
 
     // MARK: World block
@@ -262,7 +273,7 @@ private struct AvatarRow: View {
                           presence: PresenceLine(window: .now, count: 239), carried: people, status: .prayToCarry)
             CommunityCard(listNumber: 52, sealVariant: 3, people: 4345, prayers: 3881,
                           presence: PresenceLine(window: .lastHour, count: 640), carried: many, status: .covered,
-                          heldToday: true)
+                          held: true)
             CommunityCard(listNumber: 52, sealVariant: nil, people: 4345, prayers: 3881,
                           presence: nil, carried: [people[0]], status: .prayToCarry, closingMinutes: 5)
         }

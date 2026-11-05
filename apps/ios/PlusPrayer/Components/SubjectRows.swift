@@ -1,3 +1,4 @@
+import PlusPrayerDomain
 import SwiftUI
 
 // Home rows (design-direction §3, §5). One line each, no dividers, no
@@ -12,7 +13,8 @@ import SwiftUI
 // for exceptional states ("Answered · Oct 19", "Not on the list …").
 //
 // These take plain values and closures; the list decides what they show.
-// The trailing slot is reserved for the prayer-mode check (a later slice).
+// The trailing slot is empty in nav mode; in prayer the check fades into it
+// (`check` non-nil) and a tap checks instead of opening the item.
 
 /// A name: avatar, name, carried mark.
 struct NameRow: View {
@@ -26,8 +28,10 @@ struct NameRow: View {
     var secondary: SecondaryLine? = nil
     /// Has intentions below it on the thread.
     var hasIntentions = false
-    /// VoiceOver: the full sentence for the row (`RowSpeech`).
+    /// VoiceOver: the full sentence for the row.
     let accessibilityLabel: String
+    /// In prayer: this row's check. nil = nav mode.
+    var check: HoldState? = nil
     var onTap: () -> Void = {}
 
     var body: some View {
@@ -41,13 +45,14 @@ struct NameRow: View {
                 secondary
             }
             Spacer(minLength: 0)
+            CheckSlot(check: check)
         }
         .padding(.leading, PP.space.gutter)
         .padding(.trailing, PP.space.gutter)
         .padding(.vertical, PP.space.xs)
         .frame(minHeight: PP.size.row.name)
         .thread(hasIntentions ? .trunk : nil)
-        .rowInteraction(label: accessibilityLabel, onTap: onTap)
+        .rowInteraction(label: accessibilityLabel, check: check, onTap: onTap)
     }
 }
 
@@ -60,6 +65,7 @@ struct IntentionRow: View {
     /// `.branch` if more intentions follow under the same name.
     let thread: ThreadPart
     let accessibilityLabel: String
+    var check: HoldState? = nil
     var onTap: () -> Void = {}
 
     /// The first line's band: at least as tall as the prayer check, so the dot,
@@ -80,13 +86,14 @@ struct IntentionRow: View {
                 secondary
             }
             Spacer(minLength: 0)
+            CheckSlot(check: check).frame(height: band)
         }
         .padding(.trailing, PP.space.gutter)
         .padding(.top, PP.space.xxs)
         .padding(.bottom, PP.space.sm)
         .frame(minHeight: PP.size.row.intention, alignment: .top)
         .thread(thread, branchY: PP.space.xxs + band / 2)
-        .rowInteraction(label: accessibilityLabel, onTap: onTap)
+        .rowInteraction(label: accessibilityLabel, check: check, onTap: onTap)
     }
 }
 
@@ -110,15 +117,39 @@ struct SecondaryLine: View {
     }
 }
 
-private extension View {
-    /// The whole row is one button and one sentence to VoiceOver.
-    func rowInteraction(label: String, onTap: @escaping () -> Void) -> some View {
+/// The trailing slot: empty in nav mode, the check in prayer (fading in).
+struct CheckSlot: View {
+    let check: HoldState?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        PrayerCheck(state: check ?? .none)
+            .opacity(check == nil ? 0 : 1)
+            .animation(.easeOut(duration: reduceMotion ? PP.duration.quick : PP.duration.settle), value: check == nil)
+    }
+}
+
+extension View {
+    /// The whole row is one element: a button in nav mode, a toggle in prayer
+    /// (held / partly held / not held), one sentence to VoiceOver.
+    func rowInteraction(label: String, check: HoldState?, onTap: @escaping () -> Void) -> some View {
         frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
             .onTapGesture(perform: onTap)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(label)
-            .accessibilityAddTraits(.isButton)
+            .accessibilityValue(check.map(\.spoken) ?? "")
+            .accessibilityAddTraits(check == nil ? .isButton : .isToggle)
+    }
+}
+
+extension HoldState {
+    var spoken: String {
+        switch self {
+        case .none: L10n.Row.notHeld
+        case .held: L10n.Row.held
+        case .partial: L10n.Row.partial
+        }
     }
 }
 

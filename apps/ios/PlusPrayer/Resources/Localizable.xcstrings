@@ -426,6 +426,150 @@
           }
         }
       }
+    },
+    "prayer.amen": {
+      "comment": "The pray button once the 5 s minimum has passed: ends the prayer.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amen"
+          }
+        }
+      }
+    },
+    "prayer.cancel": {
+      "comment": "Header text button in prayer mode (top-leading): discard the prayer.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "prayer.discard": {
+      "comment": "Confirm discarding the prayer (nothing is logged).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard"
+          }
+        }
+      }
+    },
+    "prayer.discardQuestion": {
+      "comment": "Confirmation when cancelling a prayer longer than ~30 s.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discard this prayer?"
+          }
+        }
+      }
+    },
+    "prayer.keepPraying": {
+      "comment": "Cancel the discard; the prayer continues.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep praying"
+          }
+        }
+      }
+    },
+    "prayer.time": {
+      "comment": "VoiceOver for the prayer bar's timer, e.g. “Time in prayer 3:12”.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time in prayer %@"
+          }
+        }
+      }
+    },
+    "prayer.with": {
+      "comment": "Prayer bar, after the timer: how many others are praying now (shown at 10 or more).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "with %lld"
+          }
+        }
+      }
+    },
+    "prayer.withSpoken": {
+      "comment": "VoiceOver for “with N” in the prayer bar.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Praying with %lld other"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Praying with %lld others"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "row.check.held": {
+      "comment": "VoiceOver value of a row in prayer mode once checked. NEW COPY, not in the spec: review.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Held"
+          }
+        }
+      }
+    },
+    "row.check.none": {
+      "comment": "VoiceOver value of an unchecked row in prayer mode. NEW COPY, not in the spec: review.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not held"
+          }
+        }
+      }
+    },
+    "row.check.partial": {
+      "comment": "VoiceOver value of a name in prayer mode when only some of its intentions are checked. NEW COPY, not in the spec: review.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partly held"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -274,6 +274,13 @@ nonisolated enum PP {
             /// The filter glyph and the chip's ×.
             static let icon: CGFloat = 20
         }
+        /// The prayer-mode check's strokes (size.check is its diameter).
+        enum checkMark {
+            /// Unchecked: a thin inkMuted ring.
+            static let noneStroke: CGFloat = 1
+            /// Partial: the gold ring and its dash.
+            static let partialStroke: CGFloat = 1.5
+        }
     }
 
     enum number {
@@ -306,6 +313,14 @@ nonisolated enum PP {
         }
         /// The check bloom: share of its duration spent swelling (ease-out); the rest settles (ease-in).
         static let bloomRiseShare: Double = 0.35
+        /// The check glyph inside a held check, as a share of its diameter.
+        static let checkGlyph: Double = 0.62
+        /// The partial check's dash, as a share of its diameter.
+        static let checkDash: Double = 0.4
+        /// The held check springs in from this scale (Reduce Motion: no scale, a fade).
+        static let checkSpringFrom: Double = 0.4
+        /// During the countdown the pray button's disc is the action blue at this opacity (over raised); solid once Amen is available.
+        static let prayButtonDim: Double = 0.3
     }
 
     enum type {

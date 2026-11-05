@@ -56,6 +56,29 @@ nonisolated enum L10n {
         }
     }
 
+    enum Prayer {
+        static var amen: String { NSLocalizedString("prayer.amen", comment: "") }
+        static var cancel: String { NSLocalizedString("prayer.cancel", comment: "") }
+        static var discardQuestion: String { NSLocalizedString("prayer.discardQuestion", comment: "") }
+        static var discard: String { NSLocalizedString("prayer.discard", comment: "") }
+        static var keepPraying: String { NSLocalizedString("prayer.keepPraying", comment: "") }
+        static func with(_ n: Int) -> String {
+            String(format: NSLocalizedString("prayer.with", comment: ""), locale: .current, n)
+        }
+        static func withSpoken(_ n: Int) -> String {
+            String.localizedStringWithFormat(NSLocalizedString("prayer.withSpoken", comment: ""), n)
+        }
+        static func time(_ elapsed: String) -> String {
+            String(format: NSLocalizedString("prayer.time", comment: ""), elapsed)
+        }
+    }
+
+    enum Row {
+        static var held: String { NSLocalizedString("row.check.held", comment: "") }
+        static var partial: String { NSLocalizedString("row.check.partial", comment: "") }
+        static var notHeld: String { NSLocalizedString("row.check.none", comment: "") }
+    }
+
     enum Filter {
         static var all: String { NSLocalizedString("home.filter.all", comment: "") }
         static var stillToHold: String { NSLocalizedString("home.filter.stillToHold", comment: "") }
