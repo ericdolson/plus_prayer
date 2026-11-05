@@ -291,4 +291,14 @@ compose queries; if an operation is missing, ask for a backend change.
   `firebase dataconnect:sdk:generate` after any connector change. Never edit
   by hand.
 - `Theme/Tokens.generated.swift`: regenerate from `design/tokens.json` with
-  the token generator. Never edit by hand.
+  `node design/generate/index.mjs` (`--check` fails if it's stale). Never
+  edit by hand.
+- Custom symbols (`Assets.xcassets/Symbols/pp.*.symbolset`): regenerate from
+  their source SVGs with `design/generate/symbol.py` (usage in its header).
+
+## Components so far (build step 1)
+- `MonogramAvatar` — initials on a tone; one letter or color only when small.
+- `.heldRing(_:cornerRadius:)`, `HeldDot` — gold held marks with the check bloom.
+- `CarriedLabel` (single-line rows: the mark follows the ellipsis) and
+  `CarriedMark.after` (inline, for text that wraps).
+- `ComponentGallery` is the temporary root until Home exists.

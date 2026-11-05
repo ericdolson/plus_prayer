@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!--Generator: hand-built from +prayer_icon.svg (design/generate/symbol.py)-->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="3300" height="2200">
+ <!--glyph: "", point size: 100.0, font version: "17.0d1e1", template writer version: "128"-->
+ <g id="Notes">
+  <rect height="2200" id="artboard" style="fill:white;opacity:1" width="3300" x="0" y="0"/>
+  <line style="fill:none;stroke:black;opacity:1;stroke-width:0.5;" x1="263" x2="3036" y1="292" y2="292"/>
+  <text style="stroke:none;fill:black;font-family:sans-serif;font-size:13;font-weight:bold;" transform="matrix(1 0 0 1 263 322)">Weight/Scale Variations</text>
+  <text id="template-version" style="stroke:none;fill:black;font-family:sans-serif;font-size:13;" transform="matrix(1 0 0 1 3036 1933)">Template v.3.0</text>
+ </g>
+ <g id="Guides">
+  <path d="M263 696L3036 696" id="Baseline-S" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;"/>
+  <path d="M263 625.541L3036 625.541" id="Capline-S" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;"/>
+  <path d="M263 1126L3036 1126" id="Baseline-M" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;"/>
+  <path d="M263 1055.54L3036 1055.54" id="Capline-M" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;"/>
+  <path d="M263 1556L3036 1556" id="Baseline-L" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;"/>
+  <path d="M263 1485.54L3036 1485.54" id="Capline-L" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;"/>
+  <path d="M1391 1030L1391 1150" id="left-margin-Regular-M" style="fill:none;stroke:#00AEEF;stroke-width:0.5;opacity:1.0;"/>
+  <path d="M1453.777 1030L1453.777 1150" id="right-margin-Regular-M" style="fill:none;stroke:#00AEEF;stroke-width:0.5;opacity:1.0;"/>
+ </g>
+ <g id="Symbols">
+  <g id="Regular-M" transform="matrix(1 0 0 1 1391 1126)">
+   <path d="M48.55 -36.964 c14.996 -23.214 4.942 -32.384 -11.897 -9.742 c0.409 -37.289 -17.478 -30.69 -15.234 2.341 C-6.706 -60.26 -6.105 -41.073 17.013 -29.087 c-28.453 24.894 -13.004 35.55 11.362 10.247 c11.845 23.348 34.762 27.918 16.162 -3.084 c20.948 0.542 25.904 -11.971 4.013 -15.04 Z M40.792 -33.865 l-0.104 0.907 c-0.201 1.211 -0.557 1.516 -1.769 1.516 h-5.908 v6.212 c0 1.211 -0.305 1.516 -1.516 1.516 h-0.959 c-1.211 0 -1.516 -0.305 -1.516 -1.516 v-6.212 h-6.465 c-1.211 0 -1.464 -0.305 -1.315 -1.516 l0.104 -0.907 c0.201 -1.211 0.557 -1.516 1.769 -1.516 h5.908 v-6.212 c0 -1.211 0.305 -1.516 1.516 -1.516 h0.959 c1.211 0 1.516 0.305 1.516 1.516 v6.212 h6.517 c1.211 0 1.464 0.305 1.263 1.516 Z"/>
+  </g>
+ </g>
+</svg>
