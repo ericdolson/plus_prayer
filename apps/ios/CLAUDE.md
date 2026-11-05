@@ -32,14 +32,23 @@ app Swift yet. Build order: `app-brief.md` §6.
 ## Ownership — Eric only
 - **Signing, team, capabilities, entitlements** (Sign in with Apple, push,
   background modes, App Groups), provisioning, App Store Connect.
-- Adding a **package dependency** to the Xcode project (it edits
-  `project.pbxproj`). Agents ask, naming the package, version and products.
+- Adding a **package dependency** to the Xcode project (Xcode's MCP server
+  has no tool for it). Agents ask, naming the package, version and products.
 - `GoogleService-Info.plist` (build input; lives in the app target, not
   `backend/`).
 
 ## Xcode project rules
-- **Never edit `project.pbxproj` by hand.** Not with sed, not with a script,
-  not "just one line".
+- **Never edit the project file by hand.** Xcode 27 writes it as
+  `PlusPrayer.xcodeproj/project.xcproj` (a readable format that replaces
+  `project.pbxproj`); the rule holds for it too. Not with sed, not with a
+  script, not "just one line".
+- Change the project through **Xcode's MCP server** (`xcrun mcpbridge`,
+  configured as `xcode`): `UpdateTargetBuildSetting`, `XcodeNewTarget`,
+  `XcodeMakeDir`, `AddEntitlement`, `AddInfoPlist`; `BuildProject`,
+  `RunAllTests` and `RenderPreview` to verify. Without it, ask Eric.
+- Command-line builds work too:
+  `xcodebuild -project apps/ios/PlusPrayer.xcodeproj -scheme PlusPrayer
+  -destination 'generic/platform=iOS Simulator' build`.
 - The project uses **synchronized folders** (Xcode 16+): every file under
   `PlusPrayer/`, `PlusPrayerTests/` and `PlusPrayerUITests/` is in its target
   automatically. Add, move and delete Swift files on disk; never touch the

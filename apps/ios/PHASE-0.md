@@ -176,6 +176,18 @@ deleted while it's running. If so, the RTDB part of the wipe would finish at
 the next launch, before RTDB starts. Is that acceptable? The SQL Connect
 cache and the queue clear immediately either way.
 
+**B6. Hand-editing the new project format.** Xcode 27 wrote
+`project.xcproj`, a readable format, instead of `project.pbxproj`. The rule
+still forbids hand edits; everything goes through Xcode's MCP server. Keep
+that rule, or allow careful hand edits to this format?
+
+**B7. iPad.** The template targets iPhone and iPad (`TARGETED_DEVICE_FAMILY`
+1,2), and the spec never mentions iPad. iPhone only for now?
+
+**B8. Xcode 27 is now required.** The project format means anyone building
+the app needs Xcode 27 or later, and so does CI. The app's minimum iOS stays
+26 (the template set 27.2; I'll lower it to 26.0). Fine?
+
 ## 5. Next: Q13
 
 **Creating the project through the Xcode MCP.** Xcode ships an MCP
