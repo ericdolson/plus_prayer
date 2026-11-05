@@ -233,7 +233,7 @@ compose queries; if an operation is missing, ask for a backend change.
 - Floating controls sit on Liquid Glass (`glassEffect`, grouped in a
   `GlassEffectContainer`): the pill, the header's badge and filter, the
   docked search field. The pill and pray button are our layout and sizes on
-  native glass. The pray button is interactive glass tinted action blue. In-content
+  native glass. The pray button is interactive glass tinted action blue, the header avatar glass tinted with its tone. In-content
   containers (community card, search match hint) are flat `cardSurface`,
   never glass.
 - Scroll edges are native: the soft scroll edge effect, no custom blur or dim.

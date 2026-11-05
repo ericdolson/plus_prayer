@@ -12,10 +12,17 @@ struct MonogramAvatar: View {
     /// Palette index, 0–15 (`PrayerSubject.avatarTone`, or the default from the id).
     let tone: Int
     var size: CGFloat = PP.size.avatar.row
+    /// false: the initials only, for a control that puts them on glass tinted
+    /// with `color(tone:)` (your avatar in Home's header).
+    var filled = true
+
+    static func color(tone: Int) -> Color {
+        PP.color.avatarTones[tone.mod(PP.color.avatarTones.count)]
+    }
 
     var body: some View {
         Circle()
-            .fill(PP.color.avatarTones[tone.mod(PP.color.avatarTones.count)])
+            .fill(filled ? Self.color(tone: tone) : .clear)
             .frame(width: size, height: size)
             .overlay {
                 if let glyph = Glyph(initials: initials, diameter: size) {

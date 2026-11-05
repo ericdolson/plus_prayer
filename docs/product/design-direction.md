@@ -341,7 +341,9 @@ gold.
   with a hairline edge, so they hold their shape over any row. The pray button
   is the same interactive glass **tinted action blue** (2026-11-05, was solid
   blue: a rigid disc felt dead beside the glass that gives under the finger);
-  it still reads as solid blue, never gold. The header's glass matches the ~32 pt header
+  it still reads as solid blue, never gold. Your **header avatar** (→ You) is
+  the same interactive glass tinted with your avatar tone (2026-11-05), the
+  initials on it as on any avatar. The header's glass matches the ~32 pt header
   avatar. An active filter raises the glass's tint (neutral, never blue).
 - **Glass vs. surface (2026-10-29):** glass is only for **controls that float
   over content** (streak badge, filter, pill, docked search field). Anything

@@ -11,7 +11,8 @@ import SwiftUI
 //     Header normal:     [avatar][✱ 6] ………… [filter]  or  [Still to hold ×]
 //     Header in prayer:  [Cancel] ……………………… [filter]  or  [Still to hold ×]
 
-/// Leading: your avatar (→ You) and the streak badge; in prayer, Cancel.
+/// Leading: your avatar (→ You, on glass tinted with your tone) and the streak
+/// badge; in prayer, Cancel.
 /// Trailing: the filter, or the active-filter chip in its place.
 struct HomeHeader: View {
     let initials: String
@@ -37,10 +38,14 @@ struct HomeHeader: View {
                     .glassEffect(.regular.interactive(), in: .capsule)
                     .transition(.opacity)
             } else {
+                // On interactive glass tinted with your tone, like the pray
+                // button, so it gives under the finger like the other controls.
                 Button(action: onYou) {
-                    MonogramAvatar(initials: initials, tone: tone, size: PP.size.avatar.header)
+                    MonogramAvatar(initials: initials, tone: tone, size: PP.size.avatar.header, filled: false)
+                        .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
+                .glassEffect(.regular.tint(MonogramAvatar.color(tone: tone)).interactive(), in: .circle)
                 .accessibilityLabel(L10n.Home.you)
                 .transition(.opacity)
 

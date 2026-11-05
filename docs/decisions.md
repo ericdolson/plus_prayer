@@ -1365,3 +1365,10 @@ the old breath was too slow and quiet to notice; a rigid disc felt dead next
 to the glass controls that give under the finger, and the system's own
 press response is the native feel (iOS's prominent glass buttons work this
 way, a UIKit button would add nothing).
+
+### Decision: The header avatar is on tinted glass
+**Timestamp:** 2026-11-05
+Your avatar in Home's header (→ You) sits on interactive Liquid Glass tinted
+with your avatar tone, like the pray button on blue.
+Why: it's a floating control like the others and should give under the
+finger the same way; the tint keeps it reading as your avatar.
