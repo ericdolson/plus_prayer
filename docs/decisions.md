@@ -1347,3 +1347,21 @@ stand alone, apart from Eric's fitness app. Switching before the beta avoids
 an app transfer (only possible after a release) and keeps Sign in with Apple
 user IDs stable (they're scoped to the developer team, so a later move would
 force a user migration).
+
+### Decision: Halo edge line, a breath you can see, a glass pray button
+**Timestamp:** 2026-11-05
+From the first look at prayer mode on device (iOS):
+- **Halo = a solid 3 pt gold line on the screen's edge + the glow over it**,
+  as in the Flutter build. The line is steady (it fades in and out with the
+  session only); the glow breathes and flares.
+- **The glow's breath is quicker and deeper:** ~5 s cycle (was ~8 s), glow
+  opacity ~0.4 ↔ 1.0 (was 0.65 ↔ 0.85). Reduce Motion: static at ~0.7.
+  SUPERSEDES the "~8 s, 0.65 ↔ 0.85" values in the 2026-11-03 halo entries.
+- **The pray button is interactive Liquid Glass tinted action blue**
+  (SUPERSEDES "solid action blue, never glass"). It still reads as solid
+  blue; while counting down the tint dims and the glass stops responding.
+Why: the line gives the edge a distinct "held" frame the glow only accents;
+the old breath was too slow and quiet to notice; a rigid disc felt dead next
+to the glass controls that give under the finger, and the system's own
+press response is the native feel (iOS's prominent glass buttons work this
+way, a UIKit button would add nothing).

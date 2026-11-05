@@ -339,7 +339,9 @@ gold.
 - **Controls float on their own glass:** the streak badge, the filter, the
   pill and the docked search field each sit on a fully rounded frosted shape
   with a hairline edge, so they hold their shape over any row. The pray button
-  stays solid action blue. The header's glass matches the ~32 pt header
+  is the same interactive glass **tinted action blue** (2026-11-05, was solid
+  blue: a rigid disc felt dead beside the glass that gives under the finger);
+  it still reads as solid blue, never gold. The header's glass matches the ~32 pt header
   avatar. An active filter raises the glass's tint (neutral, never blue).
 - **Glass vs. surface (2026-10-29):** glass is only for **controls that float
   over content** (streak badge, filter, pill, docked search field). Anything
@@ -644,6 +646,10 @@ on Today's list or Your portion.
 ## 7. Prayer mode visuals
 - **Halo is gold** (gold = holding): edge glow in dark mode; a slightly
   stronger gradient in light mode so it doesn't vanish.
+- **Halo = a solid edge line + a glow** (2026-11-05, as in the Flutter build):
+  a steady **3 pt** gold line on the screen's very edge says "holding"; the
+  glow over it only accents it. Only the glow breathes and flares; the line
+  just fades in and out with the session.
 - **Halo behavior** (2026-11-03): it frames the session and is not a second
   signature motion.
   - **Enter/exit:** fades in over ~400 ms when the prayer starts; fades out
@@ -653,8 +659,9 @@ on Today's list or Your portion.
     on through the invitation. The closing phase (closing sheet, Still-to-hold
     fold) is **not** held back: it starts at once and the flare + fade play
     beneath it.
-  - **At rest:** nearly still. At most a very slow breath (~8 s cycle, opacity
-    ~0.65 ↔ 0.85). No moving, rotating or multicolor gradient (that reads as
+  - **At rest:** the line is steady; the glow breathes, slow but discernible
+    (2026-11-05: ~5 s cycle, glow opacity ~0.4 ↔ 1.0; was ~8 s at 0.65 ↔ 0.85,
+    too quiet to see). No moving, rotating or multicolor gradient (that reads as
     Siri).
   - **Amen flare** (committing Amen only): ~500 ms, opacity → ~1.0 (0.99 is
     fine) and glow reach ~1.3× the resting reach. Shape: fast rise (~150 ms,
@@ -666,7 +673,7 @@ on Today's list or Your portion.
     from the screen edge (inset + stroke + blur falloff, not blur radius
     alone), so it doesn't muddy the corners behind the prayer pill and Amen
     button. The flare may exceed this briefly.
-  - **Reduce Motion:** fully static at opacity ~0.75 (no breath, no flare);
+  - **Reduce Motion:** fully static, the glow at opacity ~0.7 (no breath, no flare);
     enter/exit stay as simple fades.
 - Checkbox fades into the trailing slot of every row and the community card.
   **Checked = gold ring on the avatar / gold dot on the intention**, applied

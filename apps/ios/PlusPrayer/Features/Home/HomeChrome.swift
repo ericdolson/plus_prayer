@@ -3,8 +3,8 @@ import SwiftUI
 // Home's header and floating bar (design-direction §4). No header slab and no
 // divider: the list scrolls beneath and dissolves under the platform's soft
 // scroll edge (Tier B on iOS). Controls float on their own glass. The pill and
-// pray button are our layout (Tier A) on native glass; the pray button stays
-// solid action blue.
+// pray button are our layout (Tier A) on native glass; the pray button's glass
+// is tinted action blue.
 //
 //     Normal:     ( History  🔎  ＋ )   ( 🙏 )
 //     In prayer:  ( 3:12 · with 229    🔎 )   ( Amen )
@@ -142,10 +142,12 @@ struct HomeBar: View {
     }
 }
 
-/// The round pray button: solid action blue (never glass, never gold). On
-/// start a ring just outside the disc decays over the minimum (~5 s) while the
-/// disc dims; then it becomes Amen. Before that, taps do nothing (Cancel is
-/// always there). Reduce Motion: the ring steps once a second.
+/// The round pray button: action blue (never gold) on the same interactive
+/// Liquid Glass as the pill, tinted blue, so it gives under the finger like
+/// the other controls. On start a ring just outside the disc decays over the
+/// minimum (~5 s) while the tint dims and the glass stops responding; then it
+/// becomes Amen. Before that, taps do nothing (Cancel is always there).
+/// Reduce Motion: the ring steps once a second.
 struct PrayButton: View {
     var startedAt: Date? = nil
     var diameter: CGFloat = PP.size.prayButton.diameter
@@ -162,12 +164,6 @@ struct PrayButton: View {
                 if startedAt == nil { onPray() } else if !counting { onAmen() }
             } label: {
                 ZStack {
-                    if counting {
-                        Circle().fill(PP.color.raised)
-                        Circle().fill(PP.color.primary.opacity(PP.number.prayButtonDim))
-                    } else {
-                        Circle().fill(PP.color.primary)
-                    }
                     if startedAt != nil && !counting {
                         Text(L10n.Prayer.amen)
                             .font(PP.type.label)
@@ -180,21 +176,26 @@ struct PrayButton: View {
                     }
                 }
                 .frame(width: diameter, height: diameter)
-                .overlay {
-                    if counting {
-                        // Decays clockwise from the top, just outside the disc.
-                        Circle()
-                            .trim(from: 0, to: 1 - progress)
-                            .stroke(PP.color.primary,
-                                    style: StrokeStyle(lineWidth: PP.size.prayButton.ringGap * PP.number.ringStroke,
-                                                       lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                            .padding(-PP.size.prayButton.ringGap)
-                    }
-                }
                 .contentShape(Circle())
             }
-            .buttonStyle(PressDim())
+            .buttonStyle(.plain)
+            .glassEffect(.regular
+                            .tint(counting ? PP.color.primary.opacity(PP.number.prayButtonDim) : PP.color.primary)
+                            .interactive(!counting),
+                         in: .circle)
+            .overlay {
+                if counting {
+                    // Decays clockwise from the top, just outside the disc.
+                    Circle()
+                        .trim(from: 0, to: 1 - progress)
+                        .stroke(PP.color.primary,
+                                style: StrokeStyle(lineWidth: PP.size.prayButton.ringGap * PP.number.ringStroke,
+                                                   lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .padding(-PP.size.prayButton.ringGap)
+                        .allowsHitTesting(false)
+                }
+            }
             .disabled(counting)
             .accessibilityLabel(startedAt == nil ? L10n.Home.pray : L10n.Prayer.amen)
         }
@@ -205,14 +206,5 @@ struct PrayButton: View {
         let elapsed = now.timeIntervalSince(startedAt)
         let steps = reduceMotion ? elapsed.rounded(.down) : elapsed
         return min(1, max(0, steps / PrayerSession.minimum))
-    }
-}
-
-/// A quiet press: a slight dip, no bounce (the check is the only spring).
-private struct PressDim: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .brightness(configuration.isPressed ? -PP.number.pressed : 0)
-            .animation(.easeOut(duration: PP.duration.quick), value: configuration.isPressed)
     }
 }

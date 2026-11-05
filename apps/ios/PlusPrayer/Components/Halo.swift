@@ -1,13 +1,15 @@
 import SwiftUI
 
-/// The prayer-mode halo (design-direction §7): a gold glow framing the screen,
-/// following the display's own corners. It frames the session; it is not a
-/// second signature motion.
-/// - Enter/exit: fades over `duration.haloFade`.
-/// - At rest: nearly still, one slow breath (`number.halo.restLow` ↔ `restHigh`).
+/// The prayer-mode halo (design-direction §7): a solid gold line on the
+/// screen's edge (`size.halo.edge`) with a gold glow over it, both following
+/// the display's own corners. The line holds; the glow accents it. It frames
+/// the session; it is not a second signature motion.
+/// - Enter/exit: both fade over `duration.haloFade`.
+/// - At rest: the line is steady; the glow breathes (`number.halo.restLow` ↔
+///   `restHigh`, `duration.haloBreath` each way).
 /// - A committing Amen (`flare` changes): a quick rise to `flarePeak` and
 ///   `flareReach`× the reach, a slower settle, then the fade-out.
-/// - Reduce Motion: static at `number.halo.reduceMotion`; plain fades.
+/// - Reduce Motion: the glow is static at `number.halo.reduceMotion`; plain fades.
 /// The resting glow stays within `size.halo.maxInwardReach` of the edge.
 struct Halo: View {
     let active: Bool
@@ -17,6 +19,9 @@ struct Halo: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
 
+    /// The whole halo's presence (the line's opacity).
+    @State private var shown: Double = 0
+    /// The glow's opacity.
     @State private var level: Double = 0
     @State private var reach: Double = 1
     @State private var breathing = false
@@ -27,12 +32,17 @@ struct Halo: View {
     }
 
     var body: some View {
-        ConcentricRectangle()
-            // Centered on the screen's edge: the outer half is off-screen, so the
-            // visible band is `width` wide.
-            .stroke(PP.color.halo, lineWidth: width * reach * 2)
-            .blur(radius: width * reach / 2)
-            .opacity(level)
+        // Strokes are centered on the screen's edge: the outer half is
+        // off-screen, so each visible band is half its line width.
+        ZStack {
+            ConcentricRectangle()
+                .stroke(PP.color.halo, lineWidth: width * reach * 2)
+                .blur(radius: width * reach / 2)
+                .opacity(level)
+            ConcentricRectangle()
+                .stroke(PP.color.halo, lineWidth: PP.size.halo.edge * 2)
+        }
+            .opacity(shown)
             .ignoresSafeArea()
             .allowsHitTesting(false)
             .accessibilityHidden(true)
@@ -46,10 +56,10 @@ struct Halo: View {
     private var rest: Double { reduceMotion ? PP.number.halo.reduceMotion : PP.number.halo.restLow }
 
     private func enter() {
-        withAnimation(.easeOut(duration: PP.duration.haloFade)) { level = rest } completion: { breathe() }
+        withAnimation(.easeOut(duration: PP.duration.haloFade)) { shown = 1; level = rest } completion: { breathe() }
     }
 
-    /// Opacity drifts between the rest levels, very slowly, until the session ends.
+    /// The glow drifts between the rest levels until the session ends.
     private func breathe() {
         guard active, !reduceMotion, !flaring else { return }
         breathing = true
@@ -60,7 +70,10 @@ struct Halo: View {
 
     private func exit() {
         breathing = false
-        withAnimation(.easeOut(duration: PP.duration.haloFade)) { level = 0; reach = 1 }
+        withAnimation(.easeOut(duration: PP.duration.haloFade)) {
+            // Setting level also stops the breath's repeating animation.
+            shown = 0; level = 0; reach = 1
+        }
     }
 
     private func amenFlare() {

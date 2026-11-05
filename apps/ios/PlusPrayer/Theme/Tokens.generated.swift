@@ -253,6 +253,8 @@ nonisolated enum PP {
         enum halo {
             /// The halo's stroke at rest.
             static let glowWidth: CGFloat = 6
+            /// The solid gold line on the screen's edge, under the glow. Steady: only the glow breathes.
+            static let edge: CGFloat = 3
             /// At rest the visible glow stays within this distance of the screen edge.
             static let maxInwardReach: CGFloat = 12
         }
@@ -298,12 +300,12 @@ nonisolated enum PP {
         static let initialsTracking: Double = 0.04
         /// Prayer-mode halo (design-direction §7).
         enum halo {
-            /// The breath's low opacity at rest.
-            static let restLow: Double = 0.65
-            /// The breath's high opacity at rest.
-            static let restHigh: Double = 0.85
-            /// Reduce Motion: static at this opacity, no breath, no flare.
-            static let reduceMotion: Double = 0.75
+            /// The glow's breath, low opacity at rest (the edge line holds steady).
+            static let restLow: Double = 0.4
+            /// The glow's breath, high opacity at rest.
+            static let restHigh: Double = 1
+            /// Reduce Motion: the glow is static at this opacity (mid-breath), no breath, no flare.
+            static let reduceMotion: Double = 0.7
             /// The committing Amen's flare peak opacity (0.99 is fine).
             static let flarePeak: Double = 1
             /// The flare's reach, × the resting reach.
@@ -373,8 +375,8 @@ nonisolated enum PP {
         static let searchPause: TimeInterval = 0.6
         /// The halo fades in/out.
         static let haloFade: TimeInterval = 0.4
-        /// Half of the halo's breath (a full in-and-out cycle is 8 s).
-        static let haloBreath: TimeInterval = 4
+        /// Half of the halo glow's breath (a full in-and-out cycle is 5 s).
+        static let haloBreath: TimeInterval = 2.5
         /// The committing Amen's flare, before the fade-out.
         static let haloFlare: TimeInterval = 0.5
         /// The flare's fast rise (ease-out); the rest settles (ease-in-out).
