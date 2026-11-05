@@ -61,7 +61,7 @@ Stage 1 is a private beta that tests whether the app is the right mechanism.
 - [ ] Publish step sets videoPublishedAt, post links, sealVariant; uploads video
 
 ### App foundations [app]
-- [ ] Fresh native iOS project in SwiftUI (Flutter build = reference only); architecture conventions in its `CLAUDE.md`
+- [ ] Fresh native iOS project in SwiftUI at `apps/ios/` (Flutter build in `app/` = reference only, tagged `flutter-reference`); architecture conventions in `apps/ios/CLAUDE.md`
 - [ ] Generated SQL Connect Swift SDK wired up
 - [ ] Offline-first prayer write queue
 - [ ] ~500-name soft safety cap (abuse only, not a paywall)

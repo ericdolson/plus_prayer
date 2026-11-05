@@ -1,6 +1,6 @@
 # +Prayer — Product Spec Index
 
-**Read this before any feature work in `app/` or `backend/`.**
+**Read this before any feature work in `apps/ios/`, `apps/android/` or `backend/`.**
 
 This folder is the CURRENT-STATE spec: what is true about the product right now,
 one file per feature. Each file applies to the app AND the backend, since nearly
@@ -13,7 +13,8 @@ every feature crosses that boundary.
 | Decision log | `docs/decisions.md` | Append-only WHY, timestamped, with supersedes |
 | Data shape | `backend/dataconnect/schema/schema.gql` | Source of truth for tables/fields |
 | Operation map | `backend/dataconnect/connector/OPERATIONS.md` | Screen → operation, @auth |
-| Build conventions | `app/CLAUDE.md`, `backend/CLAUDE.md` | How to build on each side (not product rules) |
+| Build conventions | `apps/ios/CLAUDE.md`, `apps/android/CLAUDE.md`, `backend/CLAUDE.md` | How to build on each side (not product rules) |
+| Visual reference | `docs/product/reference/` | Screenshots of approved screens. Reference only — the spec wins when they differ |
 | Raw inputs | `seeds/` | Chat exports. Input only, never the source of truth |
 
 ## How to maintain

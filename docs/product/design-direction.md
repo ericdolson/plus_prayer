@@ -45,6 +45,9 @@ spec decision first.
 
 Where it's unclear which tier something is in, ask; don't guess.
 
+**Visual reference:** screenshots of approved screens live in
+`docs/product/reference/`. They show intent; **the spec wins when they differ**.
+
 ---
 
 ## 1. Color system — every color has one job

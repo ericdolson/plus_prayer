@@ -90,7 +90,12 @@ plusprayer/
     CLAUDE.md
     dataconnect/       ← SQL Connect schema + connectors/operations
     functions/         ← Cloud Functions (assembly job, RTDB mirrors, notifications)
-  app/                 ← Flutter app (holds its own Firebase client config)
+  apps/
+    ios/               ← native iOS app, SwiftUI (built first; own Firebase client config)
+      CLAUDE.md
+    android/           ← native Android app, Kotlin + Compose (before public launch)
+      CLAUDE.md
+  app/                 ← Flutter build — REFERENCE ONLY (tag `flutter-reference`); retire later
     CLAUDE.md
   publishing/          ← Zernio publishing pipeline (captions, scripts — text only)
     CLAUDE.md

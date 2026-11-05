@@ -1216,3 +1216,13 @@ wins (e.g. the filter menu's gold check at 0 is monochrome in a system menu).
 See design-direction.md §0.
 Why: the custom parts carry +Prayer's identity; the chrome should feel like
 the phone.
+
+### Decision: Native folder layout + screenshot reference
+**Timestamp:** 2026-11-05
+Native projects live at `apps/ios/` (SwiftUI, first) and `apps/android/`
+(Kotlin + Compose), each with its own `CLAUDE.md` and Firebase client config.
+`app/` stays as the Flutter reference (tagged `flutter-reference`) until it is
+retired. Screenshots of approved screens go in `docs/product/reference/` as
+reference only; the spec wins when they differ.
+Why: separate native roots keep path-scoped CI simple and leave the Flutter
+build intact to look back at.
