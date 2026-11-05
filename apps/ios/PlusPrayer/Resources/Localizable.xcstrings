@@ -13,6 +13,246 @@
       },
       "shouldTranslate": false
     },
+    "card.closesSoon": {
+      "comment": "Card: replaces the status line near the cutoff, only if you haven't prayed with the list today.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List %1$lld closes in %2$lld min · pray to carry them"
+          }
+        }
+      }
+    },
+    "card.closesSoonYou": {
+      "comment": "Same, when only you are carried.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List %1$lld closes in %2$lld min · pray to be on List %3$lld"
+          }
+        }
+      }
+    },
+    "card.list.beingFilmed": {
+      "comment": "VoiceOver: the card's seal before the list is published (unsealed).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List %lld, being filmed"
+          }
+        }
+      }
+    },
+    "card.list.sealed": {
+      "comment": "VoiceOver: the card's seal once the list is published.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List %lld, sealed"
+          }
+        }
+      }
+    },
+    "card.list.title": {
+      "comment": "The community card's title, e.g. “List 52”. Always a no-break space before the number.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "List %lld"
+          }
+        }
+      }
+    },
+    "card.overflow": {
+      "comment": "The avatar row's overflow disc, e.g. “+4”.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld"
+          }
+        }
+      }
+    },
+    "card.people": {
+      "comment": "Card counts row: people on the list. The number is styled separately (ink), the word muted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld person"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld people"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "card.prayers": {
+      "comment": "Card counts row: prayers for the list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld prayer"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld prayers"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "card.presence.lastHour": {
+      "comment": "Card presence line, short form (no dot).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld prayed this hour"
+          }
+        }
+      }
+    },
+    "card.presence.lastHour.spoken": {
+      "comment": "VoiceOver: the long form of “prayed this hour”.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld prayed in the last hour"
+          }
+        }
+      }
+    },
+    "card.presence.now": {
+      "comment": "Card presence line (with the live dot). Shown only at 10 or more.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld praying now"
+          }
+        }
+      }
+    },
+    "card.presence.today": {
+      "comment": "Card presence line (no dot).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld prayed today"
+          }
+        }
+      }
+    },
+    "card.status.covered": {
+      "comment": "Card status: your carried people are already going onto the next list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They'll be on List %lld"
+          }
+        }
+      }
+    },
+    "card.status.coveredYou": {
+      "comment": "Card status when only you are carried.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You'll be on List %lld"
+          }
+        }
+      }
+    },
+    "card.status.nextPrayer": {
+      "comment": "Card status: prayed with the list today, but it has flipped since.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your next prayer carries them onto List %lld"
+          }
+        }
+      }
+    },
+    "card.status.nextPrayerYou": {
+      "comment": "Same, when only you are carried.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your next prayer puts you on List %lld"
+          }
+        }
+      }
+    },
+    "card.status.prayToBe": {
+      "comment": "Card status when only you are carried.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pray to be on List %lld"
+          }
+        }
+      }
+    },
+    "card.status.prayToCarry": {
+      "comment": "Card status: the one actionable thing.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pray to carry them onto List %lld"
+          }
+        }
+      }
+    },
     "home.bar.add": {
       "comment": "Accessibility label: the + in Home's floating bar (opens the add sheet).",
       "extractionState": "manual",

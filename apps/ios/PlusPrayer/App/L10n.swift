@@ -1,4 +1,5 @@
 import Foundation
+import PlusPrayerDomain
 
 /// Every user-facing string, by key, from `Resources/Localizable.xcstrings`
 /// (apps/ios/CLAUDE.md, "Copy and localization"). Views never hold literals.
@@ -15,6 +16,43 @@ nonisolated enum L10n {
         /// "6 days with the world"; 0 → "Days with the world".
         static func streak(_ days: Int) -> String {
             String.localizedStringWithFormat(NSLocalizedString("home.header.streak", comment: ""), days)
+        }
+    }
+
+    enum Card {
+        private static func f(_ key: String, _ args: CVarArg...) -> String {
+            String(format: NSLocalizedString(key, comment: ""), locale: .current, arguments: args)
+        }
+        private static func plural(_ key: String, _ n: Int) -> String {
+            String.localizedStringWithFormat(NSLocalizedString(key, comment: ""), n)
+        }
+
+        static func title(_ list: Int) -> String { f("card.list.title", list) }
+        static func sealed(_ list: Int) -> String { f("card.list.sealed", list) }
+        static func beingFilmed(_ list: Int) -> String { f("card.list.beingFilmed", list) }
+        static func people(_ n: Int) -> String { plural("card.people", n) }
+        static func prayers(_ n: Int) -> String { plural("card.prayers", n) }
+        static func prayingNow(_ n: Int) -> String { f("card.presence.now", n) }
+        static func prayedLastHour(_ n: Int) -> String { f("card.presence.lastHour", n) }
+        static func prayedLastHourSpoken(_ n: Int) -> String { f("card.presence.lastHour.spoken", n) }
+        static func prayedToday(_ n: Int) -> String { f("card.presence.today", n) }
+        static func overflow(_ n: Int) -> String { f("card.overflow", n) }
+
+        /// The status line under your carried people. `next` = the list they go onto.
+        static func status(_ status: TomorrowStatus, next: Int, aboutYouOnly: Bool) -> String {
+            switch (status, aboutYouOnly) {
+            case (.covered, false): f("card.status.covered", next)
+            case (.covered, true): f("card.status.coveredYou", next)
+            case (.nextPrayerCarries, false): f("card.status.nextPrayer", next)
+            case (.nextPrayerCarries, true): f("card.status.nextPrayerYou", next)
+            case (.prayToCarry, false): f("card.status.prayToCarry", next)
+            case (.prayToCarry, true): f("card.status.prayToBe", next)
+            }
+        }
+
+        /// Replaces the status line near the cutoff.
+        static func closesSoon(list: Int, minutes: Int, next: Int, aboutYouOnly: Bool) -> String {
+            aboutYouOnly ? f("card.closesSoonYou", list, minutes, next) : f("card.closesSoon", list, minutes)
         }
     }
 

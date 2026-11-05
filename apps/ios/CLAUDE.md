@@ -309,6 +309,9 @@ compose queries; if an operation is missing, ask for a backend change.
 - `StreakBadge`; Home shell: `HomeHeader`, `HomeFilterControl` (native menu,
   chip when active), `HomeBar` + `PrayButton`, placed with `safeAreaBar` so
   the native soft scroll edge applies.
+- `CommunityCard`: cropped seal, world block (beside the seal, or below it
+  when it can't fit), measured avatar row with "+N", status line from the
+  gate; held ring as its border. Rules in PlusPrayerDomain (`Card.swift`).
 - `HomeView` is the root (sample rows until the mock data source exists);
   `ComponentGallery` stays for previews.
 - Strings: `App/L10n.swift` over `Resources/Localizable.xcstrings` (explicit

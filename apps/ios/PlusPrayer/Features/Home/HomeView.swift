@@ -1,8 +1,9 @@
+import PlusPrayerDomain
 import SwiftUI
 
-/// Home (screens.md, design-direction §3–§6). The shell for now: header,
-/// floating bar and scroll edges over sample rows. The community card,
-/// prayer mode, search and real data come in later slices.
+/// Home (screens.md, design-direction §3–§6): header, community card, rows,
+/// floating bar, on sample values for now. Prayer mode, search and real data
+/// come in later slices.
 struct HomeView: View {
     @State private var filter: HomeFilter = .all
     @State private var dadHeld = true
@@ -10,9 +11,14 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
+                CommunityCard(listNumber: 52, sealVariant: 3, people: 4345, prayers: 3881,
+                              presence: PresenceLine(window: .now, count: 239),
+                              carried: Self.sampleCarried, status: .prayToCarry)
+                    .padding(.horizontal, PP.space.gutter)
+                    .padding(.bottom, PP.space.cardToList)
                 SampleRows(dadHeld: $dadHeld)
             }
-            .padding(.top, PP.space.sm)
+            .padding(.top, PP.space.xl)
             .padding(.bottom, PP.space.xl)
         }
         .scrollEdgeEffectStyle(.soft, for: .all)
@@ -25,6 +31,15 @@ struct HomeView: View {
         }
         .background(PP.color.ground)
     }
+
+    private static let sampleCarried: [CommunityCard.Person] = [
+        .init(id: "me", initials: "EO", tone: 7, spokenName: "You", isSelf: true),
+        .init(id: "d", initials: "D", tone: 0, spokenName: "Dad", isSelf: false),
+        .init(id: "m", initials: "M", tone: 8, spokenName: "Mom", isSelf: false),
+        .init(id: "dk", initials: "DK", tone: 10, spokenName: "Daniel Kim", isSelf: false),
+        .init(id: "op", initials: "OP", tone: 13, spokenName: "Olivia Park", isSelf: false),
+        .init(id: "u", initials: "U", tone: 14, spokenName: "Uncle Ray", isSelf: false),
+    ]
 }
 
 /// Placeholder content until the mock data source exists (slice 4).
