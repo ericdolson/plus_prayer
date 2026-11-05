@@ -113,7 +113,9 @@ Theme/        tokens + semantic access; no logic
   the root and the only screen with the floating bar; everything else pushes
   (`.subject(id)`, `.history`, `.todaysList`, …).
 - **You** (settings) is a native sheet over Home, opened from the header
-  avatar. Add sheet, invitation and note are sheets too.
+  avatar. The add sheet, the Amen invitation, the closing sheet and the note
+  are native sheets with detents; Tier A components (ring button, cluster,
+  seal) sit inside them.
 - **Prayer mode is not a route**: it's Home in a different state
   (`prayer-flow.md`).
 - Onboarding is derived from data (no self name → onboarding), never a stored
@@ -155,6 +157,20 @@ compose queries; if an operation is missing, ask for a backend change.
 - Callables that need the server's answer (addSubject returns the id and the
   carry decision) are online-only for now.
 
+## Offline reads and the device cache
+- The SQL Connect SDK caches every query result on disk (`clientCache`:
+  persistent, `maxAge: 0`, set in `connector.yaml`). Online, queries go to the
+  server and refresh the cache; offline, repositories fall back to
+  `execute(fetchPolicy: .cacheOnly)`. That's how Home opens with no signal.
+- The SDK scopes its cache file by Firebase uid, under
+  `Documents/com.google.firebase.dataconnect/`. **Clear it on sign-out and on
+  account deletion** (privacy.md): one `DeviceDataWiper` deletes that folder,
+  the queue file, the RTDB local cache and any app caches. It runs before
+  `Auth.signOut()` and after `deleteAccount` succeeds. The SDK (11.12) has no
+  public clear-cache API, so this relies on its folder name; a test asserts
+  the folder exists after a cached query, so an SDK change fails loudly.
+- OPEN (`PHASE-0.md` A3): whether that folder and the queue file are
+  excluded from iCloud backup.
 ## Mock backend and environments
 - `AppEnvironment` picks one at launch from the scheme's launch argument
   `-PPEnvironment mock|emulator|firebase`. Debug defaults to **mock**.
@@ -176,9 +192,10 @@ compose queries; if an operation is missing, ask for a backend change.
   literals, no `.font(.system(size:))`, no numeric padding or sizes** in
   Features/ or Components/. A missing value means a missing token: add it to
   `tokens.json` (and the spec) first.
-- Colors are dynamic (light and dark in one `Color`). Dark is the default
-  theme; the System/Light/Dark preference is device-local (`@AppStorage`),
-  applied with `.preferredColorScheme`.
+- Colors are dynamic (light and dark in one `Color`). Both themes are fully
+  designed; the app **follows the system** by default. The System/Light/Dark
+  setting in You is device-local (`@AppStorage`), applied with
+  `.preferredColorScheme` (nil for System).
 - Type: Roca only for names on Home, list numbers and big lines; everything
   else the system font. Roca roles use `Font.custom(_:size:relativeTo:)` so
   they scale with Dynamic Type; system roles use the matching text style.

@@ -1275,3 +1275,27 @@ didn't compile. No shipped client used these operations.
 **Timestamp:** 2026-11-05
 Eric confirmed the Roca license covers embedding in the iOS and Android apps.
 The license file is still to be added to the repo.
+
+### Decision: iOS Phase 0 answers (cache, sheets, filter counts, icon, launch, theme)
+**Timestamp:** 2026-11-05
+- **Client cache:** the Swift SDK caches query results persistently
+  (`clientCache`, `maxAge: 0`, Swift target only), so Home loads offline and
+  is still fresh whenever online. The app clears the cache on sign-out and on
+  account deletion (privacy.md, auth-onboarding.md).
+- **Sheets:** the Amen invitation, the closing sheet and the add sheet are
+  native sheets with detents; the signature components inside them stay
+  Tier A (design-direction §0).
+- **Filter menu counts** (SUPERSEDES trailing counts and the gold check at 0):
+  the count goes in the item's title ("Still to hold · 3"). At 0 there is no
+  count and no check, since a system menu's check means "the active filter";
+  the item shows the subtitle "Everyone's held today." (design-direction §4).
+- **App icon:** an interim icon built from `+prayer_icon.svg`; the layered
+  Icon Composer icon is a later design task (open-questions D4).
+- **Launch screen:** the wordmark centered on `ground`, in light and dark
+  (auth-onboarding.md).
+- **Theme** (SUPERSEDES "Dark theme is the primary design", app-brief §0, and
+  the Flutter build's dark default): both themes are fully designed; the app
+  follows the system, with a device-local System/Light/Dark setting in You
+  (screens.md).
+- **Reference screenshots** are renamed `<screen>-<state>-<theme>.png` and
+  indexed in `docs/product/reference/README.md`.

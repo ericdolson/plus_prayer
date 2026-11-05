@@ -21,7 +21,9 @@ and the 2026-10 Flutter build) is **reference only**, not a pattern to follow.
 ## 0. Non-negotiables
 - **Brand voice** (root `CLAUDE.md`): observational, spare, human. No hype, no
   urgency, no confetti. At most one restrained emotional line per moment.
-- **Darker over lighter; antique over bright.** Dark theme is the primary design.
+- **Darker over lighter; antique over bright.** Light and dark themes are both
+  fully designed, and the app follows the system appearance by default, with a
+  System/Light/Dark setting in You (2026-11-05).
 - **Privacy:** names are never public. Counts only for anything shared. Aliases
   are owner-only. Intention text never appears in notifications.
 - **No ledger of absences:** never show empty days, ratios ("14 of 16"), zeros

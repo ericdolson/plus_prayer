@@ -17,6 +17,8 @@ _Last updated: 2026-10-17_
 
 ## DECIDED — first run (2026-10-17)
 - **Anonymous-first.** No sign-in wall. Anonymous auth is created silently.
+- **Launch screen** (2026-11-05): the wordmark centered on `ground`, in light
+  and dark. It's the platform's static launch screen, not step 1 below.
 - **Flow:**
   1. Splash: "Your name, carried by the world."
   2. One plain screen: "Pray for today's list. Tomorrow, you're on it."
@@ -35,6 +37,8 @@ _Last updated: 2026-10-17_
 - **Account deletion:** immediate after one confirmation; deletes User,
   subjects, prayers. Past list entries are stripped of name/owner but list
   counts remain. Tell users to cancel subscriptions in their store account.
+  The device's cached data is cleared too (privacy.md).
+- **Sign-out clears the device's cached data** (2026-11-05; privacy.md).
 - **Names are never shown in recordings.** Privacy always holds; the filmed list
   is never legible.
 

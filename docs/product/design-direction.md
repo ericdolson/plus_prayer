@@ -44,6 +44,10 @@ detail (e.g. system menus are monochrome), the platform wins; don't build a
 custom component just to keep a flourish. A custom Tier B replacement needs a
 spec decision first.
 
+**Sheets (2026-11-05):** the Amen invitation, the closing sheet and the add
+sheet are **native sheets with detents** (Tier B). The signature components
+inside them (the ring button, the avatar cluster, the seal) stay Tier A.
+
 Where it's unclear which tier something is in, ask; don't guess.
 
 **Visual reference:** screenshots of approved screens live in
@@ -214,13 +218,13 @@ gold.
     number (today's vs tomorrow's list would be ambiguous and the number shifts
     at the flip). **No icons** in the menu (a hollow ring reads as an unchecked
     box).
-  - **Counts in the menu only**, right-aligned and muted, on all three (All 12 ·
-    Still to hold 3 · Carried 6). When Still to hold reaches 0, show a small
-    **gold check** instead of "0". Never on the main screen.
-    _Native menu (Tier B, §0, 2026-11-05):_ counts appear as the platform
-    allows (trailing if supported, otherwise in the item text, e.g. "Still to
-    hold · 3"). The check at 0 uses the platform's glyph and color; system
-    menus are monochrome, and that's fine.
+  - **Counts in the menu only**, on all three, **in the item's title**
+    (2026-11-05, native menu, Tier B §0): "All · 12", "Still to hold · 3",
+    "Carried · 6". Never on the main screen.
+  - **Still to hold at 0** (2026-11-05): no count and no check (in a system
+    menu the check means "the active filter"). Instead the item carries the
+    subtitle **"Everyone's held today."**
+    _Was: trailing muted counts, and a small gold check in place of "0"._
   - **Empty state** for Still to hold: "Everyone's been held today."
   - **Linger then fold:** under Still to hold, rows held in a prayer show their
     gold ring for ~1–1.5 s after Amen, then gently fold away (Reduce Motion:

@@ -91,8 +91,8 @@ vector data and render as templates where tinted.
 | Bloom (carried mark) | `img/+prayer_icon.svg` | `Assets.xcassets/Marks/CarriedMark` (template, vector) | Tinted `carriedMark`. Replaced by the "+"-free bloom when D1 lands |
 | Stamp | `img/wax_stamps/wax-neutral.png` (512 px) | `Assets.xcassets/Seals/Stamp` | The only stamp Flutter uses: one gray relief, tinted per wax at runtime (face → base, highlights → sheen), and pewter for the streak badge. 512 px covers the 110 pt card stamp at 3×. Replaced by D2 vectors (small sizes) and D3 photos (≥ 40 pt) |
 | Wordmark | `img/+_prayer.svg` | `Assets.xcassets/Brand/Wordmark` (vector) | Foot of You; the launch screen |
-| Launch screen | ground colors + wordmark | `INFOPLIST_KEY_UILaunchScreen` (no storyboard) | Q11 |
-| App icon | `launch_icon.png` (1000 px, flat) | interim `AppIcon` | iOS 26 icons are layered (Icon Composer `.icon`); 1000 px is short of 1024. Q10 |
+| Launch screen | wordmark + `ground` (light and dark) | `INFOPLIST_KEY_UILaunchScreen` (no storyboard) | Q11 |
+| App icon | `img/+prayer_icon.svg` | interim `AppIcon` (1024 px) | Q10. Colors and variants: A6. Layered Icon Composer icon later (D4) |
 | Phosphor Light | `fonts/Phosphor-Light.ttf` | **not brought** | SF Symbols instead (Q1) |
 | Google "G" | `img/google_logo.png` | later, with sign-in (build step 3) | Use Google's current branding asset, not this PNG, if it's outdated |
 | Firebase config | `app/ios/Runner/GoogleService-Info.plist` | app target | Same bundle ID, same Firebase iOS app. Eric adds it |
@@ -122,41 +122,61 @@ are), `splash_image.png` (a 1424 px raster of the wordmark; the SVG replaces it)
   edges are native on iOS; the docked search row is a sanctioned exception.
 - **Q9:** Roca is licensed for app embedding. The license file is still to be
   added.
+- **Q3 Cache:** persistent, `maxAge: 0`, Swift only (committed). Cleared on
+  sign-out and account deletion.
+- **Q7 Sheets:** the invitation, closing and add sheets are native sheets with
+  detents.
+- **Q8 Filter counts:** in the title ("Still to hold · 3"); at 0, no count, no
+  check, subtitle "Everyone's held today."
+- **Q10 Icon:** interim from `+prayer_icon.svg`; layered icon later (D4).
+- **Q11 Launch:** the wordmark centered on `ground`, light and dark.
+- **Q12 Theme:** follows the system; the System/Light/Dark setting stays.
+- **Q14 Screenshots:** renamed and indexed in `docs/product/reference/README.md`.
 
-## 4. Open questions
+## 4. Ambiguities from the 2026-11-05 answers (not resolved)
 
-**Q3. Persistent client cache for the Swift SDK?** `connector.yaml` can turn
-on `clientCache` (`storage: persistent`) for the Swift target only. This is a
-codegen change with no deploy. The spec says only the very first launch needs
-a connection, so Home must load offline.
-_Recommend:_ yes, `maxAge: 0` with persistent storage. It serves the last
-result offline and always fetches fresh results online. Our queue still owns
-writes.
+**A1. Sign-out doesn't exist in the spec.** Q3 clears the cache "on
+sign-out", but You only lists "sign-in/link" (anonymous-first, linking keeps
+the same uid). Is there a Sign out row once an account is linked? If so,
+where does it sit, and what does the app show afterwards (a fresh anonymous
+user going through onboarding, or a sign-in screen)?
 
-**Q7. Are the Amen invitation, closing sheet and add sheet native sheets?**
-_Recommend:_ yes, native sheets with detents. Tier A components (ring button,
-cluster, seal) go inside them. `sheet` and `scrim` are kept in tokens only in
-case an overlay ends up custom.
+**A2. Clearing the cache relies on an SDK internal.** Data Connect iOS 11.12
+has no public clear-cache API. It keeps one SQLite file per uid in
+`Documents/com.google.firebase.dataconnect/` and never deletes old ones. The
+plan (`CLAUDE.md`, "Offline reads") deletes that folder before sign-out and
+after deletion, with a test that fails if the SDK moves it. Is that
+acceptable until Firebase adds an API? Should "cached data" also cover the
+RTDB local cache and the offline queue? The plan assumes yes.
 
-**Q8. The filter menu's counts.** A native `Menu` item can show a subtitle
-line, or the count can sit in the title ("Still to hold · 3"). Both fit "as
-the platform allows". Which one? _Recommend:_ in the title, since it's one
-line and reads like the spec.
+**A3. iCloud backup.** That cache lives in `Documents/`, which iOS backs up
+to iCloud by default, so names and intentions would land in the user's
+backups. Exclude it (and the queue file) from backup? Doing so means a
+restored phone re-downloads everything on first launch.
 
-**Q10. App icon.** iOS 26 icons are layered (Icon Composer `.icon`, with
-light, dark and tinted variants). Can you supply the layers (bloom, "+",
-ground), or should I build the interim icon from `launch_icon.png`? It's
-1000 px; iOS wants 1024.
+**A4. Two near-identical lines.** The filter menu's subtitle at 0 is
+"Everyone's held today." The Still to hold empty state (§4) is "Everyone's
+been held today." Keep both as written, or use one wording?
 
-**Q11. Launch screen.** _Recommend:_ the wordmark centered on `ground` (light
-and dark), matching `splash.PNG`. "Your name, carried by the world." stays
-the first onboarding screen, not the launch screen.
+**A5. Counts on All and Carried.** Q8 gave the format for Still to hold. I
+applied the same title format to the others ("All · 12", "Carried · 6").
+Confirm, and confirm that a 0 under Carried just shows "Carried · 0" (the
+"no count at 0" rule was stated for Still to hold only).
 
-**Q12. Default theme.** Flutter defaults to Dark and offers a
-System/Light/Dark setting. Native apps usually follow System. Keep Dark as
-the default (app-brief: "Dark theme is the primary design")?
+**A6. Interim icon details.** `+prayer_icon.svg` is the bloom alone. For the
+interim icon:
+- What color is the bloom, and on what background? The launch screenshot
+  uses the action blue on dark ground, but blue means "do this" in the app.
+- Should it include iOS 26's dark and tinted variants, or a single image?
 
-**Q13. Creating the project: through the Xcode MCP.** Xcode ships an MCP
+**A7. Appearance setting placement and storage.** I added it to the You list
+after "grace offers toggle", and marked it device-local, the one setting not
+synced on the User record (as in the Flutter build). Confirm the position and
+that it stays device-local.
+
+## 5. Next: Q13
+
+**Creating the project through the Xcode MCP.** Xcode ships an MCP
 server (`xcrun mcpbridge`) that can create projects, targets and
 synchronized folders, set build settings and entitlements, build, run tests
 and render previews. Xcode writes the project itself, so the
@@ -181,12 +201,6 @@ and render previews. Xcode writes the project itself, so the
 4. **Agent:** build through the MCP and confirm a blank app runs on the
    iOS 26.5 simulator. Then build order step 1 (tokens, components, mock)
    starts.
-
-**Q14. Reference screenshots.** The 8 PNGs in `docs/product/reference/` are
-untracked, and their names don't follow the README's
-`<screen>-<state>-<theme>.png` (e.g. `home_filter_menu.PNG`). I didn't commit
-them, since they aren't mine. Should I rename and commit them (e.g.
-`home-filter-menu-dark.png`)?
 
 **Notes (no answer needed):**
 - **Halo corners:** iOS has no public API for the screen's corner radius

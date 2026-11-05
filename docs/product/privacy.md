@@ -29,3 +29,6 @@ _Last updated: 2026-10-18. Not legal advice — final text via a policy generato
   emergencies; child-safety content reported as required (see safety.md).
 - **Deletion:** immediate; past list entries lose name/owner; counts remain;
   subscriptions cancelled via the store.
+- **On-device cache** (2026-11-05): the iOS app keeps the user's last query
+  results on the device (names, intentions, history) so it works offline. It
+  is cleared on sign-out and on account deletion.

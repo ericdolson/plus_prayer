@@ -35,7 +35,8 @@ _Last updated: 2026-10-18_
 - **One detail page for names and intentions** — the intention version hides
   what doesn't apply (no nested intentions, no avatar edit) and adds its parent
   name + Answered/Release.
-- **Add sheet (one bottom sheet, two entry points):**
+- **Add sheet (one bottom sheet, two entry points):** a native sheet with
+  detents (design-direction §0).
   - From footer ＋: defaults to **Add name**; can switch to intention, which
     reveals a name picker (default "Me").
   - From a name's detail page (or row): opens as **Add intention for {alias}**,
@@ -47,6 +48,8 @@ _Last updated: 2026-10-18_
   You (settings) · Archived · Membership/paywall · Onboarding.
 - **You (settings) contents:** name (edit limit), sign-in/link, membership
   (trial, upgrade, restore), reminders, notifications (incl. "Show names in
-  notifications"), notifications, grace offers toggle,
+  notifications"), notifications, grace offers toggle, appearance
+  (System/Light/Dark, default System; device-local, 2026-11-05),
   Archived, privacy & terms, delete account, about the ritual. Settings are
-  stored on the User record (sync across devices). Location consent: later.
+  stored on the User record (sync across devices), except appearance.
+  Location consent: later.
