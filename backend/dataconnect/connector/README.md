@@ -17,5 +17,12 @@ Server-only operations (assembly, prayer reactions, merge, moderation,
 publish, entitlements) live in `../admin/` (`NO_ACCESS`) and are called by
 the Cloud Functions in `backend/functions`.
 
+Swift codegen gotchas (firebase-tools 15.x doesn't guard against these, and
+the Swift package then fails to compile):
+- Never alias a field to a Swift keyword (`self`, `default`, `protocol`, …).
+- A nested selection of the same type as its parent (a subject's `parent`)
+  generates a struct inside a struct of the same name. Select the foreign key
+  scalar (`parentId`) or alias the selection (`parentSubject: parent { … }`).
+
 Auth posture: anonymous users get the full surface — use `USER_ANON`, never
 `USER` (SQL Connect's `USER` excludes anonymous accounts).

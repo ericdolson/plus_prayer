@@ -79,7 +79,7 @@ class GetMyPortionUser {
 class GetMyPortionItems {
   final String id;
   final EnumValue<SubjectKind> kind;
-  final GetMyPortionItemsParent? parent;
+  final String? parentId;
   final String publicName;
   final String? personalLabel;
   final bool isSelf;
@@ -90,7 +90,7 @@ class GetMyPortionItems {
   
   id = nativeFromJson<String>(json['id']),
   kind = subjectKindDeserializer(json['kind']),
-  parent = json['parent'] == null ? null : GetMyPortionItemsParent.fromJson(json['parent']),
+  parentId = json['parentId'] == null ? null : nativeFromJson<String>(json['parentId']),
   publicName = nativeFromJson<String>(json['publicName']),
   personalLabel = json['personalLabel'] == null ? null : nativeFromJson<String>(json['personalLabel']),
   isSelf = nativeFromJson<bool>(json['isSelf']),
@@ -109,7 +109,7 @@ class GetMyPortionItems {
     final GetMyPortionItems otherTyped = other as GetMyPortionItems;
     return id == otherTyped.id && 
     kind == otherTyped.kind && 
-    parent == otherTyped.parent && 
+    parentId == otherTyped.parentId && 
     publicName == otherTyped.publicName && 
     personalLabel == otherTyped.personalLabel && 
     isSelf == otherTyped.isSelf && 
@@ -119,7 +119,7 @@ class GetMyPortionItems {
     
   }
   @override
-  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, parent.hashCode, publicName.hashCode, personalLabel.hashCode, isSelf.hashCode, isCarried.hashCode, sortOrder.hashCode, avatarTone.hashCode]);
+  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, parentId.hashCode, publicName.hashCode, personalLabel.hashCode, isSelf.hashCode, isCarried.hashCode, sortOrder.hashCode, avatarTone.hashCode]);
   
 
   Map<String, dynamic> toJson() {
@@ -128,8 +128,8 @@ class GetMyPortionItems {
     json['kind'] = 
     subjectKindSerializer(kind)
     ;
-    if (parent != null) {
-      json['parent'] = parent!.toJson();
+    if (parentId != null) {
+      json['parentId'] = nativeToJson<String?>(parentId);
     }
     json['publicName'] = nativeToJson<String>(publicName);
     if (personalLabel != null) {
@@ -147,47 +147,13 @@ class GetMyPortionItems {
   GetMyPortionItems({
     required this.id,
     required this.kind,
-    this.parent,
+    this.parentId,
     required this.publicName,
     this.personalLabel,
     required this.isSelf,
     required this.isCarried,
     required this.sortOrder,
     this.avatarTone,
-  });
-}
-
-@immutable
-class GetMyPortionItemsParent {
-  final String id;
-  GetMyPortionItemsParent.fromJson(dynamic json):
-  
-  id = nativeFromJson<String>(json['id']);
-  @override
-  bool operator ==(Object other) {
-    if(identical(this, other)) {
-      return true;
-    }
-    if(other.runtimeType != runtimeType) {
-      return false;
-    }
-
-    final GetMyPortionItemsParent otherTyped = other as GetMyPortionItemsParent;
-    return id == otherTyped.id;
-    
-  }
-  @override
-  int get hashCode => id.hashCode;
-  
-
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {};
-    json['id'] = nativeToJson<String>(id);
-    return json;
-  }
-
-  GetMyPortionItemsParent({
-    required this.id,
   });
 }
 

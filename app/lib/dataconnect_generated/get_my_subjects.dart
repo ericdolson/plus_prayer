@@ -20,7 +20,7 @@ class GetMySubjectsVariablesBuilder {
 class GetMySubjectsPrayerSubjects {
   final String id;
   final EnumValue<SubjectKind> kind;
-  final GetMySubjectsPrayerSubjectsParent? parent;
+  final String? parentId;
   final String publicName;
   final String? personalLabel;
   final String? note;
@@ -37,7 +37,7 @@ class GetMySubjectsPrayerSubjects {
   
   id = nativeFromJson<String>(json['id']),
   kind = subjectKindDeserializer(json['kind']),
-  parent = json['parent'] == null ? null : GetMySubjectsPrayerSubjectsParent.fromJson(json['parent']),
+  parentId = json['parentId'] == null ? null : nativeFromJson<String>(json['parentId']),
   publicName = nativeFromJson<String>(json['publicName']),
   personalLabel = json['personalLabel'] == null ? null : nativeFromJson<String>(json['personalLabel']),
   note = json['note'] == null ? null : nativeFromJson<String>(json['note']),
@@ -64,7 +64,7 @@ class GetMySubjectsPrayerSubjects {
     final GetMySubjectsPrayerSubjects otherTyped = other as GetMySubjectsPrayerSubjects;
     return id == otherTyped.id && 
     kind == otherTyped.kind && 
-    parent == otherTyped.parent && 
+    parentId == otherTyped.parentId && 
     publicName == otherTyped.publicName && 
     personalLabel == otherTyped.personalLabel && 
     note == otherTyped.note && 
@@ -80,7 +80,7 @@ class GetMySubjectsPrayerSubjects {
     
   }
   @override
-  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, parent.hashCode, publicName.hashCode, personalLabel.hashCode, note.hashCode, isSelf.hashCode, isCarried.hashCode, sortOrder.hashCode, avatarTone.hashCode, avatarPath.hashCode, resolution.hashCode, resolvedAt.hashCode, createdAt.hashCode, lastPrayed.hashCode]);
+  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, parentId.hashCode, publicName.hashCode, personalLabel.hashCode, note.hashCode, isSelf.hashCode, isCarried.hashCode, sortOrder.hashCode, avatarTone.hashCode, avatarPath.hashCode, resolution.hashCode, resolvedAt.hashCode, createdAt.hashCode, lastPrayed.hashCode]);
   
 
   Map<String, dynamic> toJson() {
@@ -89,8 +89,8 @@ class GetMySubjectsPrayerSubjects {
     json['kind'] = 
     subjectKindSerializer(kind)
     ;
-    if (parent != null) {
-      json['parent'] = parent!.toJson();
+    if (parentId != null) {
+      json['parentId'] = nativeToJson<String?>(parentId);
     }
     json['publicName'] = nativeToJson<String>(publicName);
     if (personalLabel != null) {
@@ -124,7 +124,7 @@ class GetMySubjectsPrayerSubjects {
   GetMySubjectsPrayerSubjects({
     required this.id,
     required this.kind,
-    this.parent,
+    this.parentId,
     required this.publicName,
     this.personalLabel,
     this.note,
@@ -137,40 +137,6 @@ class GetMySubjectsPrayerSubjects {
     this.resolvedAt,
     required this.createdAt,
     required this.lastPrayed,
-  });
-}
-
-@immutable
-class GetMySubjectsPrayerSubjectsParent {
-  final String id;
-  GetMySubjectsPrayerSubjectsParent.fromJson(dynamic json):
-  
-  id = nativeFromJson<String>(json['id']);
-  @override
-  bool operator ==(Object other) {
-    if(identical(this, other)) {
-      return true;
-    }
-    if(other.runtimeType != runtimeType) {
-      return false;
-    }
-
-    final GetMySubjectsPrayerSubjectsParent otherTyped = other as GetMySubjectsPrayerSubjectsParent;
-    return id == otherTyped.id;
-    
-  }
-  @override
-  int get hashCode => id.hashCode;
-  
-
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {};
-    json['id'] = nativeToJson<String>(id);
-    return json;
-  }
-
-  GetMySubjectsPrayerSubjectsParent({
-    required this.id,
   });
 }
 

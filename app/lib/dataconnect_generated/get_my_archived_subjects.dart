@@ -20,7 +20,7 @@ class GetMyArchivedSubjectsVariablesBuilder {
 class GetMyArchivedSubjectsPrayerSubjects {
   final String id;
   final EnumValue<SubjectKind> kind;
-  final GetMyArchivedSubjectsPrayerSubjectsParent? parent;
+  final GetMyArchivedSubjectsPrayerSubjectsParentSubject? parentSubject;
   final String publicName;
   final String? personalLabel;
   final EnumValue<SubjectResolution>? resolution;
@@ -30,7 +30,7 @@ class GetMyArchivedSubjectsPrayerSubjects {
   
   id = nativeFromJson<String>(json['id']),
   kind = subjectKindDeserializer(json['kind']),
-  parent = json['parent'] == null ? null : GetMyArchivedSubjectsPrayerSubjectsParent.fromJson(json['parent']),
+  parentSubject = json['parentSubject'] == null ? null : GetMyArchivedSubjectsPrayerSubjectsParentSubject.fromJson(json['parentSubject']),
   publicName = nativeFromJson<String>(json['publicName']),
   personalLabel = json['personalLabel'] == null ? null : nativeFromJson<String>(json['personalLabel']),
   resolution = json['resolution'] == null ? null : subjectResolutionDeserializer(json['resolution']),
@@ -48,7 +48,7 @@ class GetMyArchivedSubjectsPrayerSubjects {
     final GetMyArchivedSubjectsPrayerSubjects otherTyped = other as GetMyArchivedSubjectsPrayerSubjects;
     return id == otherTyped.id && 
     kind == otherTyped.kind && 
-    parent == otherTyped.parent && 
+    parentSubject == otherTyped.parentSubject && 
     publicName == otherTyped.publicName && 
     personalLabel == otherTyped.personalLabel && 
     resolution == otherTyped.resolution && 
@@ -57,7 +57,7 @@ class GetMyArchivedSubjectsPrayerSubjects {
     
   }
   @override
-  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, parent.hashCode, publicName.hashCode, personalLabel.hashCode, resolution.hashCode, resolvedAt.hashCode, archivedByCascade.hashCode]);
+  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, parentSubject.hashCode, publicName.hashCode, personalLabel.hashCode, resolution.hashCode, resolvedAt.hashCode, archivedByCascade.hashCode]);
   
 
   Map<String, dynamic> toJson() {
@@ -66,8 +66,8 @@ class GetMyArchivedSubjectsPrayerSubjects {
     json['kind'] = 
     subjectKindSerializer(kind)
     ;
-    if (parent != null) {
-      json['parent'] = parent!.toJson();
+    if (parentSubject != null) {
+      json['parentSubject'] = parentSubject!.toJson();
     }
     json['publicName'] = nativeToJson<String>(publicName);
     if (personalLabel != null) {
@@ -88,7 +88,7 @@ class GetMyArchivedSubjectsPrayerSubjects {
   GetMyArchivedSubjectsPrayerSubjects({
     required this.id,
     required this.kind,
-    this.parent,
+    this.parentSubject,
     required this.publicName,
     this.personalLabel,
     this.resolution,
@@ -98,12 +98,12 @@ class GetMyArchivedSubjectsPrayerSubjects {
 }
 
 @immutable
-class GetMyArchivedSubjectsPrayerSubjectsParent {
+class GetMyArchivedSubjectsPrayerSubjectsParentSubject {
   final String id;
   final String publicName;
   final String? personalLabel;
   final EnumValue<SubjectStatus> status;
-  GetMyArchivedSubjectsPrayerSubjectsParent.fromJson(dynamic json):
+  GetMyArchivedSubjectsPrayerSubjectsParentSubject.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']),
   publicName = nativeFromJson<String>(json['publicName']),
@@ -118,7 +118,7 @@ class GetMyArchivedSubjectsPrayerSubjectsParent {
       return false;
     }
 
-    final GetMyArchivedSubjectsPrayerSubjectsParent otherTyped = other as GetMyArchivedSubjectsPrayerSubjectsParent;
+    final GetMyArchivedSubjectsPrayerSubjectsParentSubject otherTyped = other as GetMyArchivedSubjectsPrayerSubjectsParentSubject;
     return id == otherTyped.id && 
     publicName == otherTyped.publicName && 
     personalLabel == otherTyped.personalLabel && 
@@ -142,7 +142,7 @@ class GetMyArchivedSubjectsPrayerSubjectsParent {
     return json;
   }
 
-  GetMyArchivedSubjectsPrayerSubjectsParent({
+  GetMyArchivedSubjectsPrayerSubjectsParentSubject({
     required this.id,
     required this.publicName,
     this.personalLabel,

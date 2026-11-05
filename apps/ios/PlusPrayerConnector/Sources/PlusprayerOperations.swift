@@ -3190,7 +3190,7 @@ selfNameChangedAt: Timestamp?
 
 
 
-public struct PrayerSubjectSelf: Decodable, Sendable ,Hashable, Equatable, Identifiable {
+public struct PrayerSubjectSelfSubject: Decodable, Sendable ,Hashable, Equatable, Identifiable {
   
 
 
@@ -3214,7 +3214,7 @@ avatarPath: String?
 
 
   
-  public var prayerSubjectSelfKey: PrayerSubjectKey {
+  public var prayerSubjectSelfSubjectKey: PrayerSubjectKey {
     return PrayerSubjectKey(
       
       id: id
@@ -3227,7 +3227,7 @@ public func hash(into hasher: inout Hasher) {
   hasher.combine(id)
   
 }
-public static func == (lhs: PrayerSubjectSelf, rhs: PrayerSubjectSelf) -> Bool {
+public static func == (lhs: PrayerSubjectSelfSubject, rhs: PrayerSubjectSelfSubject) -> Bool {
     
     return lhs.id == rhs.id 
         
@@ -3272,7 +3272,7 @@ public static func == (lhs: PrayerSubjectSelf, rhs: PrayerSubjectSelf) -> Bool {
   }
 }
 public var 
-self: [PrayerSubjectSelf]
+selfSubject: [PrayerSubjectSelfSubject]
 
 
   
@@ -3334,7 +3334,7 @@ public static func == (lhs: User, rhs: User) -> Bool {
     
     case selfNameChangedAt
     
-    case self
+    case selfSubject
     
   }
 
@@ -3411,7 +3411,7 @@ public static func == (lhs: User, rhs: User) -> Bool {
     self.selfNameChangedAt = try codecHelper.decode(Timestamp?.self, forKey: .selfNameChangedAt, container: &container)
     
     
-    self.self = try codecHelper.decode([PrayerSubjectSelf].self, forKey: .self, container: &container)
+    self.selfSubject = try codecHelper.decode([PrayerSubjectSelfSubject].self, forKey: .selfSubject, container: &container)
     
     
   }
@@ -3488,58 +3488,8 @@ kind: SubjectKind
 
 
 
-
-
-public struct PrayerSubject: Decodable, Sendable ,Hashable, Equatable, Identifiable {
-  
-
-
 public var 
-id: UUID
-
-
-  
-  public var prayerSubjectKey: PrayerSubjectKey {
-    return PrayerSubjectKey(
-      
-      id: id
-    )
-  }
-
-  
-public func hash(into hasher: inout Hasher) {
-  
-  hasher.combine(id)
-  
-}
-public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
-    
-    return lhs.id == rhs.id 
-        
-  }
-
-  
-
-  
-  enum CodingKeys: String, CodingKey {
-    
-    case id
-    
-  }
-
-  public init(from decoder: any Decoder) throws {
-    var container = try decoder.container(keyedBy: CodingKeys.self)
-    let codecHelper = CodecHelper<CodingKeys>()
-
-    
-    
-    self.id = try codecHelper.decode(UUID.self, forKey: .id, container: &container)
-    
-    
-  }
-}
-public var 
-parent: PrayerSubject?
+parentId: UUID?
 
 
 
@@ -3691,7 +3641,7 @@ public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
     
     case kind
     
-    case parent
+    case parentId
     
     case publicName
     
@@ -3733,7 +3683,7 @@ public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
     
     
     
-    self.parent = try codecHelper.decode(PrayerSubject?.self, forKey: .parent, container: &container)
+    self.parentId = try codecHelper.decode(UUID?.self, forKey: .parentId, container: &container)
     
     
     
@@ -3904,58 +3854,8 @@ kind: SubjectKind
 
 
 
-
-
-public struct PrayerSubject: Decodable, Sendable ,Hashable, Equatable, Identifiable {
-  
-
-
 public var 
-id: UUID
-
-
-  
-  public var prayerSubjectKey: PrayerSubjectKey {
-    return PrayerSubjectKey(
-      
-      id: id
-    )
-  }
-
-  
-public func hash(into hasher: inout Hasher) {
-  
-  hasher.combine(id)
-  
-}
-public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
-    
-    return lhs.id == rhs.id 
-        
-  }
-
-  
-
-  
-  enum CodingKeys: String, CodingKey {
-    
-    case id
-    
-  }
-
-  public init(from decoder: any Decoder) throws {
-    var container = try decoder.container(keyedBy: CodingKeys.self)
-    let codecHelper = CodecHelper<CodingKeys>()
-
-    
-    
-    self.id = try codecHelper.decode(UUID.self, forKey: .id, container: &container)
-    
-    
-  }
-}
-public var 
-parent: PrayerSubject?
+parentId: UUID?
 
 
 
@@ -4007,7 +3907,7 @@ public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
     
     case kind
     
-    case parent
+    case parentId
     
     case publicName
     
@@ -4033,7 +3933,7 @@ public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
     
     
     
-    self.parent = try codecHelper.decode(PrayerSubject?.self, forKey: .parent, container: &container)
+    self.parentId = try codecHelper.decode(UUID?.self, forKey: .parentId, container: &container)
     
     
     
@@ -4779,58 +4679,8 @@ kind: SubjectKind
 
 
 
-
-
-public struct PrayerSubject: Decodable, Sendable ,Hashable, Equatable, Identifiable {
-  
-
-
 public var 
-id: UUID
-
-
-  
-  public var prayerSubjectKey: PrayerSubjectKey {
-    return PrayerSubjectKey(
-      
-      id: id
-    )
-  }
-
-  
-public func hash(into hasher: inout Hasher) {
-  
-  hasher.combine(id)
-  
-}
-public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
-    
-    return lhs.id == rhs.id 
-        
-  }
-
-  
-
-  
-  enum CodingKeys: String, CodingKey {
-    
-    case id
-    
-  }
-
-  public init(from decoder: any Decoder) throws {
-    var container = try decoder.container(keyedBy: CodingKeys.self)
-    let codecHelper = CodecHelper<CodingKeys>()
-
-    
-    
-    self.id = try codecHelper.decode(UUID.self, forKey: .id, container: &container)
-    
-    
-  }
-}
-public var 
-parent: PrayerSubject?
+parentId: UUID?
 
 
 
@@ -4892,7 +4742,7 @@ public static func == (lhs: PrayerSubjectItems, rhs: PrayerSubjectItems) -> Bool
     
     case kind
     
-    case parent
+    case parentId
     
     case publicName
     
@@ -4922,7 +4772,7 @@ public static func == (lhs: PrayerSubjectItems, rhs: PrayerSubjectItems) -> Bool
     
     
     
-    self.parent = try codecHelper.decode(PrayerSubject?.self, forKey: .parent, container: &container)
+    self.parentId = try codecHelper.decode(UUID?.self, forKey: .parentId, container: &container)
     
     
     
@@ -5308,7 +5158,7 @@ createdAt: Timestamp
 
 
 
-public struct PrayerSubject: Decodable, Sendable ,Hashable, Equatable, Identifiable {
+public struct PrayerSubjectParentSubject: Decodable, Sendable ,Hashable, Equatable, Identifiable {
   
 
 
@@ -5337,7 +5187,7 @@ isSelf: Bool
 
 
   
-  public var prayerSubjectKey: PrayerSubjectKey {
+  public var prayerSubjectParentSubjectKey: PrayerSubjectKey {
     return PrayerSubjectKey(
       
       id: id
@@ -5350,7 +5200,7 @@ public func hash(into hasher: inout Hasher) {
   hasher.combine(id)
   
 }
-public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
+public static func == (lhs: PrayerSubjectParentSubject, rhs: PrayerSubjectParentSubject) -> Bool {
     
     return lhs.id == rhs.id 
         
@@ -5401,7 +5251,7 @@ public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
   }
 }
 public var 
-parent: PrayerSubject?
+parentSubject: PrayerSubjectParentSubject?
 
 
 
@@ -5911,7 +5761,7 @@ public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
     
     case createdAt
     
-    case parent
+    case parentSubject
     
     case intentions
     
@@ -5983,7 +5833,7 @@ public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
     
     
     
-    self.parent = try codecHelper.decode(PrayerSubject?.self, forKey: .parent, container: &container)
+    self.parentSubject = try codecHelper.decode(PrayerSubjectParentSubject?.self, forKey: .parentSubject, container: &container)
     
     
     self.intentions = try codecHelper.decode([PrayerSubjectIntentions].self, forKey: .intentions, container: &container)
@@ -7374,7 +7224,7 @@ kind: SubjectKind
 
 
 
-public struct PrayerSubject: Decodable, Sendable ,Hashable, Equatable, Identifiable {
+public struct PrayerSubjectParentSubject: Decodable, Sendable ,Hashable, Equatable, Identifiable {
   
 
 
@@ -7398,7 +7248,7 @@ status: SubjectStatus
 
 
   
-  public var prayerSubjectKey: PrayerSubjectKey {
+  public var prayerSubjectParentSubjectKey: PrayerSubjectKey {
     return PrayerSubjectKey(
       
       id: id
@@ -7411,7 +7261,7 @@ public func hash(into hasher: inout Hasher) {
   hasher.combine(id)
   
 }
-public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
+public static func == (lhs: PrayerSubjectParentSubject, rhs: PrayerSubjectParentSubject) -> Bool {
     
     return lhs.id == rhs.id 
         
@@ -7456,7 +7306,7 @@ public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
   }
 }
 public var 
-parent: PrayerSubject?
+parentSubject: PrayerSubjectParentSubject?
 
 
 
@@ -7513,7 +7363,7 @@ public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
     
     case kind
     
-    case parent
+    case parentSubject
     
     case publicName
     
@@ -7541,7 +7391,7 @@ public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
     
     
     
-    self.parent = try codecHelper.decode(PrayerSubject?.self, forKey: .parent, container: &container)
+    self.parentSubject = try codecHelper.decode(PrayerSubjectParentSubject?.self, forKey: .parentSubject, container: &container)
     
     
     

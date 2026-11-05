@@ -91,7 +91,7 @@ Two computed rules used throughout (never swept by a job):
   since lastListLocalDate exceed graceDays — so a break shows before the next
   write.
 - **getMySubjects** (OWNER) — subjects WHERE status = ACTIVE (Answered
-  intentions stay ACTIVE until archived): id, kind, parent { id }, publicName,
+  intentions stay ACTIVE until archived): id, kind, parentId, publicName,
   personalLabel, isSelf, isCarried, sortOrder, avatarTone, avatarPath,
   resolution, resolvedAt. Client nests intentions under their parent, ordered
   by sortOrder within each level, self row pinned top.

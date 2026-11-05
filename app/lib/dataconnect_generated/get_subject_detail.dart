@@ -43,7 +43,7 @@ class GetSubjectDetailPrayerSubjects {
   final EnumValue<SubjectResolution>? resolution;
   final Timestamp? resolvedAt;
   final Timestamp createdAt;
-  final GetSubjectDetailPrayerSubjectsParent? parent;
+  final GetSubjectDetailPrayerSubjectsParentSubject? parentSubject;
   final List<GetSubjectDetailPrayerSubjectsIntentions> intentions;
   final List<GetSubjectDetailPrayerSubjectsEntries> entries;
   final List<GetSubjectDetailPrayerSubjectsPrayers> prayers;
@@ -63,7 +63,7 @@ class GetSubjectDetailPrayerSubjects {
   resolution = json['resolution'] == null ? null : subjectResolutionDeserializer(json['resolution']),
   resolvedAt = json['resolvedAt'] == null ? null : Timestamp.fromJson(json['resolvedAt']),
   createdAt = Timestamp.fromJson(json['createdAt']),
-  parent = json['parent'] == null ? null : GetSubjectDetailPrayerSubjectsParent.fromJson(json['parent']),
+  parentSubject = json['parentSubject'] == null ? null : GetSubjectDetailPrayerSubjectsParentSubject.fromJson(json['parentSubject']),
   intentions = (json['intentions'] as List<dynamic>)
         .map((e) => GetSubjectDetailPrayerSubjectsIntentions.fromJson(e))
         .toList(),
@@ -97,14 +97,14 @@ class GetSubjectDetailPrayerSubjects {
     resolution == otherTyped.resolution && 
     resolvedAt == otherTyped.resolvedAt && 
     createdAt == otherTyped.createdAt && 
-    parent == otherTyped.parent && 
+    parentSubject == otherTyped.parentSubject && 
     intentions == otherTyped.intentions && 
     entries == otherTyped.entries && 
     prayers == otherTyped.prayers;
     
   }
   @override
-  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, publicName.hashCode, personalLabel.hashCode, note.hashCode, isSelf.hashCode, isCarried.hashCode, status.hashCode, sortOrder.hashCode, avatarTone.hashCode, avatarPath.hashCode, resolution.hashCode, resolvedAt.hashCode, createdAt.hashCode, parent.hashCode, intentions.hashCode, entries.hashCode, prayers.hashCode]);
+  int get hashCode => Object.hashAll([id.hashCode, kind.hashCode, publicName.hashCode, personalLabel.hashCode, note.hashCode, isSelf.hashCode, isCarried.hashCode, status.hashCode, sortOrder.hashCode, avatarTone.hashCode, avatarPath.hashCode, resolution.hashCode, resolvedAt.hashCode, createdAt.hashCode, parentSubject.hashCode, intentions.hashCode, entries.hashCode, prayers.hashCode]);
   
 
   Map<String, dynamic> toJson() {
@@ -141,8 +141,8 @@ class GetSubjectDetailPrayerSubjects {
       json['resolvedAt'] = resolvedAt!.toJson();
     }
     json['createdAt'] = createdAt.toJson();
-    if (parent != null) {
-      json['parent'] = parent!.toJson();
+    if (parentSubject != null) {
+      json['parentSubject'] = parentSubject!.toJson();
     }
     json['intentions'] = intentions.map((e) => e.toJson()).toList();
     json['entries'] = entries.map((e) => e.toJson()).toList();
@@ -165,7 +165,7 @@ class GetSubjectDetailPrayerSubjects {
     this.resolution,
     this.resolvedAt,
     required this.createdAt,
-    this.parent,
+    this.parentSubject,
     required this.intentions,
     required this.entries,
     required this.prayers,
@@ -173,13 +173,13 @@ class GetSubjectDetailPrayerSubjects {
 }
 
 @immutable
-class GetSubjectDetailPrayerSubjectsParent {
+class GetSubjectDetailPrayerSubjectsParentSubject {
   final String id;
   final String publicName;
   final String? personalLabel;
   final bool isCarried;
   final bool isSelf;
-  GetSubjectDetailPrayerSubjectsParent.fromJson(dynamic json):
+  GetSubjectDetailPrayerSubjectsParentSubject.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']),
   publicName = nativeFromJson<String>(json['publicName']),
@@ -195,7 +195,7 @@ class GetSubjectDetailPrayerSubjectsParent {
       return false;
     }
 
-    final GetSubjectDetailPrayerSubjectsParent otherTyped = other as GetSubjectDetailPrayerSubjectsParent;
+    final GetSubjectDetailPrayerSubjectsParentSubject otherTyped = other as GetSubjectDetailPrayerSubjectsParentSubject;
     return id == otherTyped.id && 
     publicName == otherTyped.publicName && 
     personalLabel == otherTyped.personalLabel && 
@@ -219,7 +219,7 @@ class GetSubjectDetailPrayerSubjectsParent {
     return json;
   }
 
-  GetSubjectDetailPrayerSubjectsParent({
+  GetSubjectDetailPrayerSubjectsParentSubject({
     required this.id,
     required this.publicName,
     this.personalLabel,

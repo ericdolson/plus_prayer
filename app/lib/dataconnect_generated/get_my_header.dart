@@ -35,7 +35,7 @@ class GetMyHeaderUser {
   final bool listLiveOptIn;
   final bool showNamesInNotifications;
   final Timestamp? selfNameChangedAt;
-  final List<GetMyHeaderUserSelf> self;
+  final List<GetMyHeaderUserSelfSubject> selfSubject;
   GetMyHeaderUser.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']),
@@ -55,8 +55,8 @@ class GetMyHeaderUser {
   listLiveOptIn = nativeFromJson<bool>(json['listLiveOptIn']),
   showNamesInNotifications = nativeFromJson<bool>(json['showNamesInNotifications']),
   selfNameChangedAt = json['selfNameChangedAt'] == null ? null : Timestamp.fromJson(json['selfNameChangedAt']),
-  self = (json['self'] as List<dynamic>)
-        .map((e) => GetMyHeaderUserSelf.fromJson(e))
+  selfSubject = (json['selfSubject'] as List<dynamic>)
+        .map((e) => GetMyHeaderUserSelfSubject.fromJson(e))
         .toList();
   @override
   bool operator ==(Object other) {
@@ -85,11 +85,11 @@ class GetMyHeaderUser {
     listLiveOptIn == otherTyped.listLiveOptIn && 
     showNamesInNotifications == otherTyped.showNamesInNotifications && 
     selfNameChangedAt == otherTyped.selfNameChangedAt && 
-    self == otherTyped.self;
+    selfSubject == otherTyped.selfSubject;
     
   }
   @override
-  int get hashCode => Object.hashAll([id.hashCode, displayName.hashCode, locale.hashCode, timezone.hashCode, planTier.hashCode, includeLimit.hashCode, trialStartedAt.hashCode, entitlementExpiresAt.hashCode, currentStreak.hashCode, bestStreak.hashCode, lastListLocalDate.hashCode, graceDays.hashCode, graceOfferPending.hashCode, graceOffersEnabled.hashCode, listLiveOptIn.hashCode, showNamesInNotifications.hashCode, selfNameChangedAt.hashCode, self.hashCode]);
+  int get hashCode => Object.hashAll([id.hashCode, displayName.hashCode, locale.hashCode, timezone.hashCode, planTier.hashCode, includeLimit.hashCode, trialStartedAt.hashCode, entitlementExpiresAt.hashCode, currentStreak.hashCode, bestStreak.hashCode, lastListLocalDate.hashCode, graceDays.hashCode, graceOfferPending.hashCode, graceOffersEnabled.hashCode, listLiveOptIn.hashCode, showNamesInNotifications.hashCode, selfNameChangedAt.hashCode, selfSubject.hashCode]);
   
 
   Map<String, dynamic> toJson() {
@@ -125,7 +125,7 @@ class GetMyHeaderUser {
     if (selfNameChangedAt != null) {
       json['selfNameChangedAt'] = selfNameChangedAt!.toJson();
     }
-    json['self'] = self.map((e) => e.toJson()).toList();
+    json['selfSubject'] = selfSubject.map((e) => e.toJson()).toList();
     return json;
   }
 
@@ -147,17 +147,17 @@ class GetMyHeaderUser {
     required this.listLiveOptIn,
     required this.showNamesInNotifications,
     this.selfNameChangedAt,
-    required this.self,
+    required this.selfSubject,
   });
 }
 
 @immutable
-class GetMyHeaderUserSelf {
+class GetMyHeaderUserSelfSubject {
   final String id;
   final String publicName;
   final int? avatarTone;
   final String? avatarPath;
-  GetMyHeaderUserSelf.fromJson(dynamic json):
+  GetMyHeaderUserSelfSubject.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']),
   publicName = nativeFromJson<String>(json['publicName']),
@@ -172,7 +172,7 @@ class GetMyHeaderUserSelf {
       return false;
     }
 
-    final GetMyHeaderUserSelf otherTyped = other as GetMyHeaderUserSelf;
+    final GetMyHeaderUserSelfSubject otherTyped = other as GetMyHeaderUserSelfSubject;
     return id == otherTyped.id && 
     publicName == otherTyped.publicName && 
     avatarTone == otherTyped.avatarTone && 
@@ -196,7 +196,7 @@ class GetMyHeaderUserSelf {
     return json;
   }
 
-  GetMyHeaderUserSelf({
+  GetMyHeaderUserSelfSubject({
     required this.id,
     required this.publicName,
     this.avatarTone,

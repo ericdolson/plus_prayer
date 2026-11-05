@@ -83,7 +83,7 @@ query GetMyHeader @auth(level: USER_ANON) {
     listLiveOptIn
     showNamesInNotifications
     selfNameChangedAt
-    self: prayerSubjects_on_owner(where: { isSelf: { eq: true } }, limit: 1) {
+    selfSubject: prayerSubjects_on_owner(where: { isSelf: { eq: true } }, limit: 1) {
       id
       publicName
       avatarTone
@@ -94,7 +94,7 @@ query GetMyHeader @auth(level: USER_ANON) {
 
 
 # Home: the personal list. Answered intentions stay ACTIVE until archived.
-# The client nests intentions under `parent` and orders each level by
+# The client nests intentions under `parentId` and orders each level by
 # sortOrder (self pinned top). `lastPrayed` = the user's latest prayer that
 # held this item (filtered by who prayed, never by subject owner). Read
 # through the join table: `prayers_via_PrayerSubjectLink(where: { prayer })`
@@ -106,7 +106,7 @@ query GetMySubjects @auth(level: USER_ANON) {
   ) {
     id
     kind
-    parent { id }
+    parentId
     publicName
     personalLabel
     note
@@ -139,7 +139,7 @@ query SearchMySubjects($query: String!) @auth(level: USER_ANON) {
   ) {
     id
     kind
-    parent { id }
+    parentId
     publicName
     personalLabel
     status
@@ -222,7 +222,7 @@ query GetMyPortion($listId: UUID) @auth(level: USER_ANON) {
   ) {
     id
     kind
-    parent { id }
+    parentId
     publicName
     personalLabel
     isSelf
@@ -271,7 +271,7 @@ query GetSubjectDetail($id: UUID!, $prayerLimit: Int = 500, $prayerOffset: Int =
     resolution
     resolvedAt
     createdAt
-    parent { id publicName personalLabel isCarried isSelf }
+    parentSubject: parent { id publicName personalLabel isCarried isSelf }
     intentions: prayerSubjects_on_parent(
       where: { status: { ne: PURGED } }
       orderBy: [{ sortOrder: ASC }, { createdAt: ASC }]
@@ -408,7 +408,7 @@ query GetMyArchivedSubjects @auth(level: USER_ANON) {
   ) {
     id
     kind
-    parent { id publicName personalLabel status }
+    parentSubject: parent { id publicName personalLabel status }
     publicName
     personalLabel
     resolution
