@@ -43,7 +43,7 @@ every feature crosses that boundary.
 | [schema-brief.md](schema-brief.md) | Handoff: every table/field/function change from the meetings | Ready for backend |
 | [design-direction.md](design-direction.md) | Visual system: color roles, type, spacing, Home rows, community card, motion, icons — overrides app-brief | Decided 2026-10-23 |
 | [groups-design-note.md](groups-design-note.md) | Future prayer-groups UI direction (not built) | Stage 4+ note |
-| [app-brief.md](app-brief.md) | Handoff: screens, components, flows, states, copy for the Flutter app | Ready for app |
+| [app-brief.md](app-brief.md) | Handoff: screens, components, flows, states, copy for the native apps (iOS SwiftUI first, Android Compose) | Ready for app |
 | [safety.md](safety.md) | Self-harm, threats, child safety — KNOWN GAP checklist | Beta items + Stage 2 |
 | [roadmap.md](roadmap.md) | Stages 0–4 with task checklist | Drafted 2026-10-18 |
 | [open-questions.md](open-questions.md) | Everything unresolved, in one place | Living |

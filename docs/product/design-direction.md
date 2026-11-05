@@ -15,6 +15,38 @@ antique character appears in the app.
 
 ---
 
+## 0. Platforms & fidelity tiers (2026-11-05)
+The app is **native on each platform**: **iOS first in SwiftUI** (iOS 26,
+Liquid Glass), then **Android in Kotlin + Jetpack Compose** (Material 3)
+before public launch. The Flutter build in `app/` is reference only.
+Each platform should feel at home on that platform. +Prayer's identity lives in
+its custom components, which match across both.
+
+**Tier A — Signature components (custom, must match across platforms).**
+This spec gives exact values (sizes, tokens, weights, spacing, timing), and
+both apps target them. Tune by eye on both, then update the spec so they stay
+in step:
+avatars and the held ring · threads and the gold dot · Home row layout and
+spacing · the community card (including the avatar cluster) · the streak seal ·
+wax seals · the bead strand · prayer mode (halo, checks, check bloom) · the pray
+button and its ring countdown · Amen → seal · color roles and tokens · type roles
+(Roca for names/numbers/big lines, system sans for body).
+
+**Tier B — Native chrome (platform component, platform metrics).**
+Use the platform's own component and accept its look: menus, popovers,
+context menus, sheets, alerts, search field, navigation and tool bars and their
+material, switches, pickers, date pickers, the share sheet, keyboards. For these,
+the spec defines **content and behavior only**: items, order, labels, copy,
+counts, checked/active state, and what each does. It does **not** define padding,
+radius, row height or background color. Where a platform can't render a
+detail (e.g. system menus are monochrome), the platform wins; don't build a
+custom component just to keep a flourish. A custom Tier B replacement needs a
+spec decision first.
+
+Where it's unclear which tier something is in, ask; don't guess.
+
+---
+
 ## 1. Color system — every color has one job
 
 | Role | Meaning | Used for | Never for |
@@ -179,6 +211,10 @@ gold.
   - **Counts in the menu only**, right-aligned and muted, on all three (All 12 ·
     Still to hold 3 · Carried 6). When Still to hold reaches 0, show a small
     **gold check** instead of "0". Never on the main screen.
+    _Native menu (Tier B, §0, 2026-11-05):_ counts appear as the platform
+    allows (trailing if supported, otherwise in the item text, e.g. "Still to
+    hold · 3"). The check at 0 uses the platform's glyph and color; system
+    menus are monochrome, and that's fine.
   - **Empty state** for Still to hold: "Everyone's been held today."
   - **Linger then fold:** under Still to hold, rows held in a prayer show their
     gold ring for ~1–1.5 s after Amen, then gently fold away (Reduce Motion:

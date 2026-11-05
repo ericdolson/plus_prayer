@@ -1184,3 +1184,35 @@ Why: the in-progress bead should be the quietest thing on the strand, not the
 loudest; an empty ring says "not sealed yet" the way the unsealed blank does.
 Rejected: brightening waxes (they're the real seal colors); one slot per
 missed list (turns the break into a count of absence).
+
+### Decision: Native apps — iOS in SwiftUI first, Android in Compose before launch
+**Timestamp:** 2026-11-05 (SUPERSEDES Flutter as the app stack)
+The app is built natively: iOS first in SwiftUI (iOS 26, Liquid Glass), then
+Android in Kotlin + Jetpack Compose (Material 3). Android at parity is a hard
+gate for public launch; the beta can be iOS-only. Both use the generated SQL
+Connect SDKs (Swift, Kotlin) and native Firebase SDKs. The Flutter build in
+`app/` is reference only. Rules stay on the server or in the spec, so neither
+app invents behavior; build each feature on iOS first and port it while fresh.
+Why: Flutter still doesn't render real Liquid Glass (not even in `cupertino_ui`
+1.0 as of Aug 2026), and the bars, sheets, menus and search are where native
+familiarity matters most (e.g. the filter menu rendered as flat gray). The
+client is thin, so a second native app is mostly UI work. The platform-neutral
+spec is the real asset, and AI-assisted building makes two native codebases
+affordable.
+Rejected: staying on Flutter (imitation glass that is always behind Apple);
+Kotlin Multiplatform shared logic (complexity for little logic on the client).
+Risk: Android matters for a global prayer audience, so it must not slip past
+launch.
+
+### Decision: Fidelity tiers — signature components match, native chrome varies
+**Timestamp:** 2026-11-05
+Tier A (custom signature components: avatars and rings, threads, rows, the
+community card, seals, bead strand, prayer mode, pray button, Amen → seal,
+color and type roles) gets exact values in the spec, and both apps match them.
+Tier B (menus, popovers, sheets, alerts, search, bars, switches, pickers) uses
+the platform component, and the spec defines only content and behavior, not
+padding, radius or color. Where a platform can't render a detail, the platform
+wins (e.g. the filter menu's gold check at 0 is monochrome in a system menu).
+See design-direction.md §0.
+Why: the custom parts carry +Prayer's identity; the chrome should feel like
+the phone.

@@ -22,7 +22,7 @@ story is rooted in universal human goodwill rather than any specific faith
 tradition. The brand does not perform community or spirituality — it states
 facts and stops.
 
-The long-term product is a Flutter/Firebase app. The current phase is
+The long-term product is a native iOS (SwiftUI) and Android (Kotlin + Compose) app on Firebase. The current phase is
 social-first audience building. The app launches later, with social funneling
 into it.
 
@@ -110,7 +110,7 @@ plusprayer/
 - **backend/ owns deploy artifacts** — schema, functions, security rules, and
   the `firebase.json`/`.firebaserc` that drive deploys. Run deploys from within
   backend/.
-- **Path-scoped CI** so editing a caption doesn't trigger a Flutter build and a
+- **Path-scoped CI** so editing a caption doesn't trigger an app build and a
   schema change doesn't redeploy the app. The workstreams have very different
   cadences (app = slow store review; functions = continuous; social = daily).
 
@@ -135,7 +135,7 @@ there. Open questions live in `docs/product/open-questions.md`.
 
 ## Tech Stack (current)
 
-- **App:** Flutter + Firebase
+- **App:** native — iOS in SwiftUI first, Android in Kotlin + Jetpack Compose before public launch (2026-11-05; was Flutter). Firebase SDKs on both.
 - **Backend DB:** Firebase SQL Connect (managed PostgreSQL via Cloud SQL),
   region `us-central1`. Chosen over Firestore for relational fit, native
   full-text search, per-operation pricing, and per-operation auth (vs. a global

@@ -1,12 +1,16 @@
-# App Brief — handoff for the Flutter session
+# App Brief — handoff for the native app builds
 
 _Written 2026-10-18 from the product meetings of 2026-10-17/18._
-**Audience:** an agent building the Flutter app in `app/`. This pulls every
+**Platforms (2026-11-05):** native. **iOS first in SwiftUI**, then **Android
+in Kotlin + Jetpack Compose** before public launch. Read `design-direction.md` §0
+for what must match across platforms (Tier A) vs. what stays native (Tier B).
+The Flutter build in `app/` is reference only.
+
+**Audience:** an agent building the native app. This pulls every
 screen, component, flow, state, and copy rule into one place. Each section names
 the spec file behind it — read it when a rule is unclear. Data shapes come from
-`schema-brief.md`; don't invent fields. The existing `app/` code is a hacky
-Firestore POC: **reference only** (its in-prayer mode and halo are the right
-idea), not a pattern to follow.
+`schema-brief.md`; don't invent fields. Earlier code in `app/` (the Firestore POC
+and the 2026-10 Flutter build) is **reference only**, not a pattern to follow.
 
 > **Visual design (2026-10-23): read `design-direction.md` first. It overrides
 > this brief on Home rows, the community card, colors, type, motion, icons, and
@@ -29,14 +33,15 @@ idea), not a pattern to follow.
 - **The community is the offering:** the list prayer is the primary habit.
 
 ## 1. Architecture guidance
-- **Data:** SQL Connect generated Dart SDK (named operations only — never compose
+- **Data:** SQL Connect generated SDK — Swift on iOS, Kotlin on Android (named operations only — never compose
   queries). **Live:** RTDB `/stats/live`, `/lists/current` (incl. `closesAt`),
   `/config` (with compiled-in defaults), and the user's own
   `/presence/{uid}/{deviceId}` (also the in-progress prayer draft).
 - **Offline-first:** a prayer must succeed with no signal. `logPrayer` uses a
   client-generated UUID and queues; drafts persist via RTDB offline persistence.
   Only the very first launch needs a connection ("Connect to begin").
-- **Notifications:** `flutter_local_notifications` `zonedSchedule`, rescheduled
+- **Notifications:** native local notifications (iOS `UNUserNotificationCenter`
+  calendar triggers; Android `AlarmManager`/WorkManager), rescheduled
   ~7 days ahead on each app open (iOS 64-pending cap). FCM only for the opt-in
   "Today's list is live".
 - **Analytics from day one** (Firebase Analytics): first_open, name_set,

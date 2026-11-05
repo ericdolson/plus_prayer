@@ -9,7 +9,7 @@ _Last updated: 2026-10-18_
 - Names/intentions may be in any script even while the UI is English-only.
   40/80 caps count visible characters (grapheme clusters), not bytes.
 - Print PDF must use fonts covering all scripts (e.g. Noto family).
-- Flutter layouts avoid hard-coded left/right so RTL works later.
+- Layouts on both platforms use leading/trailing, never hard-coded left/right, so RTL works later.
 
 ## DECIDED
 - **Avatar cluster component** (2026-10-18), reused on the list row, Amen

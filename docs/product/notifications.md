@@ -36,7 +36,9 @@ _Last updated: 2026-10-17_
   was narrower; this decision settles it.
 
 ## From seed 2026-10-11 (SETTLED there unless noted)
-- Local scheduling via `flutter_local_notifications` `zonedSchedule`;
+- Local scheduling via native local notifications (iOS
+  `UNUserNotificationCenter`; Android `AlarmManager`/WorkManager — 2026-11-05,
+  was `flutter_local_notifications`);
   reschedule ~7 days ahead on each app open (iOS 64-pending cap) so content can
   vary ("3 of your intentions are on today's list"). Android inexact-alarm drift
   acceptable; test Samsung/Xiaomi early.

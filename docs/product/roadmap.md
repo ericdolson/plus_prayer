@@ -1,7 +1,7 @@
 # Roadmap & Checklist
 
 _Last updated: 2026-10-19. Built from the decisions in this folder. Tags:
-**[be]** backend, **[app]** Flutter, **[ops]** Eric's pipeline/skills,
+**[be]** backend, **[app]** native apps (iOS SwiftUI first, Android Compose), **[ops]** Eric's pipeline/skills,
 **[biz]** store/legal/business._
 
 ## Guiding constraint
@@ -61,8 +61,8 @@ Stage 1 is a private beta that tests whether the app is the right mechanism.
 - [ ] Publish step sets videoPublishedAt, post links, sealVariant; uploads video
 
 ### App foundations [app]
-- [ ] Fresh Flutter project (POC = reference only); architecture conventions in `app/CLAUDE.md`
-- [ ] Generated SQL Connect Dart SDK wired up
+- [ ] Fresh native iOS project in SwiftUI (Flutter build = reference only); architecture conventions in its `CLAUDE.md`
+- [ ] Generated SQL Connect Swift SDK wired up
 - [ ] Offline-first prayer write queue
 - [ ] ~500-name soft safety cap (abuse only, not a paywall)
 - [ ] Analytics events from day one (first prayer, list prayer, D1/D7/D30,
@@ -107,6 +107,7 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
 ---
 
 ## Stage 2 — Public launch
+- [ ] [app] **Hard gate:** native Android app (Kotlin + Jetpack Compose, generated Kotlin SDK) at parity with iOS before public launch
 - [ ] [biz] Price + tiers (Q3); billing provider (Q15 — RevenueCat favored for
       anonymous users + restore)
 - [ ] [be] Entitlement webhook → `setEntitlement`
