@@ -13,9 +13,12 @@ patterns: hooks, Riverpod, Material theming, and the custom chrome Flutter
 needed (frosted menus, shader scroll edges) all have native answers here.
 
 ## Status
-Phase 0 (conventions, tokens, assets plan) is mostly answered; the open
-items and the project-creation steps are in `PHASE-0.md`. No Xcode project or
-app Swift yet. Build order: `app-brief.md` §6.
+Phase 0 is done (open items in `PHASE-0.md`). Build order: `app-brief.md`
+§6. Built so far (see "Components so far" below and `git log`): the theme
+and signature components, Home's rows, shell, community card and prayer mode,
+all on sample values. Next: the mock data source and domain models, or the
+rest of prayer mode (list invitation, closing sheet and note, fold under
+Still to hold).
 
 ## Stack
 - SwiftUI, **iOS 26** minimum (Liquid Glass), **iPhone only** (2026-11-05),
@@ -56,6 +59,25 @@ app Swift yet. Build order: `app-brief.md` §6.
 - Command-line builds work too:
   `xcodebuild -project apps/ios/PlusPrayer.xcodeproj -scheme PlusPrayer
   -destination 'generic/platform=iOS Simulator' build`.
+- **Installing on Eric's iPhone.** Xcode's Run hangs on "Preparing iPhone",
+  so build and install from the command line (from the repo root):
+  ```bash
+  DD="${TMPDIR:-/tmp}/pp-dd-device"
+  DEVICE=00008150-001A75D02639401C   # Eric's iPhone 17 Pro
+  xcodebuild -project apps/ios/PlusPrayer.xcodeproj -scheme PlusPrayer \
+    -configuration Debug -destination 'generic/platform=iOS' \
+    -derivedDataPath "$DD" -allowProvisioningUpdates build
+  xcrun devicectl device install app --device $DEVICE \
+    "$DD/Build/Products/Debug-iphoneos/PlusPrayer.app"
+  xcrun devicectl device process launch --terminate-existing \
+    --device $DEVICE dev.hammock.plusprayer
+  ```
+  - Check first with `xcrun devicectl list devices`: the phone must show
+    `connected`. `unavailable` (or error 4016) means it's locked, asleep, or
+    neither cabled nor on the Mac's Wi-Fi; ask Eric rather than retrying.
+  - The phone needs to be unlocked for the launch step.
+  - Signing is automatic for the team in the project; never change the team
+    or bundle ID to make an install work.
 - The project uses **synchronized folders** (Xcode 16+): every file under
   `PlusPrayer/`, `PlusPrayerTests/` and `PlusPrayerUITests/` is in its target
   automatically. Add, move and delete Swift files on disk; never touch the
