@@ -781,6 +781,80 @@
         "note": "Added directly by Eric 2026-11-01 — manual addition, not sourced from a social 🙏 comment."
       }
     ],
-    "69": []
+    "69": [
+      {
+        "platform": "facebook",
+        "handle": "Diana Irving",
+        "id": "28867262856292387",
+        "at": "2026-11-02T01:02:53Z",
+        "comment_url": "https://www.facebook.com/reel/1103653835741370/?comment_id=122141660744983291_1153784163656474",
+        "message": "",
+        "note": "Manual exception: empty-text comment (GIF) on the List 68 Facebook post, no readable 🙏. Added per Eric 2026-11-06 (same exception as Lists 62, 64–68)."
+      },
+      {
+        "platform": "manual",
+        "handle": "Steven",
+        "id": null,
+        "at": "2026-11-02T01:02:53Z",
+        "comment_url": "https://www.facebook.com/reel/1103653835741370/?comment_id=122141660744983291_1153784163656474",
+        "note": "Diana Irving's son (surname not given). Carried alongside her onto List 69 per Eric 2026-11-06."
+      },
+      {
+        "platform": "manual",
+        "handle": "Katy Marie Mahoney McAlister",
+        "id": null,
+        "at": "2026-11-06T04:40:29Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-06 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Shaun Spratt",
+        "id": null,
+        "at": "2026-11-06T04:40:29Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-06 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "ElegantStrawberry4137",
+        "id": null,
+        "at": "2026-11-06T04:40:29Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-06 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Eric Olson",
+        "id": null,
+        "at": "2026-11-06T04:40:29Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-06 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "George Bori",
+        "id": null,
+        "at": "2026-11-06T04:40:29Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-06 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "David Grant",
+        "id": null,
+        "at": "2026-11-06T04:40:29Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-06 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Nate Anderson",
+        "id": null,
+        "at": "2026-11-06T04:40:29Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-06 — manual addition, not sourced from a social 🙏 comment."
+      }
+    ]
   }
 }

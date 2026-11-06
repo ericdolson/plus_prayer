@@ -53,8 +53,15 @@ list **N** in `publishing/participants.json`.
    A third window's cursor comes from the **previous window's 50th row** the same
    way, which keeps every overlap at 50 posts.
 
-   **`limit` is clamped server-side to 100.** Asking for 200 silently returns 100
-   with `hasMore: true` — it LOOKS like one call got everything. Never assume it did.
+   **Keep adding windows until one comes back with `hasMore: False`.** Don't plan
+   for a fixed number of windows. Each next cursor comes from the previous window's
+   50th row, so the overlaps stay at ≥25 posts even when pages come back short.
+
+   **`limit` is clamped server-side to 100 — and pages can come back shorter.**
+   Asking for 200 silently returns 100 with `hasMore: true`, so it LOOKS like one
+   call got everything. Never assume it did. On 2026-11-06 (List 69, 221 posts)
+   `limit=100` returned only 75, 75, 85 and 71 rows across four windows, with
+   `hasMore: true` on the first three. Trust `hasMore`, not the row count.
 
    **Merge and assert with the committed script — do not hand-roll it each run:**
 
@@ -83,8 +90,8 @@ list **N** in `publishing/participants.json`.
      alignment instead of silently skipping posts;
    - no duplicate `"<platform>:<id>"` inside a single window.
 
-   Once the archive passes ~150 posts the tail stops being big enough for one window;
-   add a THIRD overlapping window rather than accepting an inline page — the script
+   When the tail is too small for one window, add another overlapping window rather
+   than accepting an inline page (a short tail page comes back INLINE) — the script
    takes any number of windows, so that is one more path argument, not a code change.
    Page composition shifts every run as new posts push old ones down, so nothing may
    depend on a given window's contents being stable.
