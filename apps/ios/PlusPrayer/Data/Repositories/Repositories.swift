@@ -15,6 +15,45 @@ protocol SubjectRepository {
     /// ACTIVE subjects (answered intentions stay until archived), with each
     /// one's `lastPrayed` local date.
     func subjects() -> AsyncStream<[Subject]>
+
+    /// The addSubject callable: appended to the bottom of its level, carried
+    /// automatically while the pool has room, `avatarTone` stored. Online
+    /// only (it needs the server's id and carry decision). Throws
+    /// `AddSubjectError`.
+    func addSubject(_ input: NewSubject) async throws -> AddedSubject
+}
+
+struct NewSubject: Equatable {
+    let kind: SubjectKind
+    let publicName: String
+    /// Required for an intention: its name.
+    var parentId: String? = nil
+    /// Names only; blank = none.
+    var alias: String? = nil
+    /// Names only: picked when the add sheet opened.
+    var avatarTone: Int? = nil
+}
+
+struct AddedSubject: Equatable {
+    let id: String
+    /// False when the pool was full: saved for private prayer, not printed.
+    let isCarried: Bool
+}
+
+/// From the addSubject callable's codes (backend/functions/src/subjects.ts):
+/// invalid-argument → `.input`, resource-exhausted → `.cap`, no connection →
+/// `.offline`, anything else (failed-precondition for the hard cap, internal,
+/// …) → `.failed`.
+enum AddSubjectError: Error, Equatable {
+    /// The server rejected the text (the same rules as PlusPrayerDomain).
+    case input(TextIssue)
+    /// No connection.
+    case offline
+    /// The ~500 cap on what's on Home. Not a paywall.
+    case cap
+    /// Anything else (the quiet ~5,000 hard cap, an unexpected server
+    /// error): "Couldn't add this right now. Try again in a little while."
+    case failed
 }
 
 /// getCurrentListMeta + RTDB `/lists/current` (live count, closesAt), and
@@ -52,6 +91,13 @@ protocol LiveRepository {
     func config() -> AsyncStream<AppConfig>
 }
 
+/// Whether the device can reach the backend (NWPathMonitor for real; the
+/// mock's toggle). Online-only commands (addSubject) read it to disable
+/// themselves and say "Adding needs a connection."
+protocol NetworkRepository {
+    func online() -> AsyncStream<Bool>
+}
+
 /// The repositories one environment provides.
 struct Repositories {
     let subjects: any SubjectRepository
@@ -59,6 +105,7 @@ struct Repositories {
     let user: any UserRepository
     let prayers: any PrayerRepository
     let live: any LiveRepository
+    let network: any NetworkRepository
 }
 
 /// A value that streams to any number of watchers: each new stream yields the

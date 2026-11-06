@@ -66,9 +66,4 @@ struct RowStatusTests {
     @Test func otherwiseNoSecondLine() {
         #expect(rowStatus(Fixture.tree["dad-1"]!) == nil)
     }
-
-    @Test func justAddedOverThePool() {
-        #expect(rowStatus(Fixture.tree["bea"]!, justAddedNotCarried: true, poolLimit: 15)
-                == .notCarriedPoolFull(limit: 15))
-    }
 }

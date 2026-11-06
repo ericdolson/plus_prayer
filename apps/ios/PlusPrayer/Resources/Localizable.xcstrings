@@ -13,6 +13,324 @@
       },
       "shouldTranslate": false
     },
+    "add.add": {
+      "comment": "Add sheet: the toolbar's save button.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        }
+      }
+    },
+    "add.alias.caption": {
+      "comment": "Add sheet: muted caption under the Alias field (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only you see this"
+          }
+        }
+      }
+    },
+    "add.alias.placeholder": {
+      "comment": "Add sheet: the Alias field's placeholder (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e.g. Dad"
+          }
+        }
+      }
+    },
+    "add.cancel": {
+      "comment": "Add sheet: the toolbar's close button on the form.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "add.capReached": {
+      "comment": "Add sheet: inline line at the top at the ~500-item cap; Add disabled (screens.md). The number is the cap.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You've reached %lld names and intentions. Archive some to add more."
+          }
+        }
+      }
+    },
+    "add.counter": {
+      "comment": "Add sheet: muted counter under a field in its last 10 characters (\"34/40\").",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "add.error.contact": {
+      "comment": "Add sheet: inline under the Name or Intention field, live after typing pauses (app-brief, Input validation).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Names and intentions can't include phone numbers, emails, or links."
+          }
+        }
+      }
+    },
+    "add.failed": {
+      "comment": "Add sheet: inline line at the top when an add fails for any other reason (the quiet ~5,000 hard cap, an unexpected server error); text kept (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't add this right now. Try again in a little while."
+          }
+        }
+      }
+    },
+    "add.for": {
+      "comment": "Add sheet: the intention's name picker label, before the name (\"For (M) Me\").",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For"
+          }
+        }
+      }
+    },
+    "add.intention.caption": {
+      "comment": "Add sheet: muted caption under the Intention field (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Printed on the list"
+          }
+        }
+      }
+    },
+    "add.intention.placeholder": {
+      "comment": "Add sheet: the Intention field's placeholder, also the offer step's (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e.g. Healing after surgery"
+          }
+        }
+      }
+    },
+    "add.name.caption": {
+      "comment": "Add sheet: muted caption under the Name field (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Printed on the list"
+          }
+        }
+      }
+    },
+    "add.name.placeholder": {
+      "comment": "Add sheet: the Name field's placeholder (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Their name"
+          }
+        }
+      }
+    },
+    "add.notNow": {
+      "comment": "Add sheet: the offer step's leading toolbar button (the name is already saved).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not now"
+          }
+        }
+      }
+    },
+    "add.offer.onList": {
+      "comment": "Add sheet offer step, after a name is saved. The argument is the alias, else the name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is on your list."
+          }
+        }
+      }
+    },
+    "add.offer.question": {
+      "comment": "Add sheet offer step: the question above the intention field. The argument is the alias, else the name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add an intention for %@?"
+          }
+        }
+      }
+    },
+    "add.offline": {
+      "comment": "Add sheet: inline line at the top while offline; Add is disabled and the text is kept (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adding needs a connection."
+          }
+        }
+      }
+    },
+    "add.saved.freePlace": {
+      "comment": "Add sheet, pool full on the free pool (screens.md): second sentence. You are always carried free; this is the one extra place.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your free place on the list is in use."
+          }
+        }
+      }
+    },
+    "add.saved.intention": {
+      "comment": "Add sheet, an intention saved privately because the pool is full (screens.md). Never quotes the intention.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This intention is saved for your own prayers."
+          }
+        }
+      }
+    },
+    "add.saved.membership": {
+      "comment": "Add sheet, pool full, the first full-pool add of the day when a larger pool exists (PROPOSED cadence, open-questions Q31). The number is the base membership pool.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Membership carries up to %lld of your people each day."
+          }
+        }
+      }
+    },
+    "add.saved.poolFull": {
+      "comment": "Add sheet, pool full on a paid pool: second sentence. The number is the user's pool (never 1: the free pool has its own line).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "All %lld places on the list are in use."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "add.saved.private": {
+      "comment": "Add sheet, pool full: first sentence. The argument is the alias (else the name), or the intention's text.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is saved for your own prayers."
+          }
+        }
+      }
+    },
+    "add.saved.seeMembership": {
+      "comment": "Add sheet, pool full: the blue button under the membership line.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See membership"
+          }
+        }
+      }
+    },
+    "add.saved.yourPortion": {
+      "comment": "Add sheet, pool full: the small blue link to Your portion.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your portion"
+          }
+        }
+      }
+    },
+    "add.tab.intention": {
+      "comment": "Add sheet: the segmented control's Intention tab.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intention"
+          }
+        }
+      }
+    },
+    "add.tab.name": {
+      "comment": "Add sheet: the segmented control's Name tab.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        }
+      }
+    },
     "card.closesSoon": {
       "comment": "Card: replaces the status line near the cutoff, only if you haven't prayed with the list today.",
       "extractionState": "manual",
@@ -783,18 +1101,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Answered · %@"
-          }
-        }
-      }
-    },
-    "row.status.notCarriedFull": {
-      "comment": "Row second line, once, for an item added while the carried pool was full (app-brief, add sheet). The number is the pool size.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not on the list · all %lld places in use"
           }
         }
       }

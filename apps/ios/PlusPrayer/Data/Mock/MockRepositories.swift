@@ -10,7 +10,8 @@ extension Repositories {
                      lists: MockListRepository(backend: backend),
                      user: MockUserRepository(backend: backend),
                      prayers: MockPrayerRepository(backend: backend),
-                     live: MockLiveRepository(backend: backend))
+                     live: MockLiveRepository(backend: backend),
+                     network: MockNetworkRepository(backend: backend))
     }
 }
 
@@ -19,6 +20,10 @@ final class MockSubjectRepository: SubjectRepository {
     init(backend: MockBackend) { self.backend = backend }
 
     func subjects() -> AsyncStream<[Subject]> { backend.subjects.stream() }
+
+    func addSubject(_ input: NewSubject) async throws -> AddedSubject {
+        try await backend.addSubject(input)
+    }
 }
 
 final class MockListRepository: ListRepository {
@@ -102,4 +107,11 @@ final class MockLiveRepository: LiveRepository {
     }
 
     func config() -> AsyncStream<AppConfig> { backend.config.stream() }
+}
+
+final class MockNetworkRepository: NetworkRepository {
+    let backend: MockBackend
+    init(backend: MockBackend) { self.backend = backend }
+
+    func online() -> AsyncStream<Bool> { backend.connected.stream() }
 }

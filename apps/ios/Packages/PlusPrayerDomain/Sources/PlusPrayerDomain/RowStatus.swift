@@ -8,13 +8,11 @@ import Foundation
 public enum RowStatus: Sendable, Equatable {
     /// "Answered · Oct 3"
     case answered(on: Date)
-    /// Added while the pool was full, so saved for private prayer
-    /// (monetization.md, auto-carry): "Not on the list · all 15 places in use".
-    case notCarriedPoolFull(limit: Int)
 }
 
-public func rowStatus(_ subject: Subject, justAddedNotCarried: Bool = false, poolLimit: Int = 0) -> RowStatus? {
+/// A full pool is said in the add sheet, never on Home (screens.md, add
+/// sheet; design-direction §5: absence is never marked).
+public func rowStatus(_ subject: Subject) -> RowStatus? {
     if subject.resolution == .answered, let on = subject.resolvedAt { return .answered(on: on) }
-    if justAddedNotCarried { return .notCarriedPoolFull(limit: poolLimit) }
     return nil
 }

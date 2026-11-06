@@ -19,11 +19,11 @@ and signature components, Home's rows, shell, community card and prayer mode,
 and the domain models + mock data source: Home runs on `HomeModel` over the
 mock repositories, the filter works (counts, context rows, linger then fold,
 empty states); Amen ends in the list invitation and the closing sheet with
-the note. Next: the add sheet (screens.md, with the answers to the app's
-questions in decisions.md), then search. Still open in prayer mode: backgrounding and the
-welcome-back question, the presence draft, the first Amen's onboarding
-steps. Also pending: the offline queue (Data/Queue, replacing the mock's
-in-memory hold) and a debug menu for the mock's scenario controls.
+the note; the add sheet (footer ＋) adds names and intentions. Next: search.
+Still open in prayer mode: backgrounding and the welcome-back question, the
+presence draft, the first Amen's onboarding steps. Also pending: the offline
+queue (Data/Queue, replacing the mock's in-memory hold), a debug menu for the
+mock's scenario controls, and the add sheet's entry from a name's page.
 
 ## Stack
 - SwiftUI, **iOS 26** minimum (Liquid Glass), **iPhone only** (2026-11-05),
@@ -389,6 +389,14 @@ compose queries; if an operation is missing, ask for a backend change.
   The committing Amen (`amen(prayedWithListToday:)` or
   `amenFromInvitation()`) returns the `NewPrayer` for Home to log; the
   selection stays through closing so held rings don't blink.
-- UI smoke test (`PlusPrayerUITests`): pray → Amen → invitation → hold →
-  Amen → closing → note → the card's status. Screenshots are attached to
+- `Features/AddSheet/AddSheet` + `State/AddSheetModel` (screens.md, Add
+  sheet → Details): toolbar buttons, a segmented Name | Intention, the
+  offer step pushed in; every field stays in the hierarchy so focus moves
+  without the keyboard dropping. Validation, the pool check and the tone
+  pick are in PlusPrayerDomain; the full-pool invitation cadence is one rule
+  (`poolFullInvitation`, PROPOSED, open-questions Q31). Its links take
+  closures and stay hidden until Your portion and Membership exist.
+- UI smoke tests (`PlusPrayerUITests`): pray → Amen → invitation → hold →
+  Amen → closing → note → the card's status; ＋ → name (tabs keep the
+  keyboard) → offer → intention → on Home. Screenshots are attached to
   the result bundle (`xcrun xcresulttool export attachments`).

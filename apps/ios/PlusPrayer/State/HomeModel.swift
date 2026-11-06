@@ -22,6 +22,7 @@ final class HomeModel {
     private(set) var stats = LiveStats.empty
     private(set) var config = AppConfig.defaults
     private(set) var localPrayers: [NewPrayer] = []
+    private(set) var isOnline = true
     /// The local day; the gold and "prayed with the list today" clear when it changes.
     private(set) var today: LocalDate
 
@@ -35,10 +36,13 @@ final class HomeModel {
 
     private let repositories: Repositories
     private let clock: () -> Date
+    /// Device-local preferences (the add sheet's "shown today").
+    private let defaults: UserDefaults
 
-    init(repositories: Repositories, clock: @escaping () -> Date = Date.init) {
+    init(repositories: Repositories, clock: @escaping () -> Date = Date.init, defaults: UserDefaults = .standard) {
         self.repositories = repositories
         self.clock = clock
+        self.defaults = defaults
         today = LocalDate(clock())
     }
 
@@ -58,6 +62,7 @@ final class HomeModel {
             group.addTask { await self.watchStats() }
             group.addTask { await self.watchConfig() }
             group.addTask { await self.watchLocalPrayers() }
+            group.addTask { await self.watchNetwork() }
             group.addTask { await self.followTheDay() }
         }
     }
@@ -79,6 +84,9 @@ final class HomeModel {
     }
     private func watchConfig() async {
         for await value in repositories.live.config() { config = value }
+    }
+    private func watchNetwork() async {
+        for await value in repositories.network.online() { isOnline = value }
     }
     private func watchLocalPrayers() async {
         for await value in repositories.prayers.localPrayers() { localPrayers = value }
@@ -211,6 +219,56 @@ final class HomeModel {
         await repositories.prayers.updateNote(prayerId: prayerId, note: note)
     }
 
+    /// The addSubject callable (online only). A new item the pool can't
+    /// carry is saved for private prayer; the add sheet says so.
+    func addSubject(_ input: NewSubject) async throws -> AddedSubject {
+        try await repositories.subjects.addSubject(input)
+    }
+
+    /// A new name's tone (design-direction §1b): one of the least used among
+    /// the avatars on Home, Me included, by the tone you see. Picked when the
+    /// add sheet opens; nothing is kept if it's cancelled.
+    func toneForNewName() -> Int {
+        var generator = SystemRandomNumberGenerator()
+        return pickTone(tree.names.map(\.tone), using: &generator)
+    }
+
+    /// The add sheet's name picker: your names in Home order, Me first.
+    var pickerNames: [PickerName] {
+        tree.names.map { PickerName(id: $0.id, label: $0.label, initials: monogram($0), tone: $0.tone) }
+    }
+
+    /// The pool a full-pool add is measured against ("All {pool} places").
+    var poolLimit: Int {
+        header.map { effectivePoolLimit($0, now: clock()) } ?? freeCarryLimit
+    }
+
+    /// The free pool: "Your free place on the list is in use."
+    var isFreePool: Bool { header.map { PlusPrayerDomain.isFreePool($0, now: clock()) } ?? true }
+
+    /// Active names and intentions; at the ~500 cap the add sheet says so.
+    var subjectCount: Int { subjects?.count ?? 0 }
+
+    private static let membershipShownKey = "addSheet.membershipInvitationShownOn"
+
+    /// What the add sheet offers under the pool-full line (PROPOSED cadence,
+    /// open-questions Q31; the rule is `poolFullInvitation`).
+    func poolFullInvitation() -> PoolFullInvitation {
+        guard let header else { return .portionLink }
+        let shownOn = defaults.string(forKey: Self.membershipShownKey).flatMap(LocalDate.init(string:))
+        return PlusPrayerDomain.poolFullInvitation(user: header, now: clock(), today: today,
+                                                   premiumPool: config.basePremiumPool, shownOn: shownOn)
+    }
+
+    /// The membership invitation was shown: later adds today get the link.
+    /// Recorded only when it's really shown (not while Membership is hidden).
+    func recordMembershipInvitationShown() {
+        defaults.set(today.description, forKey: Self.membershipShownKey)
+    }
+
+    /// A subject's label ("Dad"), for the offer step and the picker.
+    func label(of id: String) -> String? { tree[id]?.label }
+
     private func linger(_ ids: Set<String>) {
         guard !ids.isEmpty else { return }
         batches += 1
@@ -233,7 +291,6 @@ final class HomeModel {
         let carried = showsCarriedMark(s, in: tree)
         let secondary: RowItem.Secondary? = switch rowStatus(s) {
         case .answered(let on): .init(text: L10n.Row.answered(on), answered: true)
-        case .notCarriedPoolFull(let limit): .init(text: L10n.Row.notCarriedFull(limit), answered: false)
         case nil: nil
         }
         let named = s.label != s.publicName ? "\(s.label), \(s.publicName)" : s.publicName
@@ -278,6 +335,14 @@ struct NameGroup: Identifiable, Equatable {
     let name: RowItem
     let intentions: [RowItem]
     var id: String { name.id }
+}
+
+/// One name in the add sheet's picker.
+struct PickerName: Identifiable, Equatable {
+    let id: String
+    let label: String
+    let initials: String
+    let tone: Int
 }
 
 struct HeaderValues: Equatable {

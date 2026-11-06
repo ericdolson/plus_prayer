@@ -154,6 +154,70 @@ struct HomeModelTests {
         #expect(backend.notes[prayer.id] == "A quiet morning.")
     }
 
+    // MARK: Adding
+
+    @Test func aNewNameGoesToTheBottomCarriedWithItsTone() async throws {
+        defer { running.cancel() }
+        let tone = home.toneForNewName()
+        let added = try await home.addSubject(NewSubject(kind: .soul, publicName: "  Ruth   Kim ",
+                                                         alias: "Ruthie", avatarTone: tone))
+        await waitUntil { home.groups.last?.id == added.id }
+        let row = try #require(home.groups.last?.name)
+        #expect(row.label == "Ruthie")
+        #expect(row.initials == "R")
+        #expect(row.tone == tone)
+        #expect(row.carried)
+        #expect(backend.subjects.value.last?.publicName == "Ruth Kim")
+    }
+
+    @Test func anIntentionGoesUnderItsName() async throws {
+        defer { running.cancel() }
+        let added = try await home.addSubject(NewSubject(kind: .intention, publicName: "Rest", parentId: "dad"))
+        await waitUntil { home.groups.first { $0.id == "dad" }?.intentions.last?.id == added.id }
+        #expect(home.groups.first { $0.id == "dad" }?.intentions.map(\.id) == ["dad-1", "dad-2", added.id])
+    }
+
+    @Test func theNewTonesAreTheLeastUsed() {
+        defer { running.cancel() }
+        let used = Set(home.groups.map(\.name.tone)) // 7, 0, 8, 10, 13, 14, 6
+        for _ in 0..<20 { #expect(!used.contains(home.toneForNewName())) }
+    }
+
+    @Test func printedTextCantCarryContactInfo() async {
+        defer { running.cancel() }
+        await #expect(throws: AddSubjectError.input(.contactInfo)) {
+            try await home.addSubject(NewSubject(kind: .soul, publicName: "Ana 555-123-4567"))
+        }
+    }
+
+    @Test func addingNeedsAConnection() async {
+        defer { running.cancel() }
+        backend.online = false
+        await #expect(throws: AddSubjectError.offline) {
+            try await home.addSubject(NewSubject(kind: .soul, publicName: "Ruth"))
+        }
+    }
+
+    @Test func whenThePoolIsFullItsSavedPrivatelyAndHomeShowsNoMark() async throws {
+        defer { running.cancel() }
+        // 7 of 10 places carried: three more fit, the fourth doesn't.
+        for name in ["A", "B", "C"] {
+            #expect(try await home.addSubject(NewSubject(kind: .soul, publicName: name)).isCarried)
+        }
+        let fourth = try await home.addSubject(NewSubject(kind: .soul, publicName: "D"))
+        #expect(!fourth.isCarried)
+        await waitUntil { home.groups.contains { $0.id == fourth.id } }
+        let row = try #require(home.groups.first { $0.id == fourth.id }?.name)
+        #expect(!row.carried)
+        #expect(row.secondary == nil, "absence is never marked; the add sheet says it")
+    }
+
+    @Test func thePickerIsHomeOrderMeFirst() {
+        defer { running.cancel() }
+        #expect(home.pickerNames.map(\.label) == ["Me", "Dad", "Mom", "Daniel Kim", "Our parish", "Ukraine", "Aunt Bea"])
+        #expect(home.pickerNames.first?.initials == "EO")
+    }
+
     @Test func theFlipNeedsAFreshPrayer() async {
         defer { running.cancel() }
         session.start(list: home.listContext)

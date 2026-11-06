@@ -165,7 +165,7 @@ nonisolated enum PP {
             static let row: CGFloat = 44
             /// Your avatar in Home's header: smaller so it doesn't compete.
             static let header: CGFloat = 32
-            /// The profile at the top of You.
+            /// The profile at the top of You; the add sheet's avatar preview (screens.md).
             static let large: CGFloat = 72
             static let small: CGFloat = 28
             static let tiny: CGFloat = 20
@@ -379,6 +379,8 @@ nonisolated enum PP {
         static let strip: TimeInterval = 0.25
         /// Search's empty state waits for typing to pause (~500–700).
         static let searchPause: TimeInterval = 0.6
+        /// The add sheet's contact-info message shows this long after typing pauses (screens.md, add sheet).
+        static let validationPause: TimeInterval = 0.5
         /// The halo fades in/out.
         static let haloFade: TimeInterval = 0.4
         /// Half of the halo glow's breath (a full in-and-out cycle is 5 s).

@@ -13,6 +13,7 @@ struct HomeView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @State private var confirmingDiscard = false
+    @State private var adding: AddSheetModel?
 
     var body: some View {
         ScrollView {
@@ -53,6 +54,7 @@ struct HomeView: View {
         .confirmationDialog(L10n.Prayer.discardQuestion, isPresented: $confirmingDiscard,
                             titleVisibility: .visible) { discardActions }
         .sheet(isPresented: prayerSheetShown) { PrayerSheet() }
+        .sheet(item: $adding) { model in AddSheet(model: model) }
         .task { await home.run() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { home.refreshToday() }
@@ -87,6 +89,7 @@ struct HomeView: View {
 
     private var bar: some View {
         HomeBar(prayerStartedAt: session.startedAt, prayingWith: home.prayingWith,
+                onAdd: { adding = AddSheetModel(home: home) },
                 onPray: { session.start(list: home.listContext) },
                 onAmen: amen)
     }

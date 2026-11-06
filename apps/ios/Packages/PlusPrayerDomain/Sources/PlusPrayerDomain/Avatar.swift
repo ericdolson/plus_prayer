@@ -36,3 +36,20 @@ public func initials(_ text: String) -> String {
 public func monogram(_ subject: Subject) -> String {
     initials(subject.isSelf ? subject.publicName : subject.label)
 }
+
+// MARK: New subjects (design-direction §1b, 2026-11-05)
+
+/// The tones used least among `tones` (the tones you see on Home: stored, or
+/// the hashed fallback), in palette order. The add sheet picks one of these
+/// at random when it opens and stores it on create.
+public func leastUsedTones(_ tones: [Int]) -> [Int] {
+    var counts = Array(repeating: 0, count: avatarToneCount)
+    for tone in tones where (0..<avatarToneCount).contains(tone) { counts[tone] += 1 }
+    let fewest = counts.min() ?? 0
+    return counts.indices.filter { counts[$0] == fewest }
+}
+
+/// A tone for a new subject: least used, ties at random.
+public func pickTone(_ tones: [Int], using generator: inout some RandomNumberGenerator) -> Int {
+    leastUsedTones(tones).randomElement(using: &generator) ?? 0
+}

@@ -209,6 +209,9 @@ public struct AppConfig: Sendable, Hashable {
     public var draftResumeMinutes = 30
     public var autoSaveHours = 6
     public var durationCapHours = 4
+    /// The base subscription's pool (monetization.md; server config). Not in
+    /// the client's `/config` yet: compiled in until the backend adds it.
+    public var basePremiumPool = 10
 
     public static let defaults = AppConfig()
 

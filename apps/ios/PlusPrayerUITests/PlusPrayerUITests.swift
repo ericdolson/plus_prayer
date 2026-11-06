@@ -49,6 +49,49 @@ final class PlusPrayerUITests: XCTestCase {
         attach(app, "5 home after")
     }
 
+    /// + → a name (the keyboard stays up across tabs) → Add → the offer
+    /// (pushed in, keyboard still up) → an intention → Add → on Home.
+    @MainActor
+    func testAddANameWithAnIntention() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-PPEnvironment", "mock"]
+        app.launch()
+
+        app.buttons["Add"].firstMatch.tap()
+        let name = app.textFields["Their name"]
+        XCTAssertTrue(name.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "Name is focused on open")
+        app.typeText("Gary Olson")
+        sleep(1)
+        attach(app, "add 1 name")
+
+        // Switch tabs: the keyboard never goes down.
+        app.segmentedControls.buttons["Intention"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up on Intention")
+        sleep(1)
+        attach(app, "add 2 intention tab")
+        app.segmentedControls.buttons["Name"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up back on Name")
+
+        app.textFields["e.g. Dad"].tap()
+        app.typeText("Dad")
+        attach(app, "add 3 alias")
+        app.navigationBars.buttons["Add"].tap()
+
+        let offer = app.staticTexts["Dad is on your list."]
+        XCTAssertTrue(offer.waitForExistence(timeout: 3), "the offer step")
+        XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up into the offer")
+        sleep(1)
+        attach(app, "add 4 offer")
+        app.typeText("Healing after surgery")
+        app.navigationBars.buttons["Add"].tap()
+
+        let row = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Dad, Gary Olson'"))
+        XCTAssertTrue(row.firstMatch.waitForExistence(timeout: 3), "the new name on Home")
+        sleep(1)
+        attach(app, "add 5 home")
+    }
+
     private func enabledAmen(_ app: XCUIApplication) -> XCUIElement {
         let amens = app.buttons.matching(NSPredicate(format: "label == 'Amen'")).allElementsBoundByIndex
         return amens.first { $0.isEnabled && $0.isHittable } ?? amens[0]

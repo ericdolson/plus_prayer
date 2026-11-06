@@ -107,6 +107,44 @@ nonisolated enum L10n {
         static var noteHint: String { NSLocalizedString("closing.noteHint", comment: "") }
     }
 
+    enum Add {
+        private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
+        static var tabName: String { t("add.tab.name") }
+        static var tabIntention: String { t("add.tab.intention") }
+        static var namePlaceholder: String { t("add.name.placeholder") }
+        static var nameCaption: String { t("add.name.caption") }
+        static var aliasPlaceholder: String { t("add.alias.placeholder") }
+        static var aliasCaption: String { t("add.alias.caption") }
+        static var intentionPlaceholder: String { t("add.intention.placeholder") }
+        static var intentionCaption: String { t("add.intention.caption") }
+        static var forLabel: String { t("add.for") }
+        static var add: String { t("add.add") }
+        static var cancel: String { t("add.cancel") }
+        static var notNow: String { t("add.notNow") }
+        static var contactError: String { t("add.error.contact") }
+        static var offline: String { t("add.offline") }
+        static var failed: String { t("add.failed") }
+        static var seeMembership: String { t("add.saved.seeMembership") }
+        static var yourPortion: String { t("add.saved.yourPortion") }
+        static func counter(_ count: Int, _ cap: Int) -> String {
+            String(format: t("add.counter"), locale: .current, count, cap)
+        }
+        static func onList(_ name: String) -> String { String(format: t("add.offer.onList"), name) }
+        static func offerQuestion(_ name: String) -> String { String(format: t("add.offer.question"), name) }
+        static func savedPrivately(_ label: String) -> String { String(format: t("add.saved.private"), label) }
+        static func poolFull(_ pool: Int) -> String {
+            String.localizedStringWithFormat(t("add.saved.poolFull"), pool)
+        }
+        static var freePlace: String { t("add.saved.freePlace") }
+        static var savedIntention: String { t("add.saved.intention") }
+        static func capReached(_ cap: Int) -> String {
+            String(format: t("add.capReached"), locale: .current, cap)
+        }
+        static func membership(_ pool: Int) -> String {
+            String(format: t("add.saved.membership"), locale: .current, pool)
+        }
+    }
+
     enum Common {
         static var save: String { NSLocalizedString("common.save", comment: "") }
         static var done: String { NSLocalizedString("common.done", comment: "") }
@@ -117,9 +155,6 @@ nonisolated enum L10n {
         static func answered(_ date: Date) -> String {
             String(format: NSLocalizedString("row.status.answered", comment: ""),
                    date.formatted(.dateTime.month(.abbreviated).day()))
-        }
-        static func notCarriedFull(_ limit: Int) -> String {
-            String.localizedStringWithFormat(NSLocalizedString("row.status.notCarriedFull", comment: ""), limit)
         }
         static func carried(_ name: String) -> String {
             String(format: NSLocalizedString("row.carried", comment: ""), name)

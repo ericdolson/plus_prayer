@@ -23,10 +23,15 @@ final class MockBackend {
     private let liveDrift: Bool
     private var driftTask: Task<Void, Never>?
 
-    /// Off → writes wait on the device (the queue's job) until it's back on.
+    /// Off → writes wait on the device (the queue's job) until it's back on,
+    /// and online-only commands fail.
     var online = true {
-        didSet { if online && !oldValue { reconnectHandlers.forEach { $0() } } }
+        didSet {
+            connected.send(online)
+            if online && !oldValue { reconnectHandlers.forEach { $0() } }
+        }
     }
+    let connected = Watched(true)
     private var reconnectHandlers: [() -> Void] = []
 
     /// Prayer notes by prayer id (`updatePrayerNote`).
@@ -78,7 +83,48 @@ final class MockBackend {
         notes[prayerId] = note
     }
 
+    private var nextId = 1
+
+    /// The addSubject callable, with the server's rules: text checks, the
+    /// cap, the parent must be one of your names, appended at the bottom of
+    /// its level, carried while the pool has room.
+    func addSubject(_ input: NewSubject) async throws(AddSubjectError) -> AddedSubject {
+        try? await Task.sleep(for: latency)
+        guard online else { throw .offline }
+        guard !failsAdds else { throw .failed }
+        if let issue = validatePrinted(input.publicName, kind: input.kind)
+            ?? (input.kind == .soul ? validateAlias(input.alias) : nil) {
+            throw .input(issue)
+        }
+        let current = subjects.value
+        guard current.count < subjectCap else { throw .cap }
+        if input.kind == .intention {
+            guard let parentId = input.parentId, current.contains(where: { $0.id == parentId && $0.isName }) else {
+                throw .input(.empty)
+            }
+        }
+        let level = current.filter { !$0.isSelf && $0.parentId == input.parentId }
+        let alias = input.alias.map(cleanText).flatMap { $0.isEmpty ? nil : $0 }
+        var subject = Subject(id: "m\(nextId)", kind: input.kind, parentId: input.parentId,
+                              publicName: cleanText(input.publicName),
+                              alias: input.kind == .soul ? alias : nil,
+                              isCarried: true,
+                              sortOrder: (level.map(\.sortOrder).max() ?? 0) + 1,
+                              avatarTone: input.kind == .soul ? input.avatarTone : nil,
+                              createdAt: now())
+        nextId += 1
+        if let header = header.value {
+            subject.isCarried = carriesNewSubject(subject, in: SubjectTree(current), user: header, now: now())
+        }
+        subjects.send(current + [subject])
+        return AddedSubject(id: subject.id, isCarried: subject.isCarried)
+    }
+
     // MARK: Scenario controls
+
+    /// addSubject fails as the server would for anything unexpected (or the
+    /// quiet hard cap).
+    var failsAdds = false
 
     /// Sets the list's cutoff, as closeList does (mirrored to RTDB).
     func setClosesAt(_ closesAt: Date?) {
