@@ -20,6 +20,7 @@ decisions.md. **MVP** = blocks MVP build._
 | D2 | Draw the **7 wax-stamp vectors as the bloom pressed into wax** (one per weekday wax), replacing the painted circled-"+" placeholder in `WaxSeal`. Same bloom as D1, so ink (carried) and wax (sealed) read as one symbol. **Scope reduced 2026-11-02:** vectors now only for small sizes; large sizes use photos (D3). **2026-11-03:** detail-page beads are plain wax-colored dots, so D2 doesn't block them (see detail-page.md). See list-lifecycle and design-direction §5–6 | design |
 | D3 | **Shoot the 7 wax seals (+ an unsealed blank) as macro photos**, cut out with transparency, for large seal sizes. Shoot guide in design-direction §6 "Photographed seals" | design |
 | D4 | **Layered app icon** in Icon Composer (`.icon`: layers plus light, dark and tinted variants) for iOS 26. Until then the iOS app uses an interim icon built from `app/assets/img/+prayer_icon.svg` (2026-11-05) | design |
+| D5 | **DEFERRED (2026-11-06): searchable intention name picker.** v1 is a plain native menu listing every name (no search). Build when lists commonly pass ~10 names: menu shows Me + the 5 most recent (prayed or added) + "All names…", which pushes a list inside the add sheet with its search field focused (keyboard stays up), matching name + alias like Home search. Under ~10 names the menu lists everyone and "All names…" is hidden. See screens.md add sheet | app |
 
 ## Resolved
 | # | Resolution | Date |

@@ -78,7 +78,8 @@ _Last updated: 2026-10-18_
       Add the sheet closes (one offer; more intentions from the name's page).
     - Picker menu items show a small monogram avatar + alias (color is how
       people find their people), in Home order with Me first. Android port:
-      an exposed dropdown.
+      an exposed dropdown. **No search in v1**; a searchable "All names…"
+      step is deferred (open-questions D5).
 - **Screens:** Home · Today's list (seal, video, counts, who's carried →
   portion) · Past lists · Name/Intention detail · Your portion · History
   (account-wide, grouped by day, streak/grace marks) · Prayer detail (note) ·

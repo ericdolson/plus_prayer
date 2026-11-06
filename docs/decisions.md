@@ -1430,3 +1430,13 @@ up against a user dismissal.
   spare height below.
 Why: keep the preview honest, the tone pick stateless, and the flow short;
 avatars in the picker because color is how users find their people.
+
+### Decision: Intention name picker isn't searchable in v1
+**Timestamp:** 2026-11-06
+v1 keeps a plain native menu of all names. Search is deferred (open-questions
+D5): past ~10 names, the menu becomes Me + 5 most recent + "All names…",
+pushing a searchable list inside the sheet with focus kept (keyboard rule).
+Why: most intentions for others are added from the name's page (picker
+hidden), and footer ＋ intentions are mostly for Me (the default), so the
+picker sees light use on short lists; a native Menu can't hold a search
+field, and a custom list now buys little.
