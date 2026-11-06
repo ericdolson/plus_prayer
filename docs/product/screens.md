@@ -54,6 +54,15 @@ _Last updated: 2026-10-18_
     The sheet then slides in place to the offer "{alias} is on your list. Add
     an intention for {alias}?" with the intention field ready and
     [Not now] / [Add]. Not now loses nothing (the name is already saved).
+  - **Keyboard stays up across tabs (2026-11-05):** switching Name ⇄
+    Intention moves focus to the new tab's text field in the same frame, so
+    the keyboard never hides and reappears. The intention's name picker is a
+    compact control above the field ("For ( M ) Me") that opens a native
+    menu/popup over the sheet without taking focus from the field. The sheet
+    keeps one height for both tabs (sized to the taller form). Opened from a
+    name's page, the intention field is focused at once. The app never hides
+    the keyboard itself while a text field is next; a user swipe-down/tap-out
+    still dismisses it.
 - **Screens:** Home · Today's list (seal, video, counts, who's carried →
   portion) · Past lists · Name/Intention detail · Your portion · History
   (account-wide, grouped by day, streak/grace marks) · Prayer detail (note) ·

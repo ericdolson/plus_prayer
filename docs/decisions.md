@@ -1403,3 +1403,16 @@ Rejected: a Name-or-Intention choice screen first (a tap for everyone to serve
 the minority; ＋ already defaults to Name); opening the detail page in create
 mode (too heavy); a Name → Next → Avatar → Next → Intention wizard (each step
 is a drop-off point, and most users would just tap through the avatar step).
+
+### Decision: Add sheet keeps the keyboard up when switching tabs
+**Timestamp:** 2026-11-05
+Switching Name ⇄ Intention focuses the new tab's text field in the same frame;
+the name picker ("For ( M ) Me") opens a native menu/popup without taking
+focus; the sheet has one height for both tabs. The user can still dismiss the
+keyboard; the app never hides it on its own when a text field is next.
+Why: in the Flutter build, switching to Intention dropped focus (the picker
+seemed first), so the keyboard slid out and back in, which felt jarring. The
+picker defaults to "Me" and is rarely changed, so the intention text is the
+primary input. A sheet height change on switch was the second source of jump.
+Rejected: letting the keyboard hide/show per tab; forcing the keyboard to stay
+up against a user dismissal.
