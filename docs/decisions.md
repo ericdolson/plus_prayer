@@ -1460,3 +1460,9 @@ field, and a custom list now buys little.
 Why: an upsell on every add past the limit is too much for someone adding the
 people they love; once a day keeps the path visible without nagging. Captions
 survive typing, placeholders don't. Monetization flow to be refined later.
+
+### Note: Add-sheet upsell cadence is PROPOSED, not decided
+**Timestamp:** 2026-11-06
+Eric asked to keep the once-a-day cadence (previous entry) as a pending idea,
+not a decision. The app builds it as a placeholder; the open question is
+open-questions Q31 (alternative: first time ever, then at most weekly).

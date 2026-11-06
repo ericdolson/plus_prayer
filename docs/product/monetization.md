@@ -67,7 +67,8 @@ _Last updated: 2026-10-17_
   while the pool has room. When the pool is full, a new item is saved for
   private prayer and the add sheet says so (never silently); on Home it simply
   has no carried mark (design-direction §5 — absence is never marked).
-- **Add-sheet upsell cadence** (2026-11-06): a stronger membership invitation
+- **Add-sheet upsell cadence — PROPOSED, not decided** (2026-11-06; build as a
+  placeholder, see open-questions Q31): a stronger membership invitation
   only on the **first** full-pool add of the user's local day; later adds that
   day get only a small "Your portion" link. No upsell when there's no larger
   pool to offer. Copy and layout in screens.md (add sheet). To be refined with

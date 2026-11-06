@@ -89,6 +89,8 @@ _Last updated: 2026-10-18_
       the step after Add says "{alias} is saved for your own prayers. All
       {pool} places on the list are in use." ({pool} from the entitlement),
       with the intention offer still below it for names.
+      - **Cadence is PROPOSED (open-questions Q31); build it as an isolated,
+        easy-to-change rule.** Placeholder:
       - **First full-pool add of the user's local day:** a stronger, still
         humane invitation under that line, e.g. "Membership carries up to
         {premiumPool} of your people each day." + blue [See membership].
