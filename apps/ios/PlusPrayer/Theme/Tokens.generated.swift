@@ -323,6 +323,8 @@ nonisolated enum PP {
         static let checkSpringFrom: Double = 0.4
         /// During the countdown the pray button's disc is the action blue at this opacity (over raised); solid once Amen is available.
         static let prayButtonDim: Double = 0.3
+        /// A name shown only as the parent of an intention the filter keeps (design-direction §4: a held name with an unheld intention under Still to hold) is dimmed to this opacity; the intention stays full strength. Flutter's tuned value.
+        static let contextRow: Double = 0.55
     }
 
     enum type {

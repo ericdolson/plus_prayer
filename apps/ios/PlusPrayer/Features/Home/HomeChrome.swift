@@ -1,3 +1,4 @@
+import PlusPrayerDomain
 import SwiftUI
 
 // Home's header and floating bar (design-direction §4). No header slab and no

@@ -37,6 +37,7 @@ nonisolated enum L10n {
         static func prayedLastHourSpoken(_ n: Int) -> String { f("card.presence.lastHour.spoken", n) }
         static func prayedToday(_ n: Int) -> String { f("card.presence.today", n) }
         static func overflow(_ n: Int) -> String { f("card.overflow", n) }
+        static var you: String { NSLocalizedString("card.you", comment: "") }
 
         /// The status line under your carried people. `next` = the list they go onto.
         static func status(_ status: TomorrowStatus, next: Int, aboutYouOnly: Bool) -> String {
@@ -74,6 +75,18 @@ nonisolated enum L10n {
     }
 
     enum Row {
+        /// "Answered · Oct 19"
+        static func answered(_ date: Date) -> String {
+            String(format: NSLocalizedString("row.status.answered", comment: ""),
+                   date.formatted(.dateTime.month(.abbreviated).day()))
+        }
+        static func notCarriedFull(_ limit: Int) -> String {
+            String.localizedStringWithFormat(NSLocalizedString("row.status.notCarriedFull", comment: ""), limit)
+        }
+        static func carried(_ name: String) -> String {
+            String(format: NSLocalizedString("row.carried", comment: ""), name)
+        }
+        static var heldToday: String { NSLocalizedString("row.heldToday", comment: "") }
         static var held: String { NSLocalizedString("row.check.held", comment: "") }
         static var partial: String { NSLocalizedString("row.check.partial", comment: "") }
         static var notHeld: String { NSLocalizedString("row.check.none", comment: "") }
@@ -84,6 +97,8 @@ nonisolated enum L10n {
         static var stillToHold: String { NSLocalizedString("home.filter.stillToHold", comment: "") }
         static var carried: String { NSLocalizedString("home.filter.carried", comment: "") }
         static var allHeld: String { NSLocalizedString("home.filter.allHeld", comment: "") }
+        static var carriedMeaning: String { NSLocalizedString("home.carried.meaning", comment: "") }
+        static var carriedKeep: String { NSLocalizedString("home.carried.keep", comment: "") }
 
         /// "Still to hold · 3". Callers never pass 0 (the count is dropped).
         static func withCount(_ label: String, _ count: Int) -> String {

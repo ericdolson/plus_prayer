@@ -4,29 +4,45 @@ import SwiftUI
 /// Home (screens.md, design-direction §3–§7): header, community card, rows,
 /// floating bar; prayer mode in place (the halo, checks in the rows and the
 /// card, Cancel, the prayer bar, the pray button's countdown to Amen).
-/// Sample values until the mock data source exists; search, the filter's
-/// effect, the list invitation and the closing sheet come in later slices.
+/// Runs on `HomeModel` (the repositories, through the domain rules) and
+/// `PrayerSession`. Search, the list invitation and the closing sheet come in
+/// later slices.
 struct HomeView: View {
-    @State private var session: PrayerSession
-
-    init(session: PrayerSession = PrayerSession(graph: Sample.graph, heldToday: ["dad", "dad.surgery"])) {
-        _session = State(initialValue: session)
-    }
-    @State private var filter: HomeFilter = .all
+    @Environment(HomeModel.self) private var home
+    @Environment(PrayerSession.self) private var session
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @State private var confirmingDiscard = false
 
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
-                card
-                ForEach(Array(Sample.groups.enumerated()), id: \.element.id) { index, group in
+                if home.cardShown, let card = home.card {
+                    cardView(card)
+                        .transition(.opacity)
+                }
+                let groups = home.groups
+                ForEach(Array(groups.enumerated()), id: \.element.id) { index, group in
                     groupRows(group)
                         .padding(.top, index == 0 ? 0 : GroupSpacing.above(
-                            afterIntention: !Sample.groups[index - 1].intentions.isEmpty))
+                            afterIntention: !groups[index - 1].intentions.isEmpty))
+                        .transition(.opacity)
+                }
+                if home.allHeldShown {
+                    quietLines([L10n.Filter.allHeld])
+                }
+                if home.carriedHelperShown {
+                    // "[ Choose who's carried ] → Your portion" joins these
+                    // when Your portion exists (build step 6).
+                    quietLines([L10n.Filter.carriedMeaning, L10n.Filter.carriedKeep])
                 }
             }
             .padding(.top, PP.space.xl)
             .padding(.bottom, PP.space.xl)
+            // Rows leaving (a filter change, the fold after linger) close up;
+            // Reduce Motion: a quick fade.
+            .animation(reduceMotion ? .easeOut(duration: PP.duration.quick) : .easeInOut(duration: PP.duration.fold),
+                       value: home.groups.map(\.id) + (home.cardShown ? [HomeModel.cardKey] : []))
         }
         .scrollEdgeEffectStyle(.soft, for: .all)
         .safeAreaBar(edge: .top) { header }
@@ -36,38 +52,53 @@ struct HomeView: View {
         .sensoryFeedback(.impact(weight: .light), trigger: session.checkCount)
         .confirmationDialog(L10n.Prayer.discardQuestion, isPresented: $confirmingDiscard,
                             titleVisibility: .visible) { discardActions }
+        .task { await home.run() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { home.refreshToday() }
+        }
     }
 
-    private var card: some View {
+    private func cardView(_ card: CardValues) -> some View {
         let check: Bool? = session.isPraying ? session.selection.listIncluded : nil
-        return CommunityCard(listNumber: 52, sealVariant: 3, people: 4345, prayers: 3881,
-                             presence: PresenceLine(window: .now, count: 239),
-                             carried: Sample.carried,
-                             status: session.listHeldToday ? .covered : .prayToCarry,
-                             held: session.listHeld,
+        return CommunityCard(listNumber: card.listNumber, sealVariant: card.sealVariant,
+                             people: card.people, prayers: card.prayers, presence: card.presence,
+                             carried: card.carried.map {
+                                 CommunityCard.Person(id: $0.id, initials: $0.initials, tone: $0.tone,
+                                                      spokenName: $0.spokenName, isSelf: $0.isSelf)
+                             },
+                             status: card.status, closingMinutes: card.closingMinutes,
+                             held: card.heldToday || session.selection.listIncluded,
                              check: check,
                              onTap: { if session.isPraying { session.toggleList() } })
             .padding(.horizontal, PP.space.gutter)
             .padding(.bottom, PP.space.cardToList)
     }
 
-    private var header: some View {
+    @ViewBuilder private var header: some View {
+        @Bindable var home = home
         let onCancel: (() -> Void)? = session.isPraying ? { cancel() } : nil
-        return HomeHeader(initials: "EO", tone: 7,
-                          streakState: session.listHeldToday ? .sealedToday : .alive, streakDays: 6,
-                          filter: $filter, counts: HomeFilterCounts(all: 11, stillToHold: 8, carried: 8),
-                          onCancel: onCancel)
+        let me = home.me
+        HomeHeader(initials: me?.initials ?? "", tone: me?.tone ?? 0,
+                   streakState: me?.streakState ?? .none, streakDays: me?.streakDays ?? 0,
+                   filter: $home.filter, counts: home.counts,
+                   onCancel: onCancel)
     }
 
     private var bar: some View {
-        HomeBar(prayerStartedAt: session.startedAt, prayingWith: 238,
-                onPray: { session.start() }, onAmen: { session.amen() })
+        HomeBar(prayerStartedAt: session.startedAt, prayingWith: home.prayingWith,
+                onPray: { session.start(list: home.listContext) },
+                onAmen: amen)
     }
 
     @ViewBuilder private var discardActions: some View {
         // Not .destructive: the system would paint it red, and +Prayer has no red.
         Button(L10n.Prayer.discard) { session.cancel() }
         Button(L10n.Prayer.keepPraying, role: .cancel) {}
+    }
+
+    private func amen() {
+        guard let prayer = session.amen() else { return }
+        Task { await home.log(prayer) }
     }
 
     private func cancel() {
@@ -78,23 +109,49 @@ struct HomeView: View {
         }
     }
 
+    private func quietLines(_ lines: [String]) -> some View {
+        VStack(spacing: PP.space.xs) {
+            ForEach(lines, id: \.self) { Text($0) }
+        }
+        .font(PP.type.bodySmall)
+        .foregroundStyle(PP.color.inkMuted)
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, PP.space.gutter)
+        .padding(.vertical, PP.space.xl)
+        .transition(.opacity)
+    }
+
     @ViewBuilder
-    private func groupRows(_ group: Sample.Group) -> some View {
+    private func groupRows(_ group: NameGroup) -> some View {
+        let name = group.name
         VStack(alignment: .leading, spacing: 0) {
-            NameRow(initials: group.initials, tone: group.tone, label: group.label, carried: group.carried,
-                    held: session.isHeld(group.id), secondary: nil, hasIntentions: !group.intentions.isEmpty,
-                    accessibilityLabel: group.label,
-                    check: session.isPraying ? session.check(group.id) : nil,
-                    onTap: { tap(group.id) })
+            NameRow(initials: name.initials, tone: name.tone, label: name.label, carried: name.carried,
+                    held: held(name), secondary: secondary(name), hasIntentions: !group.intentions.isEmpty,
+                    accessibilityLabel: name.accessibilityLabel(heldOutsidePrayer: !session.isPraying && name.heldToday),
+                    check: session.isPraying ? session.check(name.id) : nil,
+                    onTap: { tap(name.id) })
+                // A name shown only for an intention the filter keeps: dimmed;
+                // the intention stays at full strength.
+                .opacity(name.isContext ? PP.number.contextRow : 1)
             ForEach(Array(group.intentions.enumerated()), id: \.element.id) { index, intention in
-                IntentionRow(text: intention.text, carried: intention.carried, held: session.isHeld(intention.id),
-                             secondary: intention.answered.map { SecondaryLine(text: $0, kind: .answered) },
+                IntentionRow(text: intention.label, carried: intention.carried, held: held(intention),
+                             secondary: secondary(intention),
                              thread: index == group.intentions.count - 1 ? .lastBranch : .branch,
-                             accessibilityLabel: intention.text,
+                             accessibilityLabel: intention.accessibilityLabel(
+                                heldOutsidePrayer: !session.isPraying && intention.heldToday),
                              check: session.isPraying ? session.check(intention.id) : nil,
                              onTap: { tap(intention.id) })
+                    .transition(.opacity)
             }
         }
+    }
+
+    /// The gold ring / dot: held today, or held live in this prayer.
+    private func held(_ row: RowItem) -> Bool { row.heldToday || session.isHeld(row.id) }
+
+    private func secondary(_ row: RowItem) -> SecondaryLine? {
+        row.secondary.map { SecondaryLine(text: $0.text, kind: $0.answered ? .answered : .notice) }
     }
 
     /// In prayer a tap checks; in nav mode it opens the item (a later slice).
@@ -103,69 +160,51 @@ struct HomeView: View {
     }
 }
 
-/// Placeholder content until the mock data source exists.
-enum Sample {
-    struct Intention: Identifiable {
-        let id: String
-        let text: String
-        var carried = false
-        var answered: String? = nil
+// MARK: Previews (always on the mock)
+
+private struct HomePreview: View {
+    @State private var home: HomeModel
+    @State private var session: PrayerSession
+
+    /// `startedAgo`: begin a prayer that many seconds ago; `checks`: ids to
+    /// check in it ("list" for the card).
+    init(filter: HomeFilter = .all, startedAgo: TimeInterval? = nil, checks: [String] = []) {
+        let environment = AppEnvironment.mock(MockBackend(latency: .zero, liveDrift: false))
+        let home = HomeModel(environment: environment)
+        home.filter = filter
+        let session = PrayerSession(graph: { home.graph },
+                                    clock: { .now.addingTimeInterval(-(startedAgo ?? 0)) })
+        _home = State(initialValue: home)
+        _session = State(initialValue: session)
+        if startedAgo != nil {
+            session.start(list: ListContext(listId: "list-52", listNumber: 52))
+            self.checks = checks
+        }
     }
 
-    struct Group: Identifiable {
-        let id: String
-        let label: String
-        let initials: String
-        let tone: Int
-        var carried = true
-        var intentions: [Intention] = []
+    private var checks: [String] = []
+
+    var body: some View {
+        HomeView()
+            .environment(home)
+            .environment(session)
+            .task {
+                // The graph exists once the subjects have arrived.
+                try? await Task.sleep(for: .milliseconds(50))
+                for id in checks { id == "list" ? session.toggleList() : session.toggle(id) }
+            }
     }
-
-    static let groups: [Group] = [
-        Group(id: "me", label: "Me", initials: "EO", tone: 7,
-              intentions: [Intention(id: "me.work", text: "Patience with the new job", carried: true)]),
-        Group(id: "dad", label: "Dad", initials: "D", tone: 0,
-              intentions: [Intention(id: "dad.surgery", text: "Healing after his surgery", carried: true),
-                           Intention(id: "dad.heart", text: "Rest for his heart")]),
-        Group(id: "mom", label: "Mom", initials: "M", tone: 8,
-              intentions: [Intention(id: "mom.ruth", text: "A safe delivery for Ruth", answered: "Answered · Oct 19")]),
-        Group(id: "dk", label: "Daniel Kim", initials: "DK", tone: 10),
-        Group(id: "op", label: "Olivia Park", initials: "OP", tone: 13),
-        Group(id: "ray", label: "Uncle Ray", initials: "U", tone: 14),
-        Group(id: "june", label: "Grandma June", initials: "G", tone: 3, carried: false),
-        Group(id: "bea", label: "Aunt Bea", initials: "A", tone: 6, carried: false),
-        Group(id: "sam", label: "Sam", initials: "S", tone: 9, carried: false),
-    ]
-
-    static let graph = SubjectGraph(intentionsByName: Dictionary(uniqueKeysWithValues: groups.map {
-        ($0.id, $0.intentions.map(\.id))
-    }))
-
-    static let carried: [CommunityCard.Person] = [
-        .init(id: "me", initials: "EO", tone: 7, spokenName: "You", isSelf: true),
-        .init(id: "d", initials: "D", tone: 0, spokenName: "Dad", isSelf: false),
-        .init(id: "m", initials: "M", tone: 8, spokenName: "Mom", isSelf: false),
-        .init(id: "dk", initials: "DK", tone: 10, spokenName: "Daniel Kim", isSelf: false),
-        .init(id: "op", initials: "OP", tone: 13, spokenName: "Olivia Park", isSelf: false),
-        .init(id: "u", initials: "U", tone: 14, spokenName: "Uncle Ray", isSelf: false),
-    ]
 }
 
-#Preview("Dark") { HomeView().preferredColorScheme(.dark) }
+#Preview("Dark") { HomePreview().preferredColorScheme(.dark) }
+#Preview("Light") { HomePreview().preferredColorScheme(.light) }
+#Preview("Still to hold") { HomePreview(filter: .stillToHold).preferredColorScheme(.dark) }
+#Preview("Carried") { HomePreview(filter: .carried).preferredColorScheme(.light) }
 #Preview("In prayer") {
     // Started 11 s ago (Amen is available), the list and a few rows checked.
-    let session = PrayerSession(graph: Sample.graph, clock: { .now.addingTimeInterval(-11) })
-    session.start()
-    session.toggleList()
-    session.toggle("dad.heart")
-    session.toggle("mom")
-    session.toggle("mom.ruth")
-    return HomeView(session: session).preferredColorScheme(.dark)
+    HomePreview(startedAgo: 11, checks: ["list", "dad-2", "mom", "mom-1"]).preferredColorScheme(.dark)
 }
-#Preview("Light") { HomeView().preferredColorScheme(.light) }
-#Preview("Counting down") {
-    // 2 s in: the ring is decaying, Amen isn't available yet.
-    let session = PrayerSession(graph: Sample.graph, clock: { .now.addingTimeInterval(-2) })
-    session.start()
-    return HomeView(session: session).preferredColorScheme(.light)
+#Preview("Counting down") { HomePreview(startedAgo: 2).preferredColorScheme(.light) }
+#Preview("Large type") {
+    HomePreview().environment(\.dynamicTypeSize, .accessibility2).preferredColorScheme(.dark)
 }

@@ -1,9 +1,9 @@
+import PlusPrayerDomain
 import SwiftUI
 
-/// Home's filter (design-direction §4): All · Still to hold · Carried.
-enum HomeFilter: CaseIterable, Hashable {
-    case all, stillToHold, carried
-
+/// Home's filter (design-direction §4): All · Still to hold · Carried. The
+/// rules live in PlusPrayerDomain (`HomeFilter.swift`).
+extension HomeFilter {
     var label: String {
         switch self {
         case .all: L10n.Filter.all

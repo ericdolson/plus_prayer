@@ -16,9 +16,11 @@ needed (frosted menus, shader scroll edges) all have native answers here.
 Phase 0 is done (open items in `PHASE-0.md`). Build order: `app-brief.md`
 §6. Built so far (see "Components so far" below and `git log`): the theme
 and signature components, Home's rows, shell, community card and prayer mode,
-all on sample values. Next: the mock data source and domain models, or the
-rest of prayer mode (list invitation, closing sheet and note, fold under
-Still to hold).
+and the domain models + mock data source: Home runs on `HomeModel` over the
+mock repositories, the filter works (counts, context rows, linger then fold,
+empty states). Next: the rest of prayer mode (list invitation, closing sheet
+and note), the offline queue (Data/Queue, replacing the mock's in-memory
+hold), or a debug menu for the mock's scenario controls.
 
 ## Stack
 - SwiftUI, **iOS 26** minimum (Liquid Glass), **iPhone only** (2026-11-05),
@@ -340,7 +342,32 @@ compose queries; if an operation is missing, ask for a backend change.
   corners; breath, Amen flare, Reduce Motion static), `PrayButton` with the
   5 s ring countdown to Amen, Cancel in the header (confirm past 30 s), the
   prayer bar (timer · "with N" · search).
-- `HomeView` is the root (sample rows until the mock data source exists);
-  `ComponentGallery` stays for previews.
+- `HomeView` is the root, on `HomeModel` + `PrayerSession` from the
+  environment; `ComponentGallery` stays for previews.
 - Strings: `App/L10n.swift` over `Resources/Localizable.xcstrings` (explicit
   keys, plural variations).
+
+## Data and state so far (build step 2)
+- PlusPrayerDomain: models (`Subject`, `CurrentList`, `MyListStatus`,
+  `UserHeader`, `LiveStats`, `AppConfig`, `NewPrayer`, `LocalDate`) and
+  rules: `SubjectTree`, carry (`isEffectivelyCarried`, `carriedNames`),
+  Home's filter (`visibleGroups`, `filterCount`, `communityCardShown`),
+  streak (`effectiveStreak`, `afterListPrayer`, `streakBadgeState`), the
+  local-prayer fold, the gate (`tomorrowStatus(list:…)`), row status,
+  `monogram`. Ported from Flutter's `domain/rules`, same cases in the tests.
+- `Data/Repositories`: protocols for what's built so far (Home's reads and
+  `logPrayer`); `Watched<Value>` streams a value (current first, then
+  changes). Each surface grows with its feature.
+- `Data/Mock`: `MockBackend` (main-actor, in-memory, applies the server's
+  rules; `online`, `advanceClock`, `flipList`, `setSealed`, `setClosesAt`,
+  `setStats`, live drift), `MockSeed.standard` (Flutter's seed: the
+  reference screenshots), repositories over it. `MockPrayerRepository`
+  holds prayers in memory until the backend takes them; the real queue
+  replaces it.
+- `App/AppEnvironment`: `-PPEnvironment mock|emulator|firebase`; only mock
+  exists, the others log and fall back to it until build step 4.
+- `State/HomeModel`: watches the repositories in `run()` (the view's
+  `.task`), derives rows, counts, header and card through the domain;
+  `log(_:)` sends Amen's prayer and starts the linger under Still to hold.
+  `PrayerSession` holds only this prayer's selection and returns the
+  `NewPrayer` from `amen()`.

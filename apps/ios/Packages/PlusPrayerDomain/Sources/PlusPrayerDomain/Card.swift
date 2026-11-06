@@ -1,3 +1,5 @@
+import Foundation
+
 // The community card's rules (design-direction §6, presence-live.md,
 // list-lifecycle.md). Pure functions; the app turns their answers into copy.
 
@@ -70,4 +72,28 @@ public func fillRow(people: Int, capacity: Int) -> (shown: Int, overflow: Int) {
     if people <= capacity { return (people, 0) }
     let shown = max(capacity - 1, 0)
     return (shown, people - shown)
+}
+
+public func presenceLine(_ stats: LiveStats, threshold: Int) -> PresenceLine? {
+    presenceLine(prayingNow: stats.prayingNow, prayedLastHour: stats.prayedLastHour,
+                 prayedToday: stats.prayedToday, threshold: threshold)
+}
+
+/// Others in prayer alongside you, for the prayer bar ("with 212"); nil when
+/// the live count is under the display threshold. Your own presence is part
+/// of `prayingNow` once it has synced.
+public func othersInPrayer(_ stats: LiveStats, threshold: Int) -> Int? {
+    stats.prayingNow < threshold ? nil : stats.prayingNow - 1
+}
+
+// MARK: The closing notice
+
+/// Minutes until the list closes, during the last 5 minutes, for someone who
+/// hasn't prayed with it today (the notice replaces the status line); nil
+/// otherwise. Rounded up, 1…5.
+public func closingSoonMinutes(closesAt: Date?, now: Date, prayedWithListToday: Bool) -> Int? {
+    guard let closesAt, !prayedWithListToday else { return nil }
+    let left = closesAt.timeIntervalSince(now)
+    guard left >= 0, left <= 5 * 60 else { return nil }
+    return min(5, max(1, Int((left / 60).rounded(.up))))
 }

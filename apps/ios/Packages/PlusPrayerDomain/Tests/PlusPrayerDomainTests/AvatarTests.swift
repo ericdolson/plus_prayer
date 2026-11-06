@@ -36,3 +36,12 @@ struct InitialsTests {
         #expect(initials(name) == expected)
     }
 }
+
+struct MonogramTests {
+    @Test func yoursFromYourNameOthersFromWhatYouCallThem() {
+        #expect(monogram(Fixture.tree["self"]!) == "EO")
+        #expect(monogram(Fixture.tree["dad"]!) == "D")
+        #expect(monogram(Fixture.tree["bea"]!) == "AB")
+        #expect(monogram(Fixture.name("p", "Our parish", order: 0)) == "OP")
+    }
+}

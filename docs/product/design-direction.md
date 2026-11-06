@@ -242,7 +242,8 @@ gold.
     label → reopen the menu. Neutral active style (ink on `raised`), not blue.
   - Filters remain available in prayer mode.
   - Unprayed filter: a held name with an unprayed intention shows dimmed, with
-    the unprayed intention at full strength (keep).
+    the unprayed intention at full strength (keep). Dimmed = 55% opacity
+    (`number.contextRow`, Flutter's value; 2026-11-05).
 - **Bottom bar — floating pill + separate pray button** (iOS 26 pattern):
   ```
   Normal:     ( History  🔎  ＋ )   ( 🙏 )

@@ -6,27 +6,26 @@ import PlusPrayerDomain
 /// Home in a different state, not a screen: rows become checkable, the halo
 /// frames the screen, the bar becomes the prayer bar.
 ///
-/// Build step 1: no writes yet. Amen marks what was held as held today (the
-/// gold that lasts until local midnight); logging, the list invitation and
-/// the closing sheet come with the data layer and the next slices.
+/// The session holds only what this prayer holds. What's held today comes
+/// from the data (`HomeModel`); Amen hands back the `NewPrayer` to log. The
+/// list invitation and the closing sheet come in the next slices.
 @MainActor @Observable
 final class PrayerSession {
     enum Phase: Equatable {
         case idle
-        case praying(startedAt: Date)
+        /// `list`: the list current at the start, which the prayer counts for.
+        case praying(startedAt: Date, list: ListContext?)
     }
 
     private(set) var phase: Phase = .idle
     private(set) var selection = PrayerSelection.empty
-    /// Held today (until local midnight): names and intentions, and the list.
-    private(set) var heldToday: Set<String>
-    private(set) var listHeldToday: Bool
     /// Bumps on each committing Amen: the halo's flare.
     private(set) var amenCount = 0
     /// Bumps each time something is checked (not unchecked): the light haptic.
     private(set) var checkCount = 0
 
-    let graph: SubjectGraph
+    /// Which names have which intentions, as Home shows them now.
+    private let graph: () -> SubjectGraph
     private let clock: () -> Date
 
     /// The pray button's minimum before Amen (prayer-flow.md, ~5 s).
@@ -34,18 +33,15 @@ final class PrayerSession {
     /// Past this, Cancel asks "Discard this prayer?" (design-direction §4, ~30 s).
     static let confirmDiscardAfter: TimeInterval = 30
 
-    init(graph: SubjectGraph, heldToday: Set<String> = [], listHeldToday: Bool = false,
-         clock: @escaping () -> Date = Date.init) {
+    init(graph: @escaping () -> SubjectGraph, clock: @escaping () -> Date = Date.init) {
         self.graph = graph
-        self.heldToday = heldToday
-        self.listHeldToday = listHeldToday
         self.clock = clock
     }
 
     var isPraying: Bool { phase != .idle }
 
     var startedAt: Date? {
-        if case .praying(let startedAt) = phase { return startedAt }
+        if case .praying(let startedAt, _) = phase { return startedAt }
         return nil
     }
 
@@ -60,25 +56,23 @@ final class PrayerSession {
     // MARK: Row state
 
     /// The check a row shows in prayer.
-    func check(_ id: String) -> HoldState { selection.state(of: id, in: graph) }
+    func check(_ id: String) -> HoldState { selection.state(of: id, in: graph()) }
 
-    /// The gold ring / dot: held today, or held live in this prayer.
-    func isHeld(_ id: String) -> Bool { heldToday.contains(id) || selection.isHeld(id) }
-
-    var listHeld: Bool { listHeldToday || selection.listIncluded }
+    /// Held in this prayer (the row's gold, live).
+    func isHeld(_ id: String) -> Bool { selection.isHeld(id) }
 
     // MARK: Commands
 
-    func start() {
+    func start(list: ListContext?) {
         guard !isPraying else { return }
         selection = .empty
-        phase = .praying(startedAt: clock())
+        phase = .praying(startedAt: clock(), list: list)
     }
 
     func toggle(_ id: String) {
         guard isPraying else { return }
         let willHold = !selection.isHeld(id)
-        selection = selection.toggling(id, in: graph).stamped(at: clock())
+        selection = selection.toggling(id, in: graph()).stamped(at: clock())
         if willHold { checkCount += 1 }
     }
 
@@ -89,14 +83,19 @@ final class PrayerSession {
         if willHold { checkCount += 1 }
     }
 
-    /// The committing Amen.
-    func amen() {
-        guard canAmen(at: clock()) else { return }
-        heldToday.formUnion(selection.held)
-        listHeldToday = listHeldToday || selection.listIncluded
+    /// The committing Amen: ends the prayer and returns it, to be logged.
+    /// nil before the minimum (or with no list known, which can't happen once
+    /// Home has loaded: every prayer records the list current at its start).
+    func amen() -> NewPrayer? {
+        let now = clock()
+        guard canAmen(at: now), case .praying(let startedAt, let list) = phase else { return nil }
+        let prayer = list.map {
+            newPrayer(id: UUID().uuidString, selection: selection, startedAt: startedAt, endedAt: now, list: $0)
+        }
         amenCount += 1
         selection = .empty
         phase = .idle
+        return prayer
     }
 
     /// Discard: nothing is logged.

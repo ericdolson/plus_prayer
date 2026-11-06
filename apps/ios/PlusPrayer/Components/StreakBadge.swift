@@ -1,17 +1,14 @@
+import PlusPrayerDomain
 import SwiftUI
 
 /// The header's streak badge (design-direction §4, streaks-reminders.md): a
 /// neutral pewter seal and the number, which carries the state. Never gold,
 /// never a wax color. Sits on its own glass. Always tappable.
 struct StreakBadge: View {
-    enum State {
-        /// Prayed with the list today: the number in ink.
-        case sealedToday
-        /// Alive, not yet today: the number in inkMuted, the seal one step dimmer.
-        case alive
-        /// No streak: a dim seal and no number (never "0").
-        case none
-    }
+    /// Sealed today (number in ink), alive (inkMuted, the seal one step
+    /// dimmer), or none (a dim seal, no number, never "0"). PlusPrayerDomain
+    /// derives it (`streakBadgeState`).
+    typealias State = StreakBadgeState
 
     let state: State
     let days: Int

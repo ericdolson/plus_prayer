@@ -29,3 +29,10 @@ public func initials(_ text: String) -> String {
     }
     return String(first).uppercased() + String(last).uppercased()
 }
+
+/// A subject's avatar initials, the same on its row, the header and the
+/// card's row (design-direction §6): your own from your printed name ("EO",
+/// not "M" for "Me"), everyone else's from what you call them ("D" for Dad).
+public func monogram(_ subject: Subject) -> String {
+    initials(subject.isSelf ? subject.publicName : subject.label)
+}

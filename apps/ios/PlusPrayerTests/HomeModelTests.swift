@@ -1,0 +1,173 @@
+import Foundation
+import PlusPrayerDomain
+import Testing
+@testable import PlusPrayer
+
+/// HomeModel over the mock backend (the standard seed): what Home shows, the
+/// filter, and a prayer from start to Amen, online and off.
+/// A clock a test moves by hand.
+@MainActor
+final class TestClock {
+    var now = Date.now
+    func advance(_ seconds: TimeInterval) { now.addTimeInterval(seconds) }
+}
+
+@MainActor
+struct HomeModelTests {
+    let backend = MockBackend(latency: .milliseconds(1), liveDrift: false)
+    let home: HomeModel
+    let session: PrayerSession
+    let clock = TestClock()
+    private let running: Task<Void, Never>
+
+    init() async {
+        let environment = AppEnvironment.mock(backend)
+        let home = HomeModel(environment: environment)
+        self.home = home
+        let clock = clock
+        session = PrayerSession(graph: { home.graph }, clock: { clock.now })
+        running = Task { await home.run() }
+        await waitUntil { home.isLoaded && home.card != nil }
+    }
+
+    /// Polls the main actor until `condition` holds (streams deliver on later turns).
+    private func waitUntil(_ condition: () -> Bool) async {
+        for _ in 0..<200 where !condition() { try? await Task.sleep(for: .milliseconds(5)) }
+    }
+
+    private func ids(_ groups: [NameGroup]) -> [String] {
+        groups.flatMap { [$0.id] + $0.intentions.map(\.id) }
+    }
+
+    @Test func showsTheSeedAsTheScreenshotsDo() {
+        defer { running.cancel() }
+        #expect(home.groups.map(\.name.label)
+                == ["Me", "Dad", "Mom", "Daniel Kim", "Our parish", "Ukraine", "Aunt Bea"])
+        #expect(home.groups[0].name.initials == "EO")
+        #expect(home.groups[1].name.heldToday)
+        let card = home.card!
+        #expect(card.listNumber == 52)
+        #expect(card.carried.map(\.initials) == ["EO", "D", "M", "DK", "OP", "U"])
+        #expect(card.status == .prayToCarry)
+        #expect(card.presence == PresenceLine(window: .now, count: 213))
+        #expect(home.me?.streakState == .alive)
+        #expect(home.me?.streakDays == 6)
+    }
+
+    @Test func filterCounts() {
+        defer { running.cancel() }
+        #expect(home.counts == HomeFilterCounts(all: 11, stillToHold: 8, carried: 8))
+    }
+
+    @Test func stillToHoldDimsAHeldNameKeptForItsIntention() {
+        defer { running.cancel() }
+        home.filter = .stillToHold
+        let dad = home.groups.first { $0.id == "dad" }!
+        #expect(dad.name.isContext)
+        #expect(dad.intentions.map(\.id) == ["dad-2"])
+        #expect(home.cardShown)
+    }
+
+    @Test func carriedShowsTheCarriedSet() {
+        defer { running.cancel() }
+        home.filter = .carried
+        #expect(ids(home.groups) == ["self", "self-1", "dad", "dad-1", "mom", "daniel", "parish", "ukraine"])
+        #expect(!home.carriedHelperShown)
+    }
+
+    @Test func amenWithTheListCarriesYouOn() async {
+        defer { running.cancel() }
+        session.start(list: home.listContext)
+        session.toggleList()
+        session.toggle("bea")
+        let prayer = try! #require({ clock.advance(6); return session.amen() }())
+        await home.log(prayer)
+
+        // From the device first (the stream's next turn): gold, the card's
+        // border, the gate, the streak.
+        await waitUntil { !home.localPrayers.isEmpty }
+        #expect(home.groups.first { $0.id == "bea" }!.name.heldToday)
+        #expect(home.card?.heldToday == true)
+        #expect(home.card?.status == .covered)
+        #expect(home.me?.streakState == .sealedToday)
+        #expect(home.me?.streakDays == 7)
+
+        // Then the backend has it, and the device holds nothing back.
+        await waitUntil { home.localPrayers.isEmpty && home.card?.prayers == 3881 }
+        #expect(home.localPrayers.isEmpty)
+        #expect(backend.myStatus.value?.prayersWithList == 1)
+        #expect(home.card?.prayers == 3881)
+        #expect(home.card?.status == .covered)
+    }
+
+    @Test func offlineThePrayerWaitsOnTheDevice() async {
+        defer { running.cancel() }
+        backend.online = false
+        session.start(list: home.listContext)
+        session.toggle("parish")
+        await home.log(try! #require({ clock.advance(6); return session.amen() }()))
+        try? await Task.sleep(for: .milliseconds(30))
+
+        #expect(home.groups.first { $0.id == "parish" }!.name.heldToday)
+        #expect(home.localPrayers.count == 1)
+        #expect(backend.subjects.value.first { $0.id == "parish" }?.lastPrayed == nil)
+
+        backend.online = true
+        await waitUntil { home.localPrayers.isEmpty }
+        #expect(backend.subjects.value.first { $0.id == "parish" }?.lastPrayed == home.today)
+    }
+
+    @Test func underStillToHoldHeldRowsLingerThenLeave() async {
+        defer { running.cancel() }
+        home.filter = .stillToHold
+        session.start(list: home.listContext)
+        session.toggle("parish")
+        session.toggleList()
+        await home.log(try! #require({ clock.advance(6); return session.amen() }()))
+
+        #expect(home.groups.contains { $0.id == "parish" }, "lingers")
+        #expect(home.cardShown, "the card lingers too")
+        await waitUntil { !home.groups.contains { $0.id == "parish" } }
+        #expect(!home.groups.contains { $0.id == "parish" }, "then folds away")
+        #expect(!home.cardShown)
+    }
+
+    @Test func theFlipNeedsAFreshPrayer() async {
+        defer { running.cancel() }
+        session.start(list: home.listContext)
+        session.toggleList()
+        await home.log(try! #require({ clock.advance(6); return session.amen() }()))
+        await waitUntil { backend.myStatus.value?.prayersWithList == 1 && home.localPrayers.isEmpty }
+
+        backend.flipList()
+        await waitUntil { home.card?.listNumber == 53 }
+        #expect(home.card?.status == .nextPrayerCarries)
+        #expect(home.card?.sealVariant == nil, "being filmed")
+        #expect(home.card?.heldToday == true, "the border stays until local midnight")
+    }
+}
+
+@MainActor
+struct PrayerSessionTests {
+    @Test func amenBeforeTheMinimumDoesNothing() {
+        let session = PrayerSession(graph: { SubjectGraph(intentionsByName: [:]) })
+        session.start(list: ListContext(listId: "list-52", listNumber: 52))
+        #expect(session.amen() == nil)
+        #expect(session.isPraying)
+    }
+
+    @Test func amenReturnsWhatWasHeld() {
+        let graph = SubjectGraph(intentionsByName: ["dad": ["dad-1"]])
+        let clock = TestClock()
+        let session = PrayerSession(graph: { graph }, clock: { clock.now })
+        session.start(list: ListContext(listId: "list-52", listNumber: 52))
+        session.toggle("dad-1")
+        clock.advance(6)
+        let prayer = session.amen()
+        #expect(prayer?.subjectIds == ["dad", "dad-1"])
+        #expect(prayer?.communityListId == nil)
+        #expect(prayer?.listContextNumber == 52)
+        #expect(!session.isPraying)
+        #expect(session.amenCount == 1)
+    }
+}
