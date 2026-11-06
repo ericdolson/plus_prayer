@@ -19,7 +19,9 @@ and signature components, Home's rows, shell, community card and prayer mode,
 and the domain models + mock data source: Home runs on `HomeModel` over the
 mock repositories, the filter works (counts, context rows, linger then fold,
 empty states); Amen ends in the list invitation and the closing sheet with
-the note; the add sheet (footer ＋) adds names and intentions. Next: search.
+the note; the add sheet (footer ＋) adds names and intentions; search docks
+above the keyboard. Next: build order step 3 (onboarding, auth, setSelfName)
+or the rest of Home (the detail page is step 5).
 Still open in prayer mode: backgrounding and the welcome-back question, the
 presence draft, the first Amen's onboarding steps. Also pending: the offline
 queue (Data/Queue, replacing the mock's in-memory hold), a debug menu for the
@@ -263,15 +265,21 @@ compose queries; if an operation is missing, ask for a backend change.
   the platform's metrics and look; the spec gives only content and behavior.
   Don't build a custom replacement without a spec decision.
 - Floating controls sit on Liquid Glass (`glassEffect`, grouped in a
-  `GlassEffectContainer`): the pill, the header's badge and filter, the
-  docked search field. The pill and pray button are our layout and sizes on
+  `GlassEffectContainer`): the pill (which becomes the search field), the
+  header's badge and filter. The pill and pray button are our layout and sizes on
   native glass. The pray button is interactive glass tinted action blue, the header avatar glass tinted with its tone. In-content
   containers (community card, search match hint) are flat `cardSurface`,
   never glass.
 - Scroll edges are native: the soft scroll edge effect, no custom blur or dim.
-- The search row docked above the keyboard is the one sanctioned custom
-  chrome: a native `TextField` on glass with the compact pray/Amen button at
-  its end (design-direction §4).
+- **`@FocusState` inside `safeAreaBar` content doesn't read back** (iOS 26):
+  setting it focuses the field, but it stays `false` while the field has
+  focus. Home's dock (`HomeDock`) follows the keyboard's notifications
+  instead and uses focus only to set it. Check this before relying on focus
+  state in a bar.
+- Search reuses the bar (design-direction §4, decided 2026-11-06): the
+  pill's glass becomes a native `TextField` (🔍 field ✕), the pray button
+  stays its own circle beside it, and with the keyboard up both ride above it
+  at `size.bar.compact`.
 - Icons: **SF Symbols** at a light weight, plus our custom symbols (praying
   hands, bloom) in the asset catalog, all through `PPIcon` (one file). No
   Phosphor, no other family.
@@ -348,9 +356,13 @@ compose queries; if an operation is missing, ask for a backend change.
   PlusPrayerDomain `Selection.swift`), `PrayerCheck` in each row's trailing
   slot and the card's, `Halo` (a steady 2 pt edge line + a breathing glow; ConcentricRectangle follows the display's
   corners; breath, Amen flare, Reduce Motion static), `PrayButton` with the
-  5 s ring countdown to Amen, Cancel in the header (confirm past 30 s), the
+  5 s countdown to Amen, Cancel in the header (confirm past 30 s), the
   prayer bar (timer · "with N" · search).
-- `RingButton` (the pray button and the invitation share it), `AvatarCluster`
+- `CountdownButton` (the pray button and the invitation share it): during
+  the ~5 s a small pie inside the dimmed disc runs down to nothing
+  (`number.countdownPie`), then Amen; no ring outside, no change in size
+  (design-direction §4, decided 2026-11-06; the invitation has no seconds
+  counter). `AvatarCluster`
   (outside the card: ≤5 every avatar and a count, more → 4 + "+N";
   `layoutCluster` in PlusPrayerDomain).
 - `Features/Prayer/PrayerSheet`: one native sheet, sized to its content
@@ -396,7 +408,15 @@ compose queries; if an operation is missing, ask for a backend change.
   pick are in PlusPrayerDomain; the full-pool invitation cadence is one rule
   (`poolFullInvitation`, PROPOSED, open-questions Q31). Its links take
   closures and stay hidden until Your portion and Membership exist.
+- Search (`Features/Home/HomeSearch.swift`): 🔎 turns the pill into the
+  search field (see Theming above); with text it stays a field until ×,
+  even with the keyboard down. The query feeds Home's domain rules
+  (name + alias, a name kept as context, the card hidden while there's
+  text). No matches: one line where only the query truncates, + Add
+  prefilled (hidden in prayer), the match hint when a filter hides matches.
+  "In your archive" waits for the archive.
 - UI smoke tests (`PlusPrayerUITests`): pray → Amen → invitation → hold →
   Amen → closing → note → the card's status; ＋ → name (tabs keep the
-  keyboard) → offer → intention → on Home. Screenshots are attached to
+  keyboard) → offer → intention → on Home; search → results → no matches →
+  the match hint → ×. Screenshots are attached to
   the result bundle (`xcrun xcresulttool export attachments`).

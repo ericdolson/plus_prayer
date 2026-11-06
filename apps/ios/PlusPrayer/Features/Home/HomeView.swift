@@ -6,7 +6,7 @@ import SwiftUI
 /// card, Cancel, the prayer bar, the pray button's countdown to Amen).
 /// Runs on `HomeModel` (the repositories, through the domain rules) and
 /// `PrayerSession`. Amen ends in `PrayerSheet` (the list invitation, then the
-/// closing sheet). Search comes in a later slice.
+/// closing sheet). Search docks above the keyboard (`HomeSearch.swift`).
 struct HomeView: View {
     @Environment(HomeModel.self) private var home
     @Environment(PrayerSession.self) private var session
@@ -14,6 +14,9 @@ struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var confirmingDiscard = false
     @State private var adding: AddSheetModel?
+    /// The query once typing has paused: no-matches waits for it, so it
+    /// doesn't flicker while a name is typed.
+    @State private var settledQuery = ""
 
     var body: some View {
         ScrollView {
@@ -31,6 +34,14 @@ struct HomeView: View {
                 }
                 if home.allHeldShown {
                     quietLines([L10n.Filter.allHeld])
+                }
+                if home.noMatches && settledQuery == home.query {
+                    NoMatchesView(query: home.query.trimmingCharacters(in: .whitespacesAndNewlines),
+                                  showsAdd: !session.isPraying, // adding mid-prayer isn't a goal
+                                  hiddenByFilter: home.matchesHiddenByFilter,
+                                  onAdd: { adding = AddSheetModel(home: home, name: home.query) },
+                                  onShowAll: { home.showAllMatches() })
+                        .transition(.opacity)
                 }
                 if home.carriedHelperShown {
                     // "[ Choose who's carried ] → Your portion" joins these
@@ -56,6 +67,11 @@ struct HomeView: View {
         .sheet(isPresented: prayerSheetShown) { PrayerSheet() }
         .sheet(item: $adding) { model in AddSheet(model: model) }
         .task { await home.run() }
+        .task(id: home.query) {
+            try? await Task.sleep(for: .seconds(PP.duration.searchPause))
+            if !Task.isCancelled { settledQuery = home.query }
+        }
+
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { home.refreshToday() }
         }
@@ -88,10 +104,7 @@ struct HomeView: View {
     }
 
     private var bar: some View {
-        HomeBar(prayerStartedAt: session.startedAt, prayingWith: home.prayingWith,
-                onAdd: { adding = AddSheetModel(home: home) },
-                onPray: { session.start(list: home.listContext) },
-                onAmen: amen)
+        HomeDock(onAdd: { adding = AddSheetModel(home: home) }, onAmen: amen)
     }
 
     @ViewBuilder private var discardActions: some View {
@@ -219,4 +232,51 @@ private struct HomePreview: View {
 #Preview("Counting down") { HomePreview(startedAgo: 2).preferredColorScheme(.light) }
 #Preview("Large type") {
     HomePreview().environment(\.dynamicTypeSize, .accessibility2).preferredColorScheme(.dark)
+}
+
+/// The bottom of Home: the bar. Searching, its pill becomes the search field
+/// and, with the keyboard up, both controls ride above it at the compact
+/// height.
+///
+/// The keyboard drives it, not the focus state: a field inside a safe-area
+/// bar takes focus when asked, but its `@FocusState` doesn't read back true
+/// there (iOS 26), so the dock follows the keyboard's own notifications.
+private struct HomeDock: View {
+    let onAdd: () -> Void
+    let onAmen: () -> Void
+
+    @Environment(HomeModel.self) private var home
+    @Environment(PrayerSession.self) private var session
+    @FocusState private var searchFocused: Bool
+    @State private var keyboardUp = false
+
+    var body: some View {
+        @Bindable var home = home
+        HomeBar(prayerStartedAt: session.startedAt, prayingWith: home.prayingWith,
+                searching: home.isSearching, compact: home.isSearching && keyboardUp,
+                onSearch: { home.openSearch() }, onAdd: onAdd,
+                onPray: { session.start(list: home.listContext) },
+                onAmen: onAmen) {
+            SearchField(query: $home.query, focused: $searchFocused, onClose: closeSearch)
+        }
+        // A little air between the controls and the keyboard.
+        .padding(.bottom, home.isSearching && keyboardUp ? PP.space.sm : 0)
+        .task {
+            for await _ in NotificationCenter.default.notifications(named: UIResponder.keyboardWillShowNotification) {
+                keyboardUp = true
+            }
+        }
+        .task {
+            for await _ in NotificationCenter.default.notifications(named: UIResponder.keyboardWillHideNotification) {
+                keyboardUp = false
+                // A search left empty closes itself when the keyboard goes.
+                if !home.hasQuery { home.closeSearch() }
+            }
+        }
+    }
+
+    private func closeSearch() {
+        searchFocused = false
+        home.closeSearch()
+    }
 }

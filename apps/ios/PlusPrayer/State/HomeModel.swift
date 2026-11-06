@@ -28,6 +28,11 @@ final class HomeModel {
 
     var filter: HomeFilter = .all
 
+    /// Search (design-direction §4): the field docked above the keyboard is
+    /// open, and what's typed in it. Both persist across nav and prayer.
+    private(set) var isSearching = false
+    var query = ""
+
     /// Ids kept past the filter while they linger (`cardKey` for the card).
     private(set) var lingering: Set<String> = []
     private var lingerBatch: [String: Int] = [:]
@@ -129,7 +134,7 @@ final class HomeModel {
     /// The groups under the filter, as the rows show them.
     var groups: [NameGroup] {
         let tree = tree
-        return visibleGroups(tree, today: today, filter: filter, keep: lingering).map { group in
+        return visibleGroups(tree, today: today, query: query, filter: filter, keep: lingering).map { group in
             NameGroup(name: item(group.name, tree: tree),
                       intentions: group.intentions.map { item($0, tree: tree) })
         }
@@ -144,12 +149,26 @@ final class HomeModel {
 
     /// Under Still to hold with nothing left, the list included.
     var allHeldShown: Bool {
-        isLoaded && filter == .stillToHold && groups.isEmpty && !cardShown
+        isLoaded && !hasQuery && filter == .stillToHold && groups.isEmpty && !cardShown
+    }
+
+    /// Search has text: results only (no card, no empty states of the filter).
+    var hasQuery: Bool { !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+
+    /// Search found nothing under the filter: "No matches for “Robe”".
+    var noMatches: Bool { isLoaded && hasQuery && groups.isEmpty }
+
+    /// With a filter active, how many items the query matches under All
+    /// ("1 match in All · Show →"); nil without a filter or nothing to show.
+    var matchesHiddenByFilter: Int? {
+        guard filter != .all, hasQuery else { return nil }
+        let count = matchesInAll(tree, query: query, today: today)
+        return count > 0 ? count : nil
     }
 
     /// Under Carried, when it holds only you: what Carried means.
     var carriedHelperShown: Bool {
-        isLoaded && filter == .carried
+        isLoaded && !hasQuery && filter == .carried
             && carriedShowsOnlyYou(visibleGroups(tree, today: today, filter: .carried))
     }
 
@@ -166,7 +185,7 @@ final class HomeModel {
     // MARK: The community card
 
     var cardShown: Bool {
-        list != nil && communityCardShown(filter: filter, query: "", prayedWithListToday: prayedWithListToday,
+        list != nil && communityCardShown(filter: filter, query: query, prayedWithListToday: prayedWithListToday,
                                           lingering: lingering.contains(Self.cardKey))
     }
 
@@ -211,6 +230,19 @@ final class HomeModel {
         }
         await repositories.prayers.logPrayer(prayer)
     }
+
+    // MARK: Search
+
+    func openSearch() { isSearching = true }
+
+    /// The row's ×: clears the query and closes the row.
+    func closeSearch() {
+        query = ""
+        isSearching = false
+    }
+
+    /// "Show →" under no matches: back to All, the query kept.
+    func showAllMatches() { filter = .all }
 
     /// The closing sheet's note (private; note-only edits). Queued after its
     /// prayer, so it never overtakes it.

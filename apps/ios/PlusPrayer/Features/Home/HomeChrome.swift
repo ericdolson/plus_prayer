@@ -65,24 +65,40 @@ struct HomeHeader: View {
 }
 
 /// The floating pill and, beside it on the thumb side, the round pray button
-/// of the same height. In prayer the pill becomes the prayer bar in place
-/// (elapsed time · "with N" · 🔎) and the pray button counts down to Amen.
-struct HomeBar: View {
+/// of the same height: two separate glass shapes. The pill changes in place:
+///
+///     Normal:     ( History  🔎  ＋ )   ( 🙏 )
+///     In prayer:  ( 3:12 · with 229    🔎 )   ( Amen )
+///     Searching:  ( 🔍 dad          ✕ )   ( 🙏 )
+///
+/// Searching, the pill's own glass becomes the search field and the pray
+/// button stays its own circle beside it; with the keyboard up both ride
+/// above it at the compact height (`compact`).
+struct HomeBar<SearchField: View>: View {
     /// Non-nil in prayer mode.
     var prayerStartedAt: Date? = nil
     /// Others praying now; nil below the display threshold.
     var prayingWith: Int? = nil
+    /// The pill is the search field.
+    var searching = false
+    /// The keyboard is up: both controls take the compact height.
+    var compact = false
     var onHistory: () -> Void = {}
     var onSearch: () -> Void = {}
     var onAdd: () -> Void = {}
     var onPray: () -> Void = {}
     var onAmen: () -> Void = {}
+    @ViewBuilder var searchField: () -> SearchField
+
+    private var height: CGFloat { compact ? PP.size.bar.compact : PP.size.bar.height }
 
     var body: some View {
         GlassEffectContainer(spacing: PP.size.bar.gap) {
             HStack(spacing: PP.size.bar.gap) {
                 Group {
-                    if let prayerStartedAt {
+                    if searching {
+                        searchField()
+                    } else if let prayerStartedAt {
                         prayerBar(startedAt: prayerStartedAt)
                     } else {
                         HStack(spacing: 0) {
@@ -92,14 +108,17 @@ struct HomeBar: View {
                         }
                     }
                 }
-                .frame(height: PP.size.bar.height)
+                .transition(.opacity)
+                .frame(height: height)
                 .glassEffect(.regular.interactive(), in: .capsule)
 
-                PrayButton(startedAt: prayerStartedAt, onPray: onPray, onAmen: onAmen)
+                PrayButton(startedAt: prayerStartedAt, diameter: height, onPray: onPray, onAmen: onAmen)
             }
         }
         .padding(.horizontal, PP.size.bar.inset)
         .animation(.easeOut(duration: PP.duration.settle), value: prayerStartedAt == nil)
+        .animation(.easeOut(duration: PP.duration.settle), value: searching)
+        .animation(.easeOut(duration: PP.duration.settle), value: compact)
     }
 
     private func pillButton(_ icon: Image, _ label: String, _ action: @escaping () -> Void) -> some View {
@@ -148,9 +167,10 @@ struct HomeBar: View {
     }
 }
 
-/// The round pray button on Home's bar: a `RingButton` with the praying
-/// hands. On start the ring decays over the minimum (~5 s), then it becomes
-/// Amen. Before that, taps do nothing (Cancel is always there).
+/// The round pray button on Home's bar: a `CountdownButton` with the
+/// praying hands. On start a small pie inside runs down over the minimum
+/// (~5 s), then it becomes Amen. Before that, taps do nothing (Cancel is
+/// always there).
 struct PrayButton: View {
     var startedAt: Date? = nil
     var diameter: CGFloat = PP.size.prayButton.diameter
@@ -158,15 +178,11 @@ struct PrayButton: View {
     var onAmen: () -> Void = {}
 
     var body: some View {
-        RingButton(startedAt: startedAt, diameter: diameter, minimum: PrayerSession.minimum,
-                   idleLabel: L10n.Home.pray, onStart: onPray, onComplete: onAmen) {
-            icon.foregroundStyle(PP.color.onPrimary)
-        } counting: { _ in
-            icon.foregroundStyle(PP.color.primary)
+        CountdownButton(startedAt: startedAt, diameter: diameter, minimum: PrayerSession.minimum,
+                        idleLabel: L10n.Home.pray, onStart: onPray, onComplete: onAmen) {
+            PPIcon.pray
+                .font(.system(size: PP.size.bar.icon, weight: .regular))
+                .foregroundStyle(PP.color.onPrimary)
         }
-    }
-
-    private var icon: some View {
-        PPIcon.pray.font(.system(size: PP.size.bar.icon, weight: .regular))
     }
 }

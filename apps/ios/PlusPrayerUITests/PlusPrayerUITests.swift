@@ -16,7 +16,9 @@ final class PlusPrayerUITests: XCTestCase {
         app.launch()
 
         app.buttons["Pray"].tap()
-        sleep(6)
+        usleep(1_500_000)
+        attach(app, "0 counting down")
+        sleep(5)
         app.buttons["Amen"].firstMatch.tap()
 
         let hold = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Hold the'")).firstMatch
@@ -90,6 +92,61 @@ final class PlusPrayerUITests: XCTestCase {
         XCTAssertTrue(row.firstMatch.waitForExistence(timeout: 3), "the new name on Home")
         sleep(1)
         attach(app, "add 5 home")
+    }
+
+    /// 🔎 → the row docks above the keyboard with the compact pray button →
+    /// results → no matches → under Still to hold, "Show →" widens to All →
+    /// × closes it.
+    @MainActor
+    func testSearch() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-PPEnvironment", "mock"]
+        app.launch()
+
+        app.buttons["Search"].firstMatch.tap()
+        let field = app.textFields["Search"]
+        XCTAssertTrue(field.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "the field is focused")
+        sleep(1)
+        attach(app, "search 0 open")
+        XCTAssertFalse(app.buttons["History"].exists, "the pill is the search field")
+        XCTAssertTrue(app.buttons["Pray"].exists, "the pray button stays beside it")
+
+        app.typeText("dad")
+        let dad = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Dad, Gary Olson'"))
+        XCTAssertTrue(dad.firstMatch.waitForExistence(timeout: 2))
+        sleep(1)
+        attach(app, "search 1 dad")
+
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "zzz")
+        let none = app.descendants(matching: .any)["No matches for “zzz”"]
+        XCTAssertTrue(none.waitForExistence(timeout: 3), "after typing pauses")
+        attach(app, "search 2 no matches")
+
+        // Lower the keyboard: the field stays (full height) with its results.
+        app.keyboards.buttons["search"].tap()
+        sleep(1)
+        attach(app, "search 2b keyboard down")
+        XCTAssertTrue(field.exists)
+        XCTAssertFalse(app.buttons["History"].exists)
+
+        // Still to hold hides a held match; the hint widens to All.
+        app.buttons["Filter"].tap()
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Still to hold'")).firstMatch.tap()
+        field.tap()
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "surgery")
+        let hint = app.buttons["Show 1 match in All"]
+        XCTAssertTrue(hint.waitForExistence(timeout: 3))
+        sleep(1)
+        attach(app, "search 3 match hint")
+        hint.tap()
+        let healing = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label BEGINSWITH 'Healing after his surgery'"))
+        XCTAssertTrue(healing.firstMatch.waitForExistence(timeout: 2))
+
+        app.buttons["Close search"].tap()
+        XCTAssertFalse(field.waitForExistence(timeout: 1))
+        XCTAssertTrue(app.buttons["History"].exists)
     }
 
     private func enabledAmen(_ app: XCUIApplication) -> XCUIElement {

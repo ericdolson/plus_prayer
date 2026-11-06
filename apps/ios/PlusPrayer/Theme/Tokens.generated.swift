@@ -245,14 +245,10 @@ nonisolated enum PP {
             static let hollowStroke: CGFloat = 1.5
         }
         enum prayButton {
-            /// Home's round pray button, the same height as the floating pill.
+            /// Home's round pray button, the same height as the floating pill (size.bar.compact while the keyboard is up).
             static let diameter: CGFloat = 62
-            /// The compact pray/Amen button docked at the end of the search field while the keyboard is up.
-            static let compact: CGFloat = 40
-            /// The Amen invitation's ring button.
+            /// The Amen invitation's button.
             static let invitation: CGFloat = 85
-            /// The countdown ring's distance outside a ring button's disc.
-            static let ringGap: CGFloat = 8
         }
         enum halo {
             /// The halo's stroke at rest.
@@ -272,6 +268,8 @@ nonisolated enum PP {
             static let inset: CGFloat = 16
             /// Between the pill and the pray button.
             static let gap: CGFloat = 12
+            /// The pill and the pray button while the keyboard is up (search): both shrink a little and ride above it.
+            static let compact: CGFloat = 52
         }
         /// Home's header controls, each on its own glass (§4).
         enum header {
@@ -287,6 +285,10 @@ nonisolated enum PP {
             /// Partial: the gold ring and its dash.
             static let partialStroke: CGFloat = 1.5
         }
+        enum hint {
+            /// The search match hint's minimum height (a comfortable tap target).
+            static let minHeight: CGFloat = 48
+        }
     }
 
     enum number {
@@ -298,8 +300,6 @@ nonisolated enum PP {
         static let initialsScale: Double = 0.4
         /// Overlapping cluster avatars: a ring in the surface's color, this share of the avatar's diameter.
         static let clusterSeparator: Double = 0.07
-        /// The countdown ring's stroke, as a share of size.prayButton.ringGap.
-        static let ringStroke: Double = 0.45
         /// Two-letter initials tracked apart by this share of their size.
         static let initialsTracking: Double = 0.04
         /// Prayer-mode halo (design-direction §7).
@@ -329,6 +329,8 @@ nonisolated enum PP {
         static let prayButtonDim: Double = 0.3
         /// A name shown only as the parent of an intention the filter keeps (design-direction §4: a held name with an unheld intention under Still to hold) is dimmed to this opacity; the intention stays full strength. Flutter's tuned value.
         static let contextRow: Double = 0.55
+        /// The countdown before Amen: a small pie inside the button, this share of its diameter, running down to nothing (no ring outside, no change in size).
+        static let countdownPie: Double = 0.4
     }
 
     enum type {

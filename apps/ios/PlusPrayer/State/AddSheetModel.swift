@@ -66,9 +66,12 @@ final class AddSheetModel: Identifiable {
     /// (screens.md) and "shown today" isn't spent.
     private let membershipAvailable: Bool
 
-    init(home: HomeModel, tab: Tab = .name, parentId: String? = nil, membershipAvailable: Bool = false) {
+    /// - Parameter name: prefilled from search ("Robe" → "Robert"), capped.
+    init(home: HomeModel, tab: Tab = .name, parentId: String? = nil, name: String = "",
+         membershipAvailable: Bool = false) {
         self.home = home
         self.tab = tab
+        self.name = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(TextCap.name))
         self.parentId = parentId ?? home.pickerNames.first?.id ?? ""
         self.membershipAvailable = membershipAvailable
         tone = home.toneForNewName()

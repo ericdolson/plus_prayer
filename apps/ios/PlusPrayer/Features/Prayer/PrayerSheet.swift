@@ -44,9 +44,9 @@ struct PrayerSheet: View {
 
 /// Amen without the list (prayer-flow.md, app-brief §3): a standalone, quiet
 /// invitation, "Hold the 4,345 on List 52 in your prayer", and who'll be
-/// carried. Tap → the same ring as the pray button, seconds counting up, the
-/// line shifts to "Holding the 4,345 on List 52"; Amen after ~5 s, and they
-/// may stay longer. Amen before tapping finishes without the list.
+/// carried. Tap → the same countdown as the pray button (a small pie running
+/// down inside it), the line shifts to "Holding the 4,345 on List 52"; Amen
+/// after ~5 s, and they may stay longer. Amen before tapping finishes without the list.
 private struct InvitationView: View {
     let card: CardValues
     let holdingSince: Date?
@@ -87,20 +87,13 @@ private struct InvitationView: View {
                     .foregroundStyle(PP.color.heldGoldText)
             }
 
-            RingButton(startedAt: holdingSince, diameter: PP.size.prayButton.invitation,
-                       minimum: PrayerSession.minimum, idleLabel: line,
-                       onStart: onHold, onComplete: onAmen) {
+            CountdownButton(startedAt: holdingSince, diameter: PP.size.prayButton.invitation,
+                            minimum: PrayerSession.minimum, idleLabel: line,
+                            onStart: onHold, onComplete: onAmen) {
                 PPIcon.pray
                     .font(.system(size: PP.size.bar.icon, weight: .regular))
                     .foregroundStyle(PP.color.onPrimary)
-            } counting: { elapsed in
-                Text(verbatim: Int(elapsed).formatted())
-                    .font(PP.type.displayLine)
-                    .foregroundStyle(PP.color.primary)
-                    .monospacedDigit()
-                    .accessibilityHidden(true)
             }
-            .padding(PP.size.prayButton.ringGap)
 
             // Finish without the list: only before tapping in.
             Button(L10n.Prayer.amen, action: onAmen)

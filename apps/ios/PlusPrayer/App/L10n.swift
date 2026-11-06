@@ -107,6 +107,23 @@ nonisolated enum L10n {
         static var noteHint: String { NSLocalizedString("closing.noteHint", comment: "") }
     }
 
+    enum Search {
+        private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
+        static var placeholder: String { L10n.Home.search }
+        static var close: String { t("search.close") }
+        static var add: String { t("search.add") }
+        static var show: String { t("search.show") }
+        /// "No matches for “Robe”": callers split it around the query so only
+        /// the query truncates.
+        static func noMatches(_ query: String) -> String { String(format: t("search.noMatches"), query) }
+        static func matchesInAll(_ n: Int) -> String {
+            String.localizedStringWithFormat(t("search.matchesInAll"), n)
+        }
+        static func showSpoken(_ n: Int) -> String {
+            String.localizedStringWithFormat(t("search.showSpoken"), n)
+        }
+    }
+
     enum Add {
         private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
         static var tabName: String { t("add.tab.name") }

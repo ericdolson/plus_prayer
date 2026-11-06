@@ -154,6 +154,60 @@ struct HomeModelTests {
         #expect(backend.notes[prayer.id] == "A quiet morning.")
     }
 
+    // MARK: Search
+
+    @Test func searchMatchesAliasAndPrintedNameAndHidesTheCard() {
+        defer { running.cancel() }
+        home.openSearch()
+        #expect(home.cardShown, "no text yet: Home as it was")
+        home.query = "gary"
+        #expect(ids(home.groups) == ["dad", "dad-1", "dad-2"])
+        #expect(!home.cardShown, "results only")
+        home.query = "Dad"
+        #expect(ids(home.groups) == ["dad", "dad-1", "dad-2"])
+    }
+
+    @Test func aMatchingIntentionKeepsItsNameAsContext() {
+        defer { running.cancel() }
+        home.query = "ruth"
+        #expect(ids(home.groups) == ["mom", "mom-1"])
+        #expect(home.groups[0].name.isContext)
+    }
+
+    @Test func noMatchesAndWhatTheFilterHides() {
+        defer { running.cancel() }
+        home.query = "zzz"
+        #expect(home.noMatches)
+        #expect(home.matchesHiddenByFilter == nil)
+
+        home.filter = .stillToHold
+        home.query = "surgery" // held today: hidden by Still to hold
+        #expect(home.noMatches)
+        #expect(home.matchesHiddenByFilter == 1)
+        #expect(!home.allHeldShown, "search has its own empty state")
+        home.showAllMatches()
+        #expect(home.filter == .all)
+        #expect(home.query == "surgery", "the query is kept")
+        #expect(!home.noMatches)
+    }
+
+    @Test func closingSearchClearsIt() {
+        defer { running.cancel() }
+        home.openSearch()
+        home.query = "dad"
+        home.closeSearch()
+        #expect(!home.isSearching)
+        #expect(home.query.isEmpty)
+        #expect(home.groups.count == 7)
+    }
+
+    @Test func noMatchesPrefillsTheAddSheet() {
+        defer { running.cancel() }
+        let model = AddSheetModel(home: home, name: "  Robe ")
+        #expect(model.name == "Robe")
+        #expect(model.previewInitials == "R")
+    }
+
     // MARK: Adding
 
     @Test func aNewNameGoesToTheBottomCarriedWithItsTone() async throws {

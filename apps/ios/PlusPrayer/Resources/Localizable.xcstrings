@@ -1104,6 +1104,102 @@
           }
         }
       }
+    },
+    "search.add": {
+      "comment": "Search's empty state: the blue button (with a + icon) that opens the add sheet prefilled with the query. Type-neutral (design-direction §4).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        }
+      }
+    },
+    "search.close": {
+      "comment": "VoiceOver: the × at the end of the docked search row (closes it and clears the query).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close search"
+          }
+        }
+      }
+    },
+    "search.matchesInAll": {
+      "comment": "Search's match hint when a filter hides matches: the count under All (design-direction §4).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld match in All"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld matches in All"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "search.noMatches": {
+      "comment": "Search found nothing: one quiet line; the query truncates, never the sentence (design-direction §4).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matches for “%@”"
+          }
+        }
+      }
+    },
+    "search.show": {
+      "comment": "Search's match hint: the blue action (clears the filter, keeps the query).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show →"
+          }
+        }
+      }
+    },
+    "search.showSpoken": {
+      "comment": "VoiceOver: the match hint as one button.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Show %lld match in All"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Show %lld matches in All"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "version": "1.0"
