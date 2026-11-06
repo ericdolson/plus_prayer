@@ -1644,3 +1644,11 @@ keyboard down) on both the Intention tab and the offer step; curly quotes in
   crossfade; search and initials stay live (search results are the thing
   being looked at, and local filtering is instant).
 Rejected: a once-per-second update while typing (flashes partial names).
+
+### Decision: Carry row follow-ups (offer-step line, last places, prefill)
+**Timestamp:** 2026-11-06
+Server-disagrees line sits under the header on the offer step (fixed the
+contradiction); when turning carry on takes all remaining places (e.g. an
+intention that also carries its name), the meter reads "This uses your last
+{N} places" and the Also-carries line drops "· uses N"; a prefilled name
+shows in "Make room for…" at once, later edits wait for the pause.

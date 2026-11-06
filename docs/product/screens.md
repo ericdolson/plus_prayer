@@ -90,7 +90,9 @@ _Last updated: 2026-10-18_
       monetization decision (Q31/Q32).
     - **Meter counts what's left, not including this item**, so it never
       changes when the toggle flips: "{left} {unit} left" (e.g. "3 places
-      left"); on with 1 left: "This uses your last place"; full or over the
+      left"); toggle on and the item's full cost equals what's left: "This
+      uses your last place" / "This uses your last {N} places" (then the
+      "Also carries {alias}" line drops its "· uses N"); full or over the
       pool (e.g. a lapsed trial): "All {pool} {unit} in use" (pool of 1:
       "Your one place is in use"). SUPERSEDES the "8 of 10 used" preview,
       which showed "10 of 10" while still allowed. Free pool, Name tab: toggle disabled, meter
@@ -100,8 +102,8 @@ _Last updated: 2026-10-18_
       (Ruth + her new intention = "uses 2 places").
     - **Server-disagrees state:** the line sits at the top with the other
       inline lines; the toolbar shows only Done; the form becomes read-only
-      (text kept, keyboard down — this is an end state). Same on the offer
-      step. With carryParent, it counts as not carried if either the
+      (text kept, keyboard down — this is an end state). On the offer step
+      the line sits under the header instead (Done only). With carryParent, it counts as not carried if either the
       intention or the name comes back uncarried.
     - **Intention under an uncarried name** (any reason): the row starts off,
       enabled while there's room; turning it on shows the true cost, "Also
@@ -110,7 +112,8 @@ _Last updated: 2026-10-18_
     - **"Make room"** sits under the meter, always (no jumping with name
       length). With nothing typed yet it reads "Make room"; it becomes "Make
       room for {alias}" once typing **pauses ~0.6 s**, with a ~150 ms
-      crossfade (never mid-word updates). Search results and avatar
+      crossfade (never mid-word updates). A name prefilled from search shows
+      at once; later edits, including clearing it, wait for the pause. Search results and avatar
       initials stay live. Until it works it's a button
       with the VoiceOver hint "Not available yet" and no action.
     - **Server disagrees** (the pool filled from another device): if the
