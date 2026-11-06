@@ -103,7 +103,7 @@ export async function processPrayer(deps: Deps, prayerId: string): Promise<Proce
     if (trialStartedAt === null && !hasActiveEntitlement(u, now)) {
       trialStartedAt = now.toISOString();
       entitlementExpiresAt = new Date(now.getTime() + deps.cfg.trialDays * DAY_MS).toISOString();
-      includeLimit = deps.cfg.basePremiumPool;
+      includeLimit = rules.basePremiumPool; // /config, the value the add sheet shows
     }
 
     const res = await mutate<{ _execute: number }>(deps.db, "ApplyPrayer", {

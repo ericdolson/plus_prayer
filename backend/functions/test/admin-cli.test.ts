@@ -117,6 +117,9 @@ describe("admin CLI: config and the entry script", () => {
     const cfg = serverConfigFromEnv({ GATE_HOURS: "24", MODERATION_WORD_BLOCKLIST: "true", LIST_TIME_ZONE: "America/Chicago" });
     assert.deepEqual([cfg.gateHours, cfg.wordBlocklistEnabled, cfg.listTimeZone], [24, true, "America/Chicago"]);
     assert.throws(() => serverConfigFromEnv({ GATE_HOURS: "thirty" }), /GATE_HOURS must be an integer/);
+    const caps = serverConfigFromEnv({ SUBJECT_CAP: "400", SUBJECT_HARD_CAP: "4000" });
+    assert.deepEqual([caps.subjectCap, caps.subjectHardCap], [400, 4000]);
+    assert.equal("basePremiumPool" in serverConfigFromEnv({ BASE_PREMIUM_POOL: "12" }), false, "lives in /config only");
   });
 
   const script = resolve(__dirname, "..", "scripts", "admin.ts");

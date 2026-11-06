@@ -98,8 +98,16 @@ export async function addSubject(
   const note = optionalText(input.note, NOTE_CAP, "note") ?? null;
 
   const { user, subjects } = await poolState(deps, uid);
-  if (subjects.length >= deps.cfg.subjectCap) {
-    throw new HttpsError("resource-exhausted", "This list is very full. Contact us if you need more room.");
+  // The cap people see counts what's on Home (ACTIVE, Answered included), so
+  // archiving makes room. A quiet hard cap on every row not purged stops
+  // archive-and-add abuse.
+  if (subjects.filter((s) => s.status === "ACTIVE").length >= deps.cfg.subjectCap) {
+    throw new HttpsError("resource-exhausted", "You've reached 500 names and intentions. Archive some to add more.");
+  }
+  if (subjects.length >= deps.cfg.subjectHardCap) {
+    // Quiet: no dedicated copy; the app shows its generic "Couldn't add this
+    // right now. Try again in a little while."
+    throw new HttpsError("failed-precondition", "Couldn't add this right now.");
   }
 
   let parentId: string | null = null;

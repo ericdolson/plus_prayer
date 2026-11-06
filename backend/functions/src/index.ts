@@ -26,8 +26,8 @@ initializeApp();
 setGlobalOptions({ region: LOCATION });
 
 const gateHours = defineInt("GATE_HOURS", { default: DEFAULT_SERVER_CONFIG.gateHours });
-const basePremiumPool = defineInt("BASE_PREMIUM_POOL", { default: DEFAULT_SERVER_CONFIG.basePremiumPool });
 const subjectCap = defineInt("SUBJECT_CAP", { default: DEFAULT_SERVER_CONFIG.subjectCap });
+const subjectHardCap = defineInt("SUBJECT_HARD_CAP", { default: DEFAULT_SERVER_CONFIG.subjectHardCap });
 const listTimeZone = defineString("LIST_TIME_ZONE", { default: DEFAULT_SERVER_CONFIG.listTimeZone });
 // Off for the beta; set true at Stage 2 to turn the LANGUAGE flag back on.
 const wordBlocklist = defineBoolean("MODERATION_WORD_BLOCKLIST", { default: DEFAULT_SERVER_CONFIG.wordBlocklistEnabled });
@@ -37,8 +37,8 @@ function getDeps(): Deps {
   deps ??= productionDeps({
     ...DEFAULT_SERVER_CONFIG,
     gateHours: gateHours.value(),
-    basePremiumPool: basePremiumPool.value(),
     subjectCap: subjectCap.value(),
+    subjectHardCap: subjectHardCap.value(),
     listTimeZone: listTimeZone.value(),
     wordBlocklistEnabled: wordBlocklist.value(),
   });

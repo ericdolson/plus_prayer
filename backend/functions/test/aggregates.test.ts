@@ -124,4 +124,14 @@ describe("increment-only aggregates", () => {
     );
     assert.deepEqual(u, { include_limit: 10, days: 14 });
   });
+
+  it("the trial's pool comes from /config (one source with the add sheet)", async () => {
+    const deps = makeDeps();
+    deps.live.config = { basePremiumPool: 12 };
+    await createUser("f2");
+    const id = await logPrayer("f2", { listId: null });
+    await processPrayer(deps, id);
+    const [u] = await sql<{ include_limit: number }>(`SELECT include_limit FROM "user" WHERE id = $1`, ["f2"]);
+    assert.equal(u.include_limit, 12);
+  });
 });

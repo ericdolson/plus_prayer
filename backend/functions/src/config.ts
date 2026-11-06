@@ -9,12 +9,13 @@ export interface ServerConfig {
   gateHours: number;
   /** Free tier: one intention under "Me". */
   freeLimit: number;
-  /** Trial and base subscription both grant this pool (monetization.md). */
-  basePremiumPool: number;
   trialDays: number;
   /** Soft landing after any entitlement end (trial or lapsed subscription). */
   softLandingDays: number;
+  /** ~500 names and intentions on Home (ACTIVE, Answered included): "You've reached 500…". */
   subjectCap: number;
+  /** Quiet hard cap on all rows not purged (archived included), against archive-and-add abuse. Param SUBJECT_HARD_CAP; no dedicated copy. */
+  subjectHardCap: number;
   nameCap: number;
   intentionCap: number;
   selfNameChangeDays: number;
@@ -39,10 +40,10 @@ export interface ServerConfig {
 export const DEFAULT_SERVER_CONFIG: ServerConfig = {
   gateHours: 30,
   freeLimit: 1,
-  basePremiumPool: 10,
   trialDays: 14,
   softLandingDays: 7,
   subjectCap: 500,
+  subjectHardCap: 5000,
   nameCap: 40,
   intentionCap: 80,
   selfNameChangeDays: 7,
@@ -67,6 +68,10 @@ export interface ClientConfig {
   draftResumeMinutes: number;
   autoSaveHours: number;
   durationCapHours: number;
+  /** The reverse trial and the base subscription both grant this pool
+   *  (monetization.md). One source: the server's grant reads it from /config,
+   *  and the add sheet shows it ("Membership carries up to {premiumPool}…"). */
+  basePremiumPool: number;
 }
 
 export const CLIENT_CONFIG_DEFAULTS: ClientConfig = (() => {

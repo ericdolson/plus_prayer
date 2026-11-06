@@ -221,6 +221,31 @@ describe("the pool on the server (addSubject / setCarriedItems)", () => {
     assert.deepEqual(await setCarriedItems(deps, "z", [mine, momIntention]), { carried: 1, limit: 1 });
   });
 
+  it("the ~500 cap counts what's on Home; archiving makes room; a quiet hard cap counts every row not purged", async () => {
+    const deps = makeDeps({ subjectCap: 3, subjectHardCap: 5 });
+    await createUser("k"); // Me: 1 on Home
+    const archive = (id: string) => clientDb.executeMutation("ArchiveSubject", { id }, impersonate("k"));
+    const add = (name: string) => addSubject(deps, "k", { kind: "SOUL", publicName: name });
+
+    await add("A");
+    const b = await add("B"); // 3 on Home
+    await assert.rejects(add("C"), (err: HttpsError) => {
+      assert.equal(err.code, "resource-exhausted");
+      assert.match(err.message, /Archive some to add more/);
+      return true;
+    });
+    await archive(b.id); // 2 on Home, 3 rows
+    const c = await add("C"); // 3 on Home, 4 rows
+    await archive(c.id); // 2 on Home, 4 rows
+    const d = await add("D"); // 3 on Home, 5 rows
+    await archive(d.id); // 2 on Home, 5 rows: the hard cap
+    await assert.rejects(add("E"), (err: HttpsError) => {
+      assert.equal(err.code, "failed-precondition");
+      assert.doesNotMatch(err.message, /500/, "generic, not the cap people see");
+      return true;
+    });
+  });
+
   it("caps names at 40 and intentions at 80 visible characters (grapheme clusters)", async () => {
     const deps = makeDeps();
     const { selfId } = await createUser("cap");

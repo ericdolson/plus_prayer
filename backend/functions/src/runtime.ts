@@ -41,7 +41,7 @@ export function productionDeps(cfg: ServerConfig): Deps {
 
 /**
  * Server config from environment variables named like the deployed params
- * (GATE_HOURS, BASE_PREMIUM_POOL, SUBJECT_CAP, LIST_TIME_ZONE,
+ * (GATE_HOURS, SUBJECT_CAP, SUBJECT_HARD_CAP, LIST_TIME_ZONE,
  * MODERATION_WORD_BLOCKLIST), falling back to the defaults.
  */
 export function serverConfigFromEnv(env: NodeJS.ProcessEnv = process.env): ServerConfig {
@@ -59,8 +59,8 @@ export function serverConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Serve
   return {
     ...DEFAULT_SERVER_CONFIG,
     gateHours: int("GATE_HOURS", DEFAULT_SERVER_CONFIG.gateHours),
-    basePremiumPool: int("BASE_PREMIUM_POOL", DEFAULT_SERVER_CONFIG.basePremiumPool),
     subjectCap: int("SUBJECT_CAP", DEFAULT_SERVER_CONFIG.subjectCap),
+    subjectHardCap: int("SUBJECT_HARD_CAP", DEFAULT_SERVER_CONFIG.subjectHardCap),
     listTimeZone: env.LIST_TIME_ZONE || DEFAULT_SERVER_CONFIG.listTimeZone,
     wordBlocklistEnabled: bool("MODERATION_WORD_BLOCKLIST", DEFAULT_SERVER_CONFIG.wordBlocklistEnabled),
   };

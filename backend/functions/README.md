@@ -22,9 +22,15 @@ account). The deployed admin callables stay available too and check the
 
 ## Config
 - Server params (`firebase-functions/params`, defaults in `src/config.ts`):
-  `GATE_HOURS` (30), `BASE_PREMIUM_POOL` (10), `SUBJECT_CAP` (500),
+  `GATE_HOURS` (30), `SUBJECT_CAP` (500, active subjects on Home),
+  `SUBJECT_HARD_CAP` (5,000, every row not purged; quiet, generic error),
   `LIST_TIME_ZONE` (America/Denver), `MODERATION_WORD_BLOCKLIST` (false — off
-  for the beta). The first deploy prompts for them once.
+  for the beta). The first deploy prompts for them once. Server-only values
+  may be params; client-visible ones live in RTDB `/config`.
+- `basePremiumPool` (the trial and base pool, 10) lives only in RTDB
+  `/config`, read by the server's grant and by the app (2026-11-06; the
+  `BASE_PREMIUM_POOL` param is gone). Production `/config` was seeded
+  2026-11-06.
 - Contact info / links: blocked at input and excluded at social ingest
   (`src/contact.ts`), always on.
 - Word blocklist (off for the beta): RTDB `/moderation/blocklist`
