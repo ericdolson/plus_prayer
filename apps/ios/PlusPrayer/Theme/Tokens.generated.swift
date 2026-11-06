@@ -151,6 +151,14 @@ nonisolated enum PP {
         static let cardToList: CGFloat = 24
         /// The card's status line under its avatar row (~6–8).
         static let statusUnderAvatars: CGFloat = 8
+        /// The add sheet's one gap between groups: a group's last element (its field, or its hint) to the next label; also the avatar or the For row to the first label (screens.md, Form type).
+        static let formGroup: CGFloat = 24
+        /// The add sheet: a label to its field.
+        static let formLabelToField: CGFloat = 8
+        /// The add sheet: a field to its hint, error or counter.
+        static let formFieldToHint: CGFloat = 6
+        /// The add sheet: the carry row's label to its meter.
+        static let formLabelToHint: CGFloat = 2
     }
 
     enum radius {
@@ -206,8 +214,8 @@ nonisolated enum PP {
             /// After a 13 pt intention; scales with the text.
             static let intention: CGFloat = 9
             static let intentionGap: CGFloat = 4
-            /// Trailing the add sheet's "Carry onto the list" label: louder than on rows because it appears once and teaches the mark (design-direction §5). Scales with the label.
-            static let carryRow: CGFloat = 17
+            /// Trailing the add sheet's "Carry onto the list" label at the label's size, inkMuted in every state (design-direction §5), centered on the label's cap height. Scales with the label.
+            static let carryRow: CGFloat = 15
         }
         enum card {
             /// The day's seal, cropped into the card's top-left corner (~70% visible).

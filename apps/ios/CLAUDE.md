@@ -420,7 +420,12 @@ compose queries; if an operation is missing, ask for a backend change.
   leading edge (the fields' text inset), input `type.body` ink, hints and
   the meter `type.caption` inkMuted, placeholders input-size inkMuted; "Make
   room" `type.caption` blue; the carry row's bloom trails its
-  label at `size.carriedMark.carryRow` (`CarriedMark.glyphEm`). The carry
+  label 6 pt after it at `size.carriedMark.carryRow` (`CarriedMark.glyphEm`),
+  inkMuted in every state, centered on the cap height (`.capCenter`).
+  Spacing tokens `space.formGroup` / `formLabelToField` / `formFieldToHint`
+  / `formLabelToHint`, measured to the letters: texts are `.capTrimmed`
+  (Theme/CapTrim.swift) to their cap height on top, labels above a field
+  also to the baseline at the bottom. The carry
   row's rules are `carryOffer` and `carryMeter` in PlusPrayerDomain (room,
   default, true cost; the meter says what's left, not counting this item:
   "3 places left"; on, taking everything left, "This uses your last place"

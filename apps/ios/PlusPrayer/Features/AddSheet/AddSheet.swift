@@ -20,8 +20,16 @@ struct AddSheet: View {
     /// "Make room for {alias}": follows the typed name only once typing
     /// pauses, never mid-word.
     @State private var makeRoomName: String?
-    /// The carry row's bloom, ~17 pt tall, scaling with its label.
+    /// The carry row's bloom, ~15 pt tall (the label's size), scaling with it.
     @ScaledMetric(relativeTo: .subheadline) private var bloomFont = PP.size.carriedMark.carryRow / CarriedMark.glyphEm
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// The carry row's toggle width, so text beside and under it stays clear.
+    @State private var toggleWidth: CGFloat = 0
+
+    /// The labels' cap height, to center the carry row's bloom on it.
+    private var labelCapHeight: CGFloat {
+        systemFontMetrics(.subheadline, weight: .semibold, size: dynamicTypeSize).capHeight
+    }
 
     /// The one line at the top: no connection, the ~500 cap, or anything
     /// else that went wrong. Text is kept.
@@ -45,6 +53,7 @@ struct AddSheet: View {
                         .font(isSettled ? PP.type.bodySmall : PP.type.caption)
                         .foregroundStyle(isSettled ? PP.color.ink : PP.color.inkMuted)
                         .multilineTextAlignment(.leading)
+                        .capTrimmed(isSettled ? .subheadline : .footnote)
                         .padding(.leading, PP.space.md)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .transition(.opacity)
@@ -202,7 +211,7 @@ struct AddSheet: View {
     }
 
     private var nameForm: some View {
-        VStack(spacing: PP.space.lg) {
+        VStack(spacing: PP.space.formGroup) {
             // A preview only in v1: its tone from the start, initials live by
             // Home's rule.
             MonogramAvatar(initials: model.previewInitials, tone: model.tone, size: PP.size.avatar.large)
@@ -220,7 +229,7 @@ struct AddSheet: View {
     }
 
     private var intentionForm: some View {
-        VStack(alignment: .leading, spacing: PP.space.lg) {
+        VStack(alignment: .leading, spacing: PP.space.formGroup) {
             forRow
             field(.intention, text: $model.intention, label: L10n.Add.intentionLabel,
                   placeholder: L10n.Add.intentionPlaceholder, caption: nil)
@@ -326,25 +335,25 @@ struct AddSheet: View {
     // MARK: The offer step
 
     private var offerPage: some View {
-        VStack(alignment: .leading, spacing: PP.space.md) {
-            Text(L10n.Add.added(model.offerName))
-                .font(PP.type.displayLine)
-                .foregroundStyle(PP.color.ink)
-                .padding(.leading, PP.space.md) // the sheet's one text edge
-            if model.notCarried != nil {
-                Text(L10n.Add.notCarried)
-                    .font(PP.type.bodySmall)
+        VStack(alignment: .leading, spacing: PP.space.formGroup) {
+            VStack(alignment: .leading, spacing: PP.space.sm) {
+                Text(L10n.Add.added(model.offerName))
+                    .font(PP.type.displayLine)
                     .foregroundStyle(PP.color.ink)
-                    .padding(.leading, PP.space.md)
-                    .transition(.opacity)
+                if model.notCarried != nil {
+                    Text(L10n.Add.notCarried)
+                        .font(PP.type.bodySmall)
+                        .foregroundStyle(PP.color.ink)
+                        .transition(.opacity)
+                }
             }
+            .padding(.leading, PP.space.md) // the sheet's one text edge
             // The question is the field's label (screens.md, Form type).
             field(.offer, text: $model.offerText, label: L10n.Add.offerQuestion(model.offerName),
                   placeholder: L10n.Add.intentionPlaceholder, caption: nil)
                 .onSubmit(save)
                 .submitLabel(.done)
             carryRow(.offer)
-                .padding(.top, PP.space.sm)
         }
     }
 
@@ -357,29 +366,44 @@ struct AddSheet: View {
     private func carryRow(_ row: AddSheetModel.CarryRow) -> some View {
         let offer = model.carryOffer(row)
         let isOn = Binding(get: { model.isCarrying(row) }, set: { model.setCarrying(row, $0) })
-        let on = model.isCarrying(row)
         let also = model.alsoCarries(row)
-        return VStack(alignment: .leading, spacing: PP.space.xxs) {
+        return VStack(alignment: .leading, spacing: PP.space.formLabelToHint) {
             HStack(spacing: PP.space.sm) {
-                HStack(alignment: .firstTextBaseline, spacing: PP.size.carriedMark.nameGap) {
+                HStack(alignment: .capCenter, spacing: PP.size.carriedMark.nameGap) {
                     Text(L10n.Add.carryTitle)
                         .font(PP.type.label)
                         .foregroundStyle(PP.color.ink)
-                    // inkMuted while on; dims to the row mark's color off or disabled.
+                        .alignmentGuide(.capCenter) { $0[.firstTextBaseline] - labelCapHeight / 2 }
+                        .capTrimmed(.subheadline, weight: .semibold)
+                    // inkMuted in every state: the toggle shows on/off (a
+                    // dimmed mark would be Home's "carried" color).
+                    // Centered on the cap height; it may overhang the label's
+                    // line without making the row taller (the gap above
+                    // reaches the label's caps).
                     PPIcon.carried
                         .font(.system(size: bloomFont))
-                        .foregroundStyle(on ? PP.color.inkMuted : PP.color.carriedMark)
+                        .foregroundStyle(PP.color.inkMuted)
+                        .frame(height: labelCapHeight)
                 }
                 .accessibilityHidden(true)
                 Spacer(minLength: PP.space.sm)
+            }
+            // The toggle trails the label's line but doesn't make it taller,
+            // so the group gap above reaches the label itself.
+            .padding(.trailing, toggleWidth + PP.space.sm)
+            .overlay(alignment: .trailing) {
                 Toggle(L10n.Add.carryTitle, isOn: isOn)
                     .ppSwitch()
                     .labelsHidden()
                     .disabled(!offer.hasRoom)
+                    .fixedSize()
+                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { toggleWidth = $0 }
             }
             Text(L10n.Add.carryMeter(model.meter(row)))
                 .font(PP.type.caption)
                 .foregroundStyle(PP.color.inkMuted)
+                .capTrimmed(.footnote)
+                .padding(.trailing, toggleWidth + PP.space.sm)
             if let also {
                 Text(L10n.Add.alsoCarries(also.name, cost: also.cost))
                     .font(PP.type.caption)
@@ -393,7 +417,6 @@ struct AddSheet: View {
         }
         // The labels' shared leading edge (the fields' text inset).
         .padding(.leading, PP.space.md)
-        .animation(.easeOut(duration: PP.duration.quick), value: on)
         .animation(.easeOut(duration: PP.duration.quick), value: also?.name)
     }
 
@@ -419,37 +442,40 @@ struct AddSheet: View {
         let cap = AddSheetModel.cap(field)
         let count = text.wrappedValue.count
         let issue = model.contactShown.contains(field)
-        return VStack(alignment: .leading, spacing: PP.space.xs) {
-            if let label {
-                Text(label)
-                    .font(PP.type.label)
+        return VStack(alignment: .leading, spacing: PP.space.formFieldToHint) {
+            VStack(alignment: .leading, spacing: PP.space.formLabelToField) {
+                if let label {
+                    Text(label)
+                        .font(PP.type.label)
+                        .foregroundStyle(PP.color.ink)
+                        .capTrimmed(.subheadline, weight: .semibold, toBaseline: true)
+                        .padding(.horizontal, PP.space.md)
+                        .accessibilityHidden(true)
+                }
+                TextField(text: text, prompt: Text(placeholder).foregroundStyle(PP.color.inkMuted)) {
+                    Text(label ?? placeholder)
+                }
+                    .focused($focus, equals: field)
+                    .font(PP.type.body)
                     .foregroundStyle(PP.color.ink)
-                    .padding(.horizontal, PP.space.md)
-                    .accessibilityHidden(true)
-            }
-            TextField(text: text, prompt: Text(placeholder).foregroundStyle(PP.color.inkMuted)) {
-                Text(label ?? placeholder)
-            }
-                .focused($focus, equals: field)
-                .font(PP.type.body)
-                .foregroundStyle(PP.color.ink)
-                .textInputAutocapitalization(field == .name || field == .alias ? .words : .sentences)
-                .padding(PP.space.md)
-                .background(PP.color.raised, in: RoundedRectangle(cornerRadius: PP.radius.md))
-                .accessibilityLabel(label ?? placeholder)
-                .onChange(of: text.wrappedValue) { _, new in
-                    if new.count > cap { text.wrappedValue = String(new.prefix(cap)) }
-                    model.textChanged()
-                }
-                .task(id: text.wrappedValue) {
-                    // Clears at once when fixed; shows after typing pauses.
-                    guard model.hasContactIssue(field) else {
-                        model.showContactIssue(field, false)
-                        return
+                    .textInputAutocapitalization(field == .name || field == .alias ? .words : .sentences)
+                    .padding(PP.space.md)
+                    .background(PP.color.raised, in: RoundedRectangle(cornerRadius: PP.radius.md))
+                    .accessibilityLabel(label ?? placeholder)
+                    .onChange(of: text.wrappedValue) { _, new in
+                        if new.count > cap { text.wrappedValue = String(new.prefix(cap)) }
+                        model.textChanged()
                     }
-                    try? await Task.sleep(for: .seconds(PP.duration.validationPause))
-                    if !Task.isCancelled { model.showContactIssue(field, true) }
-                }
+                    .task(id: text.wrappedValue) {
+                        // Clears at once when fixed; shows after typing pauses.
+                        guard model.hasContactIssue(field) else {
+                            model.showContactIssue(field, false)
+                            return
+                        }
+                        try? await Task.sleep(for: .seconds(PP.duration.validationPause))
+                        if !Task.isCancelled { model.showContactIssue(field, true) }
+                    }
+            }
             // The line under the field, only when it has something to say.
             if issue || caption != nil || count >= cap - 10 {
                 HStack(alignment: .firstTextBaseline, spacing: PP.space.sm) {
@@ -466,6 +492,7 @@ struct AddSheet: View {
                     }
                 }
                 .font(PP.type.caption)
+                .capTrimmed(.footnote)
                 .padding(.horizontal, PP.space.md)
             }
         }
@@ -530,4 +557,15 @@ private struct AddSheetPreview: View {
 #Preview("Pool full") { AddSheetPreview(tab: .name, poolFull: true).preferredColorScheme(.light) }
 #Preview("Pool full, large type") {
     AddSheetPreview(tab: .name, poolFull: true).dynamicTypeSize(.accessibility2)
+}
+
+// MARK: Alignment
+
+extension VerticalAlignment {
+    /// The middle of a text's cap height (the carry row's bloom sits on it,
+    /// as the mark does on Home's rows).
+    private enum CapCenter: AlignmentID {
+        static func defaultValue(in d: ViewDimensions) -> CGFloat { d[VerticalAlignment.center] }
+    }
+    static let capCenter = VerticalAlignment(CapCenter.self)
 }
