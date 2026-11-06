@@ -1621,3 +1621,12 @@ Why: the race needs two devices adding at the same instant and overshoots by
 an item at most, while an optimistic-lock version on User touches every
 carry-changing write; a partial carry would print Dad without the reason the
 user just wrote.
+
+### Decision: Carry row wording and end states (app/ agent follow-ups)
+**Timestamp:** 2026-11-06
+"Make room" always under the meter (fixed contradictory "beside it");
+"uses N" counts the whole effect including this item; pool of 1 reads "Your
+one place is in use"; "Make room" shows on the free Name tab too; the
+server-disagrees state is an end state (top line, Done only, read-only form,
+keyboard down) on both the Intention tab and the offer step; curly quotes in
+"Nothing matches".

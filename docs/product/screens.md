@@ -83,15 +83,23 @@ _Last updated: 2026-10-18_
     - **On by default** while there's room. The user may turn it off (kept
       for their own prayers).
     - **Pool full:** off and disabled, with a small blue **"Make room for
-      {alias}"** ("Make room for this intention" for intentions) beside it.
+      {alias}"** ("Make room for this intention" for intentions) under the meter.
       **Visible now but inert** until Membership / Your portion exist; what
       its menu offers (add more places / free one up) is part of the
       monetization decision (Q31/Q32).
     - **Meter previews the result:** it counts this item while the toggle
       is on ("8 of 10" on, "7 of 10" off). Over the pool (e.g. a lapsed
-      trial): "All {pool} {unit} in use", never "7 of 1". Free pool, Name
-      tab: toggle disabled, meter "Free carries you and one intention of
-      your own" (pending Q32 copy).
+      trial): "All {pool} {unit} in use", never "7 of 1"; with a pool of 1:
+      "Your one place is in use". Free pool, Name tab: toggle disabled, meter
+      "Free carries you and one intention of your own" (pending Q32 copy),
+      with "Make room" under it as usual (carrying others is membership).
+      "Uses N" counts everything turning it on carries, this item included
+      (Ruth + her new intention = "uses 2 places").
+    - **Server-disagrees state:** the line sits at the top with the other
+      inline lines; the toolbar shows only Done; the form becomes read-only
+      (text kept, keyboard down — this is an end state). Same on the offer
+      step. With carryParent, it counts as not carried if either the
+      intention or the name comes back uncarried.
     - **Intention under an uncarried name** (any reason): the row starts off,
       enabled while there's room; turning it on shows the true cost, "Also
       carries {alias} · uses N {unit}" (re-carrying the name brings back its
