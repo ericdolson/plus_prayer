@@ -167,6 +167,8 @@ nonisolated enum PP {
             static let header: CGFloat = 32
             /// The profile at the top of You; the add sheet's avatar preview (screens.md).
             static let large: CGFloat = 72
+            /// The add sheet's For row and the rows of "Who is this for?" (screens.md).
+            static let picker: CGFloat = 40
             static let small: CGFloat = 28
             static let tiny: CGFloat = 20
             /// Below this, two initials drop to one; a disc too small for one is color only.

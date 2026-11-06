@@ -26,7 +26,7 @@
       }
     },
     "add.alias.caption": {
-      "comment": "Add sheet: muted caption under the Alias field (screens.md).",
+      "comment": "Add sheet: muted caption under the \"What you call them\" field (screens.md).",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -37,8 +37,20 @@
         }
       }
     },
+    "add.alias.label": {
+      "comment": "Add sheet, Name tab: the label above the alias field (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you call them · optional"
+          }
+        }
+      }
+    },
     "add.alias.placeholder": {
-      "comment": "Add sheet: the Alias field's placeholder (screens.md).",
+      "comment": "Add sheet: the \"What you call them\" field's placeholder (screens.md).",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -69,6 +81,204 @@
           "stringUnit": {
             "state": "translated",
             "value": "You've reached %lld names and intentions. Archive some to add more."
+          }
+        }
+      }
+    },
+    "add.carry.allInUse.one": {
+      "comment": "Add sheet: the carry row's meter when more is carried than a pool of 1 allows (a lapsed trial, Intention tab or offer step); never \"7 of 1\" (screens.md). Unit may become people (Q32).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your one place is in use"
+          }
+        }
+      }
+    },
+    "add.carry.allInUse.places": {
+      "comment": "Add sheet: the carry row's meter when more is carried than the pool allows (a lapsed trial), never \"7 of 1\" (screens.md). The number is the pool (2 or more; a pool of 1 has its own line). Unit may become people (Q32).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All %#@pool@ in use"
+          },
+          "substitutions": {
+            "pool": {
+              "argNum": 1,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg place"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg places"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "add.carry.alsoCarries.places": {
+      "comment": "Add sheet: under the carry row when an intention's toggle is on and its name isn't carried: the true cost (the intention, the name, and the name's intentions still marked carried). First argument: the name's alias, else its name. Unit may become people (Q32).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also carries %1$@ · uses %#@cost@"
+          },
+          "substitutions": {
+            "cost": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg place"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg places"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "add.carry.freeNote": {
+      "comment": "Add sheet, Name tab, free pool: the carry row's meter (toggle disabled). PLACEHOLDER pending open-questions Q32 copy (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free carries you and one intention of your own"
+          }
+        }
+      }
+    },
+    "add.carry.makeRoom": {
+      "comment": "Add sheet, Name tab, pool full, before a name is typed: the link with no name yet (approved 2026-11-06).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Make room"
+          }
+        }
+      }
+    },
+    "add.carry.makeRoom.hint": {
+      "comment": "Add sheet: VoiceOver hint on \"Make room…\", which has no action until Membership / Your portion exist (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not available yet"
+          }
+        }
+      }
+    },
+    "add.carry.makeRoom.intention": {
+      "comment": "Add sheet, Intention tab and offer step, pool full: the small blue link beside the disabled toggle (inert for now; Q31).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Make room for this intention"
+          }
+        }
+      }
+    },
+    "add.carry.makeRoom.name": {
+      "comment": "Add sheet, Name tab, pool full: the small blue link beside the disabled toggle (inert until Membership / Your portion exist; Q31). The argument is the alias, else the name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Make room for %@"
+          }
+        }
+      }
+    },
+    "add.carry.meter.places": {
+      "comment": "Add sheet: the carry row's muted meter, previewing the result (counts this item while the toggle is on): \"8 of 10 places used\". First number: places carried with the toggle's choice (beyond you); second: the pool. Unit may become people (Q32).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld of %#@pool@ used"
+          },
+          "substitutions": {
+            "pool": {
+              "argNum": 2,
+              "formatSpecifier": "lld",
+              "variations": {
+                "plural": {
+                  "one": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg place"
+                    }
+                  },
+                  "other": {
+                    "stringUnit": {
+                      "state": "translated",
+                      "value": "%arg places"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "add.carry.notCarried": {
+      "comment": "Add sheet: inline line when the server saved the item uncarried although the toggle was on (the pool filled from another device). Intention tab: with Done; offer step: under the header (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved, but not carried. The list's places filled up."
+          }
+        }
+      }
+    },
+    "add.carry.title": {
+      "comment": "Add sheet: the carry row's toggle label, on both tabs and the offer step (screens.md). \"The list\" is the printed list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carry onto the list"
           }
         }
       }
@@ -110,7 +320,7 @@
       }
     },
     "add.for": {
-      "comment": "Add sheet: the intention's name picker label, before the name (\"For (M) Me\").",
+      "comment": "Add sheet, Intention tab: VoiceOver label of the For row (\"For, Me\"); not shown.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -121,14 +331,74 @@
         }
       }
     },
+    "add.for.back": {
+      "comment": "Add sheet, \"Who is this for?\": VoiceOver label of the toolbar's back button (an icon).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back"
+          }
+        }
+      }
+    },
+    "add.for.change": {
+      "comment": "Add sheet, Intention tab: the blue trailing word on the For row; pushes \"Who is this for?\".",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change"
+          }
+        }
+      }
+    },
+    "add.for.noMatches": {
+      "comment": "Add sheet, \"Who is this for?\": no names match the search. The argument is the query.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing matches “%@”."
+          }
+        }
+      }
+    },
+    "add.for.title": {
+      "comment": "Add sheet: the title of the For row's pushed page (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Who is this for?"
+          }
+        }
+      }
+    },
     "add.intention.caption": {
-      "comment": "Add sheet: muted caption under the Intention field (screens.md).",
+      "comment": "Add sheet: muted caption under the Intention field and the offer step's field (screens.md).",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Printed on the list"
+          }
+        }
+      }
+    },
+    "add.intention.label": {
+      "comment": "Add sheet, Intention tab: the label above the Intention field (screens.md). The offer step's field has none.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intention"
           }
         }
       }
@@ -157,6 +427,18 @@
         }
       }
     },
+    "add.name.label": {
+      "comment": "Add sheet, Name tab: the label above the Name field (screens.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        }
+      }
+    },
     "add.name.placeholder": {
       "comment": "Add sheet: the Name field's placeholder (screens.md).",
       "extractionState": "manual",
@@ -164,7 +446,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Their name"
+            "value": "e.g. Gary Olson"
           }
         }
       }
@@ -181,14 +463,14 @@
         }
       }
     },
-    "add.offer.onList": {
-      "comment": "Add sheet offer step, after a name is saved. The argument is the alias, else the name.",
+    "add.offer.added": {
+      "comment": "Add sheet offer step: the serif header after a name is saved, in every case (screens.md). The argument is the alias, else the name.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ is on your list."
+            "value": "%@ is added."
           }
         }
       }
@@ -213,96 +495,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Adding needs a connection."
-          }
-        }
-      }
-    },
-    "add.saved.freePlace": {
-      "comment": "Add sheet, pool full on the free pool (screens.md): second sentence. You are always carried free; this is the one extra place.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your free place on the list is in use."
-          }
-        }
-      }
-    },
-    "add.saved.intention": {
-      "comment": "Add sheet, an intention saved privately because the pool is full (screens.md). Never quotes the intention.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This intention is saved for your own prayers."
-          }
-        }
-      }
-    },
-    "add.saved.membership": {
-      "comment": "Add sheet, pool full, the first full-pool add of the day when a larger pool exists (PROPOSED cadence, open-questions Q31). The number is the base membership pool.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Membership carries up to %lld of your people each day."
-          }
-        }
-      }
-    },
-    "add.saved.poolFull": {
-      "comment": "Add sheet, pool full on a paid pool: second sentence. The number is the user's pool (never 1: the free pool has its own line).",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "variations": {
-            "plural": {
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "All %lld places on the list are in use."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "add.saved.private": {
-      "comment": "Add sheet, pool full: first sentence. The argument is the alias (else the name), or the intention's text.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ is saved for your own prayers."
-          }
-        }
-      }
-    },
-    "add.saved.seeMembership": {
-      "comment": "Add sheet, pool full: the blue button under the membership line.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "See membership"
-          }
-        }
-      }
-    },
-    "add.saved.yourPortion": {
-      "comment": "Add sheet, pool full: the small blue link to Your portion.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your portion"
           }
         }
       }

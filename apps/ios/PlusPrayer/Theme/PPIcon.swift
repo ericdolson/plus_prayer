@@ -21,6 +21,6 @@ nonisolated enum PPIcon {
     static let partial = Image(systemName: "minus")
     static let more = Image(systemName: "ellipsis")
     static let note = Image(systemName: "square.and.pencil")
-    /// A menu that picks one of several ("For (M) Me ⌃⌄").
-    static let chooser = Image(systemName: "chevron.up.chevron.down")
+    /// Back from a page pushed inside a sheet ("Who is this for?").
+    static let back = Image(systemName: "chevron.backward")
 }

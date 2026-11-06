@@ -52,36 +52,77 @@ struct ToneTests {
     }
 }
 
-struct PoolFullInvitationTests {
+struct CarryOfferTests {
     let now = Fixture.epoch
-    let today = Fixture.today
+    let tree = Fixture.tree // carried beyond Me: self-1, dad, dad-1, mom → 4
     let free = UserHeader(id: "u", includeLimit: 10, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(-1))
-    let member = UserHeader(id: "u", includeLimit: 10, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(86_400))
 
-    @Test func theFirstFullPoolAddOfTheDayInvites() {
-        #expect(poolFullInvitation(user: free, now: now, today: today, premiumPool: 10, shownOn: nil)
-                == .membership(premiumPool: 10))
-        #expect(poolFullInvitation(user: free, now: now, today: today, premiumPool: 10,
-                                   shownOn: today.adding(days: -1)) == .membership(premiumPool: 10))
+    func member(_ limit: Int) -> UserHeader {
+        UserHeader(id: "u", includeLimit: limit, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(86_400))
     }
 
-    @Test func laterThatDayOnlyTheLink() {
-        #expect(poolFullInvitation(user: free, now: now, today: today, premiumPool: 10, shownOn: today) == .portionLink)
+    @Test func onByDefaultWhileThereIsRoom() {
+        let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(5), now: now)
+        #expect(offer == CarryOffer(hasRoom: true, startsOn: true, alsoCarriesParent: false, used: 4, pool: 5,
+                                    cost: 1, isFree: false))
+        let intention = carryOffer(kind: .intention, parentId: "dad", in: tree, user: member(5), now: now)
+        #expect(intention.hasRoom && intention.startsOn && !intention.alsoCarriesParent)
     }
 
-    @Test func aCooldownOfAWeek() {
-        #expect(poolFullInvitation(user: free, now: now, today: today, premiumPool: 10,
-                                   shownOn: today.adding(days: -6), cooldownDays: 7) == .portionLink)
-        #expect(poolFullInvitation(user: free, now: now, today: today, premiumPool: 10,
-                                   shownOn: today.adding(days: -7), cooldownDays: 7) == .membership(premiumPool: 10))
+    @Test func aFullPoolIsOffAndDisabled() {
+        let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(4), now: now)
+        #expect(!offer.hasRoom && !offer.startsOn)
+        #expect(offer.used == 4 && offer.pool == 4)
     }
 
-    @Test func onTheTopPoolNeverAnUpsell() {
-        #expect(poolFullInvitation(user: member, now: now, today: today, premiumPool: 10, shownOn: nil) == .portionLink)
+    @Test func underMeAnIntentionNeverCarriesItsName() {
+        let offer = carryOffer(kind: .intention, parentId: "self", in: tree, user: member(5), now: now)
+        #expect(offer.hasRoom && offer.startsOn && !offer.alsoCarriesParent)
+    }
+
+    @Test func underAnUncarriedNameItStartsOffAndCarriesTheNameToo() {
+        // Bea isn't carried; her intention bea-1 still is, so carrying her
+        // costs Bea + bea-1 + the new one: 4 + 3 = 7.
+        let roomy = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(7), now: now)
+        #expect(roomy == CarryOffer(hasRoom: true, startsOn: false, alsoCarriesParent: true, used: 4, pool: 7,
+                                    cost: 3, isFree: false))
+        let tight = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(6), now: now)
+        #expect(!tight.hasRoom && tight.alsoCarriesParent)
+    }
+
+    @Test func theFreePoolCarriesOneIntentionUnderMeOnly() {
+        let mine = SubjectTree([Fixture.subjects[3]])
+        #expect(carryOffer(kind: .intention, parentId: "self", in: mine, user: free, now: now).hasRoom)
+        #expect(!carryOffer(kind: .soul, parentId: nil, in: mine, user: free, now: now).hasRoom)
+        let offer = carryOffer(kind: .soul, parentId: nil, in: mine, user: free, now: now)
+        #expect(offer.used == 0 && offer.pool == 1)
     }
 
     @Test func thePoolIsTheEffectiveEntitlement() {
         #expect(effectivePoolLimit(free, now: now) == 1)
-        #expect(effectivePoolLimit(member, now: now) == 10)
+        #expect(effectivePoolLimit(member(10), now: now) == 10)
+    }
+
+    @Test func theMeterPreviewsTheResult() {
+        let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(10), now: now)
+        #expect(carryMeter(offer, kind: .soul, isOn: true) == .used(5, pool: 10))
+        #expect(carryMeter(offer, kind: .soul, isOn: false) == .used(4, pool: 10))
+        let bea = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(10), now: now)
+        #expect(carryMeter(bea, kind: .intention, isOn: true) == .used(7, pool: 10), "the true cost")
+    }
+
+    @Test func overThePoolSaysAllInUse() {
+        // A lapsed trial: 4 carried against the free pool of 1.
+        let intention = carryOffer(kind: .intention, parentId: "self", in: tree, user: free, now: now)
+        #expect(carryMeter(intention, kind: .intention, isOn: false) == .allInUse(pool: 1))
+    }
+
+    @Test func theFreePoolsNameTabExplainsInstead() {
+        let offer = carryOffer(kind: .soul, parentId: nil, in: SubjectTree([Fixture.subjects[3]]), user: free, now: now)
+        #expect(offer.isFree && !offer.hasRoom)
+        #expect(carryMeter(offer, kind: .soul, isOn: false) == .freeYouAndOneIntention)
+        // Over the pool too: still the explanation on the Name tab.
+        let lapsed = carryOffer(kind: .soul, parentId: nil, in: tree, user: free, now: now)
+        #expect(carryMeter(lapsed, kind: .soul, isOn: false) == .freeYouAndOneIntention)
     }
 }

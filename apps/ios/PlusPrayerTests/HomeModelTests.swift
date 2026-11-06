@@ -268,8 +268,8 @@ struct HomeModelTests {
 
     @Test func thePickerIsHomeOrderMeFirst() {
         defer { running.cancel() }
-        #expect(home.pickerNames.map(\.label) == ["Me", "Dad", "Mom", "Daniel Kim", "Our parish", "Ukraine", "Aunt Bea"])
-        #expect(home.pickerNames.first?.initials == "EO")
+        #expect(home.pickerNames().map(\.label) == ["Me", "Dad", "Mom", "Daniel Kim", "Our parish", "Ukraine", "Aunt Bea"])
+        #expect(home.pickerNames().first?.initials == "EO")
     }
 
     @Test func theFlipNeedsAFreshPrayer() async {

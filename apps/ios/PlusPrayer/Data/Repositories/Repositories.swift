@@ -17,7 +17,7 @@ protocol SubjectRepository {
     func subjects() -> AsyncStream<[Subject]>
 
     /// The addSubject callable: appended to the bottom of its level, carried
-    /// automatically while the pool has room, `avatarTone` stored. Online
+    /// when asked and while the pool has room, `avatarTone` stored. Online
     /// only (it needs the server's id and carry decision). Throws
     /// `AddSubjectError`.
     func addSubject(_ input: NewSubject) async throws -> AddedSubject
@@ -32,12 +32,34 @@ struct NewSubject: Equatable {
     var alias: String? = nil
     /// Names only: picked when the add sheet opened.
     var avatarTone: Int? = nil
+    /// The add sheet's carry row. false = kept for your own prayers. (The
+    /// server still saves it privately if the pool has no room.)
+    /// schema-brief.md, "addSubject carry inputs": coming to the callable;
+    /// the mock has it now.
+    var carry = true
+    /// Intentions only: also carry the name it's under ("Also carries Dad"),
+    /// which re-carries its intentions still flagged.
+    var carryParent = false
 }
 
+/// schema-brief.md, "addSubject carry inputs": one all-or-nothing pool
+/// check in the same call.
 struct AddedSubject: Equatable {
     let id: String
-    /// False when the pool was full: saved for private prayer, not printed.
+    /// The stored flag: false when it wasn't asked to be carried or the pool
+    /// had no room.
     let isCarried: Bool
+    /// An intention's name's stored flag after the call; nil for a name.
+    var parentCarried: Bool? = nil
+    /// Prints: its own flag and its name's (a name: its own flag).
+    let effectivelyCarried: Bool
+
+    /// The server's result differs from what the carry row asked for (the
+    /// pool filled from another device): the sheet says "Saved, but not
+    /// carried…". All or nothing, so `effectivelyCarried` is the whole answer.
+    func differs(from input: NewSubject) -> Bool {
+        input.carry && !effectivelyCarried
+    }
 }
 
 /// From the addSubject callable's codes (backend/functions/src/subjects.ts):

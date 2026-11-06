@@ -51,8 +51,9 @@ final class PlusPrayerUITests: XCTestCase {
         attach(app, "5 home after")
     }
 
-    /// + → a name (the keyboard stays up across tabs) → Add → the offer
-    /// (pushed in, keyboard still up) → an intention → Add → on Home.
+    /// + → a name (the keyboard stays up across tabs) → the For push and
+    /// back (keyboard still up) → Add → "Dad is added." (pushed in, keyboard
+    /// still up) → an intention → Add → on Home.
     @MainActor
     func testAddANameWithAnIntention() throws {
         let app = XCUIApplication()
@@ -60,9 +61,10 @@ final class PlusPrayerUITests: XCTestCase {
         app.launch()
 
         app.buttons["Add"].firstMatch.tap()
-        let name = app.textFields["Their name"]
+        let name = app.textFields["Name"]
         XCTAssertTrue(name.waitForExistence(timeout: 3))
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "Name is focused on open")
+        XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the carry row")
         app.typeText("Gary Olson")
         sleep(1)
         attach(app, "add 1 name")
@@ -72,26 +74,38 @@ final class PlusPrayerUITests: XCTestCase {
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up on Intention")
         sleep(1)
         attach(app, "add 2 intention tab")
+
+        // The For row pushes "Who is this for?"; picking comes back.
+        app.buttons["For"].tap()
+        XCTAssertTrue(app.staticTexts["Who is this for?"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up into the search")
+        app.typeText("mo")
+        sleep(1)
+        attach(app, "add 3 who is this for")
+        app.buttons["addSheet.for.mom"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up back on the intention")
+        XCTAssertEqual(app.buttons["For"].value as? String, "Mom")
+
         app.segmentedControls.buttons["Name"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up back on Name")
 
-        app.textFields["e.g. Dad"].tap()
+        app.textFields["What you call them · optional"].tap()
         app.typeText("Dad")
-        attach(app, "add 3 alias")
+        attach(app, "add 4 alias")
         app.navigationBars.buttons["Add"].tap()
 
-        let offer = app.staticTexts["Dad is on your list."]
+        let offer = app.staticTexts["Dad is added."]
         XCTAssertTrue(offer.waitForExistence(timeout: 3), "the offer step")
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up into the offer")
         sleep(1)
-        attach(app, "add 4 offer")
+        attach(app, "add 5 offer")
         app.typeText("Healing after surgery")
         app.navigationBars.buttons["Add"].tap()
 
         let row = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Dad, Gary Olson'"))
         XCTAssertTrue(row.firstMatch.waitForExistence(timeout: 3), "the new name on Home")
         sleep(1)
-        attach(app, "add 5 home")
+        attach(app, "add 6 home")
     }
 
     /// 🔎 → the row docks above the keyboard with the compact pray button →

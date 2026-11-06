@@ -41,13 +41,10 @@ final class HomeModel {
 
     private let repositories: Repositories
     private let clock: () -> Date
-    /// Device-local preferences (the add sheet's "shown today").
-    private let defaults: UserDefaults
 
-    init(repositories: Repositories, clock: @escaping () -> Date = Date.init, defaults: UserDefaults = .standard) {
+    init(repositories: Repositories, clock: @escaping () -> Date = Date.init) {
         self.repositories = repositories
         self.clock = clock
-        self.defaults = defaults
         today = LocalDate(clock())
     }
 
@@ -251,8 +248,8 @@ final class HomeModel {
         await repositories.prayers.updateNote(prayerId: prayerId, note: note)
     }
 
-    /// The addSubject callable (online only). A new item the pool can't
-    /// carry is saved for private prayer; the add sheet says so.
+    /// The addSubject callable (online only). The add sheet's carry row
+    /// already said whether it's carried.
     func addSubject(_ input: NewSubject) async throws -> AddedSubject {
         try await repositories.subjects.addSubject(input)
     }
@@ -265,38 +262,29 @@ final class HomeModel {
         return pickTone(tree.names.map(\.tone), using: &generator)
     }
 
-    /// The add sheet's name picker: your names in Home order, Me first.
-    var pickerNames: [PickerName] {
-        tree.names.map { PickerName(id: $0.id, label: $0.label, initials: monogram($0), tone: $0.tone) }
+    /// "Who is this for?": your names in Home order, Me first, matching the
+    /// query on name + alias as Home search does (everyone when it's empty).
+    func pickerNames(matching query: String = "") -> [PickerName] {
+        tree.names.filter { matchesQuery($0, query) }
+            .map { PickerName(id: $0.id, label: $0.label, initials: monogram($0), tone: $0.tone) }
     }
 
-    /// The pool a full-pool add is measured against ("All {pool} places").
-    var poolLimit: Int {
-        header.map { effectivePoolLimit($0, now: clock()) } ?? freeCarryLimit
+    /// The add sheet's carry row for a new name (`parentId` nil) or an
+    /// intention under `parentId` (screens.md, "Carry row").
+    /// - Parameter justAdded: the name the sheet just saved, counted until
+    ///   Home's stream brings it.
+    func carryOffer(kind: SubjectKind, parentId: String?, justAdded: Subject? = nil) -> CarryOffer {
+        guard let header else {
+            return CarryOffer(hasRoom: false, startsOn: false, alsoCarriesParent: false, used: 0,
+                              pool: freeCarryLimit)
+        }
+        var tree = tree
+        if let justAdded, tree[justAdded.id] == nil { tree = SubjectTree(Array(tree.all) + [justAdded]) }
+        return PlusPrayerDomain.carryOffer(kind: kind, parentId: parentId, in: tree, user: header, now: clock())
     }
-
-    /// The free pool: "Your free place on the list is in use."
-    var isFreePool: Bool { header.map { PlusPrayerDomain.isFreePool($0, now: clock()) } ?? true }
 
     /// Active names and intentions; at the ~500 cap the add sheet says so.
     var subjectCount: Int { subjects?.count ?? 0 }
-
-    private static let membershipShownKey = "addSheet.membershipInvitationShownOn"
-
-    /// What the add sheet offers under the pool-full line (PROPOSED cadence,
-    /// open-questions Q31; the rule is `poolFullInvitation`).
-    func poolFullInvitation() -> PoolFullInvitation {
-        guard let header else { return .portionLink }
-        let shownOn = defaults.string(forKey: Self.membershipShownKey).flatMap(LocalDate.init(string:))
-        return PlusPrayerDomain.poolFullInvitation(user: header, now: clock(), today: today,
-                                                   premiumPool: config.basePremiumPool, shownOn: shownOn)
-    }
-
-    /// The membership invitation was shown: later adds today get the link.
-    /// Recorded only when it's really shown (not while Membership is hidden).
-    func recordMembershipInvitationShown() {
-        defaults.set(today.description, forKey: Self.membershipShownKey)
-    }
 
     /// A subject's label ("Dad"), for the offer step and the picker.
     func label(of id: String) -> String? { tree[id]?.label }
@@ -369,7 +357,7 @@ struct NameGroup: Identifiable, Equatable {
     var id: String { name.id }
 }
 
-/// One name in the add sheet's picker.
+/// One name in the add sheet's For row and "Who is this for?".
 struct PickerName: Identifiable, Equatable {
     let id: String
     let label: String

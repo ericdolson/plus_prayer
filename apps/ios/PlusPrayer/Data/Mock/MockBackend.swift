@@ -87,7 +87,8 @@ final class MockBackend {
 
     /// The addSubject callable, with the server's rules: text checks, the
     /// cap, the parent must be one of your names, appended at the bottom of
-    /// its level, carried while the pool has room.
+    /// its level, carried when asked while the pool has room (with its name,
+    /// when asked: `carryParent`).
     func addSubject(_ input: NewSubject) async throws(AddSubjectError) -> AddedSubject {
         try? await Task.sleep(for: latency)
         guard online else { throw .offline }
@@ -113,11 +114,20 @@ final class MockBackend {
                               avatarTone: input.kind == .soul ? input.avatarTone : nil,
                               createdAt: now())
         nextId += 1
-        if let header = header.value {
-            subject.isCarried = carriesNewSubject(subject, in: SubjectTree(current), user: header, now: now())
+        var updated = current
+        if !input.carry {
+            subject.isCarried = false
+        } else if let header = header.value {
+            if input.carryParent, let index = updated.firstIndex(where: { $0.id == input.parentId }) {
+                updated[index].isCarried = true
+            }
+            subject.isCarried = checkPool(SubjectTree(updated + [subject]), user: header, now: now()).fits
+            if !subject.isCarried { updated = current }
         }
-        subjects.send(current + [subject])
-        return AddedSubject(id: subject.id, isCarried: subject.isCarried)
+        subjects.send(updated + [subject])
+        let parent = updated.first { $0.id == input.parentId }
+        return AddedSubject(id: subject.id, isCarried: subject.isCarried, parentCarried: parent?.isCarried,
+                            effectivelyCarried: subject.isCarried && (parent.map { $0.isSelf || $0.isCarried } ?? true))
     }
 
     // MARK: Scenario controls

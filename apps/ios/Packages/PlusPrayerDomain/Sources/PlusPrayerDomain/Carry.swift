@@ -77,43 +77,101 @@ public func carriesNewSubject(_ new: Subject, in tree: SubjectTree, user: UserHe
 }
 
 /// The pool the carry is measured against now: `includeLimit` while the
-/// entitlement is active, else free (1). The add sheet's "All {pool} places".
+/// entitlement is active, else free (1). The add sheet's meter.
 public func effectivePoolLimit(_ user: UserHeader, now: Date) -> Int {
     hasActiveEntitlement(user, now: now) ? user.includeLimit : freeCarryLimit
 }
 
-// MARK: The add sheet's invitation when the pool is full
+// MARK: The add sheet's carry row (screens.md, "Carry row")
 //
-// PROPOSED, not decided (open-questions Q31): kept to this one rule so the
-// cadence is easy to change. Never silent, never on Home; the sheet says
-// "{alias} is saved for your own prayers. All {pool} places on the list are
-// in use." and then, under it:
+// "Carry onto the list", a toggle, and a meter that previews the result. On
+// by default while there's room; with no room it's off and disabled, with an
+// (inert for now) "Make room …" under the meter. An intention under a name
+// that isn't carried (for any reason) starts off; turning it on carries the
+// name too, and the line states the true cost.
 
-public enum PoolFullInvitation: Sendable, Equatable {
-    /// The first full-pool add of your local day, when a larger pool exists:
-    /// "Membership carries up to {premiumPool} of your people each day."
-    /// + [See membership].
-    case membership(premiumPool: Int)
-    /// Otherwise: only the small "Your portion" link (it holds the upgrade
-    /// path). On the top pool there's never an upsell.
-    case portionLink
+/// What the pool counts in, for every `{unit}`. One place to change if
+/// open-questions Q32 (people, not items) is adopted.
+public enum PoolUnit: Sendable, Equatable {
+    case places
 }
 
-/// - Parameters:
-///   - premiumPool: the base subscription's pool (`/config` `basePremiumPool`).
-///   - shownOn: the local day the membership invitation was last shown on
-///     this device ("shown today" is device-local).
-///   - cooldownDays: days before it can show again. 1 = once per local day
-///     (the placeholder); 7 would be first time, then at most weekly.
-public func poolFullInvitation(user: UserHeader, now: Date, today: LocalDate, premiumPool: Int,
-                               shownOn: LocalDate?, cooldownDays: Int = 1) -> PoolFullInvitation {
-    guard effectivePoolLimit(user, now: now) < premiumPool else { return .portionLink }
-    if let shownOn, today.days(since: shownOn) < cooldownDays { return .portionLink }
-    return .membership(premiumPool: premiumPool)
+public let poolUnit = PoolUnit.places
+
+public struct CarryOffer: Sendable, Equatable {
+    /// The toggle can turn on: the pool has room for it (and, for an
+    /// intention under an uncarried name, for the name too).
+    public let hasRoom: Bool
+    /// Where the toggle starts.
+    public let startsOn: Bool
+    /// Turning it on also carries the intention's name ("Also carries Dad").
+    public let alsoCarriesParent: Bool
+    /// What's carried now, beyond you.
+    public let used: Int
+    public let pool: Int
+    /// How many units turning it on uses: 1, or more when it carries its
+    /// name (and the name's intentions still marked carried come back).
+    public let cost: Int
+    /// No active entitlement: the free pool (one intention under Me).
+    public let isFree: Bool
+
+    public init(hasRoom: Bool, startsOn: Bool, alsoCarriesParent: Bool, used: Int, pool: Int, cost: Int = 1,
+                isFree: Bool = false) {
+        self.hasRoom = hasRoom
+        self.startsOn = startsOn
+        self.alsoCarriesParent = alsoCarriesParent
+        self.used = used
+        self.pool = pool
+        self.cost = cost
+        self.isFree = isFree
+    }
 }
 
-/// The free pool (you're always carried free, so "Your free place").
-public func isFreePool(_ user: UserHeader, now: Date) -> Bool { !hasActiveEntitlement(user, now: now) }
+/// The carry row for a new name (`parentId` nil) or a new intention under
+/// `parentId`, against the tree as it is now.
+public func carryOffer(kind: SubjectKind, parentId: String?, in tree: SubjectTree, user: UserHeader,
+                       now: Date) -> CarryOffer {
+    let used = effectiveCarried(tree).count
+    let pool = effectivePoolLimit(user, now: now)
+    let isFree = !hasActiveEntitlement(user, now: now)
+    guard kind == .soul || parentId != nil else {
+        return CarryOffer(hasRoom: false, startsOn: false, alsoCarriesParent: false, used: used, pool: pool,
+                          isFree: isFree)
+    }
+    var subjects = Array(tree.all)
+    var alsoCarriesParent = false
+    if kind == .intention, let parentId, let index = subjects.firstIndex(where: { $0.id == parentId }),
+       !subjects[index].isSelf, !subjects[index].isCarried {
+        // Carrying it brings the name back, with any intentions still marked
+        // carried under it (setCarriedItems' rule).
+        subjects[index].isCarried = true
+        alsoCarriesParent = true
+    }
+    subjects.append(Subject(id: "\u{0}new", kind: kind, parentId: kind == .intention ? parentId : nil,
+                            publicName: "", isCarried: true, sortOrder: .max, createdAt: now))
+    let after = SubjectTree(subjects)
+    let hasRoom = checkPool(after, user: user, now: now).fits
+    return CarryOffer(hasRoom: hasRoom, startsOn: hasRoom && !alsoCarriesParent,
+                      alsoCarriesParent: alsoCarriesParent, used: used, pool: pool,
+                      cost: effectiveCarried(after).count - used, isFree: isFree)
+}
+
+/// The carry row's muted meter line.
+public enum CarryMeter: Sendable, Equatable {
+    /// "8 of 10 places used"
+    case used(Int, pool: Int)
+    /// Over the pool (a lapsed trial): "All 10 places in use", never "7 of 1".
+    case allInUse(pool: Int)
+    /// Free pool, Name tab: "Free carries you and one intention of your own".
+    case freeYouAndOneIntention
+}
+
+/// The meter previews the result: it counts this item while the toggle is on.
+public func carryMeter(_ offer: CarryOffer, kind: SubjectKind, isOn: Bool) -> CarryMeter {
+    if kind == .soul && offer.isFree { return .freeYouAndOneIntention }
+    if offer.used > offer.pool { return .allInUse(pool: offer.pool) }
+    return .used(offer.used + (isOn ? offer.cost : 0), pool: offer.pool)
+}
 
 /// The ~500-item abuse cap (server config `subjectCap`; not a paywall). It
 /// counts active subjects, the ones on Home (Answered included), the same set

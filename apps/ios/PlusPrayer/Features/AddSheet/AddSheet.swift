@@ -1,31 +1,29 @@
 import PlusPrayerDomain
 import SwiftUI
 
-/// The add sheet (screens.md, "Add sheet" and its Details): one native sheet,
-/// buttons in its toolbar, a native segmented control for Name | Intention.
+/// The add sheet (screens.md, "Add sheet", revised 2026-11-06): one native
+/// sheet, buttons in its toolbar, a native segmented control for Name |
+/// Intention, a carry row on every step.
 ///
 /// Keyboard: every text field stays in the hierarchy (the hidden tab and the
-/// next step are only moved or faded), so focus moves from one field to the
+/// other pages are only moved or faded), so focus moves from one field to the
 /// next in the same transaction and the keyboard never hides and reappears.
-/// The sheet keeps one height, the tallest it has been (the name form), and
-/// the offer step pushes in from the trailing edge.
+/// The sheet keeps one height, the tallest it has been (the name form); the
+/// offer step and "Who is this for?" push in from the trailing edge.
 struct AddSheet: View {
     @State var model: AddSheetModel
-    /// Where the pool-full links go; nil until those screens exist (hidden).
-    var onSeeMembership: (() -> Void)? = nil
-    var onYourPortion: (() -> Void)? = nil
 
-    @Environment(HomeModel.self) private var home
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focus: AddSheetModel.Field?
     @State private var width: CGFloat = 0
 
-    private var onForm: Bool { model.step == .form }
-
     /// The one line at the top: no connection, the ~500 cap, or anything
     /// else that went wrong. Text is kept.
     private var notice: String? {
+        // The intention tab's "Saved, but not carried…" (the offer step has
+        // it under its header).
+        if model.notCarried == .intention && model.step == .form { return L10n.Add.notCarried }
         if model.isOffline { return L10n.Add.offline }
         if model.isAtCap { return L10n.Add.capReached(subjectCap) }
         if model.failedGenerically { return L10n.Add.failed }
@@ -44,18 +42,16 @@ struct AddSheet: View {
                         .transition(.opacity)
                 }
                 ZStack(alignment: .topLeading) {
-                    formPage
-                        .offset(x: onForm ? 0 : -width)
-                        .opacity(onForm ? 1 : 0)
-                        .allowsHitTesting(onForm)
-                        .accessibilityHidden(!onForm)
-                    stepPage
-                        .offset(x: onForm ? width : 0)
-                        .opacity(onForm ? 0 : 1)
-                        .allowsHitTesting(!onForm)
-                        .accessibilityHidden(onForm)
+                    page(formPage, shown: model.step == .form, before: true)
+                    page(offerPage, shown: isOffer, before: false)
+                }
+                // Sized to the pages (it never sets the sheet's height); its
+                // list scrolls inside.
+                .overlay(alignment: .topLeading) {
+                    page(chooserPage, shown: model.step == .choosing, before: false)
                 }
                 .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+                .disabled(isSettled)
             }
             .padding(.horizontal, PP.space.xl)
             .padding(.top, PP.space.md)
@@ -72,9 +68,36 @@ struct AddSheet: View {
         .onChange(of: model.isFinished) { _, finished in if finished { dismiss() } }
     }
 
+    /// Saved, but not carried: nothing left to do but Done.
+    private var isSettled: Bool { model.isSettled }
+
+    private var isOffer: Bool {
+        if case .offer = model.step { true } else { false }
+    }
+
+    /// A page that slides: the form leaves to the leading edge, the others
+    /// wait off the trailing edge.
+    private func page(_ content: some View, shown: Bool, before: Bool) -> some View {
+        content
+            .offset(x: shown ? 0 : (before ? -width : width))
+            .opacity(shown ? 1 : 0)
+            .allowsHitTesting(shown)
+            .accessibilityHidden(!shown)
+    }
+
     // MARK: Toolbar
 
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
+        if isSettled {
+            ToolbarItem(placement: .confirmationAction) {
+                Button(L10n.Common.done) { model.finish() }
+            }
+        } else {
+            stepToolbar
+        }
+    }
+
+    @ToolbarContentBuilder private var stepToolbar: some ToolbarContent {
         switch model.step {
         case .form:
             ToolbarItem(placement: .cancellationAction) {
@@ -91,16 +114,22 @@ struct AddSheet: View {
                 .fixedSize()
             }
             ToolbarItem(placement: .confirmationAction) { addButton }
-        case .offer, .savedPrivately(_, .soul, _):
+        case .choosing:
+            ToolbarItem(placement: .topBarLeading) {
+                Button { choose(nil) } label: { PPIcon.back }
+                    .accessibilityLabel(L10n.Add.back)
+            }
+            ToolbarItem(placement: .principal) {
+                Text(L10n.Add.whoIsThisFor)
+                    .font(PP.type.label)
+                    .foregroundStyle(PP.color.ink)
+            }
+        case .offer:
             // No back: the name is already saved.
             ToolbarItem(placement: .cancellationAction) {
                 Button(L10n.Add.notNow) { model.finish() }
             }
             ToolbarItem(placement: .confirmationAction) { addButton }
-        case .savedPrivately:
-            ToolbarItem(placement: .confirmationAction) {
-                Button(L10n.Common.done) { model.finish() }
-            }
         }
     }
 
@@ -122,14 +151,22 @@ struct AddSheet: View {
     private func save() {
         Task {
             await model.add()
-            // The next step's field takes focus as the step changes; with
-            // nothing to type next (an intention saved privately), let go.
-            switch model.step {
-            case .offer, .savedPrivately(_, .soul, _): focus = .offer
-            case .savedPrivately: focus = nil
-            case .form: break
-            }
+            // A saved name pushes the offer: its field takes focus as the
+            // step changes, so the keyboard stays up (pool full included).
+            if isOffer { focus = .offer }
         }
+    }
+
+    /// The For row pushes "Who is this for?" with its search focused.
+    private func openChooser() {
+        model.openChooser()
+        focus = .search
+    }
+
+    /// Picking someone (or going back) returns to the intention, focused.
+    private func choose(_ id: String?) {
+        model.choose(id)
+        focus = .intention
     }
 
     // MARK: The form (Name | Intention)
@@ -153,132 +190,213 @@ struct AddSheet: View {
             // Home's rule.
             MonogramAvatar(initials: model.previewInitials, tone: model.tone, size: PP.size.avatar.large)
                 .accessibilityHidden(true)
-            field(.name, text: $model.name, placeholder: L10n.Add.namePlaceholder, caption: L10n.Add.nameCaption)
+            field(.name, text: $model.name, label: L10n.Add.nameLabel, placeholder: L10n.Add.namePlaceholder,
+                  caption: L10n.Add.nameCaption)
                 .onSubmit { focus = .alias }
                 .submitLabel(.next)
-            field(.alias, text: $model.alias, placeholder: L10n.Add.aliasPlaceholder, caption: L10n.Add.aliasCaption)
+            field(.alias, text: $model.alias, label: L10n.Add.aliasLabel, placeholder: L10n.Add.aliasPlaceholder,
+                  caption: L10n.Add.aliasCaption)
                 .onSubmit(save)
                 .submitLabel(.done)
+            carryRow(.name)
         }
     }
 
     private var intentionForm: some View {
-        VStack(alignment: .leading, spacing: PP.space.md) {
-            namePicker
-            field(.intention, text: $model.intention, placeholder: L10n.Add.intentionPlaceholder,
-                  caption: L10n.Add.intentionCaption)
+        VStack(alignment: .leading, spacing: PP.space.lg) {
+            forRow
+            field(.intention, text: $model.intention, label: L10n.Add.intentionLabel,
+                  placeholder: L10n.Add.intentionPlaceholder, caption: L10n.Add.intentionCaption)
                 .onSubmit(save)
                 .submitLabel(.done)
+            carryRow(.intention)
         }
     }
 
-    /// "For ( M ) Me": a native menu over the sheet; it doesn't take focus
-    /// from the field. Items: a small monogram and the alias, Home order, Me
-    /// first. (No search in v1: open-questions D5.)
-    private var namePicker: some View {
-        Menu {
-            Picker(selection: $model.parentId) {
-                ForEach(home.pickerNames) { name in
-                    Label { Text(name.label) } icon: { MonogramImage(name: name) }
-                        .tag(name.id)
-                }
-            } label: {
-                EmptyView()
-            }
-            .pickerStyle(.inline)
-        } label: {
-            HStack(spacing: PP.space.xs) {
-                Text(L10n.Add.forLabel).foregroundStyle(PP.color.inkMuted)
+    /// Looks like a Home row: the avatar, the serif name, a blue "Change".
+    private var forRow: some View {
+        Button(action: openChooser) {
+            HStack(spacing: PP.space.md) {
                 if let parent = model.parent {
-                    MonogramAvatar(initials: parent.initials, tone: parent.tone, size: PP.size.avatar.tiny)
-                    Text(parent.label).foregroundStyle(PP.color.ink)
+                    MonogramAvatar(initials: parent.initials, tone: parent.tone, size: PP.size.avatar.picker)
+                    Text(parent.label)
+                        .font(PP.type.name)
+                        .foregroundStyle(PP.color.ink)
+                        .lineLimit(1)
                 }
-                PPIcon.chooser
-                    .imageScale(.small)
-                    .foregroundStyle(PP.color.inkMuted)
+                Spacer(minLength: PP.space.sm)
+                Text(L10n.Add.change)
+                    .font(PP.type.body)
+                    .foregroundStyle(PP.color.primary)
             }
-            .font(PP.type.bodySmall)
             .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(L10n.Add.forLabel)
         .accessibilityValue(model.parent?.label ?? "")
+        .accessibilityAddTraits(.isButton)
     }
 
-    // MARK: The next step
+    // MARK: Who is this for?
 
-    @ViewBuilder private var stepPage: some View {
+    private var chooserPage: some View {
         VStack(alignment: .leading, spacing: PP.space.md) {
-            switch model.step {
-            case .form, .offer:
-                Text(L10n.Add.onList(model.offerName))
-                    .font(PP.type.displayLine)
+            HStack(spacing: PP.space.sm) {
+                PPIcon.search
+                    .foregroundStyle(PP.color.inkMuted)
+                    .accessibilityHidden(true)
+                TextField(L10n.Search.placeholder, text: $model.chooserQuery)
+                    .focused($focus, equals: .search)
                     .foregroundStyle(PP.color.ink)
-                offer
-            case .savedPrivately(_, let kind, let invitation):
-                // "Dad is saved for your own prayers. All 10 places on the
-                // list are in use." (free: "Your free place …"; an
-                // intention is never quoted).
-                VStack(alignment: .leading, spacing: PP.space.xxs) {
-                    Text(kind == .intention ? L10n.Add.savedIntention : L10n.Add.savedPrivately(model.offerName))
-                        .foregroundStyle(PP.color.ink)
-                    Text(model.isFreePool ? L10n.Add.freePlace : L10n.Add.poolFull(model.poolLimit))
-                        .foregroundStyle(PP.color.inkMuted)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    // Return doesn't lower the keyboard (screens.md, "Keyboard stays up").
+                    .onSubmit { focus = .search }
+            }
+            .font(PP.type.body)
+            .padding(PP.space.md)
+            .background(PP.color.raised, in: RoundedRectangle(cornerRadius: PP.radius.md))
+            let names = model.chooserNames
+            if names.isEmpty {
+                Text(L10n.Add.noMatches(model.chooserQuery.trimmingCharacters(in: .whitespacesAndNewlines)))
+                    .font(PP.type.bodySmall)
+                    .foregroundStyle(PP.color.inkMuted)
+                    .padding(.horizontal, PP.space.md)
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(names) { name in
+                            chooserRow(name)
+                        }
+                    }
                 }
-                .font(PP.type.body)
-                invitationView(invitation)
-                if kind == .soul { offer }
+                .scrollBounceBehavior(.basedOnSize)
             }
         }
     }
 
-    /// The one intention offered for the name just saved.
-    private var offer: some View {
+    private func chooserRow(_ name: PickerName) -> some View {
+        Button { choose(name.id) } label: {
+            HStack(spacing: PP.space.md) {
+                MonogramAvatar(initials: name.initials, tone: name.tone, size: PP.size.avatar.picker)
+                Text(name.label)
+                    .font(PP.type.name)
+                    .foregroundStyle(PP.color.ink)
+                    .lineLimit(1)
+                Spacer(minLength: PP.space.sm)
+                if name.id == model.parentId {
+                    PPIcon.check
+                        .font(PP.type.body)
+                        .foregroundStyle(PP.color.ink)
+                }
+            }
+            .frame(minHeight: PP.size.row.name)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(name.label)
+        .accessibilityIdentifier("addSheet.for.\(name.id)")
+        .accessibilityAddTraits(name.id == model.parentId ? [.isButton, .isSelected] : .isButton)
+    }
+
+    // MARK: The offer step
+
+    private var offerPage: some View {
         VStack(alignment: .leading, spacing: PP.space.md) {
+            Text(L10n.Add.added(model.offerName))
+                .font(PP.type.displayLine)
+                .foregroundStyle(PP.color.ink)
+            if model.notCarried != nil {
+                Text(L10n.Add.notCarried)
+                    .font(PP.type.bodySmall)
+                    .foregroundStyle(PP.color.ink)
+                    .transition(.opacity)
+            }
             Text(L10n.Add.offerQuestion(model.offerName))
                 .font(PP.type.bodySmall)
                 .foregroundStyle(PP.color.inkMuted)
-            field(.offer, text: $model.offerText, placeholder: L10n.Add.intentionPlaceholder, caption: nil)
+            field(.offer, text: $model.offerText, placeholder: L10n.Add.intentionPlaceholder,
+                  caption: L10n.Add.intentionCaption)
                 .onSubmit(save)
                 .submitLabel(.done)
+            carryRow(.offer)
+                .padding(.top, PP.space.sm)
         }
     }
 
-    /// Under the pool-full line (PROPOSED cadence, Q31). Membership and Your
-    /// portion stay hidden until their screens exist (the model only offers
-    /// membership when it's available).
-    @ViewBuilder private func invitationView(_ invitation: PoolFullInvitation) -> some View {
-        switch invitation {
-        case .membership(let premiumPool):
-            if let onSeeMembership {
-                VStack(alignment: .leading, spacing: PP.space.sm) {
-                    Text(L10n.Add.membership(premiumPool))
-                        .font(PP.type.bodySmall)
+    // MARK: The carry row
+
+    /// The bloom, "Carry onto the list", the meter (previewing the toggle),
+    /// a toggle. With no room: off, disabled, and a blue "Make room …" under
+    /// the meter, inert until Membership / Your portion exist.
+    private func carryRow(_ row: AddSheetModel.CarryRow) -> some View {
+        let offer = model.carryOffer(row)
+        let isOn = Binding(get: { model.isCarrying(row) }, set: { model.setCarrying(row, $0) })
+        let also = model.alsoCarries(row)
+        return HStack(alignment: .top, spacing: PP.space.md) {
+            PPIcon.carried
+                .font(PP.type.body)
+                .foregroundStyle(PP.color.carriedMark)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: PP.space.xxs) {
+                Text(L10n.Add.carryTitle)
+                    .font(PP.type.body)
+                    .foregroundStyle(PP.color.ink)
+                    .accessibilityHidden(true)
+                Text(L10n.Add.carryMeter(model.meter(row)))
+                    .font(PP.type.caption)
+                    .foregroundStyle(PP.color.inkMuted)
+                if let also {
+                    Text(L10n.Add.alsoCarries(also.name, cost: also.cost))
+                        .font(PP.type.caption)
                         .foregroundStyle(PP.color.inkMuted)
-                    Button(L10n.Add.seeMembership, action: onSeeMembership)
-                        .buttonStyle(.glassProminent)
-                        .tint(PP.color.primary)
+                        .transition(.opacity)
+                }
+                if !offer.hasRoom {
+                    makeRoom(row)
+                        .padding(.top, PP.space.xxs)
                 }
             }
-        case .portionLink:
-            if let onYourPortion {
-                Button(L10n.Add.yourPortion, action: onYourPortion)
-                    .font(PP.type.bodySmall)
-                    .tint(PP.color.primary)
-            }
+            .layoutPriority(1)
+            Spacer(minLength: PP.space.sm)
+            Toggle(L10n.Add.carryTitle, isOn: isOn)
+                .labelsHidden()
+                .disabled(!offer.hasRoom)
         }
+        .animation(.easeOut(duration: PP.duration.quick), value: also?.cost)
+    }
+
+    /// Visible but inert for now: what its menu offers is part of the
+    /// monetization decision (open-questions Q31/Q32).
+    private func makeRoom(_ row: AddSheetModel.CarryRow) -> some View {
+        Button(row == .name ? L10n.Add.makeRoom(for: model.typedLabel) : L10n.Add.makeRoomForIntention) {}
+            .font(PP.type.bodySmall)
+            .tint(PP.color.primary)
+            .multilineTextAlignment(.leading)
+            .accessibilityHint(L10n.Add.makeRoomHint)
     }
 
     // MARK: A field
 
-    /// A native text field with its muted caption below. Caps stop input; a
-    /// muted "34/40" counter shows in the last 10 characters. Contact info
-    /// shows its message in place of the caption once typing pauses.
-    private func field(_ field: AddSheetModel.Field, text: Binding<String>, placeholder: String,
-                       caption: String?) -> some View {
+    /// A native text field with its label above (if any) and its muted
+    /// caption below. Caps stop input; a muted "34/40" counter shows in the
+    /// last 10 characters. Contact info shows its message in place of the
+    /// caption once typing pauses.
+    private func field(_ field: AddSheetModel.Field, text: Binding<String>, label: String? = nil,
+                       placeholder: String, caption: String?) -> some View {
         let cap = AddSheetModel.cap(field)
         let count = text.wrappedValue.count
         let issue = model.contactShown.contains(field)
         return VStack(alignment: .leading, spacing: PP.space.xs) {
+            if let label {
+                Text(label)
+                    .font(PP.type.label)
+                    .foregroundStyle(PP.color.ink)
+                    .padding(.horizontal, PP.space.md)
+                    .accessibilityHidden(true)
+            }
             TextField(placeholder, text: text)
                 .focused($focus, equals: field)
                 .font(PP.type.body)
@@ -286,6 +404,7 @@ struct AddSheet: View {
                 .textInputAutocapitalization(field == .name || field == .alias ? .words : .sentences)
                 .padding(PP.space.md)
                 .background(PP.color.raised, in: RoundedRectangle(cornerRadius: PP.radius.md))
+                .accessibilityLabel(label ?? placeholder)
                 .onChange(of: text.wrappedValue) { _, new in
                     if new.count > cap { text.wrappedValue = String(new.prefix(cap)) }
                     model.textChanged()
@@ -314,24 +433,6 @@ struct AddSheet: View {
             }
             .font(PP.type.caption)
             .padding(.horizontal, PP.space.md)
-        }
-    }
-}
-
-/// A small monogram as an image, for native menu items (they take images,
-/// not views).
-private struct MonogramImage: View {
-    let name: PickerName
-    @Environment(\.displayScale) private var scale
-
-    var body: some View {
-        let renderer = ImageRenderer(content: MonogramAvatar(initials: name.initials, tone: name.tone,
-                                                             size: PP.size.avatar.tiny))
-        renderer.scale = scale
-        return Group {
-            if let image = renderer.uiImage {
-                Image(uiImage: image).renderingMode(.original)
-            }
         }
     }
 }
@@ -367,18 +468,31 @@ private struct FittedSheetHeight: ViewModifier {
 // MARK: Previews (on the mock)
 
 private struct AddSheetPreview: View {
-    @State private var home = HomeModel(environment: .mock(MockBackend(latency: .zero, liveDrift: false)))
     let tab: AddSheetModel.Tab
+    var poolFull = false
+    @State private var backend = MockBackend(latency: .zero, liveDrift: false)
+    @State private var home: HomeModel?
+    @State private var model: AddSheetModel?
 
     var body: some View {
         Color.clear
-            .sheet(isPresented: .constant(true)) {
-                AddSheet(model: AddSheetModel(home: home, tab: tab))
-                    .environment(home)
+            .sheet(item: $model) { model in
+                AddSheet(model: model)
             }
-            .task { await home.run() }
+            .task {
+                if poolFull { backend.header.update { $0?.entitlementExpiresAt = .now.addingTimeInterval(-60) } }
+                let home = HomeModel(environment: .mock(backend))
+                self.home = home
+                Task { await home.run() }
+                while !home.isLoaded || home.header == nil { try? await Task.sleep(for: .milliseconds(10)) }
+                model = AddSheetModel(home: home, tab: tab, name: poolFull ? "Gary Olson" : "")
+            }
     }
 }
 
 #Preview("Name") { AddSheetPreview(tab: .name).preferredColorScheme(.dark) }
 #Preview("Intention") { AddSheetPreview(tab: .intention).preferredColorScheme(.light) }
+#Preview("Pool full") { AddSheetPreview(tab: .name, poolFull: true).preferredColorScheme(.light) }
+#Preview("Pool full, large type") {
+    AddSheetPreview(tab: .name, poolFull: true).dynamicTypeSize(.accessibility2)
+}

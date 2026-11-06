@@ -128,37 +128,66 @@ nonisolated enum L10n {
         private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
         static var tabName: String { t("add.tab.name") }
         static var tabIntention: String { t("add.tab.intention") }
+        static var nameLabel: String { t("add.name.label") }
         static var namePlaceholder: String { t("add.name.placeholder") }
         static var nameCaption: String { t("add.name.caption") }
+        static var aliasLabel: String { t("add.alias.label") }
         static var aliasPlaceholder: String { t("add.alias.placeholder") }
         static var aliasCaption: String { t("add.alias.caption") }
+        static var intentionLabel: String { t("add.intention.label") }
         static var intentionPlaceholder: String { t("add.intention.placeholder") }
         static var intentionCaption: String { t("add.intention.caption") }
         static var forLabel: String { t("add.for") }
+        static var change: String { t("add.for.change") }
+        static var whoIsThisFor: String { t("add.for.title") }
+        static var back: String { t("add.for.back") }
+        static func noMatches(_ query: String) -> String { String(format: t("add.for.noMatches"), query) }
         static var add: String { t("add.add") }
         static var cancel: String { t("add.cancel") }
         static var notNow: String { t("add.notNow") }
         static var contactError: String { t("add.error.contact") }
         static var offline: String { t("add.offline") }
         static var failed: String { t("add.failed") }
-        static var seeMembership: String { t("add.saved.seeMembership") }
-        static var yourPortion: String { t("add.saved.yourPortion") }
+        static var carryTitle: String { t("add.carry.title") }
+        static var makeRoomForIntention: String { t("add.carry.makeRoom.intention") }
+        static var makeRoomHint: String { t("add.carry.makeRoom.hint") }
+        static var notCarried: String { t("add.carry.notCarried") }
+        /// "Make room for Dad"; with nothing typed yet, "Make room".
+        static func makeRoom(for name: String) -> String {
+            name.isEmpty ? t("add.carry.makeRoom") : String(format: t("add.carry.makeRoom.name"), name)
+        }
+        // Everything with a `{unit}` goes through these, keyed by the unit
+        // (open-questions Q32): "places" today.
+
+        /// "Also carries Dad · uses 2 places"
+        static func alsoCarries(_ name: String, cost: Int, unit: PoolUnit = poolUnit) -> String {
+            let key = switch unit {
+            case .places: "add.carry.alsoCarries.places"
+            }
+            return String.localizedStringWithFormat(t(key), name, cost)
+        }
+
+        /// The carry row's meter: "8 of 10 places used", "All 1 place in use",
+        /// or the free pool's line on the Name tab.
+        static func carryMeter(_ meter: CarryMeter, unit: PoolUnit = poolUnit) -> String {
+            switch (meter, unit) {
+            case (.used(let used, let pool), .places):
+                String.localizedStringWithFormat(t("add.carry.meter.places"), used, pool)
+            case (.allInUse(1), .places):
+                t("add.carry.allInUse.one")
+            case (.allInUse(let pool), .places):
+                String.localizedStringWithFormat(t("add.carry.allInUse.places"), pool)
+            case (.freeYouAndOneIntention, _):
+                t("add.carry.freeNote")
+            }
+        }
         static func counter(_ count: Int, _ cap: Int) -> String {
             String(format: t("add.counter"), locale: .current, count, cap)
         }
-        static func onList(_ name: String) -> String { String(format: t("add.offer.onList"), name) }
+        static func added(_ name: String) -> String { String(format: t("add.offer.added"), name) }
         static func offerQuestion(_ name: String) -> String { String(format: t("add.offer.question"), name) }
-        static func savedPrivately(_ label: String) -> String { String(format: t("add.saved.private"), label) }
-        static func poolFull(_ pool: Int) -> String {
-            String.localizedStringWithFormat(t("add.saved.poolFull"), pool)
-        }
-        static var freePlace: String { t("add.saved.freePlace") }
-        static var savedIntention: String { t("add.saved.intention") }
         static func capReached(_ cap: Int) -> String {
             String(format: t("add.capReached"), locale: .current, cap)
-        }
-        static func membership(_ pool: Int) -> String {
-            String(format: t("add.saved.membership"), locale: .current, pool)
         }
     }
 

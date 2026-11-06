@@ -402,12 +402,21 @@ compose queries; if an operation is missing, ask for a backend change.
   `amenFromInvitation()`) returns the `NewPrayer` for Home to log; the
   selection stays through closing so held rings don't blink.
 - `Features/AddSheet/AddSheet` + `State/AddSheetModel` (screens.md, Add
-  sheet → Details): toolbar buttons, a segmented Name | Intention, the
-  offer step pushed in; every field stays in the hierarchy so focus moves
-  without the keyboard dropping. Validation, the pool check and the tone
-  pick are in PlusPrayerDomain; the full-pool invitation cadence is one rule
-  (`poolFullInvitation`, PROPOSED, open-questions Q31). Its links take
-  closures and stay hidden until Your portion and Membership exist.
+  sheet, revised 2026-11-06): toolbar buttons, a segmented Name | Intention,
+  labeled fields, the For row, and a carry row on every step; "{alias} is
+  added." and the offer push in, and so does "Who is this for?" (a search
+  over `pickerNames(matching:)`). Every field stays in the hierarchy (the
+  pages only slide), so focus moves without the keyboard dropping. The carry
+  row's rules are `carryOffer` and `carryMeter` in PlusPrayerDomain (room,
+  default, true cost, the meter previewing the toggle, "All N in use", the
+  free pool's line); every `{unit}` string goes through `L10n.Add` keyed by
+  `poolUnit` (Q32). "Make room …" sits under the meter, a button with no
+  action and the hint "Not available yet" (Q31). If the server's carried
+  result differs from the toggle (`AddedSubject.differs(from:)`, on
+  `effectivelyCarried`; carry is all or nothing), the sheet
+  says "Saved, but not carried…" (an intention waits for Done).
+  `NewSubject.carry` / `carryParent` follow schema-brief.md ("addSubject
+  carry inputs"); the mock has them, the callable gets them next.
 - Search (`Features/Home/HomeSearch.swift`): 🔎 turns the pill into the
   search field (see Theming above); with text it stays a field until ×,
   even with the keyboard down. The query feeds Home's domain rules
@@ -415,8 +424,8 @@ compose queries; if an operation is missing, ask for a backend change.
   text). No matches: one line where only the query truncates, + Add
   prefilled (hidden in prayer), the match hint when a filter hides matches.
   "In your archive" waits for the archive.
-- UI smoke tests (`PlusPrayerUITests`): pray → Amen → invitation → hold →
-  Amen → closing → note → the card's status; ＋ → name (tabs keep the
-  keyboard) → offer → intention → on Home; search → results → no matches →
+- UI smoke tests (`PlusPrayerUITests`, its own scheme): pray → Amen →
+  invitation → hold → Amen → closing → note → the card's status; ＋ → name
+  (tabs and the For push keep the keyboard) → offer → intention → on Home; search → results → no matches →
   the match hint → ×. Screenshots are attached to
   the result bundle (`xcrun xcresulttool export attachments`).
