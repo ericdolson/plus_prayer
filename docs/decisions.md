@@ -1440,3 +1440,23 @@ Why: most intentions for others are added from the name's page (picker
 hidden), and footer ＋ intentions are mostly for Me (the default), so the
 picker sees light use on short lists; a native Menu can't hold a search
 field, and a custom list now buys little.
+
+### Decision: Add sheet layout answers + pool-full messaging and daily upsell cadence
+**Timestamp:** 2026-11-06
+- Toolbar buttons (Cancel/Add; offer step Not now/Add, no back). Intention tab
+  Add closes when carried; pool full shows the saved-privately step with Done.
+- Pool full is said **in the sheet** ("{alias} is saved for your own prayers.
+  All {pool} places on the list are in use."); Home shows no mark.
+  SUPERSEDES app-brief's Home row line "Not on the list · all 15 places in
+  use" (it marked absence, against design-direction §5, and 15 was stale:
+  `basePremiumPool = 10`, and the pool comes from the entitlement).
+- Upsell cadence: a stronger invitation only on the first full-pool add of
+  the local day; afterwards only a small "Your portion" link; none when no
+  larger pool exists. Device-local "shown today".
+- Validation live under the field (~0.5 s debounce, Add disabled); caps stop
+  input with a counter in the last 10 chars; offline line "Adding needs a
+  connection."; helper text as captions, not placeholders; tone count = names
+  incl. Me.
+Why: an upsell on every add past the limit is too much for someone adding the
+people they love; once a day keeps the path visible without nagging. Captions
+survive typing, placeholders don't. Monetization flow to be refined later.

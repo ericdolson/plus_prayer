@@ -134,8 +134,9 @@ intention for Dad?" (Not now / Add). Name form: ~72 pt avatar preview at top
 (tone fixed at open, initials fill in live, not tappable in v1), Name with
 "Printed on the list", Alias with "Only you see this"; one tap to save, no
 wizard (screens.md). Auto-carried while the pool has
-room; when full, the new row shows "Not on the list · all 15 places in use"
-(tap → Your portion).
+room; when full, the add sheet says so ("saved for your own prayers · all
+{pool} places in use", stronger membership invitation only on the first such
+add of the day, screens.md); Home shows no mark (absence is never marked).
 
 ### Name / Intention detail (stats-history.md)
 One page; intentions hide what doesn't apply and add parent name + resolve.

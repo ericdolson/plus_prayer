@@ -80,6 +80,33 @@ _Last updated: 2026-10-18_
       people find their people), in Home order with Me first. Android port:
       an exposed dropdown. **No search in v1**; a searchable "All names…"
       step is deferred (open-questions D5).
+    - **Buttons** live in the native sheet toolbar: name form Cancel
+      (leading) / Add (trailing); offer step Not now (leading) / Add
+      (trailing), no back button (the name is already saved).
+    - **Intention tab Add:** carried → save and close, no offer. Pool full →
+      the saved-privately step below, with only [Done].
+    - **Pool full (never silent; Home shows no mark, design-direction §5):**
+      the step after Add says "{alias} is saved for your own prayers. All
+      {pool} places on the list are in use." ({pool} from the entitlement),
+      with the intention offer still below it for names.
+      - **First full-pool add of the user's local day:** a stronger, still
+        humane invitation under that line, e.g. "Membership carries up to
+        {premiumPool} of your people each day." + blue [See membership].
+      - **Later adds that day:** only a small blue text link "Your portion"
+        (it holds the upgrade path). No card, no repeat.
+      - Already on the top pool (no larger tier to offer): only "Your
+        portion", never an upsell.
+      - "Shown today" is device-local (low stakes).
+    - **Validation:** contact-info message shows live, inline under the
+      field, ~0.5 s after typing pauses; Add is disabled while it shows.
+      Caps stop input at the limit; a muted "34/40" counter appears only in
+      the last 10 characters. Offline: an inline line at the top, "Adding
+      needs a connection.", Add disabled, text kept.
+    - **Helper text** is a muted footnote caption under each field ("Printed
+      on the list" / "Only you see this"), not a placeholder. Placeholders:
+      "Their name" / "e.g. Dad".
+    - **Tone count** (clarified): names only, Me included (intentions have
+      no avatar).
 - **Screens:** Home · Today's list (seal, video, counts, who's carried →
   portion) · Past lists · Name/Intention detail · Your portion · History
   (account-wide, grouped by day, streak/grace marks) · Prayer detail (note) ·

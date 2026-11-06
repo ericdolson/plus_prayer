@@ -113,7 +113,7 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
 - [ ] [be] Entitlement webhook → `setEntitlement`
 - [ ] [app] Reverse trial (14 days from first prayer, day-10 notice, end flow:
       invite → trim → second invite)
-- [ ] [app] Paywall moments: over-limit meter (17/15) on save, "Not on the list ·
+- [ ] [app] Paywall moments: over-limit meter (17/15) on save, add-sheet "saved for your own prayers ·
       all N places in use" on add; purchase before sign-in, sign-in prompt after
 - [ ] [app] Opt-in "Today's list is live" push (FCM)
 - [ ] [be] Turn on + tune the word blocklist / automated flagging
