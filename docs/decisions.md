@@ -1416,3 +1416,17 @@ picker defaults to "Me" and is rarely changed, so the intention text is the
 primary input. A sheet height change on switch was the second source of jump.
 Rejected: letting the keyboard hide/show per tab; forcing the keyboard to stay
 up against a user dismissal.
+
+### Decision: Add sheet details (app/ agent questions)
+**Timestamp:** 2026-11-05
+- Initials preview follows Home's rule live (Name's initials until Alias has
+  text, then the alias's); the jump shows truthfully what Home will show.
+- Least-used tones count all active subjects on Home incl. Me, by visible
+  tone (stored or hashed fallback); re-picking on each open is fine.
+- Offer step: horizontal push, field focused, {alias} falls back to name,
+  Add disabled when empty, sheet closes after Add (offered once).
+- Picker items: small monogram + alias, Home order, Me first.
+- Native segmented control; content top-aligned, no avatar on Intention,
+  spare height below.
+Why: keep the preview honest, the tone pick stateless, and the flow short;
+avatars in the picker because color is how users find their people.

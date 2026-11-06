@@ -63,6 +63,22 @@ _Last updated: 2026-10-18_
     name's page, the intention field is focused at once. The app never hides
     the keyboard itself while a text field is next; a user swipe-down/tap-out
     still dismisses it.
+  - **Details (2026-11-05):**
+    - Tabs are a native segmented control (Name | Intention) at the top.
+      Content is top-aligned on both tabs; the Intention tab has no avatar,
+      and its spare height falls below the content.
+    - The preview follows Home's initials rule live: Name's initials until
+      Alias has text, then the alias's ("GO" → "D"). The jump is intended.
+    - Least-used tone counts every active subject shown on Home, including
+      Me, by the tone you see (stored, else the hashed fallback). A fresh pick
+      on each open is fine (nothing kept on cancel).
+    - The offer step is a horizontal push (forward) inside the sheet, with
+      the intention field focused (keyboard stays up). {alias} falls back to
+      the name when there's no alias. [Add] is disabled while empty; after
+      Add the sheet closes (one offer; more intentions from the name's page).
+    - Picker menu items show a small monogram avatar + alias (color is how
+      people find their people), in Home order with Me first. Android port:
+      an exposed dropdown.
 - **Screens:** Home · Today's list (seal, video, counts, who's carried →
   portion) · Past lists · Name/Intention detail · Your portion · History
   (account-wide, grouped by day, streak/grace marks) · Prayer detail (note) ·
