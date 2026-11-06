@@ -1546,3 +1546,10 @@ Why: the rows filter in real time, so a delayed empty state felt off (waiting
 won't make a match appear), and hiding and re-showing it on each keystroke
 was janky. The `duration.searchPause` token is removed.
 
+### Note: Pool unit "people, not items" is PROPOSED (Q32)
+**Timestamp:** 2026-11-06
+Discussed, not decided: count carried people (Me free), each printing with
+up to 1 chosen intention (config), the rest as "and N more". The current
+names + intentions rule stands until Eric decides; agents should not change
+pool counting yet. Add-sheet carry row, "Make room", For row and the "the
+list" copy rule wait on this.

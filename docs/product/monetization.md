@@ -49,6 +49,13 @@ _Last updated: 2026-10-17_
   copy: "Archive some to add more."); a quiet ~5,000 total-row hard cap
   backs it (2026-11-06). Power users like pastors are the future group/organization customer.
 
+- **PROPOSED (2026-11-06, open-questions Q32) — people as the unit:** the pool
+  counts carried **people** (names; Me is free and always carried), not
+  names + intentions. Each carried person prints with up to **1** chosen
+  intention (`/config` cap; raise later if needed, never lower), and the rest
+  print as "and N more". Private intentions stay unlimited. Free tier would
+  read "you, with your intention"; carrying others is membership. Until
+  decided, the rule below stands.
 - **Paid unit = a pool of carried names and intentions** (2026-10-17). Each
   name or intention counts as one; not called "lines" (printing word-wraps).
   Managed on the **"your portion"** screen, which shows an illustrative preview
