@@ -167,7 +167,7 @@ Remote Config moved to usage-based pricing on 2026-09-01, and RTDB is already
 in the stack, offline-cached, and live-updating. Revisit Remote Config only if
 A/B testing or audience targeting is needed.
 | Subject abuse cap | server; counts active subjects only | ~500 |
-| Subject total-row hard cap | server; all non-purged rows | ~5,000 |
+| Subject total-row hard cap | server Functions param (like `SUBJECT_CAP`); all non-purged rows | ~5,000 |
 
 ## 6. Functions & operations to add/revise (update OPERATIONS.md)
 - **onAuthUserCreated** — User only (nullable displayName). **setSelfName(name)**

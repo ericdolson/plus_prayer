@@ -1495,3 +1495,14 @@ Why: two sources would let the sheet promise a number the server doesn't
 grant. Counting archived items would eventually lock a faithful long-time
 user out with no remedy and make "Archive some to add more" false; the cap
 exists against abuse, not to limit a practice.
+
+### Decision: Seed done; generic add failure copy; hard cap is a param
+**Timestamp:** 2026-11-06
+- Eric ran `seed:config` on production 2026-11-06, so `/config` has
+  `basePremiumPool`. Order relative to the function deploy never mattered
+  (both sides fall back to 10); corrects the previous entry.
+- Add sheet generic failure line: "Couldn't add this right now. Try again in
+  a little while." (covers the ~5,000 hard cap and unexpected errors).
+- The ~5,000 hard cap is a Functions param like `SUBJECT_CAP`: server-only
+  values may be params; client-visible ones live in `/config`. "Quiet" means
+  no dedicated copy, not untunable.
