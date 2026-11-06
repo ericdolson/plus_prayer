@@ -39,11 +39,14 @@ struct AddSheet: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: PP.space.md) {
                 if let notice {
+                    // At the sheet's one text edge, left-aligned. The saved-
+                    // but-not-carried status is 15 pt ink, like on the offer step.
                     Text(notice)
-                        .font(PP.type.caption)
-                        .foregroundStyle(PP.color.inkMuted)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
+                        .font(isSettled ? PP.type.bodySmall : PP.type.caption)
+                        .foregroundStyle(isSettled ? PP.color.ink : PP.color.inkMuted)
+                        .multilineTextAlignment(.leading)
+                        .padding(.leading, PP.space.md)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .transition(.opacity)
                 }
                 ZStack(alignment: .topLeading) {
@@ -243,6 +246,7 @@ struct AddSheet: View {
                     .font(PP.type.body)
                     .foregroundStyle(PP.color.primary)
             }
+            .padding(.leading, PP.space.md) // the avatar on the shared edge
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -308,6 +312,7 @@ struct AddSheet: View {
                         .foregroundStyle(PP.color.ink)
                 }
             }
+            .padding(.leading, PP.space.md) // the avatar on the shared edge
             .frame(minHeight: PP.size.row.name)
             .contentShape(Rectangle())
         }
