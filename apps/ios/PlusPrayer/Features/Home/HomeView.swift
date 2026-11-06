@@ -14,9 +14,6 @@ struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var confirmingDiscard = false
     @State private var adding: AddSheetModel?
-    /// The query once typing has paused: no-matches waits for it, so it
-    /// doesn't flicker while a name is typed.
-    @State private var settledQuery = ""
 
     var body: some View {
         ScrollView {
@@ -35,7 +32,9 @@ struct HomeView: View {
                 if home.allHeldShown {
                     quietLines([L10n.Filter.allHeld])
                 }
-                if home.noMatches && settledQuery == home.query {
+                // Live, like the rows: shown as soon as nothing matches, its
+                // text following the query (never hidden and shown again).
+                if home.noMatches {
                     NoMatchesView(query: home.query.trimmingCharacters(in: .whitespacesAndNewlines),
                                   showsAdd: !session.isPraying, // adding mid-prayer isn't a goal
                                   hiddenByFilter: home.matchesHiddenByFilter,
@@ -67,10 +66,6 @@ struct HomeView: View {
         .sheet(isPresented: prayerSheetShown) { PrayerSheet() }
         .sheet(item: $adding) { model in AddSheet(model: model) }
         .task { await home.run() }
-        .task(id: home.query) {
-            try? await Task.sleep(for: .seconds(PP.duration.searchPause))
-            if !Task.isCancelled { settledQuery = home.query }
-        }
 
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { home.refreshToday() }

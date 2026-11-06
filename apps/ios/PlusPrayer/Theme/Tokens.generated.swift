@@ -379,8 +379,6 @@ nonisolated enum PP {
         static let fold: TimeInterval = 0.48
         /// Praying on a detail page: what isn't the subject fades out together.
         static let strip: TimeInterval = 0.25
-        /// Search's empty state waits for typing to pause (~500–700).
-        static let searchPause: TimeInterval = 0.6
         /// The add sheet's contact-info message shows this long after typing pauses (screens.md, add sheet).
         static let validationPause: TimeInterval = 0.5
         /// The halo fades in/out.
