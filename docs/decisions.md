@@ -1725,3 +1725,12 @@ Intention tab and the offer step. No newlines (it prints as one line):
 Return submits, pasted breaks become spaces. Name/alias stay single-line.
 Why: a single-line field hid most of an 80-character intention, the text
 people most want to reread before saving.
+
+### Decision: Add sheet optical spacing details
+**Timestamp:** 2026-11-06
+Gaps measured optically (bottom of the element above to the next cap
+height; baseline for labels over fields, below descenders for hints and the
+carry label). Offer step: "{alias} is added." → its question ~10 pt optical
+(one header block, serif descender room trimmed), not the 24 pt group gap
+(read ~31 pt on device). Toggle centered on the carry label's line,
+overhanging without moving the layout.
