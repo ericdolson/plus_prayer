@@ -1610,3 +1610,14 @@ position); "Carry onto List N" (changes daily).
 - Picker: neutral checkmark on the current person, Home's empty-search copy.
 - If the server's carried result differs from the toggle, say so inline
   instead of closing silently.
+
+### Decision: addSubject carry details (backend/ agent questions)
+**Timestamp:** 2026-11-06
+Return `effectivelyCarried` alongside the flags; all-or-nothing carry;
+no-effect `carryParent` ignored; the re-carry cost counts flagged intentions
+on both sides; the simultaneous-device race is an accepted known gap (no
+User version counter yet; over-limit trimming covers it). Q32 not applied.
+Why: the race needs two devices adding at the same instant and overshoots by
+an item at most, while an optimistic-lock version on User touches every
+carry-changing write; a partial carry would print Dad without the reason the
+user just wrote.

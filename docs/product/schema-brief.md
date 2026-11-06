@@ -303,3 +303,17 @@ The server applies the pool check atomically in the same call and returns
 whether the item (and parent) ended up carried, so the app can tell the user
 if the result differs from the toggle. Preferred over addSubject +
 setCarriedItems (two calls can race with another device).
+- Returns the stored flags (`isCarried`, `parentCarried`) **and**
+  `effectivelyCarried` (prints: own flag && parent's), which the app uses for
+  the "Saved, but not carried" check.
+- **All or nothing:** if the name + intention don't both fit, neither is
+  carried (no partial carry); the item is still saved.
+- `carryParent` where it has no effect (with `carry: false`, on a name, under
+  Me, under a carried name) is ignored, not rejected. Free tier: carryParent
+  can't succeed; the item saves uncarried.
+- The cost of re-carrying a name includes its intentions still flagged; the
+  app's "uses N" line must count the same way.
+- **Known gap (accepted 2026-11-06):** read-then-write, so two devices adding
+  at the same instant can both pass and exceed the pool by a little (same as
+  setCarriedItems). No User version counter for now; the existing over-limit
+  handling (trim on Your portion) covers it. Revisit if it shows up.
