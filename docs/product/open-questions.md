@@ -23,6 +23,7 @@ decisions.md. **MVP** = blocks MVP build._
 | D3 | **Shoot the 7 wax seals (+ an unsealed blank) as macro photos**, cut out with transparency, for large seal sizes. Shoot guide in design-direction §6 "Photographed seals" | design |
 | D4 | **Layered app icon** in Icon Composer (`.icon`: layers plus light, dark and tinted variants) for iOS 26. Until then the iOS app uses an interim icon built from `app/assets/img/+prayer_icon.svg` (2026-11-05) | design |
 | D5 | ~~Searchable intention name picker~~ **Done in spec 2026-11-06:** the add sheet's For row pushes a searchable "Who is this for?" (screens.md) | app |
+| D6 | **Discard confirmation in the add sheet (deferred 2026-11-06):** whether X / swipe-down with typed text should ask "Discard this name?" first. Not now: accidental X taps seem unlikely; revisit if testers lose text | app |
 | D6 | **DEFERRED (2026-11-06): prayer info while searching in prayer.** Searching mid-prayer turns the pill into the search field, so the timer and "with N" are hidden until ✕ (focus is elsewhere; the halo and Amen still show the prayer). Revisit only if people miss them, e.g. a quiet timer inside the field | app |
 
 ## Resolved

@@ -46,7 +46,8 @@ _Last updated: 2026-10-18_
   - New items go to the **bottom** of their level. Content is top-aligned on
     both tabs; the sheet keeps one height (the taller form), spare height
     falls below the content.
-  - **Toolbar buttons:** Cancel (leading) / Add (trailing). Offer step: Not
+  - **Toolbar buttons:** a round glass **X** (leading; the iOS 26 sheet
+    convention, VoiceOver "Cancel") / Add (trailing, as a word). Offer step: Not
     now (leading) / Add (trailing), no back button (the name is saved).
   - **Name tab, top to bottom:**
     - ~72 pt monogram avatar preview (detail-page size). Tone picked once at

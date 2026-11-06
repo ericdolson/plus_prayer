@@ -1683,3 +1683,10 @@ meter), so color separates structure (ink) from secondary text (muted) and
 size separates labels from content. Bold 17 pt labels out-shouted the content.
 Rejected: muted labels (gray soup); a leading 22 pt bloom (broke the label
 edge and didn't match the row mark's trailing position).
+
+### Decision: Add sheet uses an X for cancel
+**Timestamp:** 2026-11-06
+The add sheet's leading Cancel becomes the iOS 26 round glass X (VoiceOver
+"Cancel"); Add stays a word; the offer step keeps "Not now" (it isn't a
+cancel: the name is saved). A discard confirmation for typed text is
+deferred (open-questions D6).
