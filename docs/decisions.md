@@ -1553,3 +1553,12 @@ up to 1 chosen intention (config), the rest as "and N more". The current
 names + intentions rule stands until Eric decides; agents should not change
 pool counting yet. Add-sheet carry row, "Make room", For row and the "the
 list" copy rule wait on this.
+
+### Note: Extra printed intentions would be a tier property, not an add-on (PROPOSED, Q32)
+**Timestamp:** 2026-11-06
+If more than one printed intention per person is ever offered, it's a higher
+per-person cap on a tier (e.g. Plus: 25 people · up to 3 each), not a shared
+add-on pool. Launch with one tier and cap 1, and measure "Print this one
+instead" before adding a tier.
+Why: an add-on pool brings back two meters and cross-person swaps, sells
+"the why", and needs a second subscription group.

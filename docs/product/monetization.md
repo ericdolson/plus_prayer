@@ -54,8 +54,10 @@ _Last updated: 2026-10-17_
   names + intentions. Each carried person prints with up to **1** chosen
   intention (`/config` cap; raise later if needed, never lower), and the rest
   print as "and N more". Private intentions stay unlimited. Free tier would
-  read "you, with your intention"; carrying others is membership. Until
-  decided, the rule below stands.
+  read "you, with your intention"; carrying others is membership. More
+  intentions per person, if ever wanted, would be a tier property (a higher
+  per-person cap), never an à la carte add-on (Q32). Until decided, the rule
+  below stands.
 - **Paid unit = a pool of carried names and intentions** (2026-10-17). Each
   name or intention counts as one; not called "lines" (printing word-wraps).
   Managed on the **"your portion"** screen, which shows an illustrative preview
