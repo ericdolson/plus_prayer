@@ -265,6 +265,114 @@
         }
       }
     },
+    "closing.addNote": {
+      "comment": "Closing sheet: opens the private note field.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a note"
+          }
+        }
+      }
+    },
+    "closing.carried": {
+      "comment": "Closing sheet after a prayer with the list (auth-onboarding.md: the first Amen's line). The number is the next list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You'll be carried on List %lld."
+          }
+        }
+      }
+    },
+    "closing.noteHint": {
+      "comment": "Closing sheet: the note field's placeholder (notes are private).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only you will see this"
+          }
+        }
+      }
+    },
+    "cluster.andOthers": {
+      "comment": "Avatar cluster text, more than 5 people (a +N disc shows the count): \"You, Dad and others\".",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, %2$@ and others"
+          }
+        }
+      }
+    },
+    "cluster.counted": {
+      "comment": "Avatar cluster text, up to 5 people: the first two named, the rest counted (\"You, Dad + 3\").",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@, %2$@ + %3$lld"
+          }
+        }
+      }
+    },
+    "cluster.sentence": {
+      "comment": "Avatar cluster text: the names, then what follows them (\"You, Dad + 3\" + \"will be on List 53\").",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "cluster.two": {
+      "comment": "Avatar cluster text, two people: \"You and Dad\".",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ and %2$@"
+          }
+        }
+      }
+    },
+    "common.done": {
+      "comment": "Button: close a sheet with nothing more to do.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        }
+      }
+    },
+    "common.save": {
+      "comment": "Button: save what was typed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        }
+      }
+    },
     "home.bar.add": {
       "comment": "Accessibility label: the + in Home's floating bar (opens the add sheet).",
       "extractionState": "manual",
@@ -459,6 +567,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "You"
+          }
+        }
+      }
+    },
+    "invitation.hold": {
+      "comment": "Amen invitation, before tapping: the people on today's list, then its number (prayer-flow.md).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold the %1$lld on List %2$lld in your prayer"
+          }
+        }
+      }
+    },
+    "invitation.holding": {
+      "comment": "Amen invitation, after tapping (the ring is running).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Holding the %1$lld on List %2$lld"
+          }
+        }
+      }
+    },
+    "invitation.willBe": {
+      "comment": "Amen invitation: follows the carried names in the cluster (\"You, Dad + 3 will be on List 53\"). The number is the next list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "will be on List %lld"
           }
         }
       }

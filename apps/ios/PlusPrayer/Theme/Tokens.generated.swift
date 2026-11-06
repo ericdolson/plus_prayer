@@ -220,9 +220,13 @@ nonisolated enum PP {
             static let avatar: CGFloat = 24
             /// The Amen invitation's cluster.
             static let avatarLarge: CGFloat = 32
+            /// How far each cluster avatar overlaps the one before it: as on the card (size.card.avatarOverlap), ≤ ~4–5 so two-letter initials are never covered.
+            static let overlap: CGFloat = 4
         }
         enum seal {
             static let `default`: CGFloat = 44
+            /// The day's seal at the top of the Amen invitation (Flutter's 1.3 × the default).
+            static let invitation: CGFloat = 56
             /// The streak badge's pewter seal.
             static let badge: CGFloat = 22
             /// Dark-theme rim light.

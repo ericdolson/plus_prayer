@@ -204,6 +204,13 @@ final class HomeModel {
         await repositories.prayers.logPrayer(prayer)
     }
 
+    /// The closing sheet's note (private; note-only edits). Queued after its
+    /// prayer, so it never overtakes it.
+    func saveNote(_ text: String, prayerId: String) async {
+        guard let note = cleanNote(text) else { return }
+        await repositories.prayers.updateNote(prayerId: prayerId, note: note)
+    }
+
     private func linger(_ ids: Set<String>) {
         guard !ids.isEmpty else { return }
         batches += 1

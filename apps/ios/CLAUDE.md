@@ -18,9 +18,12 @@ Phase 0 is done (open items in `PHASE-0.md`). Build order: `app-brief.md`
 and signature components, Home's rows, shell, community card and prayer mode,
 and the domain models + mock data source: Home runs on `HomeModel` over the
 mock repositories, the filter works (counts, context rows, linger then fold,
-empty states). Next: the rest of prayer mode (list invitation, closing sheet
-and note), the offline queue (Data/Queue, replacing the mock's in-memory
-hold), or a debug menu for the mock's scenario controls.
+empty states); Amen ends in the list invitation and the closing sheet with
+the note. Next: the add sheet (screens.md, with the answers to the app's
+questions in decisions.md), then search. Still open in prayer mode: backgrounding and the
+welcome-back question, the presence draft, the first Amen's onboarding
+steps. Also pending: the offline queue (Data/Queue, replacing the mock's
+in-memory hold) and a debug menu for the mock's scenario controls.
 
 ## Stack
 - SwiftUI, **iOS 26** minimum (Liquid Glass), **iPhone only** (2026-11-05),
@@ -78,6 +81,11 @@ hold), or a debug menu for the mock's scenario controls.
     `connected`. `unavailable` (or error 4016) means it's locked, asleep, or
     neither cabled nor on the Mac's Wi-Fi; ask Eric rather than retrying.
   - The phone needs to be unlocked for the launch step.
+  - Over Wi-Fi (no cable) the phone may show `available (paired)`, and the
+    first command after it's been idle often fails with "Connection reset
+    by peer" (error 4000/54) while bringing the link up. Run it once more;
+    it then shows `connected`. Check the install's own exit status: a
+    launch can succeed on the old build after a failed install.
   - Signing is automatic for the team in the project; never change the team
     or bundle ID to make an install work.
 - The project uses **synchronized folders** (Xcode 16+): every file under
@@ -342,6 +350,13 @@ compose queries; if an operation is missing, ask for a backend change.
   corners; breath, Amen flare, Reduce Motion static), `PrayButton` with the
   5 s ring countdown to Amen, Cancel in the header (confirm past 30 s), the
   prayer bar (timer · "with N" · search).
+- `RingButton` (the pray button and the invitation share it), `AvatarCluster`
+  (outside the card: ≤5 every avatar and a count, more → 4 + "+N";
+  `layoutCluster` in PlusPrayerDomain).
+- `Features/Prayer/PrayerSheet`: one native sheet, sized to its content
+  (`fittedDetent()`), shows the Amen invitation and then becomes the closing
+  sheet in place (no dismiss and re-present between them). The invitation
+  can't be swiped away; dismissing the closing sheet ends the session.
 - `HomeView` is the root, on `HomeModel` + `PrayerSession` from the
   environment; `ComponentGallery` stays for previews.
 - Strings: `App/L10n.swift` over `Resources/Localizable.xcstrings` (explicit
@@ -368,6 +383,12 @@ compose queries; if an operation is missing, ask for a backend change.
   exists, the others log and fall back to it until build step 4.
 - `State/HomeModel`: watches the repositories in `run()` (the view's
   `.task`), derives rows, counts, header and card through the domain;
-  `log(_:)` sends Amen's prayer and starts the linger under Still to hold.
-  `PrayerSession` holds only this prayer's selection and returns the
-  `NewPrayer` from `amen()`.
+  `log(_:)` sends Amen's prayer and starts the linger under Still to hold;
+  `saveNote` queues the note after it.
+- `PrayerSession`: phases idle → praying → (invitation) → closing → idle.
+  The committing Amen (`amen(prayedWithListToday:)` or
+  `amenFromInvitation()`) returns the `NewPrayer` for Home to log; the
+  selection stays through closing so held rings don't blink.
+- UI smoke test (`PlusPrayerUITests`): pray → Amen → invitation → hold →
+  Amen → closing → note → the card's status. Screenshots are attached to
+  the result bundle (`xcrun xcresulttool export attachments`).

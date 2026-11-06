@@ -74,6 +74,44 @@ nonisolated enum L10n {
         }
     }
 
+    enum Cluster {
+        static func two(_ a: String, _ b: String) -> String {
+            String(format: NSLocalizedString("cluster.two", comment: ""), a, b)
+        }
+        static func counted(_ a: String, _ b: String, _ n: Int) -> String {
+            String(format: NSLocalizedString("cluster.counted", comment: ""), locale: .current, a, b, n)
+        }
+        static func andOthers(_ a: String, _ b: String) -> String {
+            String(format: NSLocalizedString("cluster.andOthers", comment: ""), a, b)
+        }
+        static func sentence(_ names: String, _ trailing: String) -> String {
+            String(format: NSLocalizedString("cluster.sentence", comment: ""), names, trailing)
+        }
+    }
+
+    enum Invitation {
+        private static func f(_ key: String, _ args: CVarArg...) -> String {
+            String(format: NSLocalizedString(key, comment: ""), locale: .current, arguments: args)
+        }
+        /// "will be on List 53": `next` is the list they go onto.
+        static func willBe(_ next: Int) -> String { f("invitation.willBe", next) }
+        static func hold(people: Int, list: Int) -> String { f("invitation.hold", people, list) }
+        static func holding(people: Int, list: Int) -> String { f("invitation.holding", people, list) }
+    }
+
+    enum Closing {
+        static func carried(_ next: Int) -> String {
+            String(format: NSLocalizedString("closing.carried", comment: ""), locale: .current, next)
+        }
+        static var addNote: String { NSLocalizedString("closing.addNote", comment: "") }
+        static var noteHint: String { NSLocalizedString("closing.noteHint", comment: "") }
+    }
+
+    enum Common {
+        static var save: String { NSLocalizedString("common.save", comment: "") }
+        static var done: String { NSLocalizedString("common.done", comment: "") }
+    }
+
     enum Row {
         /// "Answered · Oct 19"
         static func answered(_ date: Date) -> String {

@@ -148,69 +148,25 @@ struct HomeBar: View {
     }
 }
 
-/// The round pray button: action blue (never gold) on the same interactive
-/// Liquid Glass as the pill, tinted blue, so it gives under the finger like
-/// the other controls. On start a ring just outside the disc decays over the
-/// minimum (~5 s) while the tint dims and the glass stops responding; then it
-/// becomes Amen. Before that, taps do nothing (Cancel is always there).
-/// Reduce Motion: the ring steps once a second.
+/// The round pray button on Home's bar: a `RingButton` with the praying
+/// hands. On start the ring decays over the minimum (~5 s), then it becomes
+/// Amen. Before that, taps do nothing (Cancel is always there).
 struct PrayButton: View {
     var startedAt: Date? = nil
     var diameter: CGFloat = PP.size.prayButton.diameter
     let onPray: () -> Void
     var onAmen: () -> Void = {}
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
     var body: some View {
-        TimelineView(.animation(minimumInterval: reduceMotion ? 1 : nil, paused: startedAt == nil)) { context in
-            let progress = progress(at: context.date)
-            let counting = startedAt != nil && progress < 1
-            Button {
-                if startedAt == nil { onPray() } else if !counting { onAmen() }
-            } label: {
-                ZStack {
-                    if startedAt != nil && !counting {
-                        Text(L10n.Prayer.amen)
-                            .font(PP.type.label)
-                            .foregroundStyle(PP.color.onPrimary)
-                            .lineLimit(1)
-                    } else {
-                        PPIcon.pray
-                            .font(.system(size: PP.size.bar.icon, weight: .regular))
-                            .foregroundStyle(counting ? PP.color.primary : PP.color.onPrimary)
-                    }
-                }
-                .frame(width: diameter, height: diameter)
-                .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .glassEffect(.regular
-                            .tint(counting ? PP.color.primary.opacity(PP.number.prayButtonDim) : PP.color.primary)
-                            .interactive(!counting),
-                         in: .circle)
-            .overlay {
-                if counting {
-                    // Decays clockwise from the top, just outside the disc.
-                    Circle()
-                        .trim(from: 0, to: 1 - progress)
-                        .stroke(PP.color.primary,
-                                style: StrokeStyle(lineWidth: PP.size.prayButton.ringGap * PP.number.ringStroke,
-                                                   lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                        .padding(-PP.size.prayButton.ringGap)
-                        .allowsHitTesting(false)
-                }
-            }
-            .disabled(counting)
-            .accessibilityLabel(startedAt == nil ? L10n.Home.pray : L10n.Prayer.amen)
+        RingButton(startedAt: startedAt, diameter: diameter, minimum: PrayerSession.minimum,
+                   idleLabel: L10n.Home.pray, onStart: onPray, onComplete: onAmen) {
+            icon.foregroundStyle(PP.color.onPrimary)
+        } counting: { _ in
+            icon.foregroundStyle(PP.color.primary)
         }
     }
 
-    private func progress(at now: Date) -> Double {
-        guard let startedAt else { return 1 }
-        let elapsed = now.timeIntervalSince(startedAt)
-        let steps = reduceMotion ? elapsed.rounded(.down) : elapsed
-        return min(1, max(0, steps / PrayerSession.minimum))
+    private var icon: some View {
+        PPIcon.pray.font(.system(size: PP.size.bar.icon, weight: .regular))
     }
 }

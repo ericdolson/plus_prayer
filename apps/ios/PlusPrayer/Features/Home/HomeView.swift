@@ -5,8 +5,8 @@ import SwiftUI
 /// floating bar; prayer mode in place (the halo, checks in the rows and the
 /// card, Cancel, the prayer bar, the pray button's countdown to Amen).
 /// Runs on `HomeModel` (the repositories, through the domain rules) and
-/// `PrayerSession`. Search, the list invitation and the closing sheet come in
-/// later slices.
+/// `PrayerSession`. Amen ends in `PrayerSheet` (the list invitation, then the
+/// closing sheet). Search comes in a later slice.
 struct HomeView: View {
     @Environment(HomeModel.self) private var home
     @Environment(PrayerSession.self) private var session
@@ -52,6 +52,7 @@ struct HomeView: View {
         .sensoryFeedback(.impact(weight: .light), trigger: session.checkCount)
         .confirmationDialog(L10n.Prayer.discardQuestion, isPresented: $confirmingDiscard,
                             titleVisibility: .visible) { discardActions }
+        .sheet(isPresented: prayerSheetShown) { PrayerSheet() }
         .task { await home.run() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { home.refreshToday() }
@@ -96,9 +97,17 @@ struct HomeView: View {
         Button(L10n.Prayer.keepPraying, role: .cancel) {}
     }
 
+    /// The pray button's Amen: commits, or opens the invitation first.
     private func amen() {
-        guard let prayer = session.amen() else { return }
+        guard let prayer = session.amen(prayedWithListToday: home.prayedWithListToday) else { return }
         Task { await home.log(prayer) }
+    }
+
+    /// The invitation, then the closing sheet; dismissing the closing sheet
+    /// ends the session (the invitation can't be dismissed).
+    private var prayerSheetShown: Binding<Bool> {
+        Binding(get: { session.isInvited || session.closing != nil },
+                set: { shown in if !shown { session.close() } })
     }
 
     private func cancel() {

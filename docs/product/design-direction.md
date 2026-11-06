@@ -633,7 +633,9 @@ on Today's list or Your portion.
 - **Shared cluster component:** the card uses its full-width fill mode (28 pt
   avatars); other contexts use their own layouts with **24 pt** avatars
   (Today's list, Your portion) or **32 pt** (the Amen invitation)
-  (2026-11-05, was 28–32).
+  (2026-11-05, was 28–32). They overlap **~4 pt**, as on the card, so
+  two-letter initials are never covered (`size.cluster.overlap`). The
+  invitation's seal is **~56 pt** (`size.seal.invitation`, Flutter's value).
 - The separate floating "258 praying now" line above the list is removed.
 - **Card under filters and search** (2026-10-28):
   - **All:** shown.

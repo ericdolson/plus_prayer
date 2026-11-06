@@ -2,19 +2,44 @@ import Foundation
 import Observation
 import PlusPrayerDomain
 
-/// One prayer, from the pray button to Amen (prayer-flow.md). Prayer mode is
-/// Home in a different state, not a screen: rows become checkable, the halo
-/// frames the screen, the bar becomes the prayer bar.
+/// One prayer, from the pray button to the closing sheet (prayer-flow.md).
+/// Prayer mode is Home in a different state, not a screen: rows become
+/// checkable, the halo frames the screen, the bar becomes the prayer bar.
 ///
-/// The session holds only what this prayer holds. What's held today comes
-/// from the data (`HomeModel`); Amen hands back the `NewPrayer` to log. The
-/// list invitation and the closing sheet come in the next slices.
+///     idle ──start──▶ praying ──Amen──▶ (invitation) ──Amen──▶ closing ──close──▶ idle
+///                        │                    │
+///                        └─────── cancel ─────┘  (nothing is logged)
+///
+/// - Amen is available after the minimum (~5 s); before it only Cancel exits.
+/// - Amen without the list, when you haven't prayed with it today, opens the
+///   invitation. Tapping it holds the list and runs the same ring; it extends
+///   the same prayer: one Prayer, written once, at the final Amen. Amen
+///   before tapping finishes without the list.
+/// - The list current at the START is the one the prayer counts for.
+/// - Closing: the prayer is written (returned by the committing Amen, for
+///   Home to log); the sheet offers a private note, then you leave.
+///
+/// The session holds only this prayer. What's held today comes from the data
+/// (`HomeModel`). The selection stays through closing, so held rings don't
+/// blink before the logged prayer arrives from the repository.
 @MainActor @Observable
 final class PrayerSession {
+    struct Prayer: Equatable {
+        /// Client UUID, chosen at the start.
+        let id: String
+        let startedAt: Date
+        /// The list current at the start; nil only before Home has loaded.
+        let list: ListContext?
+    }
+
     enum Phase: Equatable {
         case idle
-        /// `list`: the list current at the start, which the prayer counts for.
-        case praying(startedAt: Date, list: ListContext?)
+        case praying(Prayer)
+        /// Amen was said without the list. `holdingSince`: when the user
+        /// tapped to hold it (the invitation's ring runs from there).
+        case invitation(Prayer, holdingSince: Date?)
+        /// Written; the closing sheet is up.
+        case closing(NewPrayer)
     }
 
     private(set) var phase: Phase = .idle
@@ -27,21 +52,48 @@ final class PrayerSession {
     /// Which names have which intentions, as Home shows them now.
     private let graph: () -> SubjectGraph
     private let clock: () -> Date
+    private let makeID: () -> String
 
     /// The pray button's minimum before Amen (prayer-flow.md, ~5 s).
     static let minimum: TimeInterval = PP.duration.prayHold
     /// Past this, Cancel asks "Discard this prayer?" (design-direction §4, ~30 s).
     static let confirmDiscardAfter: TimeInterval = 30
 
-    init(graph: @escaping () -> SubjectGraph, clock: @escaping () -> Date = Date.init) {
+    init(graph: @escaping () -> SubjectGraph, clock: @escaping () -> Date = Date.init,
+         makeID: @escaping () -> String = { UUID().uuidString }) {
         self.graph = graph
         self.clock = clock
+        self.makeID = makeID
     }
 
-    var isPraying: Bool { phase != .idle }
+    // MARK: State
 
-    var startedAt: Date? {
-        if case .praying(let startedAt, _) = phase { return startedAt }
+    private var prayer: Prayer? {
+        switch phase {
+        case .praying(let prayer), .invitation(let prayer, _): prayer
+        case .idle, .closing: nil
+        }
+    }
+
+    /// In prayer, the invitation included: the halo, checks, the prayer bar.
+    var isPraying: Bool { prayer != nil }
+
+    var startedAt: Date? { prayer?.startedAt }
+
+    var isInvited: Bool {
+        if case .invitation = phase { return true }
+        return false
+    }
+
+    /// When the user tapped the invitation; nil before.
+    var holdingListSince: Date? {
+        if case .invitation(_, let since) = phase { return since }
+        return nil
+    }
+
+    /// The prayer just written, while the closing sheet is up.
+    var closing: NewPrayer? {
+        if case .closing(let prayer) = phase { return prayer }
         return nil
     }
 
@@ -49,7 +101,10 @@ final class PrayerSession {
         startedAt.map { now.timeIntervalSince($0) } ?? 0
     }
 
-    func canAmen(at now: Date) -> Bool { isPraying && elapsed(at: now) >= Self.minimum }
+    func canAmen(at now: Date) -> Bool {
+        if case .praying = phase { return elapsed(at: now) >= Self.minimum }
+        return false
+    }
 
     func needsDiscardConfirmation(at now: Date) -> Bool { elapsed(at: now) > Self.confirmDiscardAfter }
 
@@ -64,9 +119,9 @@ final class PrayerSession {
     // MARK: Commands
 
     func start(list: ListContext?) {
-        guard !isPraying else { return }
+        guard phase == .idle else { return }
         selection = .empty
-        phase = .praying(startedAt: clock(), list: list)
+        phase = .praying(Prayer(id: makeID(), startedAt: clock(), list: list))
     }
 
     func toggle(_ id: String) {
@@ -77,30 +132,65 @@ final class PrayerSession {
     }
 
     func toggleList() {
-        guard isPraying else { return }
+        guard isPraying, prayer?.list != nil else { return }
         let willHold = !selection.listIncluded
         selection = selection.withList(willHold)
         if willHold { checkCount += 1 }
     }
 
-    /// The committing Amen: ends the prayer and returns it, to be logged.
-    /// nil before the minimum (or with no list known, which can't happen once
-    /// Home has loaded: every prayer records the list current at its start).
-    func amen() -> NewPrayer? {
+    /// The pray button's Amen. Opens the invitation (nothing written yet) or
+    /// commits: then it returns the prayer to log.
+    func amen(prayedWithListToday: Bool) -> NewPrayer? {
         let now = clock()
-        guard canAmen(at: now), case .praying(let startedAt, let list) = phase else { return nil }
-        let prayer = list.map {
-            newPrayer(id: UUID().uuidString, selection: selection, startedAt: startedAt, endedAt: now, list: $0)
+        guard canAmen(at: now), case .praying(let prayer) = phase else { return nil }
+        if invitesToList(selection, listKnown: prayer.list != nil, prayedWithListToday: prayedWithListToday) {
+            phase = .invitation(prayer, holdingSince: nil)
+            return nil
         }
-        amenCount += 1
-        selection = .empty
-        phase = .idle
-        return prayer
+        return finish(prayer, at: now)
+    }
+
+    /// The invitation's tap: hold the list too; its ring runs from now.
+    func holdList() {
+        guard case .invitation(let prayer, nil) = phase else { return }
+        selection = selection.withList(true)
+        phase = .invitation(prayer, holdingSince: clock())
+        checkCount += 1
+    }
+
+    /// The invitation's Amen: with the list once its ring has run, or
+    /// without it if the user didn't tap. Returns the prayer to log.
+    func amenFromInvitation() -> NewPrayer? {
+        let now = clock()
+        guard case .invitation(let prayer, let since) = phase else { return nil }
+        if let since, now.timeIntervalSince(since) < Self.minimum { return nil }
+        return finish(prayer, at: now)
     }
 
     /// Discard: nothing is logged.
     func cancel() {
+        guard isPraying else { return }
         selection = .empty
         phase = .idle
+    }
+
+    /// The closing sheet is gone.
+    func close() {
+        guard closing != nil else { return }
+        selection = .empty
+        phase = .idle
+    }
+
+    private func finish(_ prayer: Prayer, at end: Date) -> NewPrayer? {
+        guard let list = prayer.list else {
+            // No list known (Home hadn't loaded): nothing to record it against.
+            cancel()
+            return nil
+        }
+        let written = newPrayer(id: prayer.id, selection: selection, startedAt: prayer.startedAt, endedAt: end,
+                                list: list)
+        amenCount += 1
+        phase = .closing(written)
+        return written
     }
 }

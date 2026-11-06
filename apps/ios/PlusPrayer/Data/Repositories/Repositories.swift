@@ -37,6 +37,9 @@ protocol PrayerRepository {
     /// Records the prayer on the device before returning, then sends it when
     /// it can. A prayer never fails for want of signal.
     func logPrayer(_ prayer: NewPrayer) async
+    /// The note, the only part of a prayer that changes (note-only edits).
+    /// Queued after its prayer, so it never overtakes it. nil clears it.
+    func updateNote(prayerId: String, note: String?) async
     /// Prayers logged on this device that the server may not reflect yet:
     /// folded into Home so the result shows at once, offline too.
     func localPrayers() -> AsyncStream<[NewPrayer]>

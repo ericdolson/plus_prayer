@@ -99,3 +99,12 @@ public struct PrayerSelection: Sendable, Equatable {
         return heldCount > 0 && heldCount < intentions.count ? .partial : .held
     }
 }
+
+// MARK: The list invitation
+
+/// Amen without the list opens the quiet invitation to hold it
+/// (prayer-flow.md, "No list pre-check"), unless you've already prayed with
+/// it today, or there's no list to hold.
+public func invitesToList(_ selection: PrayerSelection, listKnown: Bool, prayedWithListToday: Bool) -> Bool {
+    listKnown && !selection.listIncluded && !prayedWithListToday
+}

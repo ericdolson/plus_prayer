@@ -29,6 +29,9 @@ final class MockBackend {
     }
     private var reconnectHandlers: [() -> Void] = []
 
+    /// Prayer notes by prayer id (`updatePrayerNote`).
+    private(set) var notes: [String: String] = [:]
+
     /// The mock's "now": real time plus whatever the clock was advanced by.
     private var clockOffset: TimeInterval = 0
     private var loggedPrayerIds: Set<String> = []
@@ -56,6 +59,7 @@ final class MockBackend {
     /// logPrayer + onPrayerLogged; idempotent by id, like the server.
     func applyPrayer(_ prayer: NewPrayer) {
         guard loggedPrayerIds.insert(prayer.id).inserted else { return }
+        notes[prayer.id] = prayer.note
         subjects.send(subjectsWithLocalPrayers(subjects.value, [prayer]))
 
         guard prayer.includesList else { return }
@@ -66,6 +70,12 @@ final class MockBackend {
         if myStatus.value?.listId == current.id {
             myStatus.update { $0?.prayersWithList += 1 }
         }
+    }
+
+    /// updatePrayerNote: note only, and only for a prayer the server has.
+    func applyNote(prayerId: String, note: String?) {
+        guard loggedPrayerIds.contains(prayerId) else { return }
+        notes[prayerId] = note
     }
 
     // MARK: Scenario controls

@@ -35,6 +35,13 @@ struct HomeModelTests {
         for _ in 0..<200 where !condition() { try? await Task.sleep(for: .milliseconds(5)) }
     }
 
+    /// Past the minimum, then Amen; through the invitation without the list
+    /// if it opens.
+    private func finish() -> NewPrayer? {
+        clock.advance(6)
+        return session.amen(prayedWithListToday: home.prayedWithListToday) ?? session.amenFromInvitation()
+    }
+
     private func ids(_ groups: [NameGroup]) -> [String] {
         groups.flatMap { [$0.id] + $0.intentions.map(\.id) }
     }
@@ -80,7 +87,7 @@ struct HomeModelTests {
         session.start(list: home.listContext)
         session.toggleList()
         session.toggle("bea")
-        let prayer = try! #require({ clock.advance(6); return session.amen() }())
+        let prayer = try! #require(finish())
         await home.log(prayer)
 
         // From the device first (the stream's next turn): gold, the card's
@@ -105,7 +112,7 @@ struct HomeModelTests {
         backend.online = false
         session.start(list: home.listContext)
         session.toggle("parish")
-        await home.log(try! #require({ clock.advance(6); return session.amen() }()))
+        await home.log(try! #require(finish()))
         try? await Task.sleep(for: .milliseconds(30))
 
         #expect(home.groups.first { $0.id == "parish" }!.name.heldToday)
@@ -123,7 +130,7 @@ struct HomeModelTests {
         session.start(list: home.listContext)
         session.toggle("parish")
         session.toggleList()
-        await home.log(try! #require({ clock.advance(6); return session.amen() }()))
+        await home.log(try! #require(finish()))
 
         #expect(home.groups.contains { $0.id == "parish" }, "lingers")
         #expect(home.cardShown, "the card lingers too")
@@ -132,11 +139,26 @@ struct HomeModelTests {
         #expect(!home.cardShown)
     }
 
+    @Test func theNoteFollowsItsPrayerOffline() async {
+        defer { running.cancel() }
+        backend.online = false
+        session.start(list: home.listContext)
+        session.toggleList()
+        let prayer = try! #require(finish())
+        await home.log(prayer)
+        await home.saveNote("  A quiet morning.\n", prayerId: prayer.id)
+        await home.saveNote("   ", prayerId: prayer.id) // blank: nothing to save
+
+        backend.online = true
+        await waitUntil { backend.notes[prayer.id] != nil }
+        #expect(backend.notes[prayer.id] == "A quiet morning.")
+    }
+
     @Test func theFlipNeedsAFreshPrayer() async {
         defer { running.cancel() }
         session.start(list: home.listContext)
         session.toggleList()
-        await home.log(try! #require({ clock.advance(6); return session.amen() }()))
+        await home.log(try! #require(finish()))
         await waitUntil { backend.myStatus.value?.prayersWithList == 1 && home.localPrayers.isEmpty }
 
         backend.flipList()
@@ -152,7 +174,7 @@ struct PrayerSessionTests {
     @Test func amenBeforeTheMinimumDoesNothing() {
         let session = PrayerSession(graph: { SubjectGraph(intentionsByName: [:]) })
         session.start(list: ListContext(listId: "list-52", listNumber: 52))
-        #expect(session.amen() == nil)
+        #expect(session.amen(prayedWithListToday: true) == nil)
         #expect(session.isPraying)
     }
 
@@ -163,11 +185,70 @@ struct PrayerSessionTests {
         session.start(list: ListContext(listId: "list-52", listNumber: 52))
         session.toggle("dad-1")
         clock.advance(6)
-        let prayer = session.amen()
+        let prayer = session.amen(prayedWithListToday: true)
         #expect(prayer?.subjectIds == ["dad", "dad-1"])
         #expect(prayer?.communityListId == nil)
         #expect(prayer?.listContextNumber == 52)
         #expect(!session.isPraying)
+        #expect(session.closing == prayer)
         #expect(session.amenCount == 1)
+        #expect(session.isHeld("dad-1"), "held until the closing sheet goes, so the gold doesn't blink")
+        session.close()
+        #expect(session.phase == .idle)
+        #expect(!session.isHeld("dad-1"))
+    }
+
+    @Test func amenWithoutTheListInvitesFirst() {
+        let clock = TestClock()
+        let session = PrayerSession(graph: { SubjectGraph(intentionsByName: ["dad": []]) }, clock: { clock.now })
+        session.start(list: ListContext(listId: "list-52", listNumber: 52))
+        session.toggle("dad")
+        clock.advance(6)
+        #expect(session.amen(prayedWithListToday: false) == nil, "nothing written yet")
+        #expect(session.isInvited)
+        #expect(session.isPraying, "the halo stays through the invitation")
+        #expect(session.amenCount == 0)
+
+        session.holdList()
+        #expect(session.holdingListSince == clock.now)
+        clock.advance(2)
+        #expect(session.amenFromInvitation() == nil, "the ring is still running")
+        clock.advance(3)
+        let prayer = session.amenFromInvitation()
+        #expect(prayer?.communityListId == "list-52")
+        #expect(prayer?.subjectIds == ["dad"])
+        #expect(prayer?.durationSeconds == 11, "one prayer: the invitation extends it")
+        #expect(session.amenCount == 1)
+    }
+
+    @Test func amenOnTheInvitationWithoutTappingFinishesWithoutTheList() {
+        let clock = TestClock()
+        let session = PrayerSession(graph: { SubjectGraph(intentionsByName: [:]) }, clock: { clock.now })
+        session.start(list: ListContext(listId: "list-52", listNumber: 52))
+        clock.advance(6)
+        _ = session.amen(prayedWithListToday: false)
+        let prayer = session.amenFromInvitation()
+        #expect(prayer != nil)
+        #expect(prayer?.communityListId == nil)
+    }
+
+    @Test func noInvitationOnceYouvePrayedWithTheList() {
+        let clock = TestClock()
+        let session = PrayerSession(graph: { SubjectGraph(intentionsByName: [:]) }, clock: { clock.now })
+        session.start(list: ListContext(listId: "list-52", listNumber: 52))
+        clock.advance(6)
+        #expect(session.amen(prayedWithListToday: true) != nil)
+        #expect(!session.isInvited)
+    }
+
+    @Test func cancelFromTheInvitationLogsNothing() {
+        let clock = TestClock()
+        let session = PrayerSession(graph: { SubjectGraph(intentionsByName: [:]) }, clock: { clock.now })
+        session.start(list: ListContext(listId: "list-52", listNumber: 52))
+        clock.advance(6)
+        _ = session.amen(prayedWithListToday: false)
+        session.cancel()
+        #expect(session.phase == .idle)
+        #expect(session.amenCount == 0)
     }
 }

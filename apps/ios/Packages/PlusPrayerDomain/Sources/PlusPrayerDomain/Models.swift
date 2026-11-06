@@ -239,13 +239,17 @@ public struct NewPrayer: Sendable, Hashable, Codable, Identifiable {
     /// When each held item was checked (schema-brief §12).
     public let checkedAt: [String: Date]
 
+    /// `durationSeconds` is the time from start to end, held within what the
+    /// server accepts: at least the minimum (a prayer can only end after it)
+    /// and at most the cap (`AppConfig`: 5 s, 4 h).
     public init(id: String, startedAt: Date, prayedAt: Date, localDate: LocalDate, timezone: String,
                 communityListId: String?, listContextNumber: Int, subjectIds: [String],
-                checkedAt: [String: Date] = [:], note: String? = nil) {
+                checkedAt: [String: Date] = [:], note: String? = nil, config: AppConfig = .defaults) {
         self.id = id
         self.startedAt = startedAt
         self.prayedAt = prayedAt
-        self.durationSeconds = Int(prayedAt.timeIntervalSince(startedAt).rounded(.down))
+        let seconds = Int(prayedAt.timeIntervalSince(startedAt).rounded(.down))
+        self.durationSeconds = min(max(seconds, config.minPrayerSeconds), config.durationCapHours * 3600)
         self.localDate = localDate
         self.timezone = timezone
         self.communityListId = communityListId
@@ -269,16 +273,16 @@ public struct ListContext: Sendable, Hashable {
     }
 }
 
-/// The prayer the user just finished, as `logPrayer` takes it. Ids are kept
-/// in a stable order (names before their intentions doesn't matter to the
-/// server; sorted so a resend is byte-identical).
+/// The prayer the user just finished, as `logPrayer` takes it. Ids are
+/// sorted, so a resend is byte-identical.
 public func newPrayer(id: String, selection: PrayerSelection, startedAt: Date, endedAt: Date,
-                      list: ListContext, calendar: Calendar = .current) -> NewPrayer {
+                      list: ListContext, calendar: Calendar = .current, config: AppConfig = .defaults) -> NewPrayer {
     NewPrayer(id: id, startedAt: startedAt, prayedAt: endedAt,
               localDate: LocalDate(startedAt, calendar: calendar),
               timezone: calendar.timeZone.identifier,
               communityListId: selection.listIncluded ? list.listId : nil,
               listContextNumber: list.listNumber,
               subjectIds: selection.held.sorted(),
-              checkedAt: selection.checkedAt)
+              checkedAt: selection.checkedAt,
+              config: config)
 }
