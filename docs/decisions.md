@@ -1702,3 +1702,11 @@ the native inline navigation title (it's a pushed view, not a form label).
 Avatar rows put the avatar on the shared edge with the name after it (Home
 layout); the top notice lines are left-aligned on the shared edge, not
 centered (centered read as toasts, apart from the form).
+
+### Decision: Carry-row bloom stays inkMuted; centered on the label
+**Timestamp:** 2026-11-06
+The carry row's bloom is `inkMuted` in every state, ~15 pt, centered on the
+label's cap height. SUPERSEDES dimming it to `carriedMark` when off: that is
+the color the mark has on Home rows, where it means "carried", so the off
+state said the opposite. The toggle alone carries on/off. On device the
+glyph also sat too high.

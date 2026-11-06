@@ -426,9 +426,9 @@ list shows at a glance what goes on the printed list.
 - **"Me" is marked too** — always on, which is how the glyph is learned.
 - **Absence is never marked:** private items simply have no mark.
 - **In the add sheet's carry row** (2026-11-06) the same flat glyph trails
-  the "Carry onto the list" label at ~17 pt, `inkMuted` when on and
-  `carriedMark` when off: louder than on rows because it appears once and
-  teaches the mark, placed exactly as on rows (trailing).
+  the "Carry onto the list" label at ~15 pt, `inkMuted` in every state,
+  centered on the label's cap height: louder than on rows because it
+  appears once and teaches the mark, placed exactly as on rows (trailing).
 - **Glyph (for now):** the same logo glyph the streak badge used
   (`assets/img/+prayer_icon.svg`, the bloom with the "+" cut out), as a flat
   neutral silhouette — no wax, no sheen. Later: a dedicated bloom without the

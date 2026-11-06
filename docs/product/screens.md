@@ -96,8 +96,10 @@ _Last updated: 2026-10-18_
   - **Carry row** (name tab, intention tab, offer step): label **"Carry
     onto the list"** styled like the other labels, followed by the bloom
     **trailing** it ("Carry onto the list ✱", as the mark trails names on
-    Home), ~17 pt, `inkMuted` while the toggle is on, dimming to
-    `carriedMark` when off or disabled; the toggle trails the row. Under it,
+    Home), ~15 pt (label size), **`inkMuted` in every state** (the toggle
+    carries the state; a dimmed mark would match Home's "carried" color and
+    say the opposite), vertically centered on the label's cap height, as the
+    mark sits on Home rows; the toggle trails the row. Under it,
     a muted meter line saying what's **left** (below). (On the offer step,
     the question "Add an intention for {alias}?" serves as the intention
     field's label.) `{unit}` comes from one formatter ("places" under today's
