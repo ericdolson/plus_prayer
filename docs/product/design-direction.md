@@ -67,7 +67,10 @@ Where it's unclear which tier something is in, ask; don't guess.
 - Settings switches and other controls are **neutral**, not blue. A
   switch's "on" track is **`inkMuted`** with the standard white knob, in both
   themes and app-wide (2026-11-06: full ink was near-white in dark mode and
-  the brightest thing on screen).
+  the brightest thing on screen). The **"off" track is much dimmer, `ink` at
+  ~14%** (a faint groove), so on and off differ by fill, not just knob
+  position; the on track stays `inkMuted` (no brighter). Tokens:
+  `switchTrackOn` / `switchTrackOff`.
 
 ### Tokens (adjust the existing `PPDarkPalette` / `PPLightPalette`)
 _Revised 2026-10-24: dark `primary`/`onPrimary` back to the electric blue with

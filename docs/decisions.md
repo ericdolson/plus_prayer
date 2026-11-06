@@ -1652,3 +1652,11 @@ contradiction); when turning carry on takes all remaining places (e.g. an
 intention that also carries its name), the meter reads "This uses your last
 {N} places" and the Also-carries line drops "· uses N"; a prefilled name
 shows in "Make room for…" at once, later edits wait for the pause.
+
+### Decision: Switch off track dimmed; on stays inkMuted
+**Timestamp:** 2026-11-06
+Off track = `ink` at ~14%, on track stays `inkMuted`, via `switchTrackOn` /
+`switchTrackOff` tokens. On device the default off track was a mid gray close
+to `inkMuted`, so states read only by knob position.
+Rejected: action blue for "on" (blue means act; a settings screen of blue
+switches would dilute it); a brighter on track (glared).
