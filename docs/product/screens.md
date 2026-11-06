@@ -124,7 +124,9 @@ _Last updated: 2026-10-18_
     - **Offline line** shows while offline and after a failed Add; text kept.
     - **Generic failure** (incl. the quiet ~5,000 hard cap and any unexpected
       server error): inline line at the top, "Couldn't add this right now.
-      Try again in a little while.", text kept.
+      Try again in a little while.", text kept and Add stays enabled (retry
+      is one tap). The line clears when the text is edited or Add is tapped
+      again; the offline line also stays while still offline.
     - **~500-item cap:** inline line at the top, "You've reached 500 names
       and intentions. Archive some to add more.", Add disabled.
 - **Screens:** Home · Today's list (seal, video, counts, who's carried →

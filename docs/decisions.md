@@ -1506,3 +1506,9 @@ exists against abuse, not to limit a practice.
 - The ~5,000 hard cap is a Functions param like `SUBJECT_CAP`: server-only
   values may be params; client-visible ones live in `/config`. "Quiet" means
   no dedicated copy, not untunable.
+
+### Decision: Add sheet failure line keeps Add enabled
+**Timestamp:** 2026-11-06
+After a generic failure Add stays enabled so retrying is one tap; the line
+clears on edit or on the next Add (offline line also persists while offline).
+Confirms the app/ agent's provisional reading.
