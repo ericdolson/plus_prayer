@@ -109,6 +109,21 @@ _Last updated: 2026-10-18_
       "Their name" / "e.g. Dad".
     - **Tone count** (clarified): names only, Me included (intentions have
       no avatar).
+    - **Until Membership / Your portion exist:** hide the whole membership
+      invitation (sentence and button) and the "Your portion" link; show only
+      the saved-privately line. `{premiumPool}` comes from client `/config`
+      (`basePremiumPool`), compiled fallback 10.
+    - **Pool full → offered intention → Add:** the sheet closes with no
+      further message (the pool was already explained).
+    - **More copy:** intention placeholder "e.g. Healing after surgery";
+      intention caption "Printed on the list". Pool of 1 (free): "{alias} is
+      saved for your own prayers. Your free place on the list is in use."
+      (never "The 1 place"; you are always carried free). Intention saved
+      privately: "This intention is saved for your own prayers." (never quote
+      the intention text).
+    - **Offline line** shows while offline and after a failed Add; text kept.
+    - **~500-item cap:** inline line at the top, "You've reached 500 names
+      and intentions. Archive some to add more.", Add disabled.
 - **Screens:** Home · Today's list (seal, video, counts, who's carried →
   portion) · Past lists · Name/Intention detail · Your portion · History
   (account-wide, grouped by day, streak/grace marks) · Prayer detail (note) ·

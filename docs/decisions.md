@@ -1466,3 +1466,17 @@ survive typing, placeholders don't. Monetization flow to be refined later.
 Eric asked to keep the once-a-day cadence (previous entry) as a pending idea,
 not a decision. The app builds it as a placeholder; the open question is
 open-questions Q31 (alternative: first time ever, then at most weekly).
+
+### Decision: Add sheet — placeholders until Membership exists, more copy, 500 cap
+**Timestamp:** 2026-11-06
+- Hide the whole membership invitation and "Your portion" link until those
+  screens exist (a sales line with nowhere to go is a dead end).
+- `basePremiumPool` goes into client `/config` (backend); app fallback 10.
+- After a private name's offered intention is added, close silently.
+- Copy: intention placeholder "e.g. Healing after surgery", caption "Printed
+  on the list"; free pool line "Your free place on the list is in use." (the
+  self is always carried free, so "1 place" misstates it); a private
+  intention reads "This intention is saved for your own prayers." (intention
+  text can be long or painful, so it's never quoted); 500 cap line "You've
+  reached 500 names and intentions. Archive some to add more."
+- The free-tier case is added to open-questions Q31.
