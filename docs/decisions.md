@@ -1696,3 +1696,9 @@ deferred (open-questions D6).
 Serif header aligns to the shared text edge; status lines 15 pt regular ink;
 validation errors 13 pt ink; 6 pt before the bloom; "Who is this for?" uses
 the native inline navigation title (it's a pushed view, not a form label).
+
+### Decision: Add sheet edges — avatar rows and notice lines
+**Timestamp:** 2026-11-06
+Avatar rows put the avatar on the shared edge with the name after it (Home
+layout); the top notice lines are left-aligned on the shared edge, not
+centered (centered read as toasts, apart from the form).

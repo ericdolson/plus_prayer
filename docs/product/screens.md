@@ -85,7 +85,10 @@ _Last updated: 2026-10-18_
     the meter and placeholders = footnote 13 pt (placeholders at input size),
     `inkMuted`. Muted is only for secondary or disappearing text; labels stay
     ink because they persist. "Make room" = 13 pt, action blue. All text
-    shares one leading edge, including the offer step's serif header.
+    shares one leading edge, including the offer step's serif header and
+    the top notice lines (offline, failure, cap: left-aligned, not
+    centered). Avatar rows (the For row, "Who is this for?") put the avatar
+    on that edge and the name after it, as on Home.
     Status lines (e.g. "Saved, but not carried…") = 15 pt regular ink;
     validation errors = 13 pt ink (no red; ink sets them apart from muted
     hints). The bloom sits 6 pt after its label (as on Home rows). "Who is
