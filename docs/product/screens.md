@@ -97,14 +97,19 @@ _Last updated: 2026-10-18_
     **Spacing:** one gap between groups, **~24 pt**, measured from the end
     of a group (its field, or its hint if it has one) to the next label;
     also avatar → first label and For row → first label. Inside a group:
-    label → field ~8 pt, field → hint ~6 pt, label → its hint (carry row)
-    ~2 pt. Gaps are optical: from the bottom of the element above (its
+    label → field ~8 pt, and **one hint gap, ~6 pt, for every hint** (under
+    a field or under the carry label; no separate carry-row value). Gaps are optical: from the bottom of the element above (its
     baseline for a label over its field; just below descenders for a hint
     or the carry label) to the next text's cap height. On the offer step the
     serif header and its question are one header block: ~10 pt optical
     (trim the serif's descender room), then the question labels the field.
-    The toggle centers on the carry label's line and may overhang it
-    without moving the layout.
+    The toggle is **vertically centered on the whole label + hint block**,
+    as in an iOS Settings row with a subtitle.
+    **One component:** every group (Name, alias, Intention, carry row) is
+    the same form-group view: label (with an optional trailing mark),
+    control, optional hint, with an optional trailing accessory (the
+    toggle). Spacing comes only from the form tokens (`formGroup`,
+    `formLabelToField`, `formHint`); views add no ad-hoc padding.
     Status lines (e.g. "Saved, but not carried…") = 15 pt regular ink;
     validation errors = 13 pt ink (no red; ink sets them apart from muted
     hints). The bloom sits 6 pt after its label (as on Home rows). "Who is

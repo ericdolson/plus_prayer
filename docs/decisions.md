@@ -1734,3 +1734,18 @@ carry label). Offer step: "{alias} is added." → its question ~10 pt optical
 (one header block, serif descender room trimmed), not the 24 pt group gap
 (read ~31 pt on device). Toggle centered on the carry label's line,
 overhanging without moving the layout.
+
+### Decision: One hint gap, toggle centered on the row, one form-group component
+**Timestamp:** 2026-11-06
+- One hint gap (~6 pt) for every hint. SUPERSEDES the 2 pt carry-label → meter
+  gap (a spec error: it made "2 places left" cramped beside the properly
+  spaced "Only you see this").
+- The carry toggle centers on the label + hint block (iOS Settings subtitle
+  row). SUPERSEDES centering on the label line (the label then sat high
+  against the toggle).
+- Every group is one shared form-group view (label + optional trailing mark,
+  control, optional hint, optional trailing accessory) spaced only by form
+  tokens, so groups can't drift apart again.
+Why: Eric was finding per-element variances by eye; both came from the spec
+giving the carry row its own values. Tokens already existed (design/tokens.json
+→ PP.space.form*); the fix is fewer special cases and one component.
