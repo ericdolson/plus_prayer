@@ -294,3 +294,12 @@ during the prayer (client-supplied, offline-safe). No UI uses it; it preserves
 options (order held, exact time for single-focus prayers). **No per-item prayer
 time is shown anywhere** (a prayer holds many items; splitting time would be
 invented math, and "longer is not better").
+
+## addSubject carry inputs (2026-11-06)
+`addSubject` takes `carry: Boolean = true` (false = save for private prayer
+only) and `carryParent: Boolean = false` (for an intention whose name isn't
+carried: carry the name too, which re-carries its intentions still flagged).
+The server applies the pool check atomically in the same call and returns
+whether the item (and parent) ended up carried, so the app can tell the user
+if the result differs from the toggle. Preferred over addSubject +
+setCarriedItems (two calls can race with another device).

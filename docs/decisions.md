@@ -1593,3 +1593,20 @@ link is a humane upsell spot; a single row plus search shows people as
 people without ranking anyone out of a visible strip.
 Rejected: avatar strip for the For picker (busy; ranks loved ones by
 position); "Carry onto List N" (changes daily).
+
+### Decision: Add sheet carry-row details (app/ agent questions)
+**Timestamp:** 2026-11-06
+- `addSubject` gains `carry` / `carryParent` inputs, pool-checked atomically,
+  returning the carried result (schema-brief). Rejected: a second
+  setCarriedItems call (races).
+- No "deliberately uncarried" distinction (the data can't tell): any
+  intention under an uncarried name starts off.
+- "Also carries {alias} · uses N {unit}" states the true cost.
+- Meter previews the result with the toggle; over-pool reads "All {pool}
+  {unit} in use"; free-tier name line pending Q32.
+- "Make room" always under the meter; bare "Make room" before a name exists;
+  inert button with VoiceOver hint "Not available yet".
+- Intention tab gets an "Intention" label; offer field keeps only the caption.
+- Picker: neutral checkmark on the current person, Home's empty-search copy.
+- If the server's carried result differs from the toggle, say so inline
+  instead of closing silently.

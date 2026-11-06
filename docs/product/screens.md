@@ -67,8 +67,14 @@ _Last updated: 2026-10-18_
       keyboard stays up) over everyone in Home order, Me first, matching name
       + alias like Home search. Picking someone pops back and refocuses the
       intention field. No ranked strip or menu (nobody is "left off").
-    - Intention field, placeholder "e.g. Healing after surgery", caption
-      "Printed on the list". Focused when the tab opens.
+    - Label **Intention**, placeholder "e.g. Healing after surgery", caption
+      "Printed on the list". Focused when the tab opens. (The offer step's
+      field has no label, since its question labels it, but keeps the caption.)
+    - "Who is this for?" keeps the sheet's height (list scrolls); the current
+      person has a neutral ink checkmark; Home search's placeholder
+      "Search"; no matches → 'Nothing matches "{query}".'; Return does
+      nothing. Changing the person resets the carry toggle to that person's
+      default.
     - **Carry row** (below).
   - **Carry row** (name tab, intention tab, offer step): the bloom, **"Carry
     onto the list"**, a toggle, and a muted meter line "{used} of {pool}
@@ -81,10 +87,24 @@ _Last updated: 2026-10-18_
       **Visible now but inert** until Membership / Your portion exist; what
       its menu offers (add more places / free one up) is part of the
       monetization decision (Q31/Q32).
-    - **Intention under an uncarried name:** if the name was deliberately
-      left uncarried, the row starts off but stays enabled while there's
-      room; turning it on shows "Also carries {alias}" (an intention prints
-      only with its name).
+    - **Meter previews the result:** it counts this item while the toggle
+      is on ("8 of 10" on, "7 of 10" off). Over the pool (e.g. a lapsed
+      trial): "All {pool} {unit} in use", never "7 of 1". Free pool, Name
+      tab: toggle disabled, meter "Free carries you and one intention of
+      your own" (pending Q32 copy).
+    - **Intention under an uncarried name** (any reason): the row starts off,
+      enabled while there's room; turning it on shows the true cost, "Also
+      carries {alias} · uses N {unit}" (re-carrying the name brings back its
+      intentions still marked carried).
+    - **"Make room"** sits under the meter, always (no jumping with name
+      length). With nothing typed yet it reads "Make room"; it becomes "Make
+      room for {alias}" once there's a name. Until it works it's a button
+      with the VoiceOver hint "Not available yet" and no action.
+    - **Server disagrees** (the pool filled from another device): if the
+      server saves uncarried while the toggle was on, the sheet doesn't close
+      silently: an inline line "Saved, but not carried. The list's places
+      filled up." (+ Done on the intention tab; on the offer step it sits
+      under the header).
     - Home never marks an uncarried item (design-direction §5).
   - **One tap to save.** Add saves at once; the sheet then pushes
     (horizontal, forward) to the offer: serif header **"{alias} is added."**
