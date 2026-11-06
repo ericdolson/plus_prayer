@@ -89,6 +89,11 @@ _Last updated: 2026-10-18_
     the top notice lines (offline, failure, cap: left-aligned, not
     centered). Avatar rows (the For row, "Who is this for?") put the avatar
     on that edge and the name after it, as on Home.
+    **Spacing:** one gap between groups, **~24 pt**, measured from the end
+    of a group (its field, or its hint if it has one) to the next label;
+    also avatar → first label and For row → first label. Inside a group:
+    label → field ~8 pt, field → hint ~6 pt, label → its hint (carry row)
+    ~2 pt.
     Status lines (e.g. "Saved, but not carried…") = 15 pt regular ink;
     validation errors = 13 pt ink (no red; ink sets them apart from muted
     hints). The bloom sits 6 pt after its label (as on Home rows). "Who is

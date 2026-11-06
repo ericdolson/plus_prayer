@@ -1710,3 +1710,10 @@ label's cap height. SUPERSEDES dimming it to `carriedMark` when off: that is
 the color the mark has on Home rows, where it means "carried", so the off
 state said the opposite. The toggle alone carries on/off. On device the
 glyph also sat too high.
+
+### Decision: Add sheet group spacing
+**Timestamp:** 2026-11-06
+One ~24 pt gap between groups, measured from a group's last element (field
+or hint) to the next label; label → field ~8 pt, field → hint ~6 pt. On
+device the gap above "What you call them" (~19 pt) was smaller than the gap
+above "Carry onto the list" (~25 pt); Eric preferred the larger one.
