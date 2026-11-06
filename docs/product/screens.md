@@ -55,8 +55,9 @@ _Last updated: 2026-10-18_
       text, then the alias's, "GO" → "D"; intended). Color never changes
       while typing. **v1: preview only** (not tappable); v2: tap → tone
       swatches (+ photo), here and in Edit together.
-    - Label **Name**, field placeholder "e.g. Gary Olson", muted caption
-      "Printed on the list". Focused on open.
+    - Label **Name**, field placeholder "e.g. Gary Olson", no caption (the
+      carry row says what prints; with groups the name is also what members
+      see). Focused on open.
     - Label **What you call them · optional**, placeholder "e.g. Dad",
       caption "Only you see this".
     - **Carry row** (below).
@@ -67,9 +68,9 @@ _Last updated: 2026-10-18_
       keyboard stays up) over everyone in Home order, Me first, matching name
       + alias like Home search. Picking someone pops back and refocuses the
       intention field. No ranked strip or menu (nobody is "left off").
-    - Label **Intention**, placeholder "e.g. Healing after surgery", caption
-      "Printed on the list". Focused when the tab opens. (The offer step's
-      field has no label, since its question labels it, but keeps the caption.)
+    - Label **Intention**, placeholder "e.g. Healing after surgery", no
+      caption. Focused when the tab opens. (The offer step's field has no
+      label either; its question labels it.)
     - "Who is this for?" keeps the sheet's height (list scrolls); the current
       person has a neutral ink checkmark; Home search's placeholder
       "Search"; no matches → 'Nothing matches "{query}".'; Return does
@@ -77,8 +78,8 @@ _Last updated: 2026-10-18_
       default.
     - **Carry row** (below).
   - **Carry row** (name tab, intention tab, offer step): the bloom, **"Carry
-    onto the list"**, a toggle, and a muted meter line "{used} of {pool}
-    {unit} used". `{unit}` comes from one formatter ("places" under today's
+    onto the list"**, a toggle, and a muted meter line saying what's **left**
+    (below). `{unit}` comes from one formatter ("places" under today's
     rule; "people" if open-questions Q32 is adopted).
     - **On by default** while there's room. The user may turn it off (kept
       for their own prayers).
@@ -87,10 +88,12 @@ _Last updated: 2026-10-18_
       **Visible now but inert** until Membership / Your portion exist; what
       its menu offers (add more places / free one up) is part of the
       monetization decision (Q31/Q32).
-    - **Meter previews the result:** it counts this item while the toggle
-      is on ("8 of 10" on, "7 of 10" off). Over the pool (e.g. a lapsed
-      trial): "All {pool} {unit} in use", never "7 of 1"; with a pool of 1:
-      "Your one place is in use". Free pool, Name tab: toggle disabled, meter
+    - **Meter counts what's left, not including this item**, so it never
+      changes when the toggle flips: "{left} {unit} left" (e.g. "3 places
+      left"); on with 1 left: "This uses your last place"; full or over the
+      pool (e.g. a lapsed trial): "All {pool} {unit} in use" (pool of 1:
+      "Your one place is in use"). SUPERSEDES the "8 of 10 used" preview,
+      which showed "10 of 10" while still allowed. Free pool, Name tab: toggle disabled, meter
       "Free carries you and one intention of your own" (pending Q32 copy),
       with "Make room" under it as usual (carrying others is membership).
       "Uses N" counts everything turning it on carries, this item included
@@ -106,7 +109,9 @@ _Last updated: 2026-10-18_
       intentions still marked carried).
     - **"Make room"** sits under the meter, always (no jumping with name
       length). With nothing typed yet it reads "Make room"; it becomes "Make
-      room for {alias}" once there's a name. Until it works it's a button
+      room for {alias}" once typing **pauses ~0.6 s**, with a ~150 ms
+      crossfade (never mid-word updates). Search results and avatar
+      initials stay live. Until it works it's a button
       with the VoiceOver hint "Not available yet" and no action.
     - **Server disagrees** (the pool filled from another device): if the
       server saves uncarried while the toggle was on, the sheet doesn't close

@@ -64,8 +64,10 @@ Where it's unclear which tier something is in, ask; don't guess.
 | **Neutrals** | Quiet | Canvas, surfaces, ink (3 levels), threads, icons, switches | — |
 
 - No red, no pink anywhere. No other accent colors.
-- Settings switches and other controls are **neutral** (ink-colored "on"
-  state), not blue.
+- Settings switches and other controls are **neutral**, not blue. A
+  switch's "on" track is **`inkMuted`** with the standard white knob, in both
+  themes and app-wide (2026-11-06: full ink was near-white in dark mode and
+  the brightest thing on screen).
 
 ### Tokens (adjust the existing `PPDarkPalette` / `PPLightPalette`)
 _Revised 2026-10-24: dark `primary`/`onPrimary` back to the electric blue with

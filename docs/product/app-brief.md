@@ -128,9 +128,8 @@ or links." Must allow verse references ("John 3:16"), room numbers, dates.
 ### Add sheet (screens.md)
 One native sheet, Name | Intention segmented control; full spec in screens.md
 (revised 2026-11-06): labeled Name / "What you call them · optional" fields
-with captions, ~72 pt avatar preview, a For row that pushes a searchable
-"Who is this for?", a **carry row** ("Carry onto the list", toggle, "{used} of
-{pool} {unit} used"; full pool → off + "Make room for {alias}", inert for
+(only the alias has a caption, "Only you see this"), ~72 pt avatar preview, a For row that pushes a searchable
+"Who is this for?", a **carry row** ("Carry onto the list", toggle, "{left} {unit} left"; full pool → off + "Make room for {alias}", inert for
 now), one-tap save, then "{alias} is added." + intention offer with focus
 kept. "The list" always means the printed list. Home never marks an uncarried
 item.

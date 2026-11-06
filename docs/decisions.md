@@ -1630,3 +1630,17 @@ one place is in use"; "Make room" shows on the free Name tab too; the
 server-disagrees state is an end state (top line, Done only, read-only form,
 keyboard down) on both the Intention tab and the offer step; curly quotes in
 "Nothing matches".
+
+### Decision: Add sheet polish from device testing
+**Timestamp:** 2026-11-06
+- Switch "on" track = `inkMuted` app-wide (full ink glared in dark mode).
+- No "Printed on the list" captions on Name or Intention; the carry row says
+  what prints, and with groups the name is also what members see. "Only you
+  see this" stays under the alias.
+- Meter counts what's **left**, excluding this item ("3 places left", "This
+  uses your last place", "All 10 places in use"). SUPERSEDES the preview
+  meter, which read "10 of 10 used" while the toggle was still on and allowed.
+- "Make room for {alias}" updates after a ~0.6 s typing pause with a ~150 ms
+  crossfade; search and initials stay live (search results are the thing
+  being looked at, and local filtering is instant).
+Rejected: a once-per-second update while typing (flashes partial names).
