@@ -126,17 +126,14 @@ or links — inline: "Names and intentions can't include phone numbers, emails,
 or links." Must allow verse references ("John 3:16"), room numbers, dates.
 
 ### Add sheet (screens.md)
-One bottom sheet. From footer ＋: **Add name** (40), switchable to intention with a
-name picker (default "Me"). From a name's detail/row: **Add intention for {alias}**
-(80), picker hidden. Optional alias. New items go to the bottom. After adding a
-name, the sheet slides in place to the offer once: "Dad is on your list. Add an
-intention for Dad?" (Not now / Add). Name form: ~72 pt avatar preview at top
-(tone fixed at open, initials fill in live, not tappable in v1), Name with
-"Printed on the list", Alias with "Only you see this"; one tap to save, no
-wizard (screens.md). Auto-carried while the pool has
-room; when full, the add sheet says so ("saved for your own prayers · all
-{pool} places in use", stronger membership invitation only on the first such
-add of the day, screens.md); Home shows no mark (absence is never marked).
+One native sheet, Name | Intention segmented control; full spec in screens.md
+(revised 2026-11-06): labeled Name / "What you call them · optional" fields
+with captions, ~72 pt avatar preview, a For row that pushes a searchable
+"Who is this for?", a **carry row** ("Carry onto the list", toggle, "{used} of
+{pool} {unit} used"; full pool → off + "Make room for {alias}", inert for
+now), one-tap save, then "{alias} is added." + intention offer with focus
+kept. "The list" always means the printed list. Home never marks an uncarried
+item.
 
 ### Name / Intention detail (stats-history.md)
 One page; intentions hide what doesn't apply and add parent name + resolve.

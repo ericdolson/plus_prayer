@@ -1562,3 +1562,34 @@ add-on pool. Launch with one tier and cap 1, and measure "Print this one
 instead" before adding a tier.
 Why: an add-on pool brings back two meters and cross-person swaps, sells
 "the why", and needs a second subscription group.
+
+### Decision: Add sheet redesign — copy rule, labels, carry row, "is added", For row
+**Timestamp:** 2026-11-06
+- **Copy rule:** "the list" only means the printed list; never "your list".
+  ("Mike is on your list" and "All 10 places on the list" read as the user's
+  own screen.)
+- **Labels:** Name ("e.g. Gary Olson", caption "Printed on the list") and
+  "What you call them · optional" ("e.g. Dad", "Only you see this").
+  SUPERSEDES placeholder-only fields ("Their name" read oddly; "e.g. Dad"
+  alone didn't say what the field was).
+- **Carry row** on both tabs and the offer step: bloom, "Carry onto the list"
+  (not "List N": the number changes daily and the community card shows it),
+  toggle on by default with room, meter "{used} of {pool} {unit} used" via
+  one formatter (unit pending Q32). Full pool: off + disabled + "Make room
+  for {alias}" / "this intention", **visible but inert** for now. An
+  intention under a deliberately uncarried name starts off, stays enabled,
+  and shows "Also carries {alias}" when turned on.
+- **After Add:** serif "{alias} is added." in every case, then the intention
+  offer with focus kept (fixes the keyboard dropping when the pool was full).
+  SUPERSEDES the pool-full message step, the free/singular pool lines, the
+  saved-privately [Done] step and the daily membership invitation (Q31
+  updated: the carry row's link is the upsell spot).
+- **For row:** one Home-style row (40 pt avatar + serif name + "Change")
+  pushing a searchable "Who is this for?" (everyone, Home order, Me first).
+  SUPERSEDES the native picker menu; closes D5.
+Why: telling the user up front whether an item is carried removes the
+after-the-fact surprise and the "your list" confusion; a persistent quiet
+link is a humane upsell spot; a single row plus search shows people as
+people without ranking anyone out of a visible strip.
+Rejected: avatar strip for the For picker (busy; ranks loved ones by
+position); "Carry onto List N" (changes daily).
