@@ -42,6 +42,18 @@ _Last updated: 2026-10-18_
   - From a name's detail page (or row): opens as **Add intention for {alias}**,
     picker hidden (association implied).
   - New items go to the **bottom** of their list.
+  - **Name form (2026-11-05):** a ~72 pt monogram avatar sits at the top
+    (same size as the detail page), then Name ("Printed on the list") and
+    Alias ("Only you see this"). Name is focused on open. The avatar shows its
+    tone from the moment the sheet opens, empty until the first letter is
+    typed; initials then fill in live from the same source Home uses. The
+    color never changes while typing. **v1: the avatar is a preview only**
+    (not tappable); v2 makes it tap → tone swatches (+ photo when photos ship),
+    here and in Edit together.
+  - **One tap to save.** No Next steps or wizard: Add saves the name at once.
+    The sheet then slides in place to the offer "{alias} is on your list. Add
+    an intention for {alias}?" with the intention field ready and
+    [Not now] / [Add]. Not now loses nothing (the name is already saved).
 - **Screens:** Home · Today's list (seal, video, counts, who's carried →
   portion) · Past lists · Name/Intention detail · Your portion · History
   (account-wide, grouped by day, streak/grace marks) · Prayer detail (note) ·

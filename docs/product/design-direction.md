@@ -113,7 +113,11 @@ accepted as tuned in the Flutter build. Tones are roughly Material
 600–800 shades, never neon 300s or dull grays. Same palette in light and dark;
 in dark mode lower brightness very slightly to avoid glare on the near-black
 ground. 12–16 colors, well separated in hue so neighbors rarely match
-(`avatarTone` 0–15). Default tone from a hash of the subject id. **After launch
+(`avatarTone` 0–15). **New subjects (2026-11-05):** the add sheet picks the
+tone when it opens, from the tones least used among the user's active names
+(ties at random), shows it before anything is typed, and writes `avatarTone`
+on create; it never changes while typing. The hash of the subject id is only
+the fallback for rows with no stored tone. **After launch
 the index→color mapping must stay stable** (changing it recolors everyone's
 people); changing it now is free.
 

@@ -129,7 +129,11 @@ or links." Must allow verse references ("John 3:16"), room numbers, dates.
 One bottom sheet. From footer ＋: **Add name** (40), switchable to intention with a
 name picker (default "Me"). From a name's detail/row: **Add intention for {alias}**
 (80), picker hidden. Optional alias. New items go to the bottom. After adding a
-name, offer once: "Add an intention for Dad?". Auto-carried while the pool has
+name, the sheet slides in place to the offer once: "Dad is on your list. Add an
+intention for Dad?" (Not now / Add). Name form: ~72 pt avatar preview at top
+(tone fixed at open, initials fill in live, not tappable in v1), Name with
+"Printed on the list", Alias with "Only you see this"; one tap to save, no
+wizard (screens.md). Auto-carried while the pool has
 room; when full, the new row shows "Not on the list · all 15 places in use"
 (tap → Your portion).
 

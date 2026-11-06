@@ -1381,3 +1381,25 @@ toward it, and the last intention in a group doesn't add its 40 pt pitch's
 empty space below it (its tap target still reaches 40 pt, into the gap).
 Why: on device the gap came out ~45 pt (24 pt added on top of ~17 pt of
 empty row and the name row's 4 pt inset), so groups read as far apart.
+
+### Decision: Add sheet name form — inline avatar, one-tap save, intention offer in place
+**Timestamp:** 2026-11-05
+- The name form shows a ~72 pt avatar preview at the top, then Name ("Printed
+  on the list") and Alias ("Only you see this"). Name is focused on open.
+- The tone is **picked when the sheet opens** from the user's least-used tones
+  among active names (ties random), shown on the empty circle before typing,
+  and **stored as `avatarTone` on create**. Initials fill in live; the color
+  never changes while typing. The id hash stays as the fallback for rows with
+  no stored tone.
+- v1: the avatar is preview-only. v2: tap → tone swatches (+ photo), here and
+  in Edit at once; a user-chosen tone replaces the auto pick.
+- Add saves in one tap. The sheet then slides in place to "{alias} is on your
+  list. Add an intention for {alias}?" (Not now / Add).
+Why: the name is what gets carried, so it's committed on the first tap; the
+avatar is decoration and shouldn't gate it. A changing color per keystroke
+reads as broken; least-used tones keep neighbors on Home apart. The helper
+lines teach the name/alias split at the one moment it matters.
+Rejected: a Name-or-Intention choice screen first (a tap for everyone to serve
+the minority; ＋ already defaults to Name); opening the detail page in create
+mode (too heavy); a Name → Next → Avatar → Next → Intention wizard (each step
+is a drop-off point, and most users would just tap through the avatar step).
