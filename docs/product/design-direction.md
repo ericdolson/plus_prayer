@@ -307,8 +307,10 @@ gold.
       sheet **prefilled with the query, cursor at the end**, so "Robe" becomes
       "Robert" naturally; it's a **name** by default (switchable to an
       intention; normal caps and validation apply).
-    - Show the empty state only after typing pauses (~500–700 ms) to avoid
-      flicker while typing.
+    - **Live, like the rows (2026-11-06):** the empty state shows as soon as
+      nothing matches and its line follows the query as you type; it's never
+      hidden and shown again while nothing still matches. (Was: wait for
+      typing to pause, ~500–700 ms.)
     - **Filter hiding matches:** if a filter is active and the query matches
       under **All**, add **one match hint** below the button: a flat
       **`cardSurface`** container (not glass — it's content, not a floating

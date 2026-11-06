@@ -1537,3 +1537,12 @@ blue pie on the dimmed disc is good as built).
 Rejected: the docked row with a compact pray button (two pray buttons in two
 shapes); a tighter ring (still a sweep around the whole button).
 
+### Decision: Search's empty state is live
+**Timestamp:** 2026-11-06
+"No matches for “…”" shows as soon as nothing matches and its line updates
+as the query changes; it isn't hidden and re-shown while typing. SUPERSEDES
+"show the empty state only after typing pauses (~500–700 ms)" (2026-10-29).
+Why: the rows filter in real time, so a delayed empty state felt off (waiting
+won't make a match appear), and hiding and re-showing it on each keystroke
+was janky. The `duration.searchPause` token is removed.
+
