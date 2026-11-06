@@ -70,7 +70,10 @@ Where it's unclear which tier something is in, ask; don't guess.
   the brightest thing on screen). The **"off" track is much dimmer, `ink` at
   ~14%** (a faint groove), so on and off differ by fill, not just knob
   position; the on track stays `inkMuted` (no brighter). Tokens:
-  `switchTrackOn` / `switchTrackOff`.
+  `switchTrackOn` / `switchTrackOff`. **iOS keeps the native switch**
+  (drag, iOS 26 glass knob, future system changes), so there the off track is
+  the system's and only `switchTrackOn` applies; `switchTrackOff` applies on
+  Android, whose native switch allows it. No custom-drawn switch.
 
 ### Tokens (adjust the existing `PPDarkPalette` / `PPLightPalette`)
 _Revised 2026-10-24: dark `primary`/`onPrimary` back to the electric blue with

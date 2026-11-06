@@ -1660,3 +1660,12 @@ Off track = `ink` at ~14%, on track stays `inkMuted`, via `switchTrackOn` /
 to `inkMuted`, so states read only by knob position.
 Rejected: action blue for "on" (blue means act; a settings screen of blue
 switches would dilute it); a brighter on track (glared).
+
+### Decision: iOS keeps the native switch (system off track)
+**Timestamp:** 2026-11-06
+iOS can't recolor the native switch's off track, so iOS keeps the native
+switch with only the on tint (`inkMuted`); `switchTrackOff` is Android-only.
+Why: native behavior (drag, glass knob, accessibility On/Off labels, future
+iOS changes) outweighs a subtle tint difference; iOS users read switches by
+knob position. Rejected: a custom ToggleStyle (replaces a native control);
+a shape behind the native switch (its translucent track blends lighter).
