@@ -266,7 +266,9 @@ compose queries; if an operation is missing, ask for a backend change.
 - Color roles (design-direction §1): blue = do this, gold = held, everything
   else neutral. No red, no pink. Switches and controls are neutral (`.tint`
   is ink), never blue. Every `Toggle` uses `.ppSwitch()` (Theme/Switch.swift):
-  the "on" track is `inkMuted` with the standard white knob, both themes.
+  the "on" track is `switchTrackOn` (inkMuted) with the standard white knob,
+  both themes; the off track stays the system's (`switchTrackOff` is
+  Android-only). Never a custom-drawn switch.
 - **Tier B chrome is native**: menus (`Menu`), sheets, alerts, confirmation
   dialogs, the search field, toolbars, `Toggle`, pickers, share sheet. Take
   the platform's metrics and look; the spec gives only content and behavior.

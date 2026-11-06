@@ -36,6 +36,10 @@ nonisolated enum PP {
         static let inkFaint = Color(light: 0x8A9BB0, dark: 0x6C7076)
         /// The carried mark. Below 3:1 on purpose (design-direction §5).
         static let carriedMark = Color(light: 0xA6B4C6, dark: 0x53585E)
+        /// A switch's "on" track: inkMuted, no brighter, with the standard white knob (design-direction §1, app-wide).
+        static let switchTrackOn = Color(light: 0x566D83, dark: 0x9A9EA4)
+        /// A switch's "off" track: ink at ~14%, a faint groove, so on and off differ by fill. Android only: iOS keeps the native switch, whose off track is the system's (design-direction §1).
+        static let switchTrackOff = Color(light: 0x05294A, dark: 0xE8EAED, lightAlpha: 0.14, darkAlpha: 0.14)
         /// Blue = do this: pray button, Amen, the invitation's tap target, primary buttons. Never status or decoration.
         static let primary = Color(light: 0x0573E0, dark: 0x0580F9)
         /// 3.8:1: glyphs and large/bold text only.
