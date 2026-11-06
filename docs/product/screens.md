@@ -70,7 +70,12 @@ _Last updated: 2026-10-18_
       + alias like Home search. Picking someone pops back and refocuses the
       intention field. No ranked strip or menu (nobody is "left off").
     - Label **Intention**, placeholder "e.g. Healing after surgery", no
-      caption. Focused when the tab opens. (The offer step's field has no
+      caption. Focused when the tab opens. **The intention field grows 1 → 3
+      lines** as you type (here and on the offer step), so all 80
+      characters stay visible; rows below move down smoothly, the sheet
+      height stays. No line breaks: Return keeps its submit job (same as
+      Add), pasted line breaks become spaces. Name and alias stay
+      single-line. (The offer step's field has no
       label either; its question labels it.)
     - "Who is this for?" keeps the sheet's height (list scrolls); the current
       person has a neutral ink checkmark; Home search's placeholder

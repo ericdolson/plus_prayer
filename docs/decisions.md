@@ -1717,3 +1717,11 @@ One ~24 pt gap between groups, measured from a group's last element (field
 or hint) to the next label; label → field ~8 pt, field → hint ~6 pt. On
 device the gap above "What you call them" (~19 pt) was smaller than the gap
 above "Carry onto the list" (~25 pt); Eric preferred the larger one.
+
+### Decision: Intention field grows to 3 lines
+**Timestamp:** 2026-11-06
+The intention input wraps and grows 1 → 3 lines (80 chars ≈ 2 lines), on the
+Intention tab and the offer step. No newlines (it prints as one line):
+Return submits, pasted breaks become spaces. Name/alias stay single-line.
+Why: a single-line field hid most of an 80-character intention, the text
+people most want to reread before saving.
