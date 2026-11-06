@@ -191,6 +191,20 @@ Callables (`functions/src/subjects.ts`):
   bottom of its level. `isCarried` auto-set while the pool (effective carry vs.
   effective entitlement) has room, else false and marked not on the list.
   Rejected past the ~500 cap ("contact us").
+  Carry inputs (2026-11-06): `carry: Boolean = true` (false = private prayer
+  only) and `carryParent: Boolean = false` (an intention under an uncarried
+  name: carry the name too, which brings back its intentions still flagged).
+  One pool check covers the whole result, all or nothing: if it doesn't fit,
+  the item is saved uncarried and the name is untouched. `carryParent` is a
+  no-op with `carry: false`, on a name, under Me, or under a name already
+  carried. Item + name are written in one transaction
+  (InsertSubjectCarryingParent). Returns `{ id, isCarried, parentCarried,
+  effectivelyCarried, sortOrder }`: `isCarried` is the item's stored flag;
+  `parentCarried` (null for a name) is true under Me or a carried name;
+  `effectivelyCarried` = it prints (own flag && parent's) — the app's "Saved,
+  but not carried" check. Known gap (accepted): read-then-write, so two
+  devices adding at once can overshoot the pool slightly; Your portion's
+  over-limit handling covers it.
 - **updateSubject** — publicName, personalLabel, note on a non-self item (same
   contact check on the name; the alias is free). Not
   kind, not parent. The self name uses setSelfName.

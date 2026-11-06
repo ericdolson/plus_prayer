@@ -77,15 +77,34 @@ async function poolState(deps: Deps, uid: string) {
   return { user: state.user, subjects: state.subjects };
 }
 
+function optionalBool(value: unknown, fallback: boolean, field: string): boolean {
+  if (value === undefined || value === null) return fallback;
+  if (typeof value !== "boolean") throw new HttpsError("invalid-argument", `${field} must be true or false`);
+  return value;
+}
+
 /**
  * "Add name" (40) or "Add intention" (80, under a name; default "Me").
- * Appended to the bottom of its level; carried automatically while the pool
- * has room, otherwise saved for private prayer and marked not on the list.
+ * Appended to the bottom of its level. `carry` (default true) asks for it to
+ * be carried; false saves it for private prayer only. `carryParent` (an
+ * intention under an uncarried name) carries the name too, which also brings
+ * back its intentions still flagged. One pool check covers the whole result:
+ * if it doesn't fit, nothing is carried — the item is saved for private
+ * prayer and the name is left as it was.
+ *
+ * Returns the stored flags — `isCarried` (the item's) and, for an intention,
+ * `parentCarried` (its name is the self or carried) — and
+ * `effectivelyCarried` (it prints: own flag && parent's), which the app uses
+ * for "Saved, but not carried". A rare simultaneous add from two devices can
+ * overshoot the pool (read-then-write; accepted 2026-11-06, schema-brief).
  */
 export async function addSubject(
   deps: Deps,
   uid: string,
-  input: { kind?: unknown; parentId?: unknown; publicName?: unknown; personalLabel?: unknown; note?: unknown },
+  input: {
+    kind?: unknown; parentId?: unknown; publicName?: unknown; personalLabel?: unknown; note?: unknown;
+    carry?: unknown; carryParent?: unknown;
+  },
 ) {
   const kind = input.kind === "INTENTION" ? "INTENTION" : input.kind === "SOUL" ? "SOUL" : null;
   if (!kind) throw new HttpsError("invalid-argument", "kind must be SOUL or INTENTION");
@@ -96,6 +115,8 @@ export async function addSubject(
   // Aliases are owner-only and never printed, so they aren't moderated.
   const personalLabel = optionalText(input.personalLabel, ALIAS_CAP, "personalLabel") ?? null;
   const note = optionalText(input.note, NOTE_CAP, "note") ?? null;
+  const carry = optionalBool(input.carry, true, "carry");
+  const carryParent = optionalBool(input.carryParent, false, "carryParent");
 
   const { user, subjects } = await poolState(deps, uid);
   // The cap people see counts what's on Home (ACTIVE, Answered included), so
@@ -110,37 +131,62 @@ export async function addSubject(
     throw new HttpsError("failed-precondition", "Couldn't add this right now.");
   }
 
-  let parentId: string | null = null;
+  let parent: PoolSubject | null = null;
   if (kind === "INTENTION") {
     if (typeof input.parentId !== "string") throw new HttpsError("invalid-argument", "An intention needs its name");
-    const parent = subjects.find((s) => s.id === input.parentId);
+    parent = subjects.find((s) => s.id === input.parentId) ?? null;
     if (!parent || parent.kind !== "SOUL" || parent.status !== "ACTIVE") {
       throw new HttpsError("invalid-argument", "That name was not found");
     }
-    parentId = parent.id;
   } else if (input.parentId != null) {
     throw new HttpsError("invalid-argument", "A name has no parent");
   }
+  const parentId = parent?.id ?? null;
 
   const level = subjects.filter((s) => !s.isSelf && (s.parent?.id ?? null) === parentId);
   const sortOrder = level.reduce((max, s) => Math.max(max, s.sortOrder), 0) + 1;
 
-  const draft: PoolSubject = {
-    id: "new",
-    kind,
-    isSelf: false,
-    isCarried: true,
-    status: "ACTIVE",
-    resolvedAt: null,
-    parent: parentId ? { id: parentId } : null,
-    sortOrder,
-  };
-  const isCarried = checkPool([...subjects, draft], user, deps.now(), deps.cfg).ok;
+  // carryParent only acts with carry, on a name that isn't already carried
+  // (the self is always carried); otherwise it's a no-op.
+  const liftParent = carry && carryParent && !!parent && !parent.isSelf && !parent.isCarried;
+  let isCarried = false;
+  if (carry) {
+    const draft: PoolSubject = {
+      id: "new",
+      kind,
+      isSelf: false,
+      isCarried: true,
+      status: "ACTIVE",
+      resolvedAt: null,
+      parent: parentId ? { id: parentId } : null,
+      sortOrder,
+    };
+    const proposed = liftParent ? subjects.map((s) => (s.id === parentId ? { ...s, isCarried: true } : s)) : subjects;
+    isCarried = checkPool([...proposed, draft], user, deps.now(), deps.cfg).ok;
+  }
 
-  const res = await mutate<{ prayerSubject_insert: { id: string } }>(deps.db, "InsertSubject", {
-    uid, kind, parentId, publicName, personalLabel, note, isCarried, sortOrder,
-  });
-  return { id: res.prayerSubject_insert.id, isCarried, sortOrder };
+  let id: string;
+  if (isCarried && liftParent) {
+    try {
+      const res = await mutate<{ prayerSubject_insert: { id: string } }>(deps.db, "InsertSubjectCarryingParent", {
+        uid, parentId, publicName, personalLabel, note, sortOrder,
+      });
+      id = res.prayerSubject_insert.id;
+    } catch (err) {
+      // The name was archived from another device since the read.
+      if (hasCheck(err, "That name was not found")) throw new HttpsError("invalid-argument", "That name was not found");
+      throw err;
+    }
+  } else {
+    const res = await mutate<{ prayerSubject_insert: { id: string } }>(deps.db, "InsertSubject", {
+      uid, kind, parentId, publicName, personalLabel, note, isCarried, sortOrder,
+    });
+    id = res.prayerSubject_insert.id;
+  }
+
+  const parentCarried = parent ? parent.isSelf || parent.isCarried || (isCarried && liftParent) : null;
+  const effectivelyCarried = isCarried && parentCarried !== false;
+  return { id, isCarried, parentCarried, effectivelyCarried, sortOrder };
 }
 
 /** Text edits on a non-self item (the self name goes through setSelfName). */

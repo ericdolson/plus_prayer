@@ -257,6 +257,87 @@ describe("the pool on the server (addSubject / setCarriedItems)", () => {
   });
 });
 
+describe("addSubject carry inputs (carry / carryParent)", () => {
+  beforeEach(resetDb);
+  const flags = (uid: string) =>
+    sql<{ public_name: string; is_carried: boolean }>(
+      "SELECT public_name, is_carried FROM prayer_subject WHERE owner_id = $1 AND NOT is_self ORDER BY public_name", [uid],
+    );
+
+  it("carry: false saves for private prayer even with room", async () => {
+    const deps = makeDeps();
+    await createUser("c1", { includeLimit: 5, expiresInMs: 30 * DAY });
+    const kept = await addSubject(deps, "c1", { kind: "SOUL", publicName: "Bo" });
+    assert.deepEqual([kept.isCarried, kept.parentCarried, kept.effectivelyCarried], [true, null, true]);
+    const res = await addSubject(deps, "c1", { kind: "SOUL", publicName: "Abe", carry: false });
+    assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [false, null, false], "a name has no parent");
+    assert.deepEqual(await flags("c1"), [{ public_name: "Abe", is_carried: false }, { public_name: "Bo", is_carried: true }]);
+  });
+
+  it("an intention under Me reports its name as carried", async () => {
+    const deps = makeDeps();
+    const { selfId } = await createUser("c2");
+    const res = await addSubject(deps, "c2", { kind: "INTENTION", parentId: selfId, publicName: "Me: rest" });
+    assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [true, true, true]);
+  });
+
+  it("carryParent carries the name too, bringing back its intentions still flagged", async () => {
+    const deps = makeDeps();
+    await createUser("c3", { includeLimit: 3, expiresInMs: 30 * DAY });
+    const dad = await addSubjectRow("c3", { name: "Dad", carried: false });
+    await addSubjectRow("c3", { parentId: dad, name: "Dad: knee", carried: true });
+    const res = await addSubject(deps, "c3", { kind: "INTENTION", parentId: dad, publicName: "Dad: sleep", carryParent: true });
+    assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [true, true, true]);
+    assert.deepEqual(await flags("c3"), [
+      { public_name: "Dad", is_carried: true },
+      { public_name: "Dad: knee", is_carried: true },
+      { public_name: "Dad: sleep", is_carried: true },
+    ]);
+  });
+
+  it("all or nothing: if the name, its flagged intentions, and the item don't fit, nothing is carried", async () => {
+    const deps = makeDeps();
+    await createUser("c4", { includeLimit: 2, expiresInMs: 30 * DAY }); // Dad + knee fit; + sleep doesn't
+    const dad = await addSubjectRow("c4", { name: "Dad", carried: false });
+    await addSubjectRow("c4", { parentId: dad, name: "Dad: knee", carried: true });
+    const res = await addSubject(deps, "c4", { kind: "INTENTION", parentId: dad, publicName: "Dad: sleep", carryParent: true });
+    assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [false, false, false]);
+    assert.deepEqual(await flags("c4"), [
+      { public_name: "Dad", is_carried: false },
+      { public_name: "Dad: knee", is_carried: true },
+      { public_name: "Dad: sleep", is_carried: false },
+    ]);
+  });
+
+  it("without carryParent, an intention under an uncarried name keeps its flag but its name stays off", async () => {
+    const deps = makeDeps();
+    await createUser("c5", { includeLimit: 5, expiresInMs: 30 * DAY });
+    const dad = await addSubjectRow("c5", { name: "Dad", carried: false });
+    const res = await addSubject(deps, "c5", { kind: "INTENTION", parentId: dad, publicName: "Dad: sleep" });
+    assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [true, false, false], "flagged, not printed");
+  });
+
+  it("free tier: carryParent can't carry another person's name", async () => {
+    const deps = makeDeps();
+    await createUser("c6");
+    const mom = await addSubjectRow("c6", { name: "Mom", carried: false });
+    const res = await addSubject(deps, "c6", { kind: "INTENTION", parentId: mom, publicName: "Mom: surgery", carryParent: true });
+    assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [false, false, false]);
+  });
+
+  it("carryParent is a no-op with carry: false; non-booleans are rejected", async () => {
+    const deps = makeDeps();
+    await createUser("c7", { includeLimit: 5, expiresInMs: 30 * DAY });
+    const dad = await addSubjectRow("c7", { name: "Dad", carried: false });
+    const res = await addSubject(deps, "c7", { kind: "INTENTION", parentId: dad, publicName: "Dad: sleep", carry: false, carryParent: true });
+    assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [false, false, false]);
+    await assert.rejects(addSubject(deps, "c7", { kind: "SOUL", publicName: "Eve", carry: "yes" }), (err: HttpsError) => {
+      assert.equal(err.code, "invalid-argument");
+      return true;
+    });
+  });
+});
+
 describe("§9 follow-ups: harvest names, the seeded blocklist, the live push", () => {
   beforeEach(resetDb);
 

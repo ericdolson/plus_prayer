@@ -134,6 +134,42 @@ mutation InsertSubject(
   )
 }
 
+# addSubject with carryParent: a carried intention and its (uncarried) name
+# carried with it, in one transaction. Carrying the name also brings back its
+# intentions still flagged isCarried; the callable's pool check counted them.
+# The name must still be my ACTIVE, non-self name, or nothing is written.
+mutation InsertSubjectCarryingParent(
+  $uid: String!
+  $parentId: UUID!
+  $publicName: String!
+  $personalLabel: String
+  $note: String
+  $sortOrder: Int!
+) @auth(level: NO_ACCESS) @transaction {
+  prayerSubject_updateMany(
+    where: {
+      id: { eq: $parentId }
+      owner: { id: { eq: $uid } }
+      kind: { eq: SOUL }
+      isSelf: { eq: false }
+      status: { eq: ACTIVE }
+    }
+    data: { isCarried: true }
+  ) @check(expr: "this == 1", message: "That name was not found")
+  prayerSubject_insert(
+    data: {
+      owner: { id: $uid }
+      kind: INTENTION
+      parentId: $parentId
+      publicName: $publicName
+      personalLabel: $personalLabel
+      note: $note
+      isCarried: true
+      sortOrder: $sortOrder
+    }
+  )
+}
+
 # Text edits on a non-self item. Omitted variables leave fields unchanged;
 # an explicit null clears personalLabel / note.
 mutation UpdateSubjectText(
