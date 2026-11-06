@@ -29,7 +29,7 @@ in step:
 avatars and the held ring · threads and the gold dot · Home row layout and
 spacing · the community card (including the avatar cluster) · the streak seal ·
 wax seals · the bead strand · prayer mode (halo, checks, check bloom) · the pray
-button and its ring countdown · Amen → seal · color roles and tokens · type roles
+button and its countdown · Amen → seal · color roles and tokens · type roles
 (Roca for names/numbers/big lines, system sans for body).
 
 **Tier B — Native chrome (platform component, platform metrics).**
@@ -46,7 +46,7 @@ spec decision first.
 
 **Sheets (2026-11-05):** the Amen invitation, the closing sheet and the add
 sheet are **native sheets with detents** (Tier B). The signature components
-inside them (the ring button, the avatar cluster, the seal) stay Tier A.
+inside them (the countdown button, the avatar cluster, the seal) stay Tier A.
 
 Where it's unclear which tier something is in, ask; don't guess.
 
@@ -252,6 +252,7 @@ gold.
   ```
   Normal:     ( History  🔎  ＋ )   ( 🙏 )
   In prayer:  ( 3:12 · with 229    🔎 )   ( Amen )
+  Searching:  ( 🔍 dad          ✕ )   ( 🙏 )     ← keyboard up: both at 52 pt
   Header normal:     [avatar][✱ 6] ………… [filter]  or  [Still to hold ×]
   Header in prayer:  [Cancel] ……………………… [filter]  or  [Still to hold ×]
   ```
@@ -262,8 +263,16 @@ gold.
     (our arrangement and sizes) on the **platform's glass material** (iOS 26
     Liquid Glass).
   - The **pray button** is a separate circle of the **same height**, action
-    blue, on the **right** (thumb side). No notch/cradle. It becomes Amen with
-    the countdown ring in place.
+    blue, on the **right** (thumb side). No notch/cradle. It becomes Amen in
+    place after the countdown.
+  - **Countdown (2026-11-06; replaces the decaying ring):** during the ~5 s
+    minimum the disc dims (`number.prayButtonDim`) and a **small pie inside
+    it** (`number.countdownPie`, 0.4 of the diameter, action blue) runs down
+    to nothing, its edge moving clockwise from 12 o'clock; then it fades
+    into **Amen**. No ring outside the button and no change in size: the
+    motion stays at the center (App Store download progress, Dynamic Island
+    timer). Reduce Motion: the pie steps once a second. The Amen invitation's
+    button is the same component (prayer-flow.md).
   - In prayer mode the pill becomes the prayer bar in place: elapsed time ·
     "with N" · **🔎 search stays available** (2026-10-28).
   - **Cancel lives in the header, top-left** (2026-10-28): a **text button
@@ -271,14 +280,21 @@ gold.
     avatar/streak. No praying-hands icon (the halo already says "praying"). Keeps
     cancel out of the thumb zone next to Amen. **If the prayer is over ~30 s,
     confirm: "Discard this prayer?"**; under that, discard immediately.
-- **Search:** 🔎 in the pill opens a search field **docked just above the
-  keyboard** (Slack-style); the list filters live behind it. If a prayer starts
-  with search active, the field stays, docked above the prayer bar (search
-  persists across modes). **Replaces pull-down search.**
-  - **Tier (2026-11-05):** a sanctioned Tier B exception. The docked row is
-    custom (iOS's own bottom search can't carry the pray button beside it),
-    built from the platform's native text field on glass. Everything inside it
-    stays native.
+- **Search reuses the bar (2026-11-06; replaces the docked search row):** 🔎
+  turns the **pill's own glass into the search field** (🔍 · text · ✕); the
+  list filters live behind it. The **pray button stays its own circle beside
+  it**, never inside the field. With the keyboard up, both **ride above it at
+  a compact 52 pt** (`size.bar.compact`, from 62) with a small gap; with the
+  keyboard down they return to full height. With text, the pill stays the
+  search field (even with the keyboard down) until **✕**, which clears the
+  query and morphs it back to History · 🔎 · ＋; left empty, it closes when
+  the keyboard goes. Search persists across modes. **Replaces pull-down
+  search.**
+  - **In prayer** the field takes the prayer bar's place while searching, so
+    the timer and "with N" are hidden until ✕: focus is on finding someone,
+    and the halo and Amen still say you're praying (open-questions D6).
+  - **Tier:** our layout (Tier A) on the platform's glass, matching the iOS 26
+    tab bar's own search morph; everything inside the field is native.
   - **Search empty state** (revised 2026-10-29): **one layout for every
     no-results case** — one quiet line + one blue add button:
     > No matches for "Robe"
@@ -313,9 +329,8 @@ gold.
     with a Restore action instead of (or above) the add shortcut. Search
     matches both aliases and real names. In prayer mode, the add shortcut is
     hidden (adding mid-prayer isn't a goal) — show the line only.
-  - While the keyboard is up, the bar hides, so the docked row carries a
-    **compact pray button** (Amen in prayer mode) at the right end of the
-    search field — Pray is never unreachable.
+  - Pray is never unreachable: the pray button (Amen in prayer) rides above
+    the keyboard beside the field.
   - Icons in the pill have accessibility labels ("History", "Search", "Add").
   - The prayer bar shows "with 229"; screen readers hear "praying with 229
     others".
@@ -346,7 +361,7 @@ gold.
   (iOS 26), not a custom blur and dim; the tuning above doesn't apply. The
   curve and values above remain the reference for the Android dim fallback.
 - **Controls float on their own glass:** the streak badge, the filter, the
-  pill and the docked search field each sit on a fully rounded frosted shape
+  pill (also the search field) each sit on a fully rounded frosted shape
   with a hairline edge, so they hold their shape over any row. The pray button
   is the same interactive glass **tinted action blue** (2026-11-05, was solid
   blue: a rigid disc felt dead beside the glass that gives under the finger);
@@ -355,7 +370,7 @@ gold.
   initials on it as on any avatar. The header's glass matches the ~32 pt header
   avatar. An active filter raises the glass's tint (neutral, never blue).
 - **Glass vs. surface (2026-10-29):** glass is only for **controls that float
-  over content** (streak badge, filter, pill, docked search field). Anything
+  over content** (streak badge, filter, pill and its search field). Anything
   that **lives in the content** and scrolls or sits with it (community card,
   search match hint, future in-content cards) is a flat **`cardSurface`**,
   never glass. Fully rounded capsules are reserved for the floating controls;
@@ -691,7 +706,7 @@ on Today's list or Your portion.
 - Checkbox fades into the trailing slot of every row and the community card.
   **Checked = gold ring on the avatar / gold dot on the intention**, applied
   live.
-- Pray button → ring countdown → **Amen** stays **blue** (action).
+- Pray button → countdown (the pie inside it) → **Amen** stays **blue** (action).
 
 ---
 
@@ -735,8 +750,9 @@ on Today's list or Your portion.
   empty trailing slot.
 - "Pinned list row" → the community card (§6).
 - "Presence line" above the list → inside the card.
-- Header right "search + filter" → filter only; search from the pill (docked
-  above the keyboard), not pull-down (revised 2026-10-27).
+- Header right "search + filter" → filter only; search from the pill (the
+  pill becomes the field, riding above the keyboard beside the pray button;
+  revised 2026-11-06), not pull-down.
 - Footer slab with notched pray button → floating pill + separate pray button.
 - Frosted header bar → no bar; scroll edges blur and dim what's beneath at the
   top and bottom of the screen, and controls sit on their own glass (§4).

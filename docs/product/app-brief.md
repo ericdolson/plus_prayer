@@ -106,12 +106,12 @@ and the 2026-10 Flutter build) is **reference only**, not a pattern to follow.
   haptic, once; uncheck silent; respect Reduce Motion.
 - Selection: checking an intention also holds its name; checking a name doesn't
   check its intentions; unchecking a name unchecks them; partial state on names.
-- **FAB:** decaying ring for 5s, then becomes **Amen**. Before 5s only ✕ exits
+- **FAB:** a small pie inside it runs down over 5s, then it becomes **Amen**. Before 5s only ✕ exits
   (discard, nothing logged).
 - **Amen without the list** (and not yet prayed with it today): standalone quiet
   invitation — "Hold the 4,345 on List 52 in your prayer" + who'll be carried
-  ("You, Daniel + 4 others will be on List 53"). **Tap** → 5s ring with seconds
-  counting up → Amen appears; may stay longer. Extends the same prayer.
+  ("You, Daniel + 4 others will be on List 53"). **Tap** → the same 5s countdown
+  (the pie inside the button) → Amen appears; may stay longer. Extends the same prayer.
 - After the final Amen: optional "Add a note" (private), then the closing line.
 - Starting from a detail page returns to Home in prayer with that item checked.
 - Backgrounding: back within ~30 min → resume quietly; later → "Welcome back.
@@ -221,8 +221,9 @@ to free → second invite if still over. Same flow when a subscription lapses
   §6). Screen readers read every name.
 - **Wax seal / bead:** 7 vector stamps (wax colors fixed by weekday via
   `sealVariant`); unsealed state.
-- **Ring button:** the FAB's 5s decaying ring and the invitation's ring share one
-  component.
+- **Countdown button:** the FAB and the invitation share one component: a
+  small pie inside the dimmed disc runs down over 5s, then Amen
+  (design-direction §4).
 - **Halo:** screen-edge glow for prayer mode (POC `CustomPainter` +
   `screen_corner_radius`).
 - **Held ring / held dot** (gold; glow in dark mode only), **thread**,

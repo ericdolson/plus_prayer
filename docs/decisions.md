@@ -1512,3 +1512,28 @@ exists against abuse, not to limit a practice.
 After a generic failure Add stays enabled so retrying is one tap; the line
 clears on edit or on the next Add (offline line also persists while offline).
 Confirms the app/ agent's provisional reading.
+
+### Decision: Search reuses the bar; the countdown is a pie inside the button
+**Timestamp:** 2026-11-06
+- **Search:** 🔎 turns the pill's own glass into the search field; the pray
+  button stays its own circle beside it. With the keyboard up both ride above
+  it at 52 pt (`size.bar.compact`); with text the pill stays a field until ✕.
+  In prayer, the field hides the timer and "with N" while searching.
+  SUPERSEDES the docked search row with a compact pray button inside it
+  (2026-10-27/11-05).
+- **Countdown:** a small pie inside the dimmed pray button (0.4 of its
+  diameter) runs down to nothing over ~5 s, then Amen. No ring outside, no
+  change in size. The Amen invitation's button uses the same component and
+  drops its seconds counter. SUPERSEDES the decaying ring (prayer-flow
+  2026-10-17) and "seconds count up in the center".
+Why: the pill and the pray button are the two objects people learn on Home;
+search becomes a third state of the same pill (as prayer already is), the
+way the iOS 26 tab bar morphs into search, instead of a second, smaller pray
+button in a different shape. The ring sat far outside the button, made it
+suddenly larger and swept the whole edge: a lot of motion for "wait a
+moment". Progress inside the control is Apple's own pattern (App Store
+download, Dynamic Island timer). Built and judged on device (contrast of the
+blue pie on the dimmed disc is good as built).
+Rejected: the docked row with a compact pray button (two pray buttons in two
+shapes); a tighter ring (still a sweep around the whole button).
+

@@ -144,7 +144,7 @@ Praying from a detail page **stays on the page**. It does not go to Home.
   status line, counts, History, "＋ Add intention", ⋯ and ‹.
 - **Controls match Home's prayer mode:** "Cancel" text button top-left
   (replaces ‹; same "Discard this prayer?" confirm after ~30 s). The blue
-  capsule morphs into the round pray button (ring → Amen) and the pill fades
+  capsule morphs into the round pray button (countdown → Amen) and the pill fades
   in beside it, holding **timer · "with N" only (no 🔎)**.
 - **Checks:** the name gets a checkbox in the trailing slot, like a Home row,
   and its avatar's gold ring follows the check. Intentions use Home's

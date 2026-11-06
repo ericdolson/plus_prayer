@@ -46,16 +46,18 @@ _Last updated: 2026-10-17_
   it ("I'm holding this one now"). In nav mode, tapping a row opens its detail.
 - **The check is a moment, not a checkbox:** checking adds a subtle halo/sparkle
   on the avatar/name so the act carries weight.
-- **The pray FAB stays in place.** On start it gets a decaying ring for the
-  minimum time, then becomes **Amen**.
+- **The pray FAB stays in place.** On start a small pie inside it runs down
+  over the minimum time (2026-11-06; was a decaying ring), then it becomes
+  **Amen** (design-direction §4).
 - **Minimum time ≈ 5 seconds.** A quick, earnest prayer must not be blocked.
   ✕ is available at any time.
 - **No list pre-check.** If the prayer ends without the current list included
   (and the user hasn't prayed for it yet), Amen opens a quiet, standalone
   invitation to hold today's list — a special moment of its own.
-- **List invitation = tap-then-ring** (2026-10-17). One tap starts a 5s ring
-  (same visual language as the FAB), seconds count up in the center, copy shifts
-  to "holding the 4,345 on List 52". Amen appears after 5s; they can stay longer.
+- **List invitation = tap-then-countdown** (2026-10-17; revised 2026-11-06).
+  One tap starts the same 5s countdown as the FAB (the small pie inside the
+  button; no seconds counter), copy shifts to "Holding the 4,345 on List 52".
+  Amen appears after 5s; they can stay longer.
   The invitation also states the reward: "You [and Mom, Dad] will be carried on
   List 53" — naming only subjects actually carried (wording for paid slots TBD
   in the monetization meeting).
@@ -72,7 +74,7 @@ _Last updated: 2026-10-17_
 ### PROPOSED (needs confirmation)
 - **Check moment restraint:** a soft ember/glow (darker over brighter), light
   haptic, once per check; uncheck is silent; respect Reduce Motion.
-- (moved to DECIDED: tap-then-ring)
+- (moved to DECIDED: tap-then-countdown)
 - **One prayer, not two:** the invitation extends the same Prayer — the write
   happens once, at final close, with `communityList` set if they accepted.
   Dismissing writes the prayer without the list. Duration includes both parts.
