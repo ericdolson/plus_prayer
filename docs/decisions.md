@@ -1669,3 +1669,17 @@ Why: native behavior (drag, glass knob, accessibility On/Off labels, future
 iOS changes) outweighs a subtle tint difference; iOS users read switches by
 knob position. Rejected: a custom ToggleStyle (replaces a native control);
 a shape behind the native switch (its translucent track blends lighter).
+
+### Decision: Add sheet form type — labels in ink, muted for hints only, trailing bloom
+**Timestamp:** 2026-11-06
+- The sheet is labeled controls stacked (label → control → hint). All
+  labels, including "Carry onto the list", = 15 pt semibold ink; input text
+  17 pt regular ink; hints/meter 13 pt `inkMuted`; "Make room" 13 pt blue.
+- The bloom trails the carry label (~17 pt; `inkMuted` on, `carriedMark`
+  off), matching how the mark trails names on Home.
+Why: labels and the carry title are the same role, so they match; muting
+labels would leave the empty sheet nearly all gray (placeholders, hints,
+meter), so color separates structure (ink) from secondary text (muted) and
+size separates labels from content. Bold 17 pt labels out-shouted the content.
+Rejected: muted labels (gray soup); a leading 22 pt bloom (broke the label
+edge and didn't match the row mark's trailing position).

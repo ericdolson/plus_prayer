@@ -77,9 +77,22 @@ _Last updated: 2026-10-18_
       nothing. Changing the person resets the carry toggle to that person's
       default.
     - **Carry row** (below).
-  - **Carry row** (name tab, intention tab, offer step): the bloom, **"Carry
-    onto the list"**, a toggle, and a muted meter line saying what's **left**
-    (below). `{unit}` comes from one formatter ("places" under today's
+  - **Form type (2026-11-06): the sheet is labeled controls stacked, one
+    rhythm: label → control → hint.** Labels (Name, What you call them ·
+    optional, Intention, Carry onto the list) = subheadline 15 pt
+    **semibold, ink**. Input text = body 17 pt regular, ink. Hints, captions,
+    the meter and placeholders = footnote 13 pt (placeholders at input size),
+    `inkMuted`. Muted is only for secondary or disappearing text; labels stay
+    ink because they persist. "Make room" = 13 pt, action blue. All labels
+    share one leading text edge.
+  - **Carry row** (name tab, intention tab, offer step): label **"Carry
+    onto the list"** styled like the other labels, followed by the bloom
+    **trailing** it ("Carry onto the list ✱", as the mark trails names on
+    Home), ~17 pt, `inkMuted` while the toggle is on, dimming to
+    `carriedMark` when off or disabled; the toggle trails the row. Under it,
+    a muted meter line saying what's **left** (below). (On the offer step,
+    the question "Add an intention for {alias}?" serves as the intention
+    field's label.) `{unit}` comes from one formatter ("places" under today's
     rule; "people" if open-questions Q32 is adopted).
     - **On by default** while there's room. The user may turn it off (kept
       for their own prayers).
