@@ -1690,3 +1690,9 @@ The add sheet's leading Cancel becomes the iOS 26 round glass X (VoiceOver
 "Cancel"); Add stays a word; the offer step keeps "Not now" (it isn't a
 cancel: the name is saved). A discard confirmation for typed text is
 deferred (open-questions D6).
+
+### Decision: Add sheet type pass follow-ups
+**Timestamp:** 2026-11-06
+Serif header aligns to the shared text edge; status lines 15 pt regular ink;
+validation errors 13 pt ink; 6 pt before the bloom; "Who is this for?" uses
+the native inline navigation title (it's a pushed view, not a form label).

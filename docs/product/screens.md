@@ -84,8 +84,12 @@ _Last updated: 2026-10-18_
     **semibold, ink**. Input text = body 17 pt regular, ink. Hints, captions,
     the meter and placeholders = footnote 13 pt (placeholders at input size),
     `inkMuted`. Muted is only for secondary or disappearing text; labels stay
-    ink because they persist. "Make room" = 13 pt, action blue. All labels
-    share one leading text edge.
+    ink because they persist. "Make room" = 13 pt, action blue. All text
+    shares one leading edge, including the offer step's serif header.
+    Status lines (e.g. "Saved, but not carried…") = 15 pt regular ink;
+    validation errors = 13 pt ink (no red; ink sets them apart from muted
+    hints). The bloom sits 6 pt after its label (as on Home rows). "Who is
+    this for?" is the pushed view's native inline navigation title.
   - **Carry row** (name tab, intention tab, offer step): label **"Carry
     onto the list"** styled like the other labels, followed by the bloom
     **trailing** it ("Carry onto the list ✱", as the mark trails names on
