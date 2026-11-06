@@ -415,7 +415,12 @@ compose queries; if an operation is missing, ask for a backend change.
   labeled fields, the For row, and a carry row on every step; "{alias} is
   added." and the offer push in, and so does "Who is this for?" (a search
   over `pickerNames(matching:)`). Every field stays in the hierarchy (the
-  pages only slide), so focus moves without the keyboard dropping. The carry
+  pages only slide), so focus moves without the keyboard dropping. Form type
+  (screens.md): label → control → hint; labels `type.label` ink on one
+  leading edge (the fields' text inset), input `type.body` ink, hints and
+  the meter `type.caption` inkMuted, placeholders input-size inkMuted; "Make
+  room" `type.caption` blue; the carry row's bloom trails its
+  label at `size.carriedMark.carryRow` (`CarriedMark.glyphEm`). The carry
   row's rules are `carryOffer` and `carryMeter` in PlusPrayerDomain (room,
   default, true cost; the meter says what's left, not counting this item:
   "3 places left"; on, taking everything left, "This uses your last place"

@@ -20,6 +20,8 @@ struct AddSheet: View {
     /// "Make room for {alias}": follows the typed name only once typing
     /// pauses, never mid-word.
     @State private var makeRoomName: String?
+    /// The carry row's bloom, ~17 pt tall, scaling with its label.
+    @ScaledMetric(relativeTo: .subheadline) private var bloomFont = PP.size.carriedMark.carryRow / CarriedMark.glyphEm
 
     /// The one line at the top: no connection, the ~500 cap, or anything
     /// else that went wrong. Text is kept.
@@ -63,6 +65,8 @@ struct AddSheet: View {
                        value: model.step)
             .animation(.easeOut(duration: PP.duration.quick), value: notice)
             .toolbar { toolbar }
+            // "Who is this for?" is the pushed page's native inline title.
+            .navigationTitle(model.step == .choosing ? L10n.Add.whoIsThisFor : "")
             .navigationBarTitleDisplayMode(.inline)
             .fittedSheetHeight()
         }
@@ -112,8 +116,11 @@ struct AddSheet: View {
     @ToolbarContentBuilder private var stepToolbar: some ToolbarContent {
         switch model.step {
         case .form:
+            // The iOS 26 sheet convention: a round glass X (VoiceOver "Cancel").
+            // No discard confirmation for now (open-questions D6).
             ToolbarItem(placement: .cancellationAction) {
-                Button(L10n.Add.cancel) { model.finish() }
+                Button(role: .close) { model.finish() }
+                    .accessibilityLabel(L10n.Add.cancel)
             }
             ToolbarItem(placement: .principal) {
                 Picker(selection: tabBinding) {
@@ -130,11 +137,6 @@ struct AddSheet: View {
             ToolbarItem(placement: .topBarLeading) {
                 Button { choose(nil) } label: { PPIcon.back }
                     .accessibilityLabel(L10n.Add.back)
-            }
-            ToolbarItem(placement: .principal) {
-                Text(L10n.Add.whoIsThisFor)
-                    .font(PP.type.label)
-                    .foregroundStyle(PP.color.ink)
             }
         case .offer:
             // No back: the name is already saved.
@@ -258,7 +260,10 @@ struct AddSheet: View {
                 PPIcon.search
                     .foregroundStyle(PP.color.inkMuted)
                     .accessibilityHidden(true)
-                TextField(L10n.Search.placeholder, text: $model.chooserQuery)
+                TextField(text: $model.chooserQuery,
+                          prompt: Text(L10n.Search.placeholder).foregroundStyle(PP.color.inkMuted)) {
+                    Text(L10n.Search.placeholder)
+                }
                     .focused($focus, equals: .search)
                     .foregroundStyle(PP.color.ink)
                     .textInputAutocapitalization(.never)
@@ -272,7 +277,7 @@ struct AddSheet: View {
             let names = model.chooserNames
             if names.isEmpty {
                 Text(L10n.Add.noMatches(model.chooserQuery.trimmingCharacters(in: .whitespacesAndNewlines)))
-                    .font(PP.type.bodySmall)
+                    .font(PP.type.caption)
                     .foregroundStyle(PP.color.inkMuted)
                     .padding(.horizontal, PP.space.md)
             } else {
@@ -320,16 +325,17 @@ struct AddSheet: View {
             Text(L10n.Add.added(model.offerName))
                 .font(PP.type.displayLine)
                 .foregroundStyle(PP.color.ink)
+                .padding(.leading, PP.space.md) // the sheet's one text edge
             if model.notCarried != nil {
                 Text(L10n.Add.notCarried)
                     .font(PP.type.bodySmall)
                     .foregroundStyle(PP.color.ink)
+                    .padding(.leading, PP.space.md)
                     .transition(.opacity)
             }
-            Text(L10n.Add.offerQuestion(model.offerName))
-                .font(PP.type.bodySmall)
-                .foregroundStyle(PP.color.inkMuted)
-            field(.offer, text: $model.offerText, placeholder: L10n.Add.intentionPlaceholder, caption: nil)
+            // The question is the field's label (screens.md, Form type).
+            field(.offer, text: $model.offerText, label: L10n.Add.offerQuestion(model.offerName),
+                  placeholder: L10n.Add.intentionPlaceholder, caption: nil)
                 .onSubmit(save)
                 .submitLabel(.done)
             carryRow(.offer)
@@ -339,44 +345,50 @@ struct AddSheet: View {
 
     // MARK: The carry row
 
-    /// The bloom, "Carry onto the list", the meter (previewing the toggle),
-    /// a toggle. With no room: off, disabled, and a blue "Make room …" under
-    /// the meter, inert until Membership / Your portion exist.
+    /// "Carry onto the list ✱" (the bloom trailing the label, as on Home's
+    /// rows), the toggle trailing the row; under it, at the label edge, the
+    /// meter, "Also carries …", and with no room the blue "Make room …"
+    /// (inert until Membership / Your portion exist).
     private func carryRow(_ row: AddSheetModel.CarryRow) -> some View {
         let offer = model.carryOffer(row)
         let isOn = Binding(get: { model.isCarrying(row) }, set: { model.setCarrying(row, $0) })
+        let on = model.isCarrying(row)
         let also = model.alsoCarries(row)
-        return HStack(alignment: .top, spacing: PP.space.md) {
-            PPIcon.carried
-                .font(PP.type.body)
-                .foregroundStyle(PP.color.carriedMark)
+        return VStack(alignment: .leading, spacing: PP.space.xxs) {
+            HStack(spacing: PP.space.sm) {
+                HStack(alignment: .firstTextBaseline, spacing: PP.size.carriedMark.nameGap) {
+                    Text(L10n.Add.carryTitle)
+                        .font(PP.type.label)
+                        .foregroundStyle(PP.color.ink)
+                    // inkMuted while on; dims to the row mark's color off or disabled.
+                    PPIcon.carried
+                        .font(.system(size: bloomFont))
+                        .foregroundStyle(on ? PP.color.inkMuted : PP.color.carriedMark)
+                }
                 .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: PP.space.xxs) {
-                Text(L10n.Add.carryTitle)
-                    .font(PP.type.body)
-                    .foregroundStyle(PP.color.ink)
-                    .accessibilityHidden(true)
-                Text(L10n.Add.carryMeter(model.meter(row)))
+                Spacer(minLength: PP.space.sm)
+                Toggle(L10n.Add.carryTitle, isOn: isOn)
+                    .ppSwitch()
+                    .labelsHidden()
+                    .disabled(!offer.hasRoom)
+            }
+            Text(L10n.Add.carryMeter(model.meter(row)))
+                .font(PP.type.caption)
+                .foregroundStyle(PP.color.inkMuted)
+            if let also {
+                Text(L10n.Add.alsoCarries(also.name, cost: also.cost))
                     .font(PP.type.caption)
                     .foregroundStyle(PP.color.inkMuted)
-                if let also {
-                    Text(L10n.Add.alsoCarries(also.name, cost: also.cost))
-                        .font(PP.type.caption)
-                        .foregroundStyle(PP.color.inkMuted)
-                        .transition(.opacity)
-                }
-                if !offer.hasRoom {
-                    makeRoom(row)
-                        .padding(.top, PP.space.xxs)
-                }
+                    .transition(.opacity)
             }
-            .layoutPriority(1)
-            Spacer(minLength: PP.space.sm)
-            Toggle(L10n.Add.carryTitle, isOn: isOn)
-                .ppSwitch()
-                .labelsHidden()
-                .disabled(!offer.hasRoom)
+            if !offer.hasRoom {
+                makeRoom(row)
+                    .padding(.top, PP.space.xxs)
+            }
         }
+        // The labels' shared leading edge (the fields' text inset).
+        .padding(.leading, PP.space.md)
+        .animation(.easeOut(duration: PP.duration.quick), value: on)
         .animation(.easeOut(duration: PP.duration.quick), value: also?.name)
     }
 
@@ -385,7 +397,7 @@ struct AddSheet: View {
     private func makeRoom(_ row: AddSheetModel.CarryRow) -> some View {
         Button(row == .name ? L10n.Add.makeRoom(for: makeRoomName ?? "") : L10n.Add.makeRoomForIntention) {}
             .contentTransition(.opacity)
-            .font(PP.type.bodySmall)
+            .font(PP.type.caption)
             .tint(PP.color.primary)
             .multilineTextAlignment(.leading)
             .accessibilityHint(L10n.Add.makeRoomHint)
@@ -410,7 +422,9 @@ struct AddSheet: View {
                     .padding(.horizontal, PP.space.md)
                     .accessibilityHidden(true)
             }
-            TextField(placeholder, text: text)
+            TextField(text: text, prompt: Text(placeholder).foregroundStyle(PP.color.inkMuted)) {
+                Text(label ?? placeholder)
+            }
                 .focused($focus, equals: field)
                 .font(PP.type.body)
                 .foregroundStyle(PP.color.ink)

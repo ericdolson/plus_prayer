@@ -65,6 +65,7 @@ final class PlusPrayerUITests: XCTestCase {
         XCTAssertTrue(name.waitForExistence(timeout: 3))
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "Name is focused on open")
         XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the carry row")
+        XCTAssertTrue(app.navigationBars.buttons["Cancel"].exists, "the glass X, read as Cancel")
         app.typeText("Gary Olson")
         sleep(1)
         attach(app, "add 1 name")
@@ -77,7 +78,7 @@ final class PlusPrayerUITests: XCTestCase {
 
         // The For row pushes "Who is this for?"; picking comes back.
         app.buttons["For"].tap()
-        XCTAssertTrue(app.staticTexts["Who is this for?"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.navigationBars.staticTexts["Who is this for?"].waitForExistence(timeout: 2), "the native title")
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up into the search")
         app.typeText("mo")
         sleep(1)

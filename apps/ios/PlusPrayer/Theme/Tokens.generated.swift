@@ -206,6 +206,8 @@ nonisolated enum PP {
             /// After a 13 pt intention; scales with the text.
             static let intention: CGFloat = 9
             static let intentionGap: CGFloat = 4
+            /// Trailing the add sheet's "Carry onto the list" label: louder than on rows because it appears once and teaches the mark (design-direction §5). Scales with the label.
+            static let carryRow: CGFloat = 17
         }
         enum card {
             /// The day's seal, cropped into the card's top-left corner (~70% visible).
