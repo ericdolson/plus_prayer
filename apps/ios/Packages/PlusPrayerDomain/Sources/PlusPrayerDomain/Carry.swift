@@ -84,7 +84,7 @@ public func effectivePoolLimit(_ user: UserHeader, now: Date) -> Int {
 
 // MARK: The add sheet's carry row (screens.md, "Carry row")
 //
-// "Carry onto the list", a toggle, and a meter that previews the result. On
+// "Carry onto the list", a toggle, and a meter saying what's left. On
 // by default while there's room; with no room it's off and disabled, with an
 // (inert for now) "Make room …" under the meter. An intention under a name
 // that isn't carried (for any reason) starts off; turning it on carries the
@@ -158,19 +158,28 @@ public func carryOffer(kind: SubjectKind, parentId: String?, in tree: SubjectTre
 
 /// The carry row's muted meter line.
 public enum CarryMeter: Sendable, Equatable {
-    /// "8 of 10 places used"
-    case used(Int, pool: Int)
-    /// Over the pool (a lapsed trial): "All 10 places in use", never "7 of 1".
+    /// "3 places left": what's left before this item.
+    case left(Int)
+    /// On, and it takes everything left: "This uses your last place" /
+    /// "This uses your last 2 places".
+    case usesLast(Int)
+    /// Full or over the pool (a lapsed trial): "All 10 places in use" (a
+    /// pool of 1: "Your one place is in use"), never "7 of 1".
     case allInUse(pool: Int)
     /// Free pool, Name tab: "Free carries you and one intention of your own".
     case freeYouAndOneIntention
 }
 
-/// The meter previews the result: it counts this item while the toggle is on.
+/// The meter counts what's left, not including this item, so the toggle
+/// doesn't change it, except that turning it on when its full cost is
+/// everything left says so (and the "Also carries" line then leaves out
+/// its cost).
 public func carryMeter(_ offer: CarryOffer, kind: SubjectKind, isOn: Bool) -> CarryMeter {
     if kind == .soul && offer.isFree { return .freeYouAndOneIntention }
-    if offer.used > offer.pool { return .allInUse(pool: offer.pool) }
-    return .used(offer.used + (isOn ? offer.cost : 0), pool: offer.pool)
+    let left = offer.pool - offer.used
+    if left <= 0 { return .allInUse(pool: offer.pool) }
+    if isOn && offer.cost >= left { return .usesLast(left) }
+    return .left(left)
 }
 
 /// The ~500-item abuse cap (server config `subjectCap`; not a paywall). It

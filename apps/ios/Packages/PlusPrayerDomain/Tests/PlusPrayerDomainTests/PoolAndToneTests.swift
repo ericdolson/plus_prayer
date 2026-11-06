@@ -103,12 +103,32 @@ struct CarryOfferTests {
         #expect(effectivePoolLimit(member(10), now: now) == 10)
     }
 
-    @Test func theMeterPreviewsTheResult() {
+    @Test func theMeterSaysWhatsLeftWhicheverWayTheToggleIs() {
         let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(10), now: now)
-        #expect(carryMeter(offer, kind: .soul, isOn: true) == .used(5, pool: 10))
-        #expect(carryMeter(offer, kind: .soul, isOn: false) == .used(4, pool: 10))
+        #expect(carryMeter(offer, kind: .soul, isOn: true) == .left(6))
+        #expect(carryMeter(offer, kind: .soul, isOn: false) == .left(6))
         let bea = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(10), now: now)
-        #expect(carryMeter(bea, kind: .intention, isOn: true) == .used(7, pool: 10), "the true cost")
+        #expect(carryMeter(bea, kind: .intention, isOn: true) == .left(6), "the cost is the Also line's job")
+    }
+
+    @Test func onWithOneLeftItTakesTheLastPlace() {
+        let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(5), now: now)
+        #expect(carryMeter(offer, kind: .soul, isOn: true) == .usesLast(1))
+        #expect(carryMeter(offer, kind: .soul, isOn: false) == .left(1))
+    }
+
+    @Test func onAndTakingEverythingLeftSaysTheLastPlaces() {
+        // Bea costs 3 (her, her flagged intention, the new one): 3 left of 7.
+        let all = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(7), now: now)
+        #expect(carryMeter(all, kind: .intention, isOn: true) == .usesLast(3))
+        #expect(carryMeter(all, kind: .intention, isOn: false) == .left(3))
+        let some = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(8), now: now)
+        #expect(carryMeter(some, kind: .intention, isOn: true) == .left(4))
+    }
+
+    @Test func fullSaysAllInUse() {
+        let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(4), now: now)
+        #expect(carryMeter(offer, kind: .soul, isOn: false) == .allInUse(pool: 4))
     }
 
     @Test func overThePoolSaysAllInUse() {

@@ -213,14 +213,16 @@ final class AddSheetModel: Identifiable {
     }
 
     /// "Also carries Dad · uses 2 places": the toggle is on and it carries
-    /// the intention's name too, at this true cost.
-    func alsoCarries(_ row: CarryRow) -> (name: String, cost: Int)? {
+    /// the intention's name too, at this true cost. The cost is nil when the
+    /// meter already says it takes the last places (no repeating it).
+    func alsoCarries(_ row: CarryRow) -> (name: String, cost: Int?)? {
         let offer = carryOffer(row)
         guard isCarrying(row), offer.alsoCarriesParent else { return nil }
+        let cost: Int? = if case .usesLast = meter(row) { nil } else { offer.cost }
         switch row {
         case .name: return nil
-        case .intention: return parent.map { ($0.label, offer.cost) }
-        case .offer: return (offerName, offer.cost)
+        case .intention: return parent.map { ($0.label, cost) }
+        case .offer: return (offerName, cost)
         }
     }
 

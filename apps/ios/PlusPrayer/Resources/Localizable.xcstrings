@@ -86,7 +86,7 @@
       }
     },
     "add.carry.allInUse.one": {
-      "comment": "Add sheet: the carry row's meter when more is carried than a pool of 1 allows (a lapsed trial, Intention tab or offer step); never \"7 of 1\" (screens.md). Unit may become people (Q32).",
+      "comment": "Add sheet: the carry row's meter when a pool of 1 is full or over (screens.md). Unit may become people (Q32).",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -98,7 +98,7 @@
       }
     },
     "add.carry.allInUse.places": {
-      "comment": "Add sheet: the carry row's meter when more is carried than the pool allows (a lapsed trial), never \"7 of 1\" (screens.md). The number is the pool (2 or more; a pool of 1 has its own line). Unit may become people (Q32).",
+      "comment": "Add sheet: the carry row's meter when the pool is full or over (a lapsed trial), never \"7 of 1\" (screens.md). The number is the pool (2 or more; a pool of 1 has its own line). Unit may become people (Q32).",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -127,6 +127,18 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "add.carry.alsoCarries": {
+      "comment": "Add sheet: under the carry row when an intention's toggle is on and its name isn't carried, while the meter already says it takes the last places (no repeating the cost; screens.md). The argument is the name's alias, else its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also carries %@"
           }
         }
       }
@@ -173,6 +185,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Free carries you and one intention of your own"
+          }
+        }
+      }
+    },
+    "add.carry.left.places": {
+      "comment": "Add sheet: the carry row's muted meter, what's left before this item (it doesn't change when the toggle flips): \"3 places left\" (screens.md). Unit may become people (Q32).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld place left"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld places left"
+                }
+              }
+            }
           }
         }
       }
@@ -225,40 +261,6 @@
         }
       }
     },
-    "add.carry.meter.places": {
-      "comment": "Add sheet: the carry row's muted meter, previewing the result (counts this item while the toggle is on): \"8 of 10 places used\". First number: places carried with the toggle's choice (beyond you); second: the pool. Unit may become people (Q32).",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$lld of %#@pool@ used"
-          },
-          "substitutions": {
-            "pool": {
-              "argNum": 2,
-              "formatSpecifier": "lld",
-              "variations": {
-                "plural": {
-                  "one": {
-                    "stringUnit": {
-                      "state": "translated",
-                      "value": "%arg place"
-                    }
-                  },
-                  "other": {
-                    "stringUnit": {
-                      "state": "translated",
-                      "value": "%arg places"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "add.carry.notCarried": {
       "comment": "Add sheet: inline line when the server saved the item uncarried although the toggle was on (the pool filled from another device). Intention tab: with Done; offer step: under the header (screens.md).",
       "extractionState": "manual",
@@ -279,6 +281,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Carry onto the list"
+          }
+        }
+      }
+    },
+    "add.carry.usesLast.places": {
+      "comment": "Add sheet: the carry row's meter when the toggle is on and turning it on takes every place left (screens.md). The number is how many. Unit may become people (Q32).",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "This uses your last place"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "This uses your last %lld places"
+                }
+              }
+            }
           }
         }
       }
@@ -379,18 +405,6 @@
         }
       }
     },
-    "add.intention.caption": {
-      "comment": "Add sheet: muted caption under the Intention field and the offer step's field (screens.md).",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Printed on the list"
-          }
-        }
-      }
-    },
     "add.intention.label": {
       "comment": "Add sheet, Intention tab: the label above the Intention field (screens.md). The offer step's field has none.",
       "extractionState": "manual",
@@ -411,18 +425,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "e.g. Healing after surgery"
-          }
-        }
-      }
-    },
-    "add.name.caption": {
-      "comment": "Add sheet: muted caption under the Name field (screens.md).",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Printed on the list"
           }
         }
       }

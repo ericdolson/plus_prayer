@@ -130,13 +130,11 @@ nonisolated enum L10n {
         static var tabIntention: String { t("add.tab.intention") }
         static var nameLabel: String { t("add.name.label") }
         static var namePlaceholder: String { t("add.name.placeholder") }
-        static var nameCaption: String { t("add.name.caption") }
         static var aliasLabel: String { t("add.alias.label") }
         static var aliasPlaceholder: String { t("add.alias.placeholder") }
         static var aliasCaption: String { t("add.alias.caption") }
         static var intentionLabel: String { t("add.intention.label") }
         static var intentionPlaceholder: String { t("add.intention.placeholder") }
-        static var intentionCaption: String { t("add.intention.caption") }
         static var forLabel: String { t("add.for") }
         static var change: String { t("add.for.change") }
         static var whoIsThisFor: String { t("add.for.title") }
@@ -159,20 +157,25 @@ nonisolated enum L10n {
         // Everything with a `{unit}` goes through these, keyed by the unit
         // (open-questions Q32): "places" today.
 
-        /// "Also carries Dad · uses 2 places"
-        static func alsoCarries(_ name: String, cost: Int, unit: PoolUnit = poolUnit) -> String {
+        /// "Also carries Dad · uses 2 places"; "Also carries Dad" when the
+        /// meter already says it takes the last places (cost nil).
+        static func alsoCarries(_ name: String, cost: Int?, unit: PoolUnit = poolUnit) -> String {
+            guard let cost else { return String(format: t("add.carry.alsoCarries"), name) }
             let key = switch unit {
             case .places: "add.carry.alsoCarries.places"
             }
             return String.localizedStringWithFormat(t(key), name, cost)
         }
 
-        /// The carry row's meter: "8 of 10 places used", "All 1 place in use",
-        /// or the free pool's line on the Name tab.
+        /// The carry row's meter: "3 places left", "This uses your last
+        /// place" / "… last 2 places", "All 10 places in use", or the free
+        /// pool's line.
         static func carryMeter(_ meter: CarryMeter, unit: PoolUnit = poolUnit) -> String {
             switch (meter, unit) {
-            case (.used(let used, let pool), .places):
-                String.localizedStringWithFormat(t("add.carry.meter.places"), used, pool)
+            case (.left(let left), .places):
+                String.localizedStringWithFormat(t("add.carry.left.places"), left)
+            case (.usesLast(let left), .places):
+                String.localizedStringWithFormat(t("add.carry.usesLast.places"), left)
             case (.allInUse(1), .places):
                 t("add.carry.allInUse.one")
             case (.allInUse(let pool), .places):

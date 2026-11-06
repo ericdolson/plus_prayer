@@ -69,7 +69,7 @@ mock's scenario controls, and the add sheet's entry from a name's page.
 - **Installing on Eric's iPhone.** Xcode's Run hangs on "Preparing iPhone",
   so build and install from the command line (from the repo root):
   ```bash
-  DD="${TMPDIR:-/tmp}/pp-dd-device"
+  DD="${TMPDIR:-/tmp}/pp-dd-device-fresh"
   DEVICE=00008150-001A75D02639401C   # Eric's iPhone 17 Pro
   xcodebuild -project apps/ios/PlusPrayer.xcodeproj -scheme PlusPrayer \
     -configuration Debug -destination 'generic/platform=iOS' \
@@ -90,6 +90,12 @@ mock's scenario controls, and the add sheet's entry from a name's page.
     launch can succeed on the old build after a failed install.
   - Signing is automatic for the team in the project; never change the team
     or bundle ID to make an install work.
+  - The build folder lives in `$TMPDIR`, which macOS prunes: a build that
+    fails with "There is no Info.plist found at …/SourcePackages/artifacts/…"
+    (or "no XCFramework found") has lost its downloaded Firebase binaries,
+    and `-resolvePackageDependencies` doesn't bring them back. Build into a
+    new folder name instead (it downloads them afresh); don't delete folders
+    without asking Eric. (2026-11-06: `pp-dd-device` broke this way.)
 - The project uses **synchronized folders** (Xcode 16+): every file under
   `PlusPrayer/`, `PlusPrayerTests/` and `PlusPrayerUITests/` is in its target
   automatically. Add, move and delete Swift files on disk; never touch the
@@ -259,7 +265,8 @@ compose queries; if an operation is missing, ask for a backend change.
   Avatar initials are the system font and track the disc, not Dynamic Type.
 - Color roles (design-direction §1): blue = do this, gold = held, everything
   else neutral. No red, no pink. Switches and controls are neutral (`.tint`
-  is ink), never blue.
+  is ink), never blue. Every `Toggle` uses `.ppSwitch()` (Theme/Switch.swift):
+  the "on" track is `inkMuted` with the standard white knob, both themes.
 - **Tier B chrome is native**: menus (`Menu`), sheets, alerts, confirmation
   dialogs, the search field, toolbars, `Toggle`, pickers, share sheet. Take
   the platform's metrics and look; the spec gives only content and behavior.
@@ -408,10 +415,13 @@ compose queries; if an operation is missing, ask for a backend change.
   over `pickerNames(matching:)`). Every field stays in the hierarchy (the
   pages only slide), so focus moves without the keyboard dropping. The carry
   row's rules are `carryOffer` and `carryMeter` in PlusPrayerDomain (room,
-  default, true cost, the meter previewing the toggle, "All N in use", the
-  free pool's line); every `{unit}` string goes through `L10n.Add` keyed by
+  default, true cost; the meter says what's left, not counting this item:
+  "3 places left"; on, taking everything left, "This uses your last place"
+  / "… last N places" (then "Also carries" drops its cost); "All N in use";
+  the free pool's line); every `{unit}` string goes through `L10n.Add` keyed by
   `poolUnit` (Q32). "Make room …" sits under the meter, a button with no
-  action and the hint "Not available yet" (Q31). If the server's carried
+  action and the hint "Not available yet" (Q31); its name follows typing
+  only after `duration.labelPause`, with a `quick` crossfade. If the server's carried
   result differs from the toggle (`AddedSubject.differs(from:)`, on
   `effectivelyCarried`; carry is all or nothing), the sheet
   says "Saved, but not carried…" (an intention waits for Done).

@@ -17,6 +17,9 @@ struct AddSheet: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focus: AddSheetModel.Field?
     @State private var width: CGFloat = 0
+    /// "Make room for {alias}": follows the typed name only once typing
+    /// pauses, never mid-word.
+    @State private var makeRoomName: String?
 
     /// The one line at the top: no connection, the ~500 cap, or anything
     /// else that went wrong. Text is kept.
@@ -65,6 +68,15 @@ struct AddSheet: View {
         }
         .tint(PP.color.ink)
         .onAppear { focus = model.activeField }
+        .task(id: model.typedLabel) {
+            guard makeRoomName != nil else {
+                makeRoomName = model.typedLabel // a prefilled name shows at once
+                return
+            }
+            try? await Task.sleep(for: .seconds(PP.duration.labelPause))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: PP.duration.quick)) { makeRoomName = model.typedLabel }
+        }
         .onChange(of: model.isFinished) { _, finished in if finished { dismiss() } }
     }
 
@@ -191,7 +203,7 @@ struct AddSheet: View {
             MonogramAvatar(initials: model.previewInitials, tone: model.tone, size: PP.size.avatar.large)
                 .accessibilityHidden(true)
             field(.name, text: $model.name, label: L10n.Add.nameLabel, placeholder: L10n.Add.namePlaceholder,
-                  caption: L10n.Add.nameCaption)
+                  caption: nil)
                 .onSubmit { focus = .alias }
                 .submitLabel(.next)
             field(.alias, text: $model.alias, label: L10n.Add.aliasLabel, placeholder: L10n.Add.aliasPlaceholder,
@@ -206,7 +218,7 @@ struct AddSheet: View {
         VStack(alignment: .leading, spacing: PP.space.lg) {
             forRow
             field(.intention, text: $model.intention, label: L10n.Add.intentionLabel,
-                  placeholder: L10n.Add.intentionPlaceholder, caption: L10n.Add.intentionCaption)
+                  placeholder: L10n.Add.intentionPlaceholder, caption: nil)
                 .onSubmit(save)
                 .submitLabel(.done)
             carryRow(.intention)
@@ -317,8 +329,7 @@ struct AddSheet: View {
             Text(L10n.Add.offerQuestion(model.offerName))
                 .font(PP.type.bodySmall)
                 .foregroundStyle(PP.color.inkMuted)
-            field(.offer, text: $model.offerText, placeholder: L10n.Add.intentionPlaceholder,
-                  caption: L10n.Add.intentionCaption)
+            field(.offer, text: $model.offerText, placeholder: L10n.Add.intentionPlaceholder, caption: nil)
                 .onSubmit(save)
                 .submitLabel(.done)
             carryRow(.offer)
@@ -362,16 +373,18 @@ struct AddSheet: View {
             .layoutPriority(1)
             Spacer(minLength: PP.space.sm)
             Toggle(L10n.Add.carryTitle, isOn: isOn)
+                .ppSwitch()
                 .labelsHidden()
                 .disabled(!offer.hasRoom)
         }
-        .animation(.easeOut(duration: PP.duration.quick), value: also?.cost)
+        .animation(.easeOut(duration: PP.duration.quick), value: also?.name)
     }
 
     /// Visible but inert for now: what its menu offers is part of the
     /// monetization decision (open-questions Q31/Q32).
     private func makeRoom(_ row: AddSheetModel.CarryRow) -> some View {
-        Button(row == .name ? L10n.Add.makeRoom(for: model.typedLabel) : L10n.Add.makeRoomForIntention) {}
+        Button(row == .name ? L10n.Add.makeRoom(for: makeRoomName ?? "") : L10n.Add.makeRoomForIntention) {}
+            .contentTransition(.opacity)
             .font(PP.type.bodySmall)
             .tint(PP.color.primary)
             .multilineTextAlignment(.leading)
@@ -381,7 +394,7 @@ struct AddSheet: View {
     // MARK: A field
 
     /// A native text field with its label above (if any) and its muted
-    /// caption below. Caps stop input; a muted "34/40" counter shows in the
+    /// caption below (if any). Caps stop input; a muted "34/40" counter shows in the
     /// last 10 characters. Contact info shows its message in place of the
     /// caption once typing pauses.
     private func field(_ field: AddSheetModel.Field, text: Binding<String>, label: String? = nil,
@@ -418,21 +431,24 @@ struct AddSheet: View {
                     try? await Task.sleep(for: .seconds(PP.duration.validationPause))
                     if !Task.isCancelled { model.showContactIssue(field, true) }
                 }
-            HStack(alignment: .firstTextBaseline, spacing: PP.space.sm) {
-                if issue {
-                    Text(L10n.Add.contactError).foregroundStyle(PP.color.ink)
-                } else if let caption {
-                    Text(caption).foregroundStyle(PP.color.inkMuted)
+            // The line under the field, only when it has something to say.
+            if issue || caption != nil || count >= cap - 10 {
+                HStack(alignment: .firstTextBaseline, spacing: PP.space.sm) {
+                    if issue {
+                        Text(L10n.Add.contactError).foregroundStyle(PP.color.ink)
+                    } else if let caption {
+                        Text(caption).foregroundStyle(PP.color.inkMuted)
+                    }
+                    Spacer(minLength: 0)
+                    if count >= cap - 10 {
+                        Text(L10n.Add.counter(count, cap))
+                            .foregroundStyle(PP.color.inkMuted)
+                            .monospacedDigit()
+                    }
                 }
-                Spacer(minLength: 0)
-                if count >= cap - 10 {
-                    Text(L10n.Add.counter(count, cap))
-                        .foregroundStyle(PP.color.inkMuted)
-                        .monospacedDigit()
-                }
+                .font(PP.type.caption)
+                .padding(.horizontal, PP.space.md)
             }
-            .font(PP.type.caption)
-            .padding(.horizontal, PP.space.md)
         }
     }
 }

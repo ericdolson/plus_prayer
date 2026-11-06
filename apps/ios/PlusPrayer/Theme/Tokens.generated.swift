@@ -383,6 +383,8 @@ nonisolated enum PP {
         static let strip: TimeInterval = 0.25
         /// The add sheet's contact-info message shows this long after typing pauses (screens.md, add sheet).
         static let validationPause: TimeInterval = 0.5
+        /// The add sheet's "Make room for {alias}" follows the typed name only after typing pauses this long, then crossfades (duration.quick); never mid-word (screens.md, carry row).
+        static let labelPause: TimeInterval = 0.6
         /// The halo fades in/out.
         static let haloFade: TimeInterval = 0.4
         /// Half of the halo glow's breath (a full in-and-out cycle is 5 s).

@@ -79,9 +79,9 @@ struct AddSheetModelTests {
         #expect(model.carryOffer(.name) == CarryOffer(hasRoom: true, startsOn: true, alsoCarriesParent: false,
                                                       used: 7, pool: 10, cost: 1, isFree: false))
         #expect(model.isCarrying(.name), "on by default with room")
-        #expect(model.meter(.name) == .used(8, pool: 10), "previews the result while on")
+        #expect(model.meter(.name) == .left(3), "what's left, before this one")
         model.setCarrying(.name, false)
-        #expect(model.meter(.name) == .used(7, pool: 10))
+        #expect(model.meter(.name) == .left(3), "the toggle doesn't change it")
         model.setCarrying(.name, true)
         model.name = "Gary Olson"
         model.alias = "Dad"
@@ -95,7 +95,7 @@ struct AddSheetModelTests {
         #expect(!model.canAdd, "empty")
         #expect(model.isCarrying(.offer))
         #expect(model.alsoCarries(.offer) == nil)
-        #expect(model.meter(.offer) == .used(9, pool: 10), "Dad counts now, and this one while on")
+        #expect(model.meter(.offer) == .left(2), "Dad is counted now")
         #expect(model.notCarried == nil)
         model.offerText = "Healing"
         await model.add()
@@ -128,7 +128,7 @@ struct AddSheetModelTests {
         model.setCarrying(.offer, true)
         #expect(model.alsoCarries(.offer)?.name == "Ruth")
         #expect(model.alsoCarries(.offer)?.cost == 2, "the true cost: Ruth and the intention")
-        #expect(model.meter(.offer) == .used(9, pool: 10))
+        #expect(model.meter(.offer) == .left(3))
         model.offerText = "Courage"
         await model.add()
         #expect(model.isFinished)
@@ -218,8 +218,11 @@ struct AddSheetModelTests {
 
     @Test func theUnitGoesThroughOneFormatter() {
         defer { running.cancel() }
-        #expect(L10n.Add.carryMeter(.used(8, pool: 10)) == "8 of 10 places used")
-        #expect(L10n.Add.carryMeter(.used(0, pool: 1)) == "0 of 1 place used")
+        #expect(L10n.Add.carryMeter(.left(3)) == "3 places left")
+        #expect(L10n.Add.carryMeter(.left(1)) == "1 place left")
+        #expect(L10n.Add.carryMeter(.usesLast(1)) == "This uses your last place")
+        #expect(L10n.Add.carryMeter(.usesLast(3)) == "This uses your last 3 places")
+        #expect(L10n.Add.alsoCarries("Dad", cost: nil) == "Also carries Dad")
         #expect(L10n.Add.carryMeter(.allInUse(pool: 10)) == "All 10 places in use")
         #expect(L10n.Add.carryMeter(.allInUse(pool: 1)) == "Your one place is in use")
         #expect(L10n.Add.carryMeter(.freeYouAndOneIntention) == "Free carries you and one intention of your own")
@@ -279,8 +282,9 @@ struct AddSheetModelTests {
         let model = AddSheetModel(home: home, tab: .intention)
         model.parentId = "bea"
         model.setCarrying(.intention, true)
-        #expect(model.alsoCarries(.intention)?.cost == 3, "Bea, her flagged intention, and this one")
-        #expect(model.meter(.intention) == .used(10, pool: 10))
+        #expect(model.meter(.intention) == .usesLast(3), "Bea, her flagged intention and this one: all 3 left")
+        #expect(model.alsoCarries(.intention)?.name == "Aunt Bea")
+        #expect(model.alsoCarries(.intention)?.cost == nil, "the meter already says it")
         model.intention = "Rest"
         await model.add()
         #expect(model.isFinished, "the server's check agrees: all three fit")
