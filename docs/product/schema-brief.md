@@ -58,7 +58,10 @@ ones the user archived on their own.
 
 Constraints: self-subject forced ACTIVE, not carried-toggleable, not resolvable.
 Resolved items are never list-eligible. Soft abuse cap ~500 subjects per user
-(server check, not a paywall).
+(server check, not a paywall) counting only **active** subjects (on Home,
+Answered included; not archived, released or purged), plus a quiet hard cap
+of ~5,000 total rows per user (generic error) against archive-and-add abuse
+(2026-11-06).
 
 ### PrayerList — changes
 | Field | Change | Why / spec |
@@ -156,13 +159,15 @@ separate Entitlement table for family/gift plans, scoped lists.
 | Grace cap / interval | RTDB `/config` + server enforcement | 2 / 7 list days |
 | Presence display threshold | RTDB `/config` | 10 |
 | Min app version | RTDB `/config` | — |
+| Base premium pool (trial + base subscription) | RTDB `/config` `basePremiumPool`, read by the server for grants (like the grace cap) and by the app for the add sheet; server fallback 10. The `BASE_PREMIUM_POOL` Functions param is dropped (2026-11-06) | 10 |
 
 Client-visible config lives in a small public-read, server-write RTDB node
 `/config` (with defaults compiled into the app), NOT Firebase Remote Config —
 Remote Config moved to usage-based pricing on 2026-09-01, and RTDB is already
 in the stack, offline-cached, and live-updating. Revisit Remote Config only if
 A/B testing or audience targeting is needed.
-| Subject abuse cap | server | ~500 |
+| Subject abuse cap | server; counts active subjects only | ~500 |
+| Subject total-row hard cap | server; all non-purged rows | ~5,000 |
 
 ## 6. Functions & operations to add/revise (update OPERATIONS.md)
 - **onAuthUserCreated** — User only (nullable displayName). **setSelfName(name)**

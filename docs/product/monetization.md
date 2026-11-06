@@ -16,7 +16,8 @@ _Last updated: 2026-10-17_
   extra name and each intention counts as one.
 - **`basePremiumPool = 10`** (2026-10-18, server config): the reverse trial grants
   exactly the base subscription's pool, so subscribing changes nothing. One
-  value drives both; tune before launch.
+  value drives both; tune before launch. **One source:** RTDB `/config`
+  `basePremiumPool`, read by the server's grant and by the app (2026-11-06).
 - **Effective entitlement is computed:** expired entitlement + no active
   subscription ⇒ free limit (no scheduled job).
 - **Trial-end soft landing:** assembly keeps carrying the full trial portion
@@ -44,7 +45,9 @@ _Last updated: 2026-10-17_
   lever), and a private cap would read as "paying to remember people". Only
   printed-list capacity (and later, guided prayer) is gated. A ~500-name soft
   safety cap per account exists only against abuse ("contact us"), not as a
-  paywall. Power users like pastors are the future group/organization customer.
+  paywall. It counts only active items, so archiving frees room (add-sheet
+  copy: "Archive some to add more."); a quiet ~5,000 total-row hard cap
+  backs it (2026-11-06). Power users like pastors are the future group/organization customer.
 
 - **Paid unit = a pool of carried names and intentions** (2026-10-17). Each
   name or intention counts as one; not called "lines" (printing word-wraps).

@@ -1480,3 +1480,18 @@ open-questions Q31 (alternative: first time ever, then at most weekly).
   text can be long or painful, so it's never quoted); 500 cap line "You've
   reached 500 names and intentions. Archive some to add more."
 - The free-tier case is added to open-questions Q31.
+
+### Decision: basePremiumPool has one source; the 500 cap counts active items
+**Timestamp:** 2026-11-06
+- `basePremiumPool` lives only in RTDB `/config`: the server's trial/base
+  grant reads it (as the grace cap does) with fallback 10, and the app reads
+  it for the add sheet. SUPERSEDES the `BASE_PREMIUM_POOL` Functions param.
+- The ~500 abuse cap counts only active subjects (on Home, incl. Answered),
+  not archived/released/purged. A quiet ~5,000 total-row hard cap (generic
+  error) guards against archive-and-add abuse.
+- Production `seed:config` (adds only missing keys) runs right before the
+  function change deploys; until then both sides fall back to 10.
+Why: two sources would let the sheet promise a number the server doesn't
+grant. Counting archived items would eventually lock a faithful long-time
+user out with no remedy and make "Archive some to add more" false; the cap
+exists against abuse, not to limit a practice.
