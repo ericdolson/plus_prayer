@@ -1842,3 +1842,18 @@ Considered: "Anything specific to pray for?" (warmer, but doesn't teach
 - The bloom's `.font(.system(size:))` from the scaled token is an accepted
   exception to the no-fixed-font rule (it's a glyph sized to text).
 - Stale lines fixed in screens.md (keyboard) and app-brief.md (summary).
+
+### Decision: The avatar lives in the field it comes from (to try, A → B → C)
+**Timestamp:** 2026-11-06
+Eric's idea: a ~30 pt avatar inside the Name field (empty state "…"), moving
+into the alias field on its first character and back when it's cleared, so
+the initials always sit in the field they come from. Fields keep their
+normal height and both reserve the avatar's space. Motion is tried in order,
+each time-boxed: A in-row with the iOS 26 glass morph / matched geometry; B
+an overlay layer above the form; C in-row shrink/grow. v2: tinted glass,
+tap → color/photo menu.
+Why: the top preview row was busy, and an avatar fixed in the Name row
+showed the alias's initials beside the name. The glass morph is the
+platform's own motion, so it doesn't compete with Amen → seal.
+SUPERSEDES the live preview row (286bf14) for the Name tab; the offer step
+keeps its avatar + serif name header.

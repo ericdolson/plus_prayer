@@ -62,19 +62,30 @@ _Last updated: 2026-10-18_
     platform's styles with our color roles (ink, `inkMuted` via the system
     secondary role, blue only for actions).
   - **Name tab (form sections, top to bottom):**
-    1. **Live preview row** (clear row, top): the person exactly as on
-       Home: **Home-row avatar (44 pt token) + the serif display name** (alias if set,
-       else the name). Empty: the toned circle + a muted serif "New name".
-       Tone picked once at open (design-direction §1b); initials and name
-       update live together, so the initials always match the words beside
-       them. Color never changes while typing. **v1: preview only**; v2:
-       tap the avatar → tone swatches (+ photo), here and in Edit together.
-       The same row is the header of the next step (continuity).
-       SUPERSEDES the avatar inside the Name row (its initials followed the
-       alias and looked disconnected from the typed name) and the earlier
-       72 pt centered circle.
-    2. Header **Name** · field "e.g. Gary Olson" (single line). Focused on
-       open.
+    1. **The avatar lives inside the field it comes from** (2026-11-06,
+       to try): a ~30 pt avatar sits at the start of the field, inset to
+       follow the field's rounded end, at the field's normal height (Name
+       and alias stay the same height). It sits in the **Name** field
+       while the alias is empty and moves into the **alias** field on the
+       alias's first character; clearing the alias moves it back. Empty
+       state: the tone with a "…" inside; then initials of the field it's
+       in. Both fields always reserve the avatar's leading space, so text
+       never shifts. VoiceOver reads it once, as part of its field. Tone
+       picked once at open (design-direction §1b); color never changes.
+       **Motion, tried in order, each time-boxed (~½ day), stop at the
+       first that looks right on device:** **A** — avatar slot in each
+       field row, moving between rows with the iOS 26 glass morph
+       (`glassEffectID`) or `matchedGeometryEffect` (a plain move without
+       glass still passes); **B** — if motion breaks between form rows, the
+       avatar in a layer above the form, anchored to the active field, with
+       the glass morph; **C** — A's structure, no travel: shrink out of one
+       field, grow into the other (~0.3 s). Report which shipped, why the
+       earlier ones failed, and a screen recording. **v1: not tappable**;
+       v2: tinted-glass avatar, tap → native menu for color / photo, here
+       and in Edit. SUPERSEDES the live preview row at the top (too busy)
+       and the avatar fixed in the Name row (initials followed the alias).
+    2. Header **Name** · field "e.g. Gary Olson" (single line; holds the
+       avatar while the alias is empty). Focused on open.
     3. Header **What you call them · optional** · field "e.g. Dad" (single
        line) · footer **"Only you see this"**.
     4. **Carry section** (below).
@@ -129,7 +140,7 @@ _Last updated: 2026-10-18_
   - **Intention form for a known person** (the offer step after adding a
     name, and "+ Intention" from a name's page or row; one layout):
     a clear header row with the person as on Home: **Home-row avatar (44 pt) + the
-    serif name** (the same row as the Name tab's live preview); then the
+    serif name**; then the
     growing intention field (focused, keyboard stays up even when the pool
     is full); then the carry section. No For row: the person is given, not
     chosen. {alias} falls back to the name.
