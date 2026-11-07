@@ -3,12 +3,22 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { beforeEach, describe, it } from "node:test";
-import { addList, addSubjectRow, clientDb, createUser, DAY, exec, impersonate, logPrayer, resetDb, sql } from "./helpers";
+import { HttpsError } from "firebase-functions/v2/https";
+import { restoreSubject } from "../src/subjects";
+import { addList, addSubjectRow, clientDb, createUser, DAY, exec, impersonate, logPrayer, makeDeps, resetDb, sql } from "./helpers";
 
 const status = async (id: string) =>
   (await sql<{ status: string; cascade: boolean }>(
     "SELECT status::text AS status, archived_by_cascade AS cascade FROM prayer_subject WHERE id = $1::uuid", [id],
   ))[0];
+
+const carried = async (...ids: string[]) => {
+  const out: Record<string, boolean> = {};
+  for (const id of ids) {
+    out[id] = (await sql<{ is_carried: boolean }>("SELECT is_carried FROM prayer_subject WHERE id = $1::uuid", [id]))[0].is_carried;
+  }
+  return out;
+};
 
 describe("logPrayer", () => {
   beforeEach(resetDb);
@@ -65,13 +75,73 @@ describe("subject lifecycle", () => {
 
     await clientDb.executeMutation("ArchiveSubject", { id: name }, as);
     assert.deepEqual(await status(open), { status: "ARCHIVED", cascade: true });
-    await assert.rejects(clientDb.executeMutation("RestoreSubject", { id: open }, as), /Restore its name first/);
+    const deps = makeDeps();
+    await assert.rejects(restoreSubject(deps, "me", open), /Restore its name first/);
 
-    await clientDb.executeMutation("RestoreSubject", { id: name }, as);
+    await restoreSubject(deps, "me", name);
     assert.deepEqual(await status(name), { status: "ACTIVE", cascade: false });
     assert.deepEqual(await status(open), { status: "ACTIVE", cascade: false });
     assert.equal((await status(released)).status, "ARCHIVED");
     assert.equal((await status(ownArchive)).status, "ARCHIVED");
+  });
+
+  it("restore is the callable now: the connector has no RestoreSubject; others' items are not found", async () => {
+    await createUser("me");
+    await createUser("other");
+    const name = await addSubjectRow("me", { name: "Al" });
+    await clientDb.executeMutation("ArchiveSubject", { id: name }, impersonate("me"));
+    await assert.rejects(clientDb.executeMutation("RestoreSubject", { id: name }, impersonate("me")));
+    await assert.rejects(restoreSubject(makeDeps(), "other", name), (err: HttpsError) => err.code === "not-found");
+    assert.equal((await status(name)).status, "ARCHIVED");
+  });
+
+  it("restore under the pool keeps carrying (the name and its cascaded intentions)", async () => {
+    await createUser("me", { includeLimit: 3, expiresInMs: 30 * DAY });
+    const name = await addSubjectRow("me", { name: "Bo" });
+    const kid = await addSubjectRow("me", { parentId: name, name: "Bo: rest" });
+    await clientDb.executeMutation("ArchiveSubject", { id: name }, impersonate("me"));
+    assert.deepEqual(await restoreSubject(makeDeps(), "me", name), { id: name, isCarried: true, uncarried: false });
+    assert.deepEqual(await carried(name, kid), { [name]: true, [kid]: true });
+  });
+
+  it("restore over the pool brings a name back uncarried; its intentions keep their flags", async () => {
+    await createUser("me", { includeLimit: 2, expiresInMs: 30 * DAY });
+    const name = await addSubjectRow("me", { name: "Cy" });
+    const kid = await addSubjectRow("me", { parentId: name, name: "Cy: work" });
+    await clientDb.executeMutation("ArchiveSubject", { id: name }, impersonate("me"));
+    await addSubjectRow("me", { name: "Di" });
+    await addSubjectRow("me", { name: "Ed" }); // 2 of 2 carried: Cy + work would make 4
+    assert.deepEqual(await restoreSubject(makeDeps(), "me", name), { id: name, isCarried: false, uncarried: true });
+    assert.deepEqual(await status(name), { status: "ACTIVE", cascade: false });
+    assert.deepEqual(await status(kid), { status: "ACTIVE", cascade: false });
+    assert.deepEqual(await carried(name, kid), { [name]: false, [kid]: true });
+  });
+
+  it("restore over the pool brings an intention back uncarried (a lapsed trial; a Released one too)", async () => {
+    const { selfId } = await createUser("me", { includeLimit: 5, expiresInMs: -DAY }); // free pool: 1 under Me
+    const mine = await addSubjectRow("me", { parentId: selfId, name: "Me: patience" });
+    const other = await addSubjectRow("me", { parentId: selfId, name: "Me: sleep" });
+    const as = impersonate("me");
+    await clientDb.executeMutation("ArchiveSubject", { id: other }, as);
+    const released = await addSubjectRow("me", { parentId: selfId, name: "Me: move" });
+    await clientDb.executeMutation("ReleaseIntention", { id: released }, as);
+    const deps = makeDeps();
+    assert.deepEqual(await restoreSubject(deps, "me", other), { id: other, isCarried: false, uncarried: true });
+    assert.deepEqual(await restoreSubject(deps, "me", released), { id: released, isCarried: false, uncarried: true });
+    assert.deepEqual(await carried(mine, other, released), { [mine]: true, [other]: false, [released]: false });
+    // Freeing the place lets the next restore carry.
+    await clientDb.executeMutation("ArchiveSubject", { id: mine }, as);
+    assert.deepEqual(await restoreSubject(deps, "me", mine), { id: mine, isCarried: true, uncarried: false });
+  });
+
+  it("restore that adds nothing to what prints keeps its flag even over the pool", async () => {
+    const { selfId } = await createUser("me", { includeLimit: 5, expiresInMs: -DAY }); // lapsed: free pool
+    await addSubjectRow("me", { name: "Fay" }); // a carried name: already over the free pool
+    const answered = await addSubjectRow("me", { parentId: selfId, name: "Me: test results" });
+    const as = impersonate("me");
+    await clientDb.executeMutation("MarkIntentionAnswered", { id: answered }, as);
+    await clientDb.executeMutation("ArchiveSubject", { id: answered }, as);
+    assert.deepEqual(await restoreSubject(makeDeps(), "me", answered), { id: answered, isCarried: true, uncarried: false });
   });
 
   it("purge cascades; the self subject can't be archived or purged; others' items are untouchable", async () => {
@@ -113,8 +183,8 @@ describe("§9 follow-ups on the client connector", () => {
     await clientDb.executeMutation("MarkIntentionAnswered", { id: answered }, as);
     await clientDb.executeMutation("ArchiveSubject", { id: answered }, as);
 
-    await clientDb.executeMutation("RestoreSubject", { id: released }, as);
-    await clientDb.executeMutation("RestoreSubject", { id: answered }, as);
+    await restoreSubject(makeDeps(), "me", released);
+    await restoreSubject(makeDeps(), "me", answered);
     const rows = await sql<{ id: string; status: string; resolution: string | null; resolved: boolean }>(
       "SELECT id, status::text AS status, resolution::text AS resolution, resolved_at IS NOT NULL AS resolved FROM prayer_subject WHERE id IN ($1::uuid, $2::uuid)",
       [released, answered],

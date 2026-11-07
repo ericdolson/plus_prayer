@@ -82,7 +82,7 @@ against the emulator and the admin CLI runs the same code locally.
 - **Accounts** — `onAuthUserCreated` (v1 auth trigger: User row), and user
   callables `syncAccount`, `setSelfName`, `deleteAccount`, `mergeAccounts`.
 - **Subjects** — user callables `addSubject`, `updateSubject`,
-  `setCarriedItems` (free-text caps and server-owned state live here, not in
+  `setCarriedItems`, `restoreSubject` (free-text caps and server-owned state live here, not in
   the client connector).
 - **Prayers** — `onPrayerLogged` (SQL Connect trigger on LogPrayer: list
   count + RTDB mirror, streak + grace, DailyStats); `sweepUncountedPrayers`

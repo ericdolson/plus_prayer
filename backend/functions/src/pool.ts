@@ -13,6 +13,9 @@ export interface PoolSubject {
   resolvedAt: string | null;
   parent: { id: string } | null;
   sortOrder: number;
+  /** Present from GetPoolState (restore needs them); drafts leave them out. */
+  resolution?: "ANSWERED" | "RELEASED" | null;
+  archivedByCascade?: boolean;
 }
 
 export interface Entitlement {

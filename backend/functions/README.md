@@ -10,7 +10,7 @@ triggers require it). All SQL lives in the `admin` connector
 | `src/index.ts` | Wiring only: triggers, schedules, callables, params |
 | `src/prayers.ts` | `onPrayerLogged` (exactly-once increments, streak/grace, trial), sweeper, grace answers |
 | `src/lists.ts` | `closeList`, `assembleNextList`, review diff, print data, publish, video |
-| `src/subjects.ts` | `setSelfName`, `addSubject`, `updateSubject`, `setCarriedItems` |
+| `src/subjects.ts` | `setSelfName`, `addSubject`, `updateSubject`, `setCarriedItems`, `restoreSubject` |
 | `src/accounts.ts` | User creation, `deleteAccount`, `mergeAccounts`, `setEntitlement` |
 | `src/presence.ts` | `/stats/live` publisher + reconcile, draft auto-save |
 | `src/streak.ts`, `src/pool.ts` | Pure rules (streak + grace; carried pool) |

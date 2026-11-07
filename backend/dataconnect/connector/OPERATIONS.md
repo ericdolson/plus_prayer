@@ -165,6 +165,7 @@ Two computed rules used throughout (never swept by a job):
 ### Screen: Archived
 - **getMyArchivedSubjects** (OWNER) — subjects WHERE status = ARCHIVED
   (including RELEASED intentions). PURGED is never returned anywhere.
+  Restoring is the **restoreSubject** callable (§B; pool-aware).
 
 ### Settings: reminders
 - **getMyReminders** (OWNER) — ReminderPreference rows for the user.
@@ -217,6 +218,19 @@ Callables (`functions/src/subjects.ts`):
   A swap (one off, one on) is still checked. Uncarrying a name leaves its intentions' own flags
   intact (they stop counting); re-carrying brings them back through the same
   check.
+- **restoreSubject** (`id`) — ARCHIVED → ACTIVE. On a name, brings back
+  ONLY its intentions with `archivedByCascade = true` (flag cleared) — never
+  Released ones or ones archived on their own. An intention whose name is
+  still archived can't be restored on its own ("Restore its name first").
+  Restoring a Released intention reopens it (resolution cleared: open and
+  list-eligible again); an Answered one stays Answered. **Pool-aware, never
+  blocked (2026-11-07):** if bringing it back with its own flag would add to
+  what prints AND the result is over the owner's pool, it comes back with
+  its own `isCarried` false (a name's intentions keep their flags; they
+  don't count while it's off). A restore that adds nothing to what prints
+  keeps its flag, even over the pool. Returns `{ id, isCarried, uncarried }`
+  (`uncarried`: the pool turned it off). Read-then-write, like addSubject.
+  Moved here from the connector so the check can't be skipped.
 
 Connector mutations (`connector/mutations.gql`):
 - **reorderSubjects** (`orderedIds`) — one level (names, or one name's
@@ -226,12 +240,8 @@ Connector mutations (`connector/mutations.gql`):
   Only open (unresolved, ACTIVE) intentions; never self.
 - **archiveSubject** — ARCHIVED. On a name, its ACTIVE intentions too, with
   `archivedByCascade = true`. Blocked for isSelf.
-- **restoreSubject** — ARCHIVED → ACTIVE. On a name, brings back ONLY its
-  intentions with `archivedByCascade = true` (flag cleared) — never Released
-  ones or ones archived on their own. An intention whose name is still
-  archived can't be restored on its own ("Restore its name first").
-  Restoring a Released intention reopens it (resolution cleared: open and
-  list-eligible again); an Answered one stays Answered.
+- **restoreSubject** — a callable since 2026-11-07 (pool-aware; see the
+  callables above). No connector mutation.
 - **purgeSubject** — PURGED ("gone gone"; row persists); on a name, all its
   intentions too. Blocked for isSelf.
 - **setSubjectAvatarTone** — palette index 0–15 (placeholder bound until the

@@ -86,7 +86,8 @@ mutation RenameSelf($uid: String!, $name: String!) @auth(level: NO_ACCESS) {
 
 
 # ----------------------------------------------------------------------------
-# Subjects (pool-aware writes: addSubject, updateSubject, setCarriedItems)
+# Subjects (pool-aware writes: addSubject, updateSubject, setCarriedItems,
+# restoreSubject)
 # ----------------------------------------------------------------------------
 
 # Entitlement + every non-purged subject (for sortOrder, the abuse cap, and
@@ -106,8 +107,60 @@ query GetPoolState($uid: String!) @auth(level: NO_ACCESS) {
     status
     sortOrder
     resolvedAt
+    resolution
+    archivedByCascade
     parent { id }
   }
+}
+
+# restoreSubject (the callable decides `isCarried`): ARCHIVED → ACTIVE. On a
+# name, brings back ONLY intentions with archivedByCascade = true (their own
+# flags kept) — never Released ones or ones archived on their own. An
+# intention whose name is still archived can't be restored on its own.
+# Restoring a Released intention reopens it (resolution cleared); an Answered
+# one stays Answered. `isCarried` is the item's own flag after the restore:
+# unchanged, or false when carrying it would go over the pool (2026-11-07).
+mutation RestoreSubjectFor($uid: String!, $id: UUID!, $isCarried: Boolean!) @auth(level: NO_ACCESS) @transaction {
+  query @redact {
+    prayerSubjects(
+      where: { id: { eq: $id }, owner: { id: { eq: $uid } }, status: { eq: ARCHIVED } }
+      limit: 1
+    )
+    @check(expr: "this.size() == 1", message: "Archived item not found")
+    @check(
+      expr: "this[0].parent == null || this[0].parent.status == 'ACTIVE'"
+      message: "Restore its name first"
+    ) {
+      id
+      parent { status }
+    }
+  }
+  reopened: prayerSubject_updateMany(
+    where: {
+      id: { eq: $id }
+      owner: { id: { eq: $uid } }
+      status: { eq: ARCHIVED }
+      resolution: { eq: RELEASED }
+    }
+    data: { status: ACTIVE, archivedByCascade: false, resolution: null, resolvedAt: null, isCarried: $isCarried }
+  )
+  restored: prayerSubject_updateMany(
+    where: {
+      id: { eq: $id }
+      owner: { id: { eq: $uid } }
+      status: { eq: ARCHIVED }
+    }
+    data: { status: ACTIVE, archivedByCascade: false, isCarried: $isCarried }
+  )
+  cascade: prayerSubject_updateMany(
+    where: {
+      parent: { id: { eq: $id } }
+      owner: { id: { eq: $uid } }
+      status: { eq: ARCHIVED }
+      archivedByCascade: { eq: true }
+    }
+    data: { status: ACTIVE, archivedByCascade: false }
+  )
 }
 
 mutation InsertSubject(

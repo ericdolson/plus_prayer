@@ -31,7 +31,6 @@ public class PlusprayerConnector {
     self.markIntentionAnsweredMutation = MarkIntentionAnsweredMutation(dataConnect: dataConnect)
     self.releaseIntentionMutation = ReleaseIntentionMutation(dataConnect: dataConnect)
     self.archiveSubjectMutation = ArchiveSubjectMutation(dataConnect: dataConnect)
-    self.restoreSubjectMutation = RestoreSubjectMutation(dataConnect: dataConnect)
     self.purgeSubjectMutation = PurgeSubjectMutation(dataConnect: dataConnect)
     self.setSubjectAvatarToneMutation = SetSubjectAvatarToneMutation(dataConnect: dataConnect)
     self.updateMySettingsMutation = UpdateMySettingsMutation(dataConnect: dataConnect)
@@ -66,7 +65,6 @@ public let reorderSubjectsMutation: ReorderSubjectsMutation
 public let markIntentionAnsweredMutation: MarkIntentionAnsweredMutation
 public let releaseIntentionMutation: ReleaseIntentionMutation
 public let archiveSubjectMutation: ArchiveSubjectMutation
-public let restoreSubjectMutation: RestoreSubjectMutation
 public let purgeSubjectMutation: PurgeSubjectMutation
 public let setSubjectAvatarToneMutation: SetSubjectAvatarToneMutation
 public let updateMySettingsMutation: UpdateMySettingsMutation

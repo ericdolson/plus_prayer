@@ -7,7 +7,7 @@ import { DAY_MS } from "./dates";
 import { hasCheck, mutate, query } from "./db";
 import { Deps } from "./deps";
 import { selfSubjectId } from "./ids";
-import { checkPool, Entitlement, PoolSubject } from "./pool";
+import { checkPool, effectiveCarried, Entitlement, PoolSubject } from "./pool";
 import { optionalText, requireName, requireNoContact } from "./text";
 
 const ALIAS_CAP = 40;
@@ -257,4 +257,61 @@ export async function setCarriedItems(deps: Deps, uid: string, rawIds: unknown) 
 export function addsCarrying(current: PoolSubject[], proposed: PoolSubject[]): boolean {
   const before = new Map(current.map((s) => [s.id, s.isCarried]));
   return proposed.some((s) => s.isCarried && before.get(s.id) !== true);
+}
+
+/**
+ * Restore an archived item (subjects.md, schema-brief §7). Never blocked for
+ * the pool, never over it (2026-11-07): if bringing it back with its own
+ * flag would push the effectively carried items over the owner's pool, it
+ * comes back uncarried — a name's own flag off (its cascade-archived
+ * intentions keep theirs, so they don't count while it's off), an
+ * intention's own flag off. "Push over" = the result doesn't fit AND the
+ * restore adds to what prints; a restore that adds nothing (an Answered
+ * intention, an item already off) keeps its flag even if the user is
+ * already over (a lapsed trial).
+ *
+ * Returns `isCarried` (the item's stored flag after) and `uncarried` (true
+ * when the pool turned it off), so the app can say so.
+ */
+export async function restoreSubject(deps: Deps, uid: string, rawId: unknown) {
+  if (typeof rawId !== "string") throw new HttpsError("invalid-argument", "id is required");
+  const { user, subjects } = await poolState(deps, uid);
+  const item = subjects.find((s) => s.id === rawId && s.status === "ARCHIVED");
+  if (!item) throw new HttpsError("not-found", "Archived item not found");
+  const parent = item.parent ? subjects.find((s) => s.id === item.parent!.id) : undefined;
+  if (item.parent && parent?.status !== "ACTIVE") {
+    throw new HttpsError("failed-precondition", "Restore its name first");
+  }
+
+  const restore = (s: PoolSubject, isCarried: boolean): PoolSubject => {
+    if (s.id === item.id) {
+      const reopened = s.resolution === "RELEASED";
+      return {
+        ...s, status: "ACTIVE", isCarried, archivedByCascade: false,
+        ...(reopened ? { resolution: null, resolvedAt: null } : {}),
+      };
+    }
+    if (item.kind === "SOUL" && s.parent?.id === item.id && s.status === "ARCHIVED" && s.archivedByCascade) {
+      return { ...s, status: "ACTIVE", archivedByCascade: false };
+    }
+    return s;
+  };
+
+  let isCarried = item.isCarried;
+  if (isCarried) {
+    const before = new Set(effectiveCarried(subjects).map((s) => s.id));
+    const after = subjects.map((s) => restore(s, true));
+    const adds = effectiveCarried(after).some((s) => !before.has(s.id));
+    if (adds && !checkPool(after, user, deps.now(), deps.cfg).ok) isCarried = false;
+  }
+
+  try {
+    await mutate(deps.db, "RestoreSubjectFor", { uid, id: item.id, isCarried });
+  } catch (err) {
+    // Restored, purged, or its name archived from another device since the read.
+    if (hasCheck(err, "Restore its name first")) throw new HttpsError("failed-precondition", "Restore its name first");
+    if (hasCheck(err, "Archived item not found")) throw new HttpsError("not-found", "Archived item not found");
+    throw err;
+  }
+  return { id: item.id, isCarried, uncarried: item.isCarried && !isCarried };
 }

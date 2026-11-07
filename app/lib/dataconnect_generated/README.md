@@ -1068,48 +1068,6 @@ ref.execute();
 ```
 
 
-### RestoreSubject
-#### Required Arguments
-```dart
-String id = ...;
-PlusprayerConnector.instance.restoreSubject(
-  id: id,
-).execute();
-```
-
-
-
-#### Return Type
-`execute()` returns a `OperationResult<RestoreSubjectData, RestoreSubjectVariables>`
-```dart
-/// Result of an Operation Request (query/mutation).
-class OperationResult<Data, Variables> {
-  OperationResult(this.dataConnect, this.data, this.ref);
-  Data data;
-  OperationRef<Data, Variables> ref;
-  FirebaseDataConnect dataConnect;
-}
-
-final result = await PlusprayerConnector.instance.restoreSubject(
-  id: id,
-);
-RestoreSubjectData data = result.data;
-final ref = result.ref;
-```
-
-#### Getting the Ref
-Each builder returns an `execute` function, which is a helper function that creates a `Ref` object, and executes the underlying operation.
-An example of how to use the `Ref` object is shown below:
-```dart
-String id = ...;
-
-final ref = PlusprayerConnector.instance.restoreSubject(
-  id: id,
-).ref();
-ref.execute();
-```
-
-
 ### PurgeSubject
 #### Required Arguments
 ```dart

@@ -7,10 +7,10 @@ PlusprayerConnector.instance.ReorderSubjects(reorderSubjectsVariables).execute()
 PlusprayerConnector.instance.MarkIntentionAnswered(markIntentionAnsweredVariables).execute();
 PlusprayerConnector.instance.ReleaseIntention(releaseIntentionVariables).execute();
 PlusprayerConnector.instance.ArchiveSubject(archiveSubjectVariables).execute();
-PlusprayerConnector.instance.RestoreSubject(restoreSubjectVariables).execute();
 PlusprayerConnector.instance.PurgeSubject(purgeSubjectVariables).execute();
 PlusprayerConnector.instance.SetSubjectAvatarTone(setSubjectAvatarToneVariables).execute();
 PlusprayerConnector.instance.UpdateMySettings(updateMySettingsVariables).execute();
+PlusprayerConnector.instance.CreateReminder(createReminderVariables).execute();
 
 ```
 

@@ -16,8 +16,6 @@ part 'release_intention.dart';
 
 part 'archive_subject.dart';
 
-part 'restore_subject.dart';
-
 part 'purge_subject.dart';
 
 part 'set_subject_avatar_tone.dart';
@@ -348,11 +346,6 @@ class PlusprayerConnector {
   
   ArchiveSubjectVariablesBuilder archiveSubject ({required String id, }) {
     return ArchiveSubjectVariablesBuilder(dataConnect, id: id,);
-  }
-  
-  
-  RestoreSubjectVariablesBuilder restoreSubject ({required String id, }) {
-    return RestoreSubjectVariablesBuilder(dataConnect, id: id,);
   }
   
   

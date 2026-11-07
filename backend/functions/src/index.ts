@@ -90,6 +90,7 @@ export const mergeAccounts = userCall((d, uid, data) => accounts.mergeAccounts(d
 export const addSubject = userCall((d, uid, data) => subjects.addSubject(d, uid, data));
 export const updateSubject = userCall((d, uid, data) => subjects.updateSubject(d, uid, data));
 export const setCarriedItems = userCall((d, uid, data) => subjects.setCarriedItems(d, uid, data.carriedIds));
+export const restoreSubject = userCall((d, uid, data) => subjects.restoreSubject(d, uid, data.id));
 
 // ----------------------------------------------------------------- prayers --
 

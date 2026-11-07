@@ -695,22 +695,6 @@ let id: UUID = ...
 DataConnect.plusprayerConnector.archiveSubjectMutation.execute(...)
 ```
 
-## RestoreSubjectMutation
-
-### Variables
-
-#### Required
-```swift
-
-let id: UUID = ...
-```
- 
-
-### One-shot execute
-```
-DataConnect.plusprayerConnector.restoreSubjectMutation.execute(...)
-```
-
 ## PurgeSubjectMutation
 
 ### Variables
