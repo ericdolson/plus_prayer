@@ -859,6 +859,63 @@
         "note": "Added directly by Eric 2026-11-06 — manual addition, not sourced from a social 🙏 comment."
       }
     ],
-    "70": []
+    "70": [
+      {
+        "platform": "manual",
+        "handle": "Anonymous Participant 1",
+        "id": null,
+        "at": "2026-11-07T21:31:16Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-07 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Anonymous Participant 2",
+        "id": null,
+        "at": "2026-11-07T21:31:16Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-07 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Eric Olson",
+        "id": null,
+        "at": "2026-11-07T21:31:16Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-07 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Mel Hill",
+        "id": null,
+        "at": "2026-11-07T21:31:16Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-07 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Julie Olson",
+        "id": null,
+        "at": "2026-11-07T21:31:16Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-07 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Cindy Olson",
+        "id": null,
+        "at": "2026-11-07T21:31:16Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-07 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Gary Olson",
+        "id": null,
+        "at": "2026-11-07T21:31:16Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-07 — manual addition, not sourced from a social 🙏 comment."
+      }
+    ]
   }
 }
