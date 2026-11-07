@@ -13,8 +13,9 @@ the detail page, this file wins.
 ### Layout (browsing) — name page
 ```
 ‹                                         ⋯
-            ( D )        ← ~72 pt avatar; gold ring if held today
-             Dad         ← Roca ~28
+            ( D )        ← ~96 pt avatar; gold ring if held today
+             Dad         ← Roca ~28 (the alias, else the name)
+         Gary Olson      ← the name, smaller inkMuted, only if there's an alias
       Dad will be on List 53   ← inkMuted status line (rules below)
 
   Held by you · 47 prayers
@@ -38,6 +39,12 @@ the detail page, this file wins.
                                ( 🙏 Pray for Dad )   ← blue capsule, pray-button slot
 ```
 - **Order:** top section (avatar + name + status) → counts → Intentions → History.
+- **Avatar ~96 pt** (2026-11-07), the same size as the add sheet's Name tab,
+  so adding someone and landing on their page shows one continuous person.
+- **Name under the alias** (2026-11-07): when the person has an alias, the
+  title is the alias and the **name** (what's printed) sits under it in
+  smaller `inkMuted` text (body), for reference. No alias → the name is the
+  title and nothing repeats. Self page: title "Me", your name under it.
 - **Counts:** "Held by you · N prayers" always; "Carried by the world · N
   prayers · N lists" only once ever carried (never "0 lists").
 - **Intentions section** reuses Home's intention row exactly: thread, gold

@@ -1955,3 +1955,10 @@ recognize someone), its row's vertical insets tighten to ~8 pt, and the
 empty state is a person glyph (`person.fill`, 70% white) instead of "…".
 Why: at ~64 pt it read small; the row was overly spacious; "…" didn't read
 as a placeholder for a person.
+
+### Decision: Person page — 96 pt avatar, name under the alias
+**Timestamp:** 2026-11-07
+The detail page's avatar grows from ~72 to ~96 pt to match the add sheet
+(no visible shrink when adding lands on the page). When there's an alias,
+the name sits under the title in smaller inkMuted text for reference (the
+self page shows your name under "Me").
