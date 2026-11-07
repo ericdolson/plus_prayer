@@ -2004,3 +2004,12 @@ self page shows your name under "Me").
 - **Backend:** a carry change that only reduces carrying must always be
   allowed, even over the pool; only additions are pool-checked. Found by
   the app agent: a lapsed-trial user couldn't turn anyone off.
+
+### Decision: Uncarry build follow-ups (orchestrator calls)
+**Timestamp:** 2026-11-07
+- A save that turns any item from not carried to carried is pool-checked,
+  swaps included, even if the total goes down. Judged on raw flags.
+- "Leaving the page" includes pushing another page on top; the failure
+  line clears then too.
+- Known, not fixed: a stale client can re-add an item another device turned
+  off and get "All {pool} places filled up." Rare; revisit if seen.
