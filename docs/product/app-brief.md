@@ -126,11 +126,10 @@ or links — inline: "Names and intentions can't include phone numbers, emails,
 or links." Must allow verse references ("John 3:16"), room numbers, dates.
 
 ### Add sheet (screens.md)
-A native sheet built on the native **form** (SwiftUI `Form`): toolbar =
-the new person's glass avatar (leading, Name tab) / segmented Name |
-Intention / X fixed at the right, with Add splitting off beside it once
-there's text. Name tab: sections "Name" and "What you call
-them · optional" (footer "Only you see this"), then a **carry section**
+A native sheet built on the native **form** (SwiftUI `Form`): toolbar X /
+segmented Name | Intention / Add. Name tab: a Contacts-style block (a ~64 pt
+avatar left of the stacked "Full name" and "What you call them (optional)"
+fields, one footer), then a **carry section**
 (native Toggle "Carry onto the list ✱" with the meter as its subtitle; full
 pool → off + footer "Make room for {alias}", inert for now). Intention tab: a
 For navigation row pushing a searchable "Who is this for?", a growing

@@ -54,35 +54,32 @@ _Last updated: 2026-10-18_
   - Form uses the **default** section spacing (compact made a footer read as
     belonging to the next section).
   - New items go to the **bottom** of their level.
-  - **Toolbar (Name and Intention tabs):** leading = the avatar (Name tab;
-    empty on the Intention tab) · center = the segmented control · the round
-    glass **X** fixed at the **far right** on both tabs (VoiceOver
-    "Cancel"); it never moves or changes meaning. **Add** (blue-tinted)
-    **splits off to the left of the X** (native toolbar glass morph) once
-    the tab's required text exists, and merges back if it's cleared. On a
-    narrow iPhone the segmented control compresses to fit. Offer step:
-    **Skip** / **Add**, no back button (the name is saved); from a name: X /
-    Add. No discard confirmation for now (open-questions D6).
+  - **Toolbar:** round glass **X** (leading; VoiceOver "Cancel") ·
+    segmented control (center) · **Add** (trailing, a word), always at
+    opposite ends. Offer step: **Skip** / **Add**, no back button (the name
+    is saved); from a name: X / Add. (SUPERSEDES Add splitting off beside
+    the X: it put the most important tap next to close.)
   - **Form styling:** the form's own background is hidden so the sheet keeps
     its material; rows use `raised`; headers, footers and row text use the
     platform's styles with our color roles (ink, `inkMuted` via the system
     secondary role, blue only for actions).
   - **Name tab (form sections, top to bottom):**
-    1. **The avatar is the toolbar's leading control** (Name tab only):
-       a tinted-glass monogram, the same object as your own avatar in
-       Home's header, showing the new person as they'll appear: tone
+    1. **Name block (to try, 2026-11-06), the classic iOS Contacts
+       "new contact" layout:** one grouped row with a **~64 pt avatar on
+       the left spanning two stacked fields** on the right: "Full name"
+       (focused on open) and "What you call them (optional)", separated by
+       the native row divider. No section headers; one section **footer**
+       explains both (DRAFT copy, to refine: "The full name is printed on
+       the list. Only you see what you call them."). The avatar: tone
        picked once at open (design-direction §1b), initials following the
        display name live (alias if set, else the name; empty: the tone with
-       "…"). **v1: not tappable**; v2: tap → native menu for color / photo
-       (here and in Edit). No avatar in the form, so the carry section
-       stays in view. SUPERSEDES the in-field avatar and its motion (row to
-       row failed; glass merge needed glass fields that didn't match the
-       form) and the top preview row (busy).
-    2. Header **Name** · field "e.g. Gary Olson" (single line, a standard
-       form row). Focused on open.
-    3. Header **What you call them · optional** · field "e.g. Dad" (single
-       line) · footer **"Only you see this"**.
-    4. **Carry section** (below).
+       "…"); **v1 not tappable**, v2 tap → color / photo. No extra height
+       over the old two-header layout, so the carry section stays in view.
+       If the lost per-field labels hurt on device, fallback: keep the two
+       section headers and accept a taller block. SUPERSEDES the toolbar
+       avatar (read as a button; overloaded the toolbar) and the in-field
+       avatar.
+    2. **Carry section** (below).
   - **Intention tab:**
     1. **For** — a native navigation row: ~40 pt avatar with initials + the
        name, Settings-style ("For · (D) Dad ›", system font), default Me.

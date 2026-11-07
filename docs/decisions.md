@@ -1872,3 +1872,16 @@ Rejected: the X turning into Add in the same spot (one place must keep one
 meaning, or closing becomes saving by accident).
 Why: no form space used, so the carry section stays in view; the toolbar
 avatar is a glass control by nature, ready for v2 customizing.
+
+### Decision: Contacts-style name block; standard toolbar (to try)
+**Timestamp:** 2026-11-06
+Name tab: one grouped row, a ~64 pt avatar on the left spanning stacked
+"Full name" / "What you call them (optional)" fields, one footer (draft
+copy). Toolbar back to X · segmented · Add at opposite ends.
+SUPERSEDES the toolbar avatar and Add splitting off beside the X (2f54c29):
+the toolbar had four controls, the avatar read as a button, and Add next to
+X invited accidental closes.
+Why: the classic iOS Contacts layout makes the avatar big enough to read as
+a person without adding height, so the carry section (the upgrade surface)
+stays in view. Open: per-field labels become placeholders (Eric unsure);
+footer copy needs work; fallback is the two section headers.
