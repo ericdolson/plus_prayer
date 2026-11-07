@@ -15,7 +15,25 @@ import UIKit
 /// Its keyboard matches the real field's (capitalization, return key), so
 /// nothing changes when focus moves. Anything typed in between is handed on
 /// through `onType` ("" for a delete), never lost.
+///
+/// `Handle.prime` takes the keyboard again on demand: switching the add
+/// sheet's tabs, where the old tab's field leaves the hierarchy before the
+/// new one appears.
 struct KeyboardPrimer: UIViewRepresentable {
+    /// Lets the sheet take the keyboard back to the primer.
+    @MainActor final class Handle {
+        fileprivate weak var field: PrimerField?
+
+        /// The primer takes the keyboard, with the next field's traits.
+        func prime(autocapitalization: UITextAutocapitalizationType, returnKey: UIReturnKeyType) {
+            guard let field else { return }
+            field.autocapitalizationType = autocapitalization
+            field.returnKeyType = returnKey
+            field.becomeFirstResponder()
+        }
+    }
+
+    var handle: Handle
     var autocapitalization: UITextAutocapitalizationType
     var returnKey: UIReturnKeyType
     var onType: (String) -> Void
@@ -28,6 +46,7 @@ struct KeyboardPrimer: UIViewRepresentable {
         field.isAccessibilityElement = false
         field.tintColor = .clear
         field.textColor = .clear
+        handle.field = field
         return field
     }
 

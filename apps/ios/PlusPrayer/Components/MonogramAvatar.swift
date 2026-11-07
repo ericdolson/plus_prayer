@@ -15,6 +15,9 @@ struct MonogramAvatar: View {
     /// false: the initials only, for a control that puts them on glass tinted
     /// with `color(tone:)` (your avatar in Home's header).
     var filled = true
+    /// Shown, like the initials, while there are none (the add sheet's
+    /// person glyph before typing begins).
+    var placeholder: Image?
 
     static func color(tone: Int) -> Color {
         PP.color.avatarTones[tone.mod(PP.color.avatarTones.count)]
@@ -25,7 +28,11 @@ struct MonogramAvatar: View {
             .fill(filled ? Self.color(tone: tone) : .clear)
             .frame(width: size, height: size)
             .overlay {
-                if let glyph = Glyph(initials: initials, diameter: size) {
+                if initials.isEmpty, let placeholder {
+                    placeholder
+                        .font(PP.type.initials(size: size * PP.number.initialsScale))
+                        .foregroundStyle(PP.color.onAvatar)
+                } else if let glyph = Glyph(initials: initials, diameter: size) {
                     Text(glyph.text)
                         .font(PP.type.initials(size: glyph.size))
                         .tracking(glyph.isPair ? glyph.size * PP.number.initialsTracking : 0)

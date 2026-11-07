@@ -421,17 +421,23 @@ compose queries; if an operation is missing, ask for a backend change.
   `size.carriedMark.carryRow` tall via `@ScaledMetric`), its footer "Make
   room for this intention". Toolbar: X · segmented control · Add at
   opposite ends. The Name tab: the avatar centered on its own clear row
-  (`avatar.newName`, 64 pt; initials follow the display name, "…" when
-  empty), then Name and "What you call them · optional" (footer "Only you
-  see this"); **no carry row**: Add saves the name auto-carried while
-  there's room and closes (to the person's page once it exists; Home for
-  now). (Tried and dropped 2026-11-06/07: the avatar inside or beside the
+  (`avatar.person`, 96 pt, ~8 pt row insets; initials follow the display
+  name, `PPIcon.person` while empty via `MonogramAvatar(placeholder:)`),
+  then Name and "What you call them · optional" (footer "Only you see
+  this"); **no carry row**: Add saves the name auto-carried while there's
+  room and closes (to the person's page once it exists; Home for now),
+  unless it ends up not carried: then the notice row "Saved, but not
+  carried. All {pool} places are in use." and Done only (never silent). (Tried and dropped 2026-11-06/07: the avatar inside or beside the
   fields, a preview row, a toolbar avatar with Add splitting off the X, a
   Contacts-style name block, a second "Added" step with a "Not now · Name ·
   Name + intention" control. A view can't move between `Form` rows, and an
-  overlay layer animated only sometimes on device.) Both tabs' forms stay
-  in the hierarchy (the hidden one faded), so focus moves without the
-  keyboard dropping. **The keyboard rises with the sheet** through
+  overlay layer animated only sometimes on device.) **Only the visible
+  tab is in the hierarchy**, so only it is in the accessibility tree (a
+  hidden `Form`'s rows, a native Toggle included, ignore
+  `accessibilityHidden`). Switching tabs, `KeyboardPrimer.Handle.prime`
+  takes the keyboard first and the new field takes it in `onChange(of:
+  tab)` (not the form's `onAppear`: that also runs as the chooser pops,
+  and focusing mid-pop lost the toolbar). **The keyboard rises with the sheet** through
   `KeyboardPrimer`: SwiftUI focuses a `Form` field only after the sheet
   settles (~0.5 s late, `.defaultFocus` included; checked on a simulator
   recording), so a hidden UIKit field takes first responder as the sheet

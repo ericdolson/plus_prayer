@@ -8,11 +8,11 @@ import SwiftUI
 /// new name is auto-carried while there's room; its page manages the rest);
 /// intentions have a carry toggle.
 ///
-/// Keyboard: both tabs' forms stay in the hierarchy (the hidden one is only
-/// faded), so focus moves from one field to the next in the same
-/// transaction and the keyboard never hides and reappears. The keyboard
-/// rises with the sheet (`KeyboardPrimer`) and the first field takes it
-/// over. "Who is this for?" is a real navigation push for tapping: its
+/// Keyboard: it rises with the sheet (`KeyboardPrimer`) and the first field
+/// takes it over. Only the visible tab is in the hierarchy (so in the
+/// accessibility tree); switching tabs hands the keyboard to the primer
+/// first, so it never hides and reappears while the new tab's field
+/// appears and takes it. "Who is this for?" is a real navigation push for tapping: its
 /// search starts inactive and the keyboard goes down. The standard large
 /// sheet.
 ///
@@ -24,6 +24,8 @@ struct AddSheet: View {
 
     @Environment(\.dismiss) private var dismiss
     @FocusState private var focus: AddSheetModel.Field?
+    /// Holds the keyboard while one tab's field leaves and the next arrives.
+    @State private var primer = KeyboardPrimer.Handle()
     /// The carry title's bloom: `size.carriedMark.carryRow` tall at the
     /// default size, scaling with the title's text.
     @ScaledMetric(relativeTo: .body) private var bloomHeight = PP.size.carriedMark.carryRow
@@ -40,7 +42,11 @@ struct AddSheet: View {
     /// wrong. Text is kept. (The person form puts "Saved, but not carried"
     /// under its header row.)
     private var notice: String? {
-        if model.notCarried && !isPerson { return L10n.Add.notCarried }
+        switch model.notCarried {
+        case .name(let pool): return L10n.Add.notCarriedName(pool: pool)
+        case .intention where !isPerson: return L10n.Add.notCarried
+        default: break
+        }
         if model.isOffline { return L10n.Add.offline }
         if model.isAtCap { return L10n.Add.capReached(subjectCap) }
         if model.failedGenerically { return L10n.Add.failed }
@@ -51,10 +57,11 @@ struct AddSheet: View {
         NavigationStack(path: $path) {
             ZStack {
                 if isPerson {
-                    page(personForm, shown: true)
+                    page(personForm)
+                } else if model.tab == .name {
+                    page(nameForm)
                 } else {
-                    page(nameForm, shown: model.tab == .name)
-                    page(intentionForm, shown: model.tab == .intention)
+                    page(intentionForm)
                 }
             }
             .disabled(isSettled)
@@ -69,13 +76,17 @@ struct AddSheet: View {
         // The keyboard rises with the sheet; the first field takes it over
         // once SwiftUI focuses it (KeyboardPrimer).
         .background {
-            KeyboardPrimer(autocapitalization: model.activeField == .name ? .words : .sentences,
+            KeyboardPrimer(handle: primer, autocapitalization: model.activeField == .name ? .words : .sentences,
                            returnKey: model.activeField == .name ? .next : .done,
                            onType: model.typeAhead)
                 .frame(width: 0, height: 0)
                 .accessibilityHidden(true)
         }
         .onAppear { focus = model.activeField }
+        // A new tab's field takes the keyboard from the primer once it's in
+        // the hierarchy. (Not from the form's onAppear: that also runs as
+        // "Who is this for?" pops, and focusing mid-pop lost the toolbar.)
+        .onChange(of: model.tab) { focus = model.activeField }
         .onChange(of: model.isFinished) { _, finished in if finished { dismiss() } }
 
 
@@ -99,13 +110,10 @@ struct AddSheet: View {
         if case .person = model.step { true } else { false }
     }
 
-    /// A tab's form: faded out when it isn't shown.
-    private func page(_ form: some View, shown: Bool) -> some View {
-        form
-            .scrollContentBackground(.hidden)
-            .opacity(shown ? 1 : 0)
-            .allowsHitTesting(shown)
-            .accessibilityHidden(!shown)
+    /// Only the visible tab is in the hierarchy (and so in the
+    /// accessibility tree: a hidden `Form`'s rows ignore `accessibilityHidden`).
+    private func page(_ form: some View) -> some View {
+        form.scrollContentBackground(.hidden)
     }
 
     /// The person as on Home: the Home-row avatar and the serif name (the
@@ -168,8 +176,13 @@ struct AddSheet: View {
     /// transaction, so the keyboard stays up.
     private var tabBinding: Binding<AddSheetModel.Tab> {
         Binding(get: { model.tab }, set: { tab in
+            guard tab != model.tab else { return }
+            // The old tab's field leaves the hierarchy: the primer holds the
+            // keyboard until the new one is there and takes it (onChange of
+            // the tab).
+            primer.prime(autocapitalization: tab == .name ? .words : .sentences,
+                         returnKey: tab == .name ? .next : .done)
             model.tab = tab
-            focus = tab == .name ? .name : .intention
         })
     }
 
@@ -186,11 +199,14 @@ struct AddSheet: View {
         Form {
             noticeSection
             // A preview only in v1: its tone from the start, initials
-            // following the display name live.
+            // following the display name live (a person glyph until typing
+            // begins). Large, in a tight row.
             Section {
-                MonogramAvatar(initials: model.avatarInitials, tone: model.tone, size: PP.size.avatar.newName)
+                MonogramAvatar(initials: model.previewInitials, tone: model.tone, size: PP.size.avatar.person,
+                               placeholder: PPIcon.person)
                     .frame(maxWidth: .infinity)
                     .accessibilityHidden(true)
+                    .listRowInsets(EdgeInsets(top: PP.space.sm, leading: 0, bottom: PP.space.sm, trailing: 0))
                     .listRowBackground(Color.clear)
             }
             Section {
@@ -327,7 +343,7 @@ struct AddSheet: View {
                     if let person = model.person {
                         personRow(initials: person.initials, tone: person.tone, name: person.label)
                     }
-                    if model.notCarried {
+                    if model.notCarried != nil {
                         Text(L10n.Add.notCarried)
                             .foregroundStyle(PP.color.ink)
                             .transition(.opacity)

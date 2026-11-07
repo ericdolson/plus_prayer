@@ -150,6 +150,14 @@ nonisolated enum L10n {
         static var makeRoomForIntention: String { t("add.carry.makeRoom.intention") }
         static var makeRoomHint: String { t("add.carry.makeRoom.hint") }
         static var notCarried: String { t("add.carry.notCarried") }
+        /// A new name saved uncarried: "Saved, but not carried. All 10
+        /// places are in use." (a pool of 1: "… Your one place is in use.").
+        static func notCarriedName(pool: Int, unit: PoolUnit = poolUnit) -> String {
+            switch (pool, unit) {
+            case (1, .places): t("add.carry.notCarried.name.one")
+            case (_, .places): String.localizedStringWithFormat(t("add.carry.notCarried.name.places"), pool)
+            }
+        }
         // Everything with a `{unit}` goes through these, keyed by the unit
         // (open-questions Q32): "places" today.
 

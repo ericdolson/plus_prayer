@@ -80,12 +80,20 @@ final class AddSheetModel: Identifiable {
     /// available to try again; the text is kept.
     private(set) var failedGenerically = false
 
-    /// An intention saved but not carried although its toggle was on:
-    /// "Saved, but not carried. The list's places filled up." An end state,
-    /// Done only.
-    private(set) var notCarried = false
+    /// Saved, but not carried: an end state, Done only. Never silent.
+    enum NotCarried: Equatable {
+        /// A new name that didn't fit (no room, or the server disagreed):
+        /// "Saved, but not carried. All {pool} places are in use." Until the
+        /// person's page exists (its "Not on the list" will say it there).
+        case name(pool: Int)
+        /// An intention whose toggle was on: "Saved, but not carried. The
+        /// list's places filled up."
+        case intention
+    }
 
-    var isSettled: Bool { notCarried }
+    private(set) var notCarried: NotCarried?
+
+    var isSettled: Bool { notCarried != nil }
 
     /// What the user set on a carry row; nil = its default.
     private var carryChoice: [CarryRow: Bool] = [:]
@@ -115,15 +123,12 @@ final class AddSheetModel: Identifiable {
 
     // MARK: Derived
 
-    /// Home's initials rule, live: the alias's once it has text, else the name's.
+    /// Home's initials rule, live: the alias's once it has text, else the
+    /// name's. The Name tab's avatar (a person glyph while empty).
     var previewInitials: String {
         let alias = cleanText(self.alias)
         return initials(alias.isEmpty ? cleanText(name) : alias)
     }
-
-    /// The new person's avatar on the Name tab: the display name's initials
-    /// (alias, else name), or "…" until there's one.
-    var avatarInitials: String { previewInitials.isEmpty ? "…" : previewInitials }
 
     var isOffline: Bool { !home.isOnline || failedOffline }
 
@@ -147,7 +152,7 @@ final class AddSheetModel: Identifiable {
     /// The toolbar's Add. Disabled while the text is empty, while a contact
     /// message shows, offline, at the cap, or saving.
     var canAdd: Bool {
-        guard !isSaving, !isOffline, !isAtCap, !notCarried else { return false }
+        guard !isSaving, !isOffline, !isAtCap, notCarried == nil else { return false }
         let text = switch activeField {
         case .name: name
         case .intention: intention
@@ -284,10 +289,15 @@ final class AddSheetModel: Identifiable {
             switch step {
             case .form where tab == .name:
                 // Auto-carried while there's room; its page manages the
-                // rest. Closes (to that page once it exists; Home for now).
-                _ = try await home.addSubject(NewSubject(kind: .soul, publicName: name, alias: alias,
-                                                         avatarTone: tone))
-                isFinished = true
+                // rest. Closes (to that page once it exists; Home for now),
+                // unless it isn't carried: then it says so and waits for Done.
+                let added = try await home.addSubject(NewSubject(kind: .soul, publicName: name, alias: alias,
+                                                                 avatarTone: tone))
+                if added.effectivelyCarried {
+                    isFinished = true
+                } else {
+                    notCarried = .name(pool: home.carryOffer(kind: .soul, parentId: nil).pool)
+                }
             case .form:
                 try await addIntention(intention, parentId: parentId, row: .intention)
             case .person(let nameId):
@@ -316,7 +326,7 @@ final class AddSheetModel: Identifiable {
                                carryParent: carry && carryOffer(row).alsoCarriesParent)
         let added = try await home.addSubject(input)
         if added.differs(from: input) {
-            notCarried = true
+            notCarried = .intention
         } else {
             isFinished = true
         }

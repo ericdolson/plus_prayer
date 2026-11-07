@@ -25,4 +25,6 @@ nonisolated enum PPIcon {
     static let partial = Image(systemName: "minus")
     static let more = Image(systemName: "ellipsis")
     static let note = Image(systemName: "square.and.pencil")
+    /// A new person before there's a name to take initials from.
+    static let person = Image(systemName: "person.fill")
 }

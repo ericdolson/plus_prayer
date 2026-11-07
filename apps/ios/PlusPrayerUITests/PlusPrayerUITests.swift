@@ -64,8 +64,8 @@ final class PlusPrayerUITests: XCTestCase {
         let name = app.textFields["Name"]
         XCTAssertTrue(name.waitForExistence(timeout: 3))
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "Name is focused on open")
-        XCTAssertFalse(app.switches["Carry onto the list"].firstMatch.isHittable,
-                       "no carry row on the Name tab (the Intention tab's is only faded)")
+        XCTAssertFalse(app.switches["Carry onto the list"].firstMatch.exists, "no carry row on the Name tab")
+        XCTAssertFalse(app.buttons["For"].exists, "the hidden Intention tab is out of the accessibility tree")
         XCTAssertTrue(app.navigationBars.buttons["Cancel"].exists, "the glass X, read as Cancel")
         app.typeText("Gary Olson")
         sleep(1)
@@ -75,6 +75,7 @@ final class PlusPrayerUITests: XCTestCase {
         app.segmentedControls.buttons["Intention"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up on Intention")
         XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the intention's carry toggle")
+        XCTAssertFalse(app.textFields["Name"].exists, "the hidden Name tab is out of the accessibility tree")
         sleep(1)
         attach(app, "add 2 intention tab")
 
