@@ -317,3 +317,10 @@ setCarriedItems (two calls can race with another device).
   at the same instant can both pass and exceed the pool by a little (same as
   setCarriedItems). No User version counter for now; the existing over-limit
   handling (trim on Your portion) covers it. Revisit if it shows up.
+
+## Carry changes that reduce carrying are always allowed (2026-11-07)
+`setCarriedItems` (and any carry-changing write) must accept a change that
+only removes carrying (uncarry a name or intention) even while the user is
+over their pool (e.g. a lapsed trial). Only changes that add carrying are
+pool-checked. Today the backend blocks every carry change while over the
+pool, so a lapsed-trial user can't trim from a person's page.

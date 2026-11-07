@@ -1991,3 +1991,16 @@ self page shows your name under "Me").
   sits on the page background.
 - Confirmed agent calls: late-focus fallback for the long-press form;
   Home's data updates continue while a page is pushed.
+
+### Decision: Person page edge cases; uncarrying is always allowed
+**Timestamp:** 2026-11-07
+- "Would use 2 places · 1 left" (disabled + Make room) when there's some
+  room but not enough; "Uses 2 places · none left" when carried with none
+  free or over the pool (never negative).
+- "Uses" excludes Answered intentions. Failure line stays until the next
+  tap or leaving.
+- Intention rows on the page sit flush with the section title (no Home
+  indent without the thread).
+- **Backend:** a carry change that only reduces carrying must always be
+  allowed, even over the pool; only additions are pool-checked. Found by
+  the app agent: a lapsed-trial user couldn't turn anyone off.

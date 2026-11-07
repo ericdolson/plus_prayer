@@ -51,7 +51,8 @@ the detail page, this file wins.
   dot, trailing carried mark (§5), gold "Answered · {date}", **but no
   thread** (2026-11-07): on Home the thread ties intentions to the name row
   above; here the page itself is the name, so a thread would hang from the
-  section title.
+  section title. Without the thread there's **no Home indent**: rows sit
+  flush with the section title (dot, then text).
   Same order as Home (Answered stay in place under the name; Released aren't
   shown). Tapping an intention pushes its own detail page.
 - **Add link:** "＋ Add intention for {alias}"; on the self page just
@@ -70,17 +71,25 @@ the detail page, this file wins.
   - Not carried: "Would use 2 places · 3 left" when turning it on brings
     back intentions still marked carried (re-carrying restores them), else
     "3 places left". If it would take all that's left: "This uses your last
-    {N} places". Full: "All 10 places in use", toggle disabled, **"Make room
+    {N} places". Some room but not enough: "Would use 2 places · 1 left",
+    disabled + "Make room". Carried with none free (or over the pool):
+    "Uses 2 places · none left" (never a negative). Full: "All 10 places
+    in use", toggle disabled, **"Make room
     for {alias}"** under it (inert until Membership / Your portion exist;
     no typing pause, the name is known). Free pool: "Free carries you and
     one intention of your own".
   - An intention page: "Also carries {alias} · uses N places" when its name
     isn't carried.
+  - "Uses" never counts Answered intentions (they don't go on the list).
   - **Feedback, never silent:** the toggle flips at once and is disabled
     while saving; if saving fails it flips back with a footer line under
     the row: pool filled from another device → "All {pool} places filled
     up."; other failure → "Couldn't change this. Try again." Offline: the
-    toggle is disabled with "Needs a connection." under it.
+    toggle is disabled with "Needs a connection." under it. The failure
+    line stays until the next tap or leaving the page (ink, like other
+    errors). **Turning carrying off always succeeds when online**, even
+    over the pool (it frees places; it's how a lapsed trial trims), so the
+    backend must never block a change that only reduces carrying.
   This page and Your portion are the places a person's carrying is managed.
 
 ### Intention page
