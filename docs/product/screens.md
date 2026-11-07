@@ -51,7 +51,8 @@ _Last updated: 2026-10-18_
     / `@FocusState` in `onAppear`, no delayed dispatch); if SwiftUI can't do
     it reliably, a small UIKit text-field bridge calling
     `becomeFirstResponder` in `viewWillAppear`.
-  - Form uses native `.listSectionSpacing(.compact)`.
+  - Form uses the **default** section spacing (compact made a footer read as
+    belonging to the next section).
   - New items go to the **bottom** of their level.
   - **Toolbar:** round glass **X** (leading; VoiceOver "Cancel") / **Add**
     (trailing, a word). Offer step: **Skip** / **Add**, no back button (the
@@ -61,19 +62,22 @@ _Last updated: 2026-10-18_
     platform's styles with our color roles (ink, `inkMuted` via the system
     secondary role, blue only for actions).
   - **Name tab (form sections, top to bottom):**
-    1. Header **Name** · one row: a **~40 pt avatar** (Home-row size)
-       leading, then the field "e.g. Gary Olson" (single line), so the row
-       previews exactly how the person will look on Home. Focused on open.
-       Tone picked once at open (design-direction §1b), shown on the empty
-       circle; initials fill in live following Home's rule (Name's initials
-       until the alias has text, then the alias's, "GO" → "D"; intended).
-       Color never changes while typing. **v1: preview only**; v2: tap →
-       tone swatches (+ photo), here and in Edit together. (SUPERSEDES the
-       ~72 pt centered preview row, which pushed the carry section out of
-       view.)
-    2. Header **What you call them · optional** · field "e.g. Dad" (single
+    1. **Live preview row** (clear row, top): the person exactly as on
+       Home: **~40 pt avatar + the serif display name** (alias if set,
+       else the name). Empty: the toned circle + a muted serif "New name".
+       Tone picked once at open (design-direction §1b); initials and name
+       update live together, so the initials always match the words beside
+       them. Color never changes while typing. **v1: preview only**; v2:
+       tap the avatar → tone swatches (+ photo), here and in Edit together.
+       The same row is the header of the next step (continuity).
+       SUPERSEDES the avatar inside the Name row (its initials followed the
+       alias and looked disconnected from the typed name) and the earlier
+       72 pt centered circle.
+    2. Header **Name** · field "e.g. Gary Olson" (single line). Focused on
+       open.
+    3. Header **What you call them · optional** · field "e.g. Dad" (single
        line) · footer **"Only you see this"**.
-    3. **Carry section** (below).
+    4. **Carry section** (below).
   - **Intention tab:**
     1. **For** — a native navigation row: ~40 pt avatar with initials + the
        name, Settings-style ("For · (D) Dad ›", system font), default Me.
@@ -124,18 +128,18 @@ _Last updated: 2026-10-18_
     - Home never marks an uncarried item (design-direction §5).
   - **Intention form for a known person** (the offer step after adding a
     name, and "+ Intention" from a name's page or row; one layout):
-    **no toolbar title** (the person header says who; a title would compete
-    with it); a clear header row with the person as on Home: **~40 pt
-    avatar + the serif name**; then the growing intention field (focused,
-    keyboard stays up even when the pool is full); then the carry section.
-    No For row: the person is given, not chosen. {alias} falls back to the
-    name.
-    - **Offer step:** a quiet **"Added"** subtitle under the name (the only
-      confirmation); the field's section header is the question **"Add an
+    a clear header row with the person as on Home: **~40 pt avatar + the
+    serif name** (the same row as the Name tab's live preview); then the
+    growing intention field (focused, keyboard stays up even when the pool
+    is full); then the carry section. No For row: the person is given, not
+    chosen. {alias} falls back to the name.
+    - **Offer step:** native toolbar title **"Added"** (what just happened;
+      the form below is the specific next step; no subtitle under the
+      name); the field's section header is the question **"Add an
       intention now?"** in sentence case (`.textCase(nil)`), without the
       name (it's right above; long names would break it); toolbar **Skip**
       (leading; closes, the name is saved) / **Add** (trailing).
-    - **From a name's page or row:** no subtitle; field header
+    - **From a name's page or row:** no toolbar title; field header
       **"Intention"**; toolbar **X** / **Add**.
   - **One tap to save.** Add saves the name at once; the sheet then pushes
     (horizontal, forward) to the offer step above. [Add] disabled while

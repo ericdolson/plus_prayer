@@ -1813,3 +1813,16 @@ reads as about the field; "now" pairs with Skip (later is fine); "intention"
 teaches the app's word. The name is omitted because it sits right above.
 Considered: "Anything specific to pray for?" (warmer, but doesn't teach
 "intention"); "…for {alias}?" (repeats the name, long names break).
+
+### Decision: Live preview row, default spacing, "Added" as the offer title
+**Timestamp:** 2026-11-06
+- Name tab opens with a live preview row: ~40 pt avatar + serif display name
+  (alias else name; empty = toned circle + muted "New name"), exactly as on
+  Home. It's the same header row the offer step shows, so the person stays
+  put while the form below changes. SUPERSEDES the avatar in the Name row
+  (initials followed the alias, "S" beside "Matt Burdick").
+- Default section spacing. SUPERSEDES `.listSectionSpacing(.compact)` ("Only
+  you see this" read as belonging to the carry section).
+- Offer step: toolbar title "Added", no subtitle under the name, question
+  header "Add an intention now?" (Eric: general → specific; the old "Add an
+  intention" title + "Added" subtitle ran specific → general and competed).
