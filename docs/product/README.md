@@ -16,6 +16,7 @@ every feature crosses that boundary.
 | Build conventions | `apps/ios/CLAUDE.md`, `apps/android/CLAUDE.md`, `backend/CLAUDE.md` | How to build on each side (not product rules) |
 | Visual reference | `docs/product/reference/` | Screenshots of approved screens. Reference only — the spec wins when they differ |
 | Raw inputs | `seeds/` | Chat exports. Input only, never the source of truth |
+| Build notes | `docs/build-notes/` | How each area was built: workarounds to keep, approaches dropped. Read before changing that area's code |
 
 ## How to maintain
 - When a decision is made: update the feature file here (current state) AND add a
