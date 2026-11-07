@@ -1941,3 +1941,9 @@ Why (Eric): no second step to explain; the page is the natural next step
 instead of getting lost on Home, and "Make room" on the page is a
 persistent upsell on every visit, not only at add time.
 Open: build order (the page isn't built yet; this moves it up).
+
+### Decision: Build the subject page next (iOS)
+**Timestamp:** 2026-11-07
+The subject detail page is the next iOS build, ahead of the rest of prayer
+mode (Amen invitation, closing sheet) and search. Why: adding a name now
+lands on it, so the add flow isn't complete without it.

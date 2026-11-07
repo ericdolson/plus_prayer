@@ -79,6 +79,11 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
       do you hold → main screen
 - [ ] [app] Main screen: personal list (names + indented intentions), pinned list
       row with seal avatar + carry-status line, unprayed dots, search/filter
+- [ ] [app] **NEXT (iOS, 2026-11-07):** Subject detail page: lists it's been
+      on, world count (live stitch), my history, gaps in days; prays in place;
+      first-intention button + carry row; adding a name lands here
+      (detail-page.md). Then the rest of prayer mode (invitation, closing
+      sheet), then search.
 - [ ] [app] In-prayer mode: halo, nav removed, footer prayer bar (timer, "with N
       others", ✕), check = holding with ember + haptic, selection rules,
       FAB ring → Amen at 5s
@@ -88,8 +93,6 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
       archive / restore / purge; resolve: Answered vs Release
 - [ ] [app] "Your portion" screen: preview, carried meter, include/remove,
       "Not printed" state (exclusions only; no pending state); contact-info input block
-- [ ] [app] Subject detail: lists it's been on, world count (live stitch), my
-      history, gaps in days; prays in place (detail-page.md, 2026-11-03)
 - [ ] [app] List detail: full-bleed self-hosted video, "being filmed" state
 - [ ] [app] Streak = days with the world (header badge + sheet: sealed/hollow
       marks, monthly personal count), grace offers/bank, milestones
