@@ -1792,3 +1792,13 @@ labels; inset grouped rows instead of free-floating fields.
 - Confirmed agent calls: Settings-style For row in system font; notice row
   as plain ink text; "Also carries…" as a second subtitle line; ink
   checkmark.
+
+### Decision: Offer step wording tightened
+**Timestamp:** 2026-11-06
+Offer step: no toolbar title; avatar + serif name with a quiet "Added"
+subtitle; field header "Intention · optional"; toolbar Skip / Add. From a
+name's page: same form, no subtitle, header "Intention", X / Add.
+SUPERSEDES the "Add an intention" toolbar title (it competed with "Added")
+and "Not now" (it answered a question no longer asked).
+Why: with the question gone, the optional header states the offer, "Skip"
+names the alternative plainly, and "Added" is the single confirmation.

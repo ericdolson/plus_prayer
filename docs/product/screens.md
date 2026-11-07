@@ -54,8 +54,8 @@ _Last updated: 2026-10-18_
   - Form uses native `.listSectionSpacing(.compact)`.
   - New items go to the **bottom** of their level.
   - **Toolbar:** round glass **X** (leading; VoiceOver "Cancel") / **Add**
-    (trailing, a word). Offer step: **Not now** / **Add**, no back button
-    (the name is saved). No discard confirmation for now (open-questions D6).
+    (trailing, a word). Offer step: **Skip** / **Add**, no back button (the
+    name is saved). No discard confirmation for now (open-questions D6).
   - **Form styling:** the form's own background is hidden so the sheet keeps
     its material; rows use `raised`; headers, footers and row text use the
     platform's styles with our color roles (ink, `inkMuted` via the system
@@ -124,18 +124,26 @@ _Last updated: 2026-10-18_
     - Home never marks an uncarried item (design-direction §5).
   - **Intention form for a known person** (the offer step after adding a
     name, and "+ Intention" from a name's page or row; one layout):
-    toolbar title **"Add an intention"** (native); a clear header row with
-    the person as on Home: **~40 pt avatar + the serif name**; on the offer
-    step only, a quiet line under the name, **"Added."** Then header
-    **Intention** + the growing field (focused, keyboard stays up even when
-    the pool is full), then the carry section. No For row: the person is
-    given, not chosen. Toolbar: offer step **Not now** / Add; from a name's
-    page **X** / Add. {alias} falls back to the name.
+    **no toolbar title** (the person header says who; a title would compete
+    with it); a clear header row with the person as on Home: **~40 pt
+    avatar + the serif name**; then the growing intention field (focused,
+    keyboard stays up even when the pool is full); then the carry section.
+    No For row: the person is given, not chosen. {alias} falls back to the
+    name.
+    - **Offer step:** a quiet **"Added"** subtitle under the name (the only
+      confirmation); field header **"Intention · optional"** (states the
+      offer without asking a question, mirroring "What you call them ·
+      optional"); toolbar **Skip** (leading; closes, the name is saved) /
+      **Add** (trailing).
+    - **From a name's page or row:** no subtitle; field header
+      **"Intention"**; toolbar **X** / **Add**.
   - **One tap to save.** Add saves the name at once; the sheet then pushes
     (horizontal, forward) to the offer step above. [Add] disabled while
     empty; after Add the sheet closes (one offer; more from the name's
     page). SUPERSEDES the serif "{alias} is added." + "Add an intention for
     {alias}?" header block (the question didn't read as the field's label).
+    Offer-step toolbar: **Skip** / Add (SUPERSEDES "Not now", which only fit
+    the old question).
   - **Intention tab Add:** saves and closes (the carry section already said
     whether it's carried).
   - **Keyboard stays up:** switching tabs focuses the new tab's field in the
