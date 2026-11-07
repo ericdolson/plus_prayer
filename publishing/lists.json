@@ -7,6 +7,39 @@
     "thumbnail_url": ""
   },
   "lists": {
+    "70": {
+      "soul_count": 4542,
+      "intention_count": 0,
+      "notes": "Contains 7 who prayed and 4535 missing children",
+      "video_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F70.mp4?alt=media&token=03ecf7fe-9dc0-463a-abf9-23cb21d46783",
+      "thumbnail_url": "https://firebasestorage.googleapis.com/v0/b/plusprayer.firebasestorage.app/o/publishing_videos%2F70_thumbnail.png?alt=media&token=c777d072-b8d8-46a1-83b0-5d5413c2353a",
+      "date": "2026-11-07",
+      "published": {
+        "scheduled_for": "2026-11-07T23:25:00Z",
+        "platforms": {
+          "youtube": {
+            "post_id": "6aefb2c1b0ca86952bd1ce40",
+            "status": "scheduled"
+          },
+          "facebook": {
+            "post_id": "6aefb2c4b0ca86952bd1ce55",
+            "status": "scheduled"
+          },
+          "instagram": {
+            "post_id": "6aefb2cc3868b60eb84e6314",
+            "status": "scheduled"
+          },
+          "threads": {
+            "post_id": "6aefb2ccfc75542659dd965e",
+            "status": "scheduled"
+          },
+          "tiktok": {
+            "post_id": "6aefb2ce3868b60eb84e631a",
+            "status": "scheduled"
+          }
+        }
+      }
+    },
     "69": {
       "soul_count": 4531,
       "intention_count": 0,
