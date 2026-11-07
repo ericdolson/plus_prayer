@@ -427,6 +427,10 @@ list shows at a glance what goes on the printed list.
   appears on an intention under an unmarked name.
 - **"Me" is marked too** — always on, which is how the glyph is learned.
 - **Absence is never marked:** private items simply have no mark.
+  **Exception (2026-11-07): a subject's own detail page** may state "Not on
+  the list", because it's where that subject is managed directly (its carry
+  row and "Make room" live there). Home, lists and every other surface still
+  never mark absence.
 - **In the add sheet's carry row** (2026-11-06) the same flat glyph trails
   the "Carry onto the list" label at ~15 pt, `inkMuted` in every state,
   centered on the label's cap height: louder than on rows because it

@@ -45,7 +45,18 @@ the detail page, this file wins.
   Same order as Home (Answered stay in place under the name; Released aren't
   shown). Tapping an intention pushes its own detail page.
 - **Add link:** "＋ Add intention for {alias}"; on the self page just
-  "＋ Add intention".
+  "＋ Add intention". **No intentions yet** (2026-11-07): the section shows
+  a prominent **"＋ Add {alias}'s first intention"** (blue tinted-glass
+  button; on the self page "＋ Add your first intention") instead of the
+  link. Both open the add-intention form for this person (screens.md).
+- **Carry row (2026-11-07)** — names and intentions, not the self page
+  (self is always carried): under the counts, a native **Toggle "Carry
+  onto the list ✱"** with the add sheet's meter as its subtitle ("3 places
+  left" / "This uses your last place" / "All 10 places in use"). Off and
+  the pool is full → disabled, with **"Make room for {alias}"** under it
+  (inert until Membership / Your portion exist). An intention whose name
+  isn't carried shows "Also carries {alias} · uses N places" when on. This
+  page and Your portion are the places a person's carrying is managed.
 
 ### Intention page
 - **No avatar.** Above the title: the parent name in small `inkMuted` text,
@@ -63,7 +74,9 @@ the detail page, this file wins.
 - **Intention (carried):** "It'll be on List 53" / "Your next prayer carries it
   onto List 54" / "Pray to carry it onto List 53".
 - **Not carried** (private, or an intention whose name isn't carried, which
-  makes it not carried): **no status line** (mark presence, never absence).
+  makes it not carried): status line **"Not on the list"** (`inkMuted`).
+  Allowed here as the subject's own management page (design-direction §5
+  exception, 2026-11-07); Home rows still never mark absence.
 - **Answered intention:** gold "Answered · {date}" in place of the status.
 - **Closing notice replaces the status line** under the card's rule (only if
   you haven't prayed with the list today): "List 52 closes in 5 min · pray to

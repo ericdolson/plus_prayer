@@ -39,15 +39,14 @@ _Last updated: 2026-10-18_
   detents (design-direction §0), **built on the native form** (SwiftUI
   `Form`, inset grouped; Compose equivalent later). The spec defines content
   and behavior; the platform owns spacing, type, alignment and row styling
-  (Tier B). Revised 2026-11-07: **two steps for a new name** (who they are,
-  then what to carry), so the carry decision and the upsell live in one
-  place.
+  (Tier B). Revised 2026-11-07: adding a name **lands on the person's page**,
+  where intentions and carrying continue.
   - **Copy rule (whole app):** "the list" only ever means the **printed** list
     (named by number where useful). The user's own screen is never called a
     list ("your list" is never used); their items are simply "added".
   - From footer ＋: opens on **Name**; a native segmented control in the
-    toolbar switches Name | Intention. From a name's detail page (or row):
-    opens the **person form** (step 2 below) for that person.
+    toolbar switches Name | Intention. From a person's page (or a Home
+    row's long-press): opens the **add-intention form for that person**.
   - **Sheet size:** the standard large sheet. **The keyboard rises with the
     sheet** in one motion: focus is set before presentation (`.defaultFocus`
     / `@FocusState` in `onAppear`, no delayed dispatch); if SwiftUI can't do
@@ -61,7 +60,7 @@ _Last updated: 2026-10-18_
   - **Toolbar (Name and Intention tabs):** round glass **X** (leading;
     VoiceOver "Cancel") · segmented control (center) · **Add** (trailing, a
     word), always at opposite ends.
-  - **Step 1 — Name tab (who they are; no carry here):**
+  - **Name tab (who they are; carrying is managed on their page):**
     1. **Avatar** — its own clear row, **~64 pt, centered**. Tone picked
        once at open (design-direction §1b); initials follow the display
        name live (alias if set, else the name); empty: the tone with "…".
@@ -72,46 +71,23 @@ _Last updated: 2026-10-18_
        disabled until there's a name.)
     3. Header **What you call them · optional** · placeholder **"e.g. Mom"**
        (single line) · footer **"Only you see this"**.
-    - **Add saves the name at once** (nothing is lost if they leave), carried
-      by default while there's room (auto-carry, monetization.md), then the
-      sheet pushes (horizontal, forward) to step 2.
-  - **Step 2 — the person form** (after adding a name, and "+ Intention"
-    from a name's page or row; one layout, the only place a specific
-    person's carrying is decided):
-    - Toolbar: after adding a name, native title **"Added"** and **Done**
-      (trailing; no leading button, no back: the name is saved). From a
-      name: **X** (leading) / **Done** (trailing), no title.
-    - A clear header row with the person as on Home: **Home-row avatar
-      (44 pt) + the serif name** (VoiceOver: one item, the name).
-    - Field section: header **"Add an intention now?"** after adding a name
-      ("Intention" from a name's page) · the intention field ("e.g. Healing
-      after surgery"), **grows 1 → 3 lines** (`axis: .vertical`,
-      `lineLimit(1...3)`; no line breaks: Return = Done, pasted breaks become
-      spaces). Focused (keyboard stays up, even when the pool is full).
-    - **Carry section:** header **"Carry onto the list ✱"** (bloom trailing,
-      `inkMuted`, `size.carriedMark.carryRow` = 15 pt via
-      `@ScaledMetric(relativeTo: .body)`); a native **segmented control
-      "Not now · Name · Name + intention"**; footer = the meter, and "Make
-      room for {alias}" when something doesn't fit.
-      - **Default = the most that fits:** "Name" (or "Not now" if even the
-        name doesn't fit). **Until the user touches the control**, typing
-        an intention moves it to "Name + intention" if that fits; once
-        they've picked a segment themselves, typing never overrides it.
-        Clearing the intention while "Name + intention" is selected (auto or
-        picked) falls back to "Name" and disables that segment; a picked
-        "Not now" or "Name" is never changed. The forced fallback is **not**
-        a user pick: the control remembers the preference ("Name +
-        intention"), so typing an intention again restores it. "Name + intention" is disabled
-        while the intention is empty.
-      - Segments that don't fit the pool are disabled, and "Make room for
-        {alias}" (blue, **visible but inert** until Membership / Your
-        portion exist; VoiceOver hint "Not available yet") sits under the
-        meter. Its menu is part of the monetization decision (Q31/Q32).
-      - From a name's page, the control starts at the person's current
-        state (e.g. "Name" if the name is carried).
-    - **Done** applies the carry choice and adds the intention if one was
-      typed (empty = just the carry choice), then closes. Swiping the sheet
-      away keeps the defaults (the name as saved in step 1).
+    - **Add saves the name** (auto-carried while there's room), **closes
+      the sheet and opens the person's page** (detail-page.md), as Contacts
+      and Calendar open what you just created. There, the person can be
+      prayed for at once, "＋ Add {alias}'s first intention" invites the
+      next step, and the carry row ("Not on the list · Make room for
+      {alias}" when full) is the upsell, every visit rather than only at
+      add time. **Interim, until the page exists in the app:** Add saves and
+      closes back to Home.
+  - **Add-intention form for a person** ("＋ Add intention" / "Add
+    {alias}'s first intention" on their page, and the long-press "Add
+    intention" on a Home row): toolbar **X** / **Add**, no title; a clear
+    header row with the person as on Home (Home-row avatar 44 pt + serif
+    name; VoiceOver one item); header **"Intention"** + the growing field
+    (1 → 3 lines, focused, Return = Add, no line breaks); then the same
+    **carry toggle** as the Intention tab (below). Add saves and closes.
+    SUPERSEDES the two-step "Added" step and its "Not now · Name · Name +
+    intention" segmented control (7f13a83 / 55445f4 / f5dbd7a).
   - **Intention tab** (choosing who it's for; adds one intention):
     1. **For** — a native navigation row: ~40 pt avatar with initials + the
        name, Settings-style ("For · (D) Dad ›", system font), default Me.
@@ -133,7 +109,7 @@ _Last updated: 2026-10-18_
        (N counts everything it carries, this item included: re-carrying the
        name brings back its intentions still flagged).
     - Add saves and closes.
-  - **Meter** (both carry controls; what's left, not including this item):
+  - **Meter** (every carry control; what's left, not including this item):
     "{left} {unit} left"; when the selected choice takes all that's left:
     "This uses your last place" / "…your last {N} places"; full or over:
     "All {pool} {unit} in use" (pool of 1: "Your one place is in use").
@@ -143,8 +119,7 @@ _Last updated: 2026-10-18_
     with a ~150 ms crossfade; bare "Make room" before a name exists. Home
     never marks an uncarried item (design-direction §5).
   - **Keyboard stays up:** switching tabs focuses the new tab's field in the
-    same frame; step 1 → step 2 keeps it up (the intention field takes
-    focus); the For push drops it and returning refocuses. The app never
+    same frame; the For push drops it and returning refocuses. The app never
     hides the keyboard itself while a text field is next; user dismissal
     still works.
   - **Validation & states** (section footers or a top notice row: plain ink
@@ -159,8 +134,8 @@ _Last updated: 2026-10-18_
     always kept.
   - **Server disagrees** (pool filled from another device; the result isn't
     carried as chosen): don't close silently. "Saved, but not carried. The
-    list's places filled up." (under the person header in step 2; the top
-    notice row on the Intention tab); toolbar shows only Done; read-only end
+    list's places filled up." (under the person header in the
+    add-intention form; the top notice row on the Intention tab); toolbar shows only Done; read-only end
     state (keyboard down).
   - Least-used tone counts names only, Me included, by visible tone. `{pool}`
     comes from the entitlement; `basePremiumPool` from client `/config`

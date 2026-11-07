@@ -1921,3 +1921,23 @@ The carry control keeps the user's preference separate from what's shown.
 If "Name + intention" was the preference (picked or auto) and clearing the
 intention forced "Name", typing an intention again restores "Name +
 intention". Only a deliberate tap changes the preference.
+
+### Decision: Adding a name lands on the person's page
+**Timestamp:** 2026-11-07
+- Name tab Add saves the name (auto-carried if room), closes the sheet and
+  opens the person's page (interim: back to Home until the page exists).
+- The person's page gains a prominent "＋ Add {alias}'s first intention"
+  when there are none, and a carry row (native Toggle "Carry onto the list
+  ✱" + meter; full → "Make room for {alias}"). Uncarried status line reads
+  "Not on the list".
+- **Principle exception (Eric):** a subject's own detail page may state
+  absence, since it's where the subject is managed directly. Home and every
+  other surface still never mark absence.
+- The add-intention form for a person uses the same carry toggle as the
+  Intention tab.
+SUPERSEDES the two-step "Added" step and its segmented carry control.
+Why (Eric): no second step to explain; the page is the natural next step
+(Contacts/Calendar precedent), the person can be prayed for right away
+instead of getting lost on Home, and "Make room" on the page is a
+persistent upsell on every visit, not only at add time.
+Open: build order (the page isn't built yet; this moves it up).
