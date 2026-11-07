@@ -183,5 +183,29 @@ struct NameCarryOfferTests {
     @Test func theFreePoolNeverFitsAName() {
         let offer = nameCarryOffer(nameId: "bea", in: tree, user: free, now: now)
         #expect(!offer.hasRoom)
+        #expect(nameCarryMeter(offer) == .freeYouAndOneIntention)
+    }
+
+    @Test func carriedTheMeterSaysWhatItUsesAndWhatsFreeOverall() {
+        // 4 carried of 10: Dad uses 2 (him and dad-1), 6 left.
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "dad", in: tree, user: member(10), now: now))
+                == .uses(cost: 2, left: 6))
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "mom", in: tree, user: member(10), now: now))
+                == .uses(cost: 1, left: 6), "an answered intention doesn't count")
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "dad", in: tree, user: member(3), now: now))
+                == .uses(cost: 2, left: 0), "over the pool (a lapsed trial): never below 0")
+    }
+
+    @Test func notCarriedTheMeterSaysWhatCarryingWouldCost() {
+        // Bea would bring back bea-1: 2 places.
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "bea", in: tree, user: member(10), now: now))
+                == .wouldUse(cost: 2, left: 6))
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "bea", in: tree, user: member(6), now: now)) == .usesLast(2))
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "bea", in: tree, user: member(4), now: now))
+                == .allInUse(pool: 4))
+        let ruth = Fixture.name("ruth", "Ruth", order: 9, carried: false)
+        let withRuth = SubjectTree(Fixture.subjects + [ruth])
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "ruth", in: withRuth, user: member(10), now: now)) == .left(6))
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "ruth", in: withRuth, user: member(5), now: now)) == .usesLast(1))
     }
 }

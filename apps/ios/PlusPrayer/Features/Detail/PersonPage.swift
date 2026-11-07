@@ -8,7 +8,8 @@ import SwiftUI
 /// where adding a name lands.
 ///
 /// Not yet: the counts, History, the ⋯ menu, the pray button and praying
-/// in place, and intention pages.
+/// in place, and intention pages. Its intention rows have no thread (the
+/// page is the name).
 struct PersonPage: View {
     let id: String
 
@@ -17,6 +18,8 @@ struct PersonPage: View {
     /// The carry toggle while setCarriedItems is on its way: shown at once,
     /// until the name's flag catches up (or the call fails).
     @State private var pendingCarry: Bool?
+    /// Why the toggle flipped back, under the row until it's touched again.
+    @State private var carryError: String?
     @ScaledMetric(relativeTo: .body) private var bloomHeight = PP.size.carriedMark.carryRow
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -77,14 +80,16 @@ struct PersonPage: View {
 
     // MARK: The carry row
 
-    /// A native toggle with the add sheet's meter as its subtitle. Off with
-    /// no room: disabled, with "Make room for {alias}" under it (inert until
-    /// Membership / Your portion exist).
+    /// A native toggle; its subtitle says what this name costs and what's
+    /// free overall ("Uses 2 places · 3 left"). Off with no room: disabled,
+    /// "Make room for {alias}" under it (inert until Membership / Your
+    /// portion exist). Never silent: offline it's disabled with "Needs a
+    /// connection."; a failed change flips back and says why.
     private func carryRow(_ page: PersonPageValues) -> some View {
         let offer = home.nameCarryOffer(id)
         let isOn = pendingCarry ?? offer.startsOn
-        let meter = L10n.Add.carryMeter(carryMeter(offer, kind: .soul, isOn: isOn))
-        let binding = Binding(get: { isOn }, set: { setCarried($0) })
+        let meter = L10n.Page.carryMeter(nameCarryMeter(offer))
+        let binding = Binding(get: { isOn }, set: { setCarried($0, pool: offer.pool) })
         return VStack(alignment: .leading, spacing: PP.space.sm) {
             Toggle(isOn: binding) {
                 CarryTitle.text(bloomHeight: bloomHeight, dynamicTypeSize: dynamicTypeSize)
@@ -94,6 +99,12 @@ struct PersonPage: View {
             .disabled(!offer.hasRoom || !home.isOnline || pendingCarry != nil)
             .accessibilityLabel(L10n.Add.carryTitle)
             .accessibilityHint(meter)
+            if let line = carryFootnote(offer: offer) {
+                Text(line)
+                    .font(PP.type.bodySmall)
+                    .foregroundStyle(PP.color.ink)
+                    .transition(.opacity)
+            }
             if !offer.hasRoom && !isOn {
                 Button(L10n.Page.makeRoom(for: page.label)) {}
                     .tint(PP.color.primary)
@@ -101,16 +112,28 @@ struct PersonPage: View {
             }
         }
         .padding(.horizontal, PP.space.gutter)
+        .animation(.easeOut(duration: PP.duration.quick), value: carryFootnote(offer: offer))
     }
 
-    private func setCarried(_ on: Bool) {
+    /// The line under the row: offline, else why the last change flipped back.
+    private func carryFootnote(offer: CarryOffer) -> String? {
+        home.isOnline ? carryError : L10n.Page.carryOffline
+    }
+
+    private func setCarried(_ on: Bool, pool: Int) {
         pendingCarry = on
+        carryError = nil
         Task {
             do {
                 try await home.setCarried(id, on)
             } catch {
-                // The toggle goes back to the name's flag.
+                // Flips back to the name's flag, and says why.
                 pendingCarry = nil
+                carryError = switch error {
+                case SetCarriedError.overLimit where on: L10n.Page.filledUp(pool: pool)
+                case SetCarriedError.offline: L10n.Page.carryOffline
+                default: L10n.Page.carryFailed
+                }
             }
         }
     }
@@ -134,12 +157,13 @@ struct PersonPage: View {
                 .padding(.horizontal, PP.space.gutter)
             } else {
                 VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(page.intentions.enumerated()), id: \.element.id) { index, intention in
+                    ForEach(page.intentions) { intention in
                         IntentionRow(text: intention.label, carried: intention.carried, held: intention.heldToday,
                                      secondary: intention.secondary.map {
                                          SecondaryLine(text: $0.text, kind: $0.answered ? .answered : .notice)
                                      },
-                                     thread: index == page.intentions.count - 1 ? .lastBranch : .branch,
+                                     // No thread: the page is the name.
+                                     thread: nil,
                                      accessibilityLabel: intention.accessibilityLabel(
                                         heldOutsidePrayer: intention.heldToday))
                     }

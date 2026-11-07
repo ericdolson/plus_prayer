@@ -119,7 +119,7 @@ final class PlusPrayerUITests: XCTestCase {
         // Lands on the person's page.
         let page = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Gary Olson' AND label CONTAINS 'Dad'"))
         XCTAssertTrue(page.firstMatch.waitForExistence(timeout: 3), "the new person's page: the alias, the name under it")
-        XCTAssertTrue(app.buttons["Add Dad's first intention"].exists, "no intentions yet: the invitation")
+        XCTAssertTrue(app.buttons["Add a first intention for Dad"].exists, "no intentions yet: the invitation")
         XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the carry row")
         sleep(1)
         attach(app, "add 5 page")
@@ -187,7 +187,7 @@ final class PlusPrayerUITests: XCTestCase {
         XCTAssertEqual(carry.value as? String, "1")
         attach(app, "page 2 carried")
 
-        app.buttons["Add Aunt Bea's first intention"].tap()
+        app.buttons["Add a first intention for Aunt Bea"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3), "the add-intention form, focused")
         app.typeText("Her new home")
         app.navigationBars.buttons["Add"].tap()

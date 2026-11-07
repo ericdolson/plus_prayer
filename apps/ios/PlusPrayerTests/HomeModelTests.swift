@@ -311,7 +311,9 @@ struct HomeModelTests {
         #expect(me?.printedName == "Eric Olson")
         #expect(L10n.Page.status(.list(.covered, next: 53), name: "Me", isSelf: true) == "You'll be on List\u{00A0}53")
         #expect(L10n.Page.addIntention(for: "Me", isSelf: true) == "Add intention")
-        #expect(L10n.Page.firstIntention(for: "Dad", isSelf: false) == "Add Dad's first intention")
+        #expect(L10n.Page.firstIntention(for: "Dad", isSelf: false) == "Add a first intention for Dad",
+                "no possessive built from the alias")
+        #expect(L10n.Page.firstIntention(for: "Me", isSelf: true) == "Add your first intention")
     }
 
     @Test func anUncarriedNameIsNotOnTheListAndCanBeCarriedFromItsPage() async throws {
@@ -320,6 +322,8 @@ struct HomeModelTests {
         #expect(L10n.Page.status(.notOnList, name: "Aunt Bea", isSelf: false) == "Not on the list")
         let offer = home.nameCarryOffer("bea")
         #expect(!offer.startsOn && offer.hasRoom)
+        #expect(L10n.Page.carryMeter(nameCarryMeter(offer)) == "3 places left", "7 of 10 carried; Bea costs 1")
+        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("dad"))) == "Uses 2 places · 3 left")
         try await home.setCarried("bea", true)
         await waitUntil { home.nameCarryOffer("bea").startsOn }
         #expect(home.page("bea")?.status != .notOnList)
@@ -327,6 +331,18 @@ struct HomeModelTests {
         await waitUntil { !home.nameCarryOffer("bea").startsOn }
         #expect(home.page("bea")?.status == .notOnList)
         #expect(backend.subjects.value.first { $0.id == "dad" }?.isCarried == true, "the others are kept")
+    }
+
+    @Test func theCarryRowSaysWhatItCostsAndWhatsFree() {
+        defer { running.cancel() }
+        #expect(L10n.Page.carryMeter(.uses(cost: 1, left: 3)) == "Uses 1 place · 3 left")
+        #expect(L10n.Page.carryMeter(.wouldUse(cost: 2, left: 3)) == "Would use 2 places · 3 left")
+        #expect(L10n.Page.carryMeter(.usesLast(2)) == "This uses your last 2 places")
+        #expect(L10n.Page.carryMeter(.allInUse(pool: 10)) == "All 10 places in use")
+        #expect(L10n.Page.carryMeter(.freeYouAndOneIntention) == "Free carries you and one intention of your own")
+        #expect(L10n.Page.filledUp(pool: 10) == "All 10 places filled up.")
+        #expect(L10n.Page.carryFailed == "Couldn't change this. Try again.")
+        #expect(L10n.Page.carryOffline == "Needs a connection.")
     }
 
     @Test func carryingANameThatDoesntFitIsRefused() async {

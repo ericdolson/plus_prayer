@@ -219,6 +219,25 @@ nonisolated enum L10n {
             isSelf ? t("page.firstIntention.self") : String(format: t("page.firstIntention"), name)
         }
         static func makeRoom(for name: String) -> String { String(format: t("page.carry.makeRoom"), name) }
+        /// The carry row's subtitle: what this name costs and what's free
+        /// overall ("Uses 2 places · 3 left").
+        static func carryMeter(_ meter: NameCarryMeter, unit: PoolUnit = poolUnit) -> String {
+            switch (meter, unit) {
+            case (.uses(let cost, let left), .places):
+                String.localizedStringWithFormat(t("page.carry.uses"), cost, left)
+            case (.wouldUse(let cost, let left), .places):
+                String.localizedStringWithFormat(t("page.carry.wouldUse"), cost, left)
+            case (.left(let left), _): Add.carryMeter(.left(left), unit: unit)
+            case (.usesLast(let left), _): Add.carryMeter(.usesLast(left), unit: unit)
+            case (.allInUse(let pool), _): Add.carryMeter(.allInUse(pool: pool), unit: unit)
+            case (.freeYouAndOneIntention, _): Add.carryMeter(.freeYouAndOneIntention, unit: unit)
+            }
+        }
+        /// Under the carry row after it flipped back: the pool filled from
+        /// another device.
+        static func filledUp(pool: Int) -> String { String.localizedStringWithFormat(t("page.carry.filledUp"), pool) }
+        static var carryFailed: String { t("page.carry.failed") }
+        static var carryOffline: String { t("page.carry.offline") }
     }
 
     enum Common {

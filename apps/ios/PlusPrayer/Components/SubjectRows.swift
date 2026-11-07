@@ -66,8 +66,9 @@ struct IntentionRow: View {
     let carried: Bool
     let held: Bool
     var secondary: SecondaryLine? = nil
-    /// `.branch` if more intentions follow under the same name.
-    let thread: ThreadPart
+    /// `.branch` if more intentions follow under the same name; nil without
+    /// a thread (a name's page, where the page is the name).
+    let thread: ThreadPart?
     let accessibilityLabel: String
     var check: HoldState? = nil
     var onTap: () -> Void = {}

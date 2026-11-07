@@ -1445,13 +1445,13 @@
       }
     },
     "page.firstIntention" : {
-      "comment" : "A name's page with no intentions: the prominent button that opens the add-intention form. The argument is the alias, else the name (detail-page.md).",
+      "comment" : "A name's page with no intentions: the prominent button that opens the add-intention form. The argument is the alias, else the name; no possessive is built from it (detail-page.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add %@'s first intention"
+            "value" : "Add a first intention for %@"
           }
         }
       }
@@ -1476,6 +1476,172 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Make room for %@"
+          }
+        }
+      }
+    },
+    "page.carry.uses" : {
+      "comment" : "A name's page: the carry row's subtitle while carried. 1: what it uses (the name and its carried intentions); 2: what's free overall, as on Home and Your portion (detail-page.md). Unit may become people (Q32).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uses %1$#@cost@ · %2$#@left@"
+          },
+          "substitutions" : {
+            "cost" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg place"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg places"
+                    }
+                  }
+                }
+              }
+            },
+            "left" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg left"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg left"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "page.carry.wouldUse" : {
+      "comment" : "A name's page: the carry row's subtitle while not carried, when carrying it brings back intentions still marked carried. 1: what it would use; 2: what's free overall (detail-page.md). Unit may become people (Q32).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Would use %1$#@cost@ · %2$#@left@"
+          },
+          "substitutions" : {
+            "cost" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg place"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg places"
+                    }
+                  }
+                }
+              }
+            },
+            "left" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg left"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg left"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "page.carry.filledUp" : {
+      "comment" : "A name's page: under the carry row when turning it on failed because the pool filled from another device; the toggle flips back. The number is the pool (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All %#@pool@ filled up."
+          },
+          "substitutions" : {
+            "pool" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg place"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg places"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "page.carry.failed" : {
+      "comment" : "A name's page: under the carry row when changing it failed for any other reason; the toggle flips back (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't change this. Try again."
+          }
+        }
+      }
+    },
+    "page.carry.offline" : {
+      "comment" : "A name's page: under the carry row while offline; the toggle is disabled (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs a connection."
           }
         }
       }

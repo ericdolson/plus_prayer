@@ -473,14 +473,18 @@ compose queries; if an operation is missing, ask for a backend change.
   values: the 96 pt avatar (held ring), the alias in `displayTitle` with
   the printed name under it, the status line (the card's rules; "Not on
   the list" when not carried, the page's exception to never marking
-  absence), Home's intention rows. The carry row (not on the self page)
-  is a native Toggle titled by `CarryTitle` with the meter
-  (`nameCarryOffer` in PlusPrayerDomain: what's left before this name);
-  it calls `setCarriedItems` through `HomeModel.setCarried`, showing the
-  new state until the flag catches up. Off with no room: disabled, "Make
-  room for {alias}" (inert). No intentions: "＋ Add {alias}'s first
-  intention" (glass prominent); else the "＋ Add intention for {alias}"
-  link; both open the add-intention form. Not yet: counts, History, ⋯,
+  absence), Home's intention rows without the thread (the page is the
+  name). The carry row (not on the self page) is a native Toggle titled
+  by `CarryTitle`; its subtitle is `nameCarryMeter` (PlusPrayerDomain):
+  what it costs and what's free overall ("Uses 2 places · 3 left",
+  "Would use 2 places · 3 left"). It calls `setCarriedItems` through
+  `HomeModel.setCarried`, showing the new state until the flag catches
+  up; never silent: offline it's disabled with "Needs a connection.", a
+  failure flips back with "All {pool} places filled up." / "Couldn't
+  change this. Try again.". Off with no room: disabled, "Make room for
+  {alias}" (inert). No intentions: "＋ Add a first intention for {alias}"
+  (glass prominent; no possessive built from the alias); else the "＋ Add
+  intention for {alias}" link; both open the add-intention form. Not yet: counts, History, ⋯,
   the pray button and praying in place, intention pages.
 - Search (`Features/Home/HomeSearch.swift`): 🔎 turns the pill into the
   search field (see Theming above); with text it stays a field until ×,

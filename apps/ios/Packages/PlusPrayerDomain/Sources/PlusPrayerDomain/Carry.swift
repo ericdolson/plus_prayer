@@ -179,6 +179,39 @@ public func nameCarryOffer(nameId: String, in tree: SubjectTree, user: UserHeade
                       cost: effectiveCarried(carried).count - used, isFree: isFree)
 }
 
+/// A name's carry row subtitle on its page (detail-page.md, 2026-11-07):
+/// what this name costs and what's free overall, so "3 left" matches Home
+/// and Your portion.
+public enum NameCarryMeter: Sendable, Equatable {
+    /// Carried: "Uses 2 places · 3 left" (the name and its carried
+    /// intentions; "Uses 1 place · 3 left" with none).
+    case uses(cost: Int, left: Int)
+    /// Not carried, and turning it on brings back intentions still marked
+    /// carried: "Would use 2 places · 3 left".
+    case wouldUse(cost: Int, left: Int)
+    /// Not carried, costing one: "3 places left".
+    case left(Int)
+    /// Not carried, and it would take everything left: "This uses your last
+    /// 2 places".
+    case usesLast(Int)
+    /// Not carried and nothing left: "All 10 places in use".
+    case allInUse(pool: Int)
+    /// The free pool: "Free carries you and one intention of your own".
+    case freeYouAndOneIntention
+}
+
+/// The page's meter for `nameCarryOffer`. "Left" is what's free overall
+/// now (never below 0, a lapsed trial included).
+public func nameCarryMeter(_ offer: CarryOffer) -> NameCarryMeter {
+    if offer.isFree { return .freeYouAndOneIntention }
+    let used = offer.used + (offer.startsOn ? offer.cost : 0)
+    let left = max(0, offer.pool - used)
+    if offer.startsOn { return .uses(cost: offer.cost, left: left) }
+    if left == 0 { return .allInUse(pool: offer.pool) }
+    if offer.cost == left { return .usesLast(left) }
+    return offer.cost > 1 ? .wouldUse(cost: offer.cost, left: left) : .left(left)
+}
+
 /// The carry row's muted meter line.
 public enum CarryMeter: Sendable, Equatable {
     /// "3 places left": what's left before this item.
