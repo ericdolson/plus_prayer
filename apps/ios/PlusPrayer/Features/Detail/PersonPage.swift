@@ -18,7 +18,8 @@ struct PersonPage: View {
     /// The carry toggle while setCarriedItems is on its way: shown at once,
     /// until the name's flag catches up (or the call fails).
     @State private var pendingCarry: Bool?
-    /// Why the toggle flipped back, under the row until it's touched again.
+    /// Why the toggle flipped back (ink, like other errors), under the row
+    /// until the next tap on the toggle or leaving the page.
     @State private var carryError: String?
     @ScaledMetric(relativeTo: .body) private var bloomHeight = PP.size.carriedMark.carryRow
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -38,6 +39,9 @@ struct PersonPage: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $adding) { model in AddSheet(model: model) }
         .onChange(of: home.nameCarryOffer(id).startsOn) { pendingCarry = nil }
+        // Leaving the page (back, or another page pushed over it) clears
+        // the failure line.
+        .onDisappear { carryError = nil }
     }
 
     // MARK: The person
@@ -81,10 +85,12 @@ struct PersonPage: View {
     // MARK: The carry row
 
     /// A native toggle; its subtitle says what this name costs and what's
-    /// free overall ("Uses 2 places · 3 left"). Off with no room: disabled,
-    /// "Make room for {alias}" under it (inert until Membership / Your
-    /// portion exist). Never silent: offline it's disabled with "Needs a
-    /// connection."; a failed change flips back and says why.
+    /// free overall ("Uses 2 places · 3 left"). Off without enough room
+    /// (full, or "Would use 2 places · 1 left"): disabled, "Make room for
+    /// {alias}" under it (inert until Membership / Your portion exist). On,
+    /// it can always turn off while online, even over the pool. Never
+    /// silent: offline it's disabled with "Needs a connection."; a failed
+    /// change flips back and says why.
     private func carryRow(_ page: PersonPageValues) -> some View {
         let offer = home.nameCarryOffer(id)
         let isOn = pendingCarry ?? offer.startsOn
@@ -96,7 +102,9 @@ struct PersonPage: View {
                 Text(meter)
             }
             .ppSwitch()
-            .disabled(!offer.hasRoom || !home.isOnline || pendingCarry != nil)
+            // Turning off is never blocked here (backend accepts any save
+            // that only reduces carrying); only turning on needs room.
+            .disabled((!isOn && !offer.hasRoom) || !home.isOnline || pendingCarry != nil)
             .accessibilityLabel(L10n.Add.carryTitle)
             .accessibilityHint(meter)
             if let line = carryFootnote(offer: offer) {

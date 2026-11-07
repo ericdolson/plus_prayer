@@ -131,7 +131,10 @@ final class MockBackend {
     }
 
     /// The setCarriedItems callable: exactly `ids` carried (the self and
-    /// resolved items aside); blocked, never trimmed, over the pool.
+    /// resolved items aside); blocked, never trimmed, over the pool — but
+    /// only when the save adds carrying. A save that only turns items off
+    /// (nothing goes from not carried to carried) is always accepted, even
+    /// over the pool (backend/functions/src/subjects.ts, 2026-11-07).
     func setCarriedItems(_ ids: [String]) async throws(SetCarriedError) {
         try? await Task.sleep(for: latency)
         guard online else { throw .offline }
@@ -142,7 +145,9 @@ final class MockBackend {
             if !subject.isSelf && !subject.isResolved { subject.isCarried = wanted.contains(subject.id) }
             return subject
         }
-        if let header = header.value, !checkPool(SubjectTree(proposed), user: header, now: now()).fits {
+        let current = Dictionary(subjects.value.map { ($0.id, $0.isCarried) }, uniquingKeysWith: { a, _ in a })
+        let adds = proposed.contains { $0.isCarried && current[$0.id] != true }
+        if adds, let header = header.value, !checkPool(SubjectTree(proposed), user: header, now: now()).fits {
             throw .overLimit
         }
         subjects.send(proposed)

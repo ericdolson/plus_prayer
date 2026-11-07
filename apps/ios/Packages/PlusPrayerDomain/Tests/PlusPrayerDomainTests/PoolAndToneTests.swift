@@ -193,7 +193,40 @@ struct NameCarryOfferTests {
         #expect(nameCarryMeter(nameCarryOffer(nameId: "mom", in: tree, user: member(10), now: now))
                 == .uses(cost: 1, left: 6), "an answered intention doesn't count")
         #expect(nameCarryMeter(nameCarryOffer(nameId: "dad", in: tree, user: member(3), now: now))
-                == .uses(cost: 2, left: 0), "over the pool (a lapsed trial): never below 0")
+                == .usesNoneLeft(cost: 2), "over the pool (a lapsed trial): never below 0")
+    }
+
+    @Test func carriedWithNoneFreeSaysNoneLeft() {
+        // Exactly full: 4 of 4.
+        let full = nameCarryOffer(nameId: "dad", in: tree, user: member(4), now: now)
+        #expect(nameCarryMeter(full) == .usesNoneLeft(cost: 2))
+        #expect(full.hasRoom, "turning it off is never blocked")
+        // Over the pool: 4 of 1, still none (not -3) and still free to turn off.
+        let over = nameCarryOffer(nameId: "mom", in: tree, user: member(1), now: now)
+        #expect(nameCarryMeter(over) == .usesNoneLeft(cost: 1))
+        #expect(over.hasRoom)
+    }
+
+    @Test func someRoomButNotEnoughWouldUseAndIsDisabled() {
+        // 4 of 5: 1 left, Bea would use 2 (her and bea-1).
+        let offer = nameCarryOffer(nameId: "bea", in: tree, user: member(5), now: now)
+        #expect(nameCarryMeter(offer) == .wouldUse(cost: 2, left: 1))
+        #expect(!offer.hasRoom && !offer.startsOn)
+    }
+
+    @Test func usesAndWouldUseNeverCountAnsweredIntentions() {
+        // Ruth (off) with one open intention flagged and one Answered flagged.
+        let ruth = Fixture.name("ruth", "Ruth", order: 9, carried: false)
+        let open = Fixture.intention("ruth-1", "ruth", "Work", order: 1)
+        let answered = Fixture.intention("ruth-2", "ruth", "A job", order: 2, answered: true)
+        let withRuth = SubjectTree(Fixture.subjects + [ruth, open, answered])
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "ruth", in: withRuth, user: member(10), now: now))
+                == .wouldUse(cost: 2, left: 6))
+        var carried = ruth
+        carried.isCarried = true
+        let on = SubjectTree(Fixture.subjects + [carried, open, answered])
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "ruth", in: on, user: member(10), now: now))
+                == .uses(cost: 2, left: 4))
     }
 
     @Test func notCarriedTheMeterSaysWhatCarryingWouldCost() {

@@ -1534,6 +1534,40 @@
         }
       }
     },
+    "page.carry.usesNoneLeft" : {
+      "comment" : "A name's page: the carry row's subtitle while carried and nothing is free overall (none left, or over the pool, e.g. a lapsed trial; never a negative number). 1: what it uses (the name and its carried intentions; Answered intentions never count) (detail-page.md). Unit may become people (Q32).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uses %#@cost@ · none left"
+          },
+          "substitutions" : {
+            "cost" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg place"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg places"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "page.carry.wouldUse" : {
       "comment" : "A name's page: the carry row's subtitle while not carried, when carrying it brings back intentions still marked carried. 1: what it would use; 2: what's free overall (detail-page.md). Unit may become people (Q32).",
       "extractionState" : "manual",

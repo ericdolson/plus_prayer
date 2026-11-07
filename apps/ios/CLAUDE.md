@@ -481,8 +481,14 @@ compose queries; if an operation is missing, ask for a backend change.
   `HomeModel.setCarried`, showing the new state until the flag catches
   up; never silent: offline it's disabled with "Needs a connection.", a
   failure flips back with "All {pool} places filled up." / "Couldn't
-  change this. Try again.". Off with no room: disabled, "Make room for
-  {alias}" (inert). No intentions: "＋ Add a first intention for {alias}"
+  change this. Try again." (ink; stays until the next tap or leaving the
+  page). Off without enough room (full, or "Would use 2 places · 1
+  left"): disabled, "Make room for {alias}" (inert). On with none free or
+  over the pool: "Uses 2 places · none left" (never negative); turning
+  off is never blocked online (setCarriedItems accepts any save that only
+  reduces carrying; the mock mirrors it). "Uses" never counts Answered
+  intentions. The page's intention rows sit flush with the section title
+  (`IntentionRow` with `thread: nil`: no Home indent). No intentions: "＋ Add a first intention for {alias}"
   (glass prominent; no possessive built from the alias); else the "＋ Add
   intention for {alias}" link; both open the add-intention form. Not yet: counts, History, ⋯,
   the pray button and praying in place, intention pages.

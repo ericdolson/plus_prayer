@@ -225,6 +225,8 @@ nonisolated enum L10n {
             switch (meter, unit) {
             case (.uses(let cost, let left), .places):
                 String.localizedStringWithFormat(t("page.carry.uses"), cost, left)
+            case (.usesNoneLeft(let cost), .places):
+                String.localizedStringWithFormat(t("page.carry.usesNoneLeft"), cost)
             case (.wouldUse(let cost, let left), .places):
                 String.localizedStringWithFormat(t("page.carry.wouldUse"), cost, left)
             case (.left(let left), _): Add.carryMeter(.left(left), unit: unit)

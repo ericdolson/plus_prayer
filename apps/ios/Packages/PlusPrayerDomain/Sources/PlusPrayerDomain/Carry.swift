@@ -184,10 +184,16 @@ public func nameCarryOffer(nameId: String, in tree: SubjectTree, user: UserHeade
 /// and Your portion.
 public enum NameCarryMeter: Sendable, Equatable {
     /// Carried: "Uses 2 places · 3 left" (the name and its carried
-    /// intentions; "Uses 1 place · 3 left" with none).
+    /// intentions; "Uses 1 place · 3 left" with none). Answered intentions
+    /// never count (they don't go on the list).
     case uses(cost: Int, left: Int)
+    /// Carried with none free, or over the pool (a lapsed trial): "Uses 2
+    /// places · none left", never a negative number.
+    case usesNoneLeft(cost: Int)
     /// Not carried, and turning it on brings back intentions still marked
-    /// carried: "Would use 2 places · 3 left".
+    /// carried: "Would use 2 places · 3 left". Also when there's some room
+    /// but not enough ("Would use 2 places · 1 left"): the toggle is then
+    /// disabled with "Make room" (`CarryOffer.hasRoom` is false).
     case wouldUse(cost: Int, left: Int)
     /// Not carried, costing one: "3 places left".
     case left(Int)
@@ -201,12 +207,13 @@ public enum NameCarryMeter: Sendable, Equatable {
 }
 
 /// The page's meter for `nameCarryOffer`. "Left" is what's free overall
-/// now (never below 0, a lapsed trial included).
+/// now (never below 0, a lapsed trial included); "uses" counts only what
+/// prints (`effectiveCarried`: no Answered intentions).
 public func nameCarryMeter(_ offer: CarryOffer) -> NameCarryMeter {
     if offer.isFree { return .freeYouAndOneIntention }
     let used = offer.used + (offer.startsOn ? offer.cost : 0)
     let left = max(0, offer.pool - used)
-    if offer.startsOn { return .uses(cost: offer.cost, left: left) }
+    if offer.startsOn { return left == 0 ? .usesNoneLeft(cost: offer.cost) : .uses(cost: offer.cost, left: left) }
     if left == 0 { return .allInUse(pool: offer.pool) }
     if offer.cost == left { return .usesLast(left) }
     return offer.cost > 1 ? .wouldUse(cost: offer.cost, left: left) : .left(left)

@@ -67,7 +67,9 @@ struct IntentionRow: View {
     let held: Bool
     var secondary: SecondaryLine? = nil
     /// `.branch` if more intentions follow under the same name; nil without
-    /// a thread (a name's page, where the page is the name).
+    /// a thread (a name's page, where the page is the name): then there's no
+    /// Home indent either, and the row sits flush with the section title
+    /// (dot, then text).
     let thread: ThreadPart?
     let accessibilityLabel: String
     var check: HoldState? = nil
@@ -82,7 +84,8 @@ struct IntentionRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: PP.space.sm) {
             HeldDot(held: held)
-                .frame(width: ThreadGeometry.textStart - PP.space.sm, height: band, alignment: .trailing)
+                .frame(width: thread == nil ? PP.size.held.dot : ThreadGeometry.textStart - PP.space.sm,
+                       height: band, alignment: .trailing)
             VStack(alignment: .leading, spacing: PP.space.xxs) {
                 CarriedMark.after(Text(verbatim: text), carried: carried, context: .intention)
                     .font(PP.type.intention)
@@ -94,6 +97,7 @@ struct IntentionRow: View {
             Spacer(minLength: 0)
             CheckSlot(check: check).frame(height: band)
         }
+        .padding(.leading, thread == nil ? PP.space.gutter : 0)
         .padding(.trailing, PP.space.gutter)
         .padding(.top, PP.space.xxs)
         .padding(.bottom, PP.space.sm)

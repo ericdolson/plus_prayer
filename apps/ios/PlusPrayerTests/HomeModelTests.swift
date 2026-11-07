@@ -337,6 +337,10 @@ struct HomeModelTests {
         defer { running.cancel() }
         #expect(L10n.Page.carryMeter(.uses(cost: 1, left: 3)) == "Uses 1 place · 3 left")
         #expect(L10n.Page.carryMeter(.wouldUse(cost: 2, left: 3)) == "Would use 2 places · 3 left")
+        #expect(L10n.Page.carryMeter(.wouldUse(cost: 2, left: 1)) == "Would use 2 places · 1 left",
+                "some room but not enough")
+        #expect(L10n.Page.carryMeter(.usesNoneLeft(cost: 2)) == "Uses 2 places · none left")
+        #expect(L10n.Page.carryMeter(.usesNoneLeft(cost: 1)) == "Uses 1 place · none left")
         #expect(L10n.Page.carryMeter(.usesLast(2)) == "This uses your last 2 places")
         #expect(L10n.Page.carryMeter(.allInUse(pool: 10)) == "All 10 places in use")
         #expect(L10n.Page.carryMeter(.freeYouAndOneIntention) == "Free carries you and one intention of your own")
@@ -351,6 +355,33 @@ struct HomeModelTests {
         await waitUntil { home.nameCarryOffer("bea").pool == 1 }
         #expect(!home.nameCarryOffer("bea").hasRoom)
         await #expect(throws: SetCarriedError.overLimit) { try await home.setCarried("bea", true) }
+    }
+
+    @Test func overThePoolTurningANameOffAlwaysWorks() async throws {
+        defer { running.cancel() }
+        // A lapsed trial: the free pool, with names still carried.
+        backend.header.update { $0?.entitlementExpiresAt = .now.addingTimeInterval(-60) }
+        await waitUntil { home.nameCarryOffer("dad").pool == 1 }
+        let dad = home.nameCarryOffer("dad")
+        #expect(dad.startsOn && dad.hasRoom, "on, and free to turn off")
+        try await home.setCarried("dad", false)
+        await waitUntil { !home.nameCarryOffer("dad").startsOn }
+        #expect(backend.subjects.value.first { $0.id == "dad" }?.isCarried == false)
+        #expect(backend.subjects.value.first { $0.id == "mom" }?.isCarried == true, "the others are kept")
+        // Still over the pool: adding back is still refused.
+        await #expect(throws: SetCarriedError.overLimit) { try await home.setCarried("dad", true) }
+    }
+
+    @Test func carriedWithNoneFreeTheMeterSaysNoneLeft() async {
+        defer { running.cancel() }
+        // 7 carried: a pool of 7 is exactly full; a pool of 3 is over.
+        backend.header.update { $0?.includeLimit = 7 }
+        await waitUntil { home.nameCarryOffer("dad").pool == 7 }
+        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("dad"))) == "Uses 2 places · none left")
+        backend.header.update { $0?.includeLimit = 3 }
+        await waitUntil { home.nameCarryOffer("dad").pool == 3 }
+        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("dad"))) == "Uses 2 places · none left",
+                "over the pool: never a negative number")
     }
 }
 
