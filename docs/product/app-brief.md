@@ -127,14 +127,16 @@ or links." Must allow verse references ("John 3:16"), room numbers, dates.
 
 ### Add sheet (screens.md)
 A native sheet built on the native **form** (SwiftUI `Form`): toolbar X /
-segmented Name | Intention / Add; a clear avatar-preview row; sections with
-headers "Name" and "What you call them · optional" (footer "Only you see
-this"); on Intention, a For navigation row pushing a searchable "Who is this
-for?" and a growing Intention field; a **carry section** (native Toggle "Carry
-onto the list ✱" with the meter as its subtitle; full pool → off + footer
-"Make room for {alias}", inert for now); one-tap save, then "{alias} is
-added." + intention offer with focus kept. "The list" always means the
-printed list. Home never marks an uncarried item.
+segmented Name | Intention / Add. Name tab: a live preview row (Home-row
+avatar + serif display name, as on Home), sections "Name" and "What you call
+them · optional" (footer "Only you see this"), then a **carry section**
+(native Toggle "Carry onto the list ✱" with the meter as its subtitle; full
+pool → off + footer "Make room for {alias}", inert for now). Intention tab: a
+For navigation row pushing a searchable "Who is this for?", a growing
+Intention field, the carry section. After adding a name: the offer step
+(toolbar title "Added", Skip / Add, the same person header row, "Add an
+intention now?"). "+ Intention" from a name uses the same person form. "The
+list" always means the printed list. Home never marks an uncarried item.
 
 ### Name / Intention detail (stats-history.md)
 One page; intentions hide what doesn't apply and add parent name + resolve.

@@ -63,7 +63,7 @@ _Last updated: 2026-10-18_
     secondary role, blue only for actions).
   - **Name tab (form sections, top to bottom):**
     1. **Live preview row** (clear row, top): the person exactly as on
-       Home: **~40 pt avatar + the serif display name** (alias if set,
+       Home: **Home-row avatar (44 pt token) + the serif display name** (alias if set,
        else the name). Empty: the toned circle + a muted serif "New name".
        Tone picked once at open (design-direction §1b); initials and name
        update live together, so the initials always match the words beside
@@ -128,7 +128,7 @@ _Last updated: 2026-10-18_
     - Home never marks an uncarried item (design-direction §5).
   - **Intention form for a known person** (the offer step after adding a
     name, and "+ Intention" from a name's page or row; one layout):
-    a clear header row with the person as on Home: **~40 pt avatar + the
+    a clear header row with the person as on Home: **Home-row avatar (44 pt) + the
     serif name** (the same row as the Name tab's live preview); then the
     growing intention field (focused, keyboard stays up even when the pool
     is full); then the carry section. No For row: the person is given, not
@@ -136,11 +136,16 @@ _Last updated: 2026-10-18_
     - **Offer step:** native toolbar title **"Added"** (what just happened;
       the form below is the specific next step; no subtitle under the
       name); the field's section header is the question **"Add an
-      intention now?"** in sentence case (`.textCase(nil)`), without the
+      intention now?"** (iOS 26 headers aren't uppercased), without the
       name (it's right above; long names would break it); toolbar **Skip**
       (leading; closes, the name is saved) / **Add** (trailing).
     - **From a name's page or row:** no toolbar title; field header
       **"Intention"**; toolbar **X** / **Add**.
+      Until the name page exists, Home rows get a **native context menu
+      (long-press) with only "Add intention"** for now; Edit / Answered /
+      Release / Archive join it as they're built (detail-page.md).
+    - The person header reads to VoiceOver as one item (the name); "Saved,
+      but not carried…" sits under it on both versions.
   - **One tap to save.** Add saves the name at once; the sheet then pushes
     (horizontal, forward) to the offer step above. [Add] disabled while
     empty; after Add the sheet closes (one offer; more from the name's
@@ -151,7 +156,8 @@ _Last updated: 2026-10-18_
   - **Intention tab Add:** saves and closes (the carry section already said
     whether it's carried).
   - **Keyboard stays up:** switching tabs focuses the new tab's field in the
-    same frame; the For push focuses search, then returns focus. The app
+    same frame; the For push drops it (a tap-only screen), and returning
+    from it (pick or back) refocuses the intention field. The app
     never hides the keyboard itself while a text field is next; user
     dismissal still works.
   - **Validation & states** (as section footers or a top notice row: plain

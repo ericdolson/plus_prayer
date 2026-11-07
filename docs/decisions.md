@@ -1826,3 +1826,19 @@ Considered: "Anything specific to pray for?" (warmer, but doesn't teach
 - Offer step: toolbar title "Added", no subtitle under the name, question
   header "Add an intention now?" (Eric: general → specific; the old "Add an
   intention" title + "Added" subtitle ran specific → general and competed).
+
+### Decision: Add sheet follow-ups (app/ agent questions, round 3)
+**Timestamp:** 2026-11-06
+- Preview row and person header use the Home-row avatar token (44 pt); the
+  For row and picker stay 40 pt.
+- Home rows get a native long-press context menu with only "Add intention"
+  for now (the from-a-name form needs an entry point); other actions join
+  as built.
+- The focus helper attaching when its view enters the window is accepted as
+  the SwiftUI equivalent of viewWillAppear.
+- Leaving "Who is this for?" by back (no pick) also refocuses the intention
+  field.
+- `.textCase(nil)` not required (iOS 26 headers aren't uppercased).
+- The bloom's `.font(.system(size:))` from the scaled token is an accepted
+  exception to the no-fixed-font rule (it's a glyph sized to text).
+- Stale lines fixed in screens.md (keyboard) and app-brief.md (summary).
