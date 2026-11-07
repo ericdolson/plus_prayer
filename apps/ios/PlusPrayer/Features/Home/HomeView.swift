@@ -154,6 +154,14 @@ struct HomeView: View {
                 // A name shown only for an intention the filter keeps: dimmed;
                 // the intention stays at full strength.
                 .opacity(name.isContext ? PP.number.contextRow : 1)
+                // Quick actions (design-direction §5): only "Add intention"
+                // for now; Edit / Answered / Release / Archive join as built.
+                // None in prayer, where a row is a check.
+                .contextMenu {
+                    if !session.isPraying {
+                        Button(L10n.Home.addIntention) { adding = AddSheetModel(home: home, intentionFor: name.id) }
+                    }
+                }
             ForEach(Array(group.intentions.enumerated()), id: \.element.id) { index, intention in
                 IntentionRow(text: intention.label, carried: intention.carried, held: held(intention),
                              secondary: secondary(intention),

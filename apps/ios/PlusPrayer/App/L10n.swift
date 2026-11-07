@@ -10,6 +10,8 @@ nonisolated enum L10n {
         static var add: String { NSLocalizedString("home.bar.add", comment: "") }
         static var pray: String { NSLocalizedString("home.bar.pray", comment: "") }
         static var you: String { NSLocalizedString("home.header.you", comment: "") }
+        /// A name row's long-press menu: opens the intention form for them.
+        static var addIntention: String { NSLocalizedString("home.row.addIntention", comment: "") }
         static var filter: String { NSLocalizedString("home.filter", comment: "") }
         static var clearFilter: String { NSLocalizedString("home.filter.clear", comment: "") }
 
@@ -186,8 +188,10 @@ nonisolated enum L10n {
         static func counter(_ count: Int, _ cap: Int) -> String {
             String(format: t("add.counter"), locale: .current, count, cap)
         }
-        /// The offer step's subtitle under the person's name.
+        /// The offer step's toolbar title.
         static var added: String { t("add.person.added") }
+        /// The live preview row's name before anything is typed.
+        static var newName: String { t("add.preview.newName") }
         /// The offer step's field header, "Add an intention now?".
         static var offerHeader: String { t("add.person.offerHeader") }
         static func capReached(_ cap: Int) -> String {

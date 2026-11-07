@@ -14,9 +14,10 @@ import SwiftUI
 /// push for tapping: its search starts inactive and the keyboard goes down.
 /// The standard large sheet.
 ///
-/// The intention form for a known person (the offer after a name is saved,
-/// or "+ Intention" from a name) is one layout: no title, the person as on
-/// Home, the field, the carry section.
+/// The Name tab opens on a live preview of the Home row (avatar + serif
+/// name). The intention form for a known person (the offer after a name is
+/// saved, or "+ Intention" from a name) is one layout under that same row:
+/// the field, the carry section, in the same place (the push slides both).
 struct AddSheet: View {
     @State var model: AddSheetModel
 
@@ -65,11 +66,9 @@ struct AddSheet: View {
                        value: isPerson)
             .animation(.easeOut(duration: PP.duration.quick), value: notice)
             .toolbar { toolbar }
+            .navigationTitle(model.isOffer ? L10n.Add.added : "")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: Route.self) { _ in chooser }
-            // Back from "Who is this for?" (a pick or back): the intention
-            // takes focus once it's in the window again.
-            .onAppear { if model.step == .form { focus = model.activeField } }
         }
         .tint(PP.color.ink)
         .presentationDetents([.large])
@@ -93,6 +92,7 @@ struct AddSheet: View {
             withAnimation(.easeInOut(duration: PP.duration.quick)) { makeRoomName = model.typedLabel }
         }
         .onChange(of: model.isFinished) { _, finished in if finished { dismiss() } }
+
         // The For row pushes; the native back (or a pick) pops.
         .onChange(of: path) { _, path in
             if path.isEmpty, model.step == .choosing {
@@ -117,11 +117,24 @@ struct AddSheet: View {
     private func page(_ form: some View, shown: Bool, slide: CGFloat) -> some View {
         form
             .scrollContentBackground(.hidden)
-            .listSectionSpacing(.compact)
             .offset(x: slide)
             .opacity(shown ? 1 : 0)
             .allowsHitTesting(shown)
             .accessibilityHidden(!shown)
+    }
+
+    /// The person as on Home: the Home-row avatar and the serif name. The
+    /// Name tab's live preview and the person form's header are this row, in
+    /// the same place on both steps.
+    private func personRow(initials: String, tone: Int, name: String, muted: Bool = false) -> some View {
+        HStack(spacing: PP.space.md) {
+            MonogramAvatar(initials: initials, tone: tone, size: PP.size.avatar.row)
+            Text(verbatim: name)
+                .font(PP.type.name)
+                .foregroundStyle(muted ? PP.color.inkMuted : PP.color.ink)
+                .lineLimit(1)
+        }
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: Toolbar
@@ -192,22 +205,23 @@ struct AddSheet: View {
     private var nameForm: some View {
         Form {
             noticeSection
+            // The live preview: the person as Home will show them, initials
+            // and name together. A preview only in v1: its tone from the start.
             Section {
-                // The avatar leads, so the row previews the person as on
-                // Home. A preview only in v1: its tone from the start,
-                // initials live by Home's rule.
-                HStack(spacing: PP.space.md) {
-                    MonogramAvatar(initials: model.previewInitials, tone: model.tone, size: PP.size.avatar.row)
-                        .accessibilityHidden(true)
-                    TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
-                        .focused($focus, equals: .name)
-                        .accessibilityLabel(L10n.Add.nameLabel)
-                        .textInputAutocapitalization(.words)
-                        .submitLabel(.next)
-                        .onSubmit { focus = .alias }
-                        .fieldRules(.name, text: $model.name, model: model)
-                }
-                .listRowBackground(PP.color.raised)
+                let label = model.typedLabel
+                personRow(initials: model.previewInitials, tone: model.tone,
+                          name: label.isEmpty ? L10n.Add.newName : label, muted: label.isEmpty)
+                    .listRowBackground(Color.clear)
+            }
+            Section {
+                TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
+                    .focused($focus, equals: .name)
+                    .accessibilityLabel(L10n.Add.nameLabel)
+                    .textInputAutocapitalization(.words)
+                    .submitLabel(.next)
+                    .onSubmit { focus = .alias }
+                    .fieldRules(.name, text: $model.name, model: model)
+                    .listRowBackground(PP.color.raised)
             } header: {
                 Text(L10n.Add.nameLabel)
             } footer: {
@@ -309,6 +323,10 @@ struct AddSheet: View {
         .searchFocused($focus, equals: .search)
         .navigationTitle(L10n.Add.whoIsThisFor)
         .navigationBarTitleDisplayMode(.inline)
+        // Back from here (a pick or back): the intention takes focus once the
+        // pop has finished and it's in the window again. (Earlier, from the
+        // root's onAppear mid-pop, it sometimes didn't take.)
+        .onDisappear { if model.step == .form { focus = .intention } }
     }
 
     /// Picking someone returns to the intention, focused.
@@ -319,30 +337,17 @@ struct AddSheet: View {
 
     // MARK: The intention form for a known person
 
-    /// The offer after a name is saved, and "+ Intention" from a name: the
-    /// person as on Home (avatar + serif name; "Added" on the offer only),
-    /// then the intention, then the carry section. No For row: the person
-    /// is given, not chosen.
+    /// The offer after a name is saved ("Added" is its title), and
+    /// "+ Intention" from a name: the person as on Home, then the intention,
+    /// then the carry section. No For row: the person is given, not chosen.
     private var personForm: some View {
         Form {
             noticeSection
             Section {
                 VStack(alignment: .leading, spacing: PP.space.md) {
-                    HStack(spacing: PP.space.md) {
-                        if let person = model.person {
-                            MonogramAvatar(initials: person.initials, tone: person.tone, size: PP.size.avatar.row)
-                        }
-                        VStack(alignment: .leading) {
-                            Text(verbatim: model.personName)
-                                .font(PP.type.name)
-                                .foregroundStyle(PP.color.ink)
-                                .lineLimit(1)
-                            if model.isOffer {
-                                Text(L10n.Add.added).foregroundStyle(.secondary)
-                            }
-                        }
+                    if let person = model.person {
+                        personRow(initials: person.initials, tone: person.tone, name: person.label)
                     }
-                    .accessibilityElement(children: .combine)
                     if model.notCarried != nil {
                         Text(L10n.Add.notCarried)
                             .foregroundStyle(PP.color.ink)
@@ -354,11 +359,7 @@ struct AddSheet: View {
             Section {
                 growingField(.person, text: $model.personText, label: personFieldHeader)
             } header: {
-                if model.isOffer {
-                    Text(personFieldHeader).textCase(nil) // a question, in sentence case
-                } else {
-                    Text(personFieldHeader)
-                }
+                Text(personFieldHeader)
             } footer: {
                 fieldFooter(.person, text: model.personText, caption: nil)
             }
@@ -366,7 +367,7 @@ struct AddSheet: View {
         }
     }
 
-    /// The offer asks, sentence case; from a name it's the plain label.
+    /// The offer asks; from a name it's the plain label.
     private var personFieldHeader: String {
         model.isOffer ? L10n.Add.offerHeader : L10n.Add.intentionLabel
     }

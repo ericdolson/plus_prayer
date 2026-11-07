@@ -466,13 +466,25 @@
       }
     },
     "add.person.added" : {
-      "comment" : "Add sheet, intention form for a known person, offer step only: the quiet subtitle under the person's name, the only confirmation that the name was saved (screens.md).",
+      "comment" : "Add sheet, offer step: the native toolbar title after a name is saved, the only confirmation (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Added"
+          }
+        }
+      }
+    },
+    "add.preview.newName" : {
+      "comment" : "Add sheet, Name tab: the live preview row's muted serif name before anything is typed (screens.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New name"
           }
         }
       }
@@ -1079,6 +1091,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "You"
+          }
+        }
+      }
+    },
+    "home.row.addIntention" : {
+      "comment" : "Home: a name row's long-press menu item; opens the intention form for that person (screens.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add intention"
           }
         }
       }

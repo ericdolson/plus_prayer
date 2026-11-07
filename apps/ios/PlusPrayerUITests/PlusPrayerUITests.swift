@@ -53,8 +53,8 @@ final class PlusPrayerUITests: XCTestCase {
 
     /// + → a name (the keyboard stays up across tabs) → the For push (search
     /// inactive, keyboard down) and a pick (the intention refocused) → Add →
-    /// the offer, "Dad · Added" (pushed in, keyboard still up) → an
-    /// intention → Add → on Home.
+    /// the offer, titled "Added" under Dad's row (pushed in, keyboard still
+    /// up) → an intention → Add → on Home.
     @MainActor
     func testAddANameWithAnIntention() throws {
         let app = XCUIApplication()
@@ -64,10 +64,12 @@ final class PlusPrayerUITests: XCTestCase {
         app.buttons["Add"].firstMatch.tap()
         let name = app.textFields["Name"]
         XCTAssertTrue(name.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["New name"].exists, "the live preview, empty")
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "Name is focused on open")
         XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the carry row")
         XCTAssertTrue(app.navigationBars.buttons["Cancel"].exists, "the glass X, read as Cancel")
         app.typeText("Gary Olson")
+        XCTAssertTrue(app.staticTexts["Gary Olson"].waitForExistence(timeout: 2), "the preview follows the name")
         sleep(1)
         attach(app, "add 1 name")
 
@@ -98,6 +100,13 @@ final class PlusPrayerUITests: XCTestCase {
         XCTAssertEqual(app.buttons["For"].value as? String, "Mom")
         XCTAssertFalse(app.navigationBars.buttons["BackButton"].exists, "back on the form, nothing pushed")
 
+        // Back without a pick refocuses it too.
+        app.buttons["For"].tap()
+        XCTAssertTrue(chooser.waitForExistence(timeout: 2))
+        chooser.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "the intention is refocused after back")
+        XCTAssertEqual(app.buttons["For"].value as? String, "Mom", "back keeps the person")
+
         app.segmentedControls.buttons["Name"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up back on Name")
 
@@ -106,8 +115,8 @@ final class PlusPrayerUITests: XCTestCase {
         attach(app, "add 4 alias")
         app.navigationBars.buttons["Add"].tap()
 
-        let offer = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Dad' AND label CONTAINS 'Added'"))
-        XCTAssertTrue(offer.firstMatch.waitForExistence(timeout: 3), "the offer step: the person, Added")
+        XCTAssertTrue(app.navigationBars["Added"].waitForExistence(timeout: 3), "the offer step, titled Added")
+        XCTAssertTrue(app.staticTexts["Dad"].exists, "under the person's row")
         XCTAssertTrue(app.navigationBars.buttons["Skip"].exists, "Skip, not back: the name is saved")
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up into the offer")
         sleep(1)
@@ -119,6 +128,36 @@ final class PlusPrayerUITests: XCTestCase {
         XCTAssertTrue(row.firstMatch.waitForExistence(timeout: 3), "the new name on Home")
         sleep(1)
         attach(app, "add 6 home")
+    }
+
+    /// Long-press Dad → "Add intention" → the intention form for him (X /
+    /// Add, keyboard up) → Add → on Home under Dad.
+    @MainActor
+    func testAddAnIntentionFromANameRow() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-PPEnvironment", "mock"]
+        app.launch()
+
+        let dad = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Dad, Gary Olson'"))
+        XCTAssertTrue(dad.firstMatch.waitForExistence(timeout: 3))
+        dad.firstMatch.press(forDuration: 1)
+        let menuItem = app.buttons["Add intention"]
+        XCTAssertTrue(menuItem.waitForExistence(timeout: 2), "the row's context menu")
+        attach(app, "row 1 menu")
+        menuItem.tap()
+
+        XCTAssertTrue(app.staticTexts["Dad"].waitForExistence(timeout: 3), "the person's row")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "the intention is focused")
+        XCTAssertTrue(app.navigationBars.buttons["Cancel"].exists, "X, not Skip")
+        XCTAssertFalse(app.buttons["For"].exists, "no For row: the person is given")
+        app.typeText("Strength for the week")
+        sleep(1)
+        attach(app, "row 2 intention form")
+        app.navigationBars.buttons["Add"].tap()
+
+        let added = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Strength for the week'"))
+        XCTAssertTrue(added.firstMatch.waitForExistence(timeout: 3), "the intention on Home")
+        attach(app, "row 3 home")
     }
 
     /// 🔎 → the row docks above the keyboard with the compact pray button →
