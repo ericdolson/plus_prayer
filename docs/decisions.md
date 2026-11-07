@@ -1907,3 +1907,10 @@ places concrete. "Not now" (gentler, implies later) over "No"; "Done" ends
 the flow whether or not an intention was typed.
 Rejected: "Name*" / "(Required)" placeholders (Add's disabled state already
 says it).
+
+### Decision: Carry segment auto-upgrade respects a manual pick
+**Timestamp:** 2026-11-07
+Typing an intention auto-selects "Name + intention" only while the user
+hasn't touched the segmented control; a manual pick is never overridden.
+Clearing the intention with "Name + intention" selected falls back to "Name"
+(that segment disables).

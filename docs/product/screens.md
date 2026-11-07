@@ -94,9 +94,13 @@ _Last updated: 2026-10-18_
       "Not now · Name · Name + intention"**; footer = the meter, and "Make
       room for {alias}" when something doesn't fit.
       - **Default = the most that fits:** "Name" (or "Not now" if even the
-        name doesn't fit). Typing an intention moves it to "Name +
-        intention" if that fits; clearing the intention moves it back.
-        "Name + intention" is disabled while the intention is empty.
+        name doesn't fit). **Until the user touches the control**, typing
+        an intention moves it to "Name + intention" if that fits; once
+        they've picked a segment themselves, typing never overrides it.
+        Clearing the intention while "Name + intention" is selected (auto or
+        picked) falls back to "Name" and disables that segment; a picked
+        "Not now" or "Name" is never changed. "Name + intention" is disabled
+        while the intention is empty.
       - Segments that don't fit the pool are disabled, and "Make room for
         {alias}" (blue, **visible but inert** until Membership / Your
         portion exist; VoiceOver hint "Not available yet") sits under the
