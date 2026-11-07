@@ -50,6 +50,32 @@
             "status": "unconfirmed",
             "platform_post_id": "7705574789137665293"
           }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "UgwqApEsLIe2QoDvMPN4AaABAg",
+            "mechanic_at": "2026-11-07T23:29:31Z",
+            "prayer_id": "UgwEnTk9MVftt5fKKi54AaABAg",
+            "prayer_at": "2026-11-07T23:29:31Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122142253448983291_1499428942323363",
+            "mechanic_at": "2026-11-07T23:29:31Z",
+            "prayer_id": "122142253448983291_1304211905195669",
+            "prayer_at": "2026-11-07T23:29:31Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "18131068820494201",
+            "mechanic_at": "2026-11-07T23:29:31Z",
+            "prayer_id": "18147386836598218",
+            "prayer_at": "2026-11-07T23:29:31Z",
+            "closeout": "pending",
+            "retired_id": null
+          }
         }
       }
     },
@@ -105,24 +131,24 @@
             "mechanic_at": "2026-11-06T06:15:24Z",
             "prayer_id": "UgybySUt8rsNaMS5dIt4AaABAg",
             "prayer_at": "2026-11-06T06:15:24Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "Ugytx8yd8-XfF5n4IKp4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122142096086983291_1366462585397181",
             "mechanic_at": "2026-11-06T06:15:24Z",
             "prayer_id": "122142096086983291_2118605908787196",
             "prayer_at": "2026-11-06T06:15:24Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122142096086983291_2016598149032704"
           },
           "instagram": {
             "mechanic_id": "17913918381668570",
             "mechanic_at": "2026-11-06T06:15:24Z",
             "prayer_id": "17925085530221137",
             "prayer_at": "2026-11-06T06:15:24Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "18119689421471918"
           }
         }
       }
