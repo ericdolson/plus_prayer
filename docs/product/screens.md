@@ -61,9 +61,13 @@ _Last updated: 2026-10-18_
     VoiceOver "Cancel") · segmented control (center) · **Add** (trailing, a
     word), always at opposite ends.
   - **Name tab (who they are; carrying is managed on their page):**
-    1. **Avatar** — its own clear row, **~64 pt, centered**. Tone picked
+    1. **Avatar** — its own clear row, **~96 pt, centered** (large: the
+       avatar is how people recognize someone), with **tight vertical
+       insets (~8 pt above and below)** so the row isn't airy. Tone picked
        once at open (design-direction §1b); initials follow the display
-       name live (alias if set, else the name); empty: the tone with "…".
+       name live (alias if set, else the name); **empty: a person glyph**
+       (SF Symbol `person.fill`, white at the initials' 70% opacity) until
+       typing begins.
        Color never changes. **v1 not tappable**; v2 tap → color / photo
        (here and in Edit).
     2. Header **Name** · field placeholder **"e.g. Gary Olson"** (single

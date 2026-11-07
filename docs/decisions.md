@@ -1947,3 +1947,11 @@ Open: build order (the page isn't built yet; this moves it up).
 The subject detail page is the next iOS build, ahead of the rest of prayer
 mode (Amen invitation, closing sheet) and search. Why: adding a name now
 lands on it, so the add flow isn't complete without it.
+
+### Decision: Name-tab avatar ~96 pt with a person glyph, tighter row
+**Timestamp:** 2026-11-07
+The Name tab's avatar grows to ~96 pt (Contacts makes it the primary way to
+recognize someone), its row's vertical insets tighten to ~8 pt, and the
+empty state is a person glyph (`person.fill`, 70% white) instead of "…".
+Why: at ~64 pt it read small; the row was overly spacious; "…" didn't read
+as a placeholder for a person.
