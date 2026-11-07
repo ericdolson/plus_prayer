@@ -190,8 +190,6 @@ nonisolated enum L10n {
         }
         /// The offer step's toolbar title.
         static var added: String { t("add.person.added") }
-        /// The live preview row's name before anything is typed.
-        static var newName: String { t("add.preview.newName") }
         /// The offer step's field header, "Add an intention now?".
         static var offerHeader: String { t("add.person.offerHeader") }
         static func capReached(_ cap: Int) -> String {

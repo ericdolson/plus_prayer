@@ -419,8 +419,15 @@ compose queries; if an operation is missing, ask for a backend change.
   for labels, footers for hints, errors (ink) and the counter; a top notice
   row; a native Toggle whose subtitle is the meter (its bloom
   `size.carriedMark.carryRow` tall via `@ScaledMetric`), its footer "Make
-  room …". The Name tab opens on a live preview of the Home row
-  (`avatar.row` + serif name, "New name" muted when empty). Each step's
+  room …". On the Name tab a 28 pt avatar (`avatar.small`) sits inside the
+  field its initials come from (Name, or the alias once it has text; "…"
+  when empty), centered on the row's rounded end; both fields keep its
+  leading space (measured from the row, so text never shifts). It travels
+  between the fields in **one layer above the form** (`avatarLayer`,
+  anchored to the rows' measured frames, `.geometryGroup()` so the initials
+  move with the disc; Reduce Motion fades): a view can't move between
+  `Form` rows (`matchedGeometryEffect` and the glass morph both swap in one
+  frame; tried 2026-11-06). Each step's
   form stays in the hierarchy (faded or slid aside), so focus moves without
   the keyboard dropping. **The keyboard rises with the sheet** through
   `KeyboardPrimer`: SwiftUI focuses a `Form` field only after the sheet

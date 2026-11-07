@@ -129,6 +129,13 @@ final class AddSheetModel: Identifiable {
         return initials(alias.isEmpty ? cleanText(name) : alias)
     }
 
+    /// The Name tab's avatar sits in the field its initials come from: the
+    /// alias once it has text, else the name.
+    var avatarField: Field { cleanText(alias).isEmpty ? .name : .alias }
+
+    /// The Name tab's avatar: its field's initials, or "…" while it's empty.
+    var avatarInitials: String { previewInitials.isEmpty ? "…" : previewInitials }
+
     /// What Home will call the name being typed: the alias, else the name
     /// ("Make room for Dad"). Empty while both are.
     var typedLabel: String {

@@ -64,12 +64,10 @@ final class PlusPrayerUITests: XCTestCase {
         app.buttons["Add"].firstMatch.tap()
         let name = app.textFields["Name"]
         XCTAssertTrue(name.waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["New name"].exists, "the live preview, empty")
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "Name is focused on open")
         XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the carry row")
         XCTAssertTrue(app.navigationBars.buttons["Cancel"].exists, "the glass X, read as Cancel")
         app.typeText("Gary Olson")
-        XCTAssertTrue(app.staticTexts["Gary Olson"].waitForExistence(timeout: 2), "the preview follows the name")
         sleep(1)
         attach(app, "add 1 name")
 

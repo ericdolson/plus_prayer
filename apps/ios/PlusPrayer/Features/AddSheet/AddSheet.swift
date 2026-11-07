@@ -14,10 +14,11 @@ import SwiftUI
 /// push for tapping: its search starts inactive and the keyboard goes down.
 /// The standard large sheet.
 ///
-/// The Name tab opens on a live preview of the Home row (avatar + serif
-/// name). The intention form for a known person (the offer after a name is
-/// saved, or "+ Intention" from a name) is one layout under that same row:
-/// the field, the carry section, in the same place (the push slides both).
+/// On the Name tab the avatar sits inside the field its initials come from
+/// (Name, or the alias once it has text) and travels between them. The
+/// intention form for a known person (the offer after a name is saved, or
+/// "+ Intention" from a name) is one layout: the person as on Home, the
+/// field, the carry section.
 struct AddSheet: View {
     @State var model: AddSheetModel
 
@@ -32,6 +33,11 @@ struct AddSheet: View {
     /// default size, scaling with the title's text.
     @ScaledMetric(relativeTo: .body) private var bloomHeight = PP.size.carriedMark.carryRow
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// The Name tab's field rows (their backgrounds' frames) and where the
+    /// Name field's content starts: the avatar is placed on its row and the
+    /// text kept clear of it.
+    @State private var fieldRows: [AddSheetModel.Field: CGRect] = [:]
+    @State private var fieldContentMinX: CGFloat = 0
     /// The navigation path: "Who is this for?" when pushed.
     @State private var path: [Route] = []
 
@@ -123,15 +129,14 @@ struct AddSheet: View {
             .accessibilityHidden(!shown)
     }
 
-    /// The person as on Home: the Home-row avatar and the serif name. The
-    /// Name tab's live preview and the person form's header are this row, in
-    /// the same place on both steps.
-    private func personRow(initials: String, tone: Int, name: String, muted: Bool = false) -> some View {
+    /// The person as on Home: the Home-row avatar and the serif name (the
+    /// person form's header).
+    private func personRow(initials: String, tone: Int, name: String) -> some View {
         HStack(spacing: PP.space.md) {
             MonogramAvatar(initials: initials, tone: tone, size: PP.size.avatar.row)
             Text(verbatim: name)
                 .font(PP.type.name)
-                .foregroundStyle(muted ? PP.color.inkMuted : PP.color.ink)
+                .foregroundStyle(PP.color.ink)
                 .lineLimit(1)
         }
         .accessibilityElement(children: .combine)
@@ -205,14 +210,6 @@ struct AddSheet: View {
     private var nameForm: some View {
         Form {
             noticeSection
-            // The live preview: the person as Home will show them, initials
-            // and name together. A preview only in v1: its tone from the start.
-            Section {
-                let label = model.typedLabel
-                personRow(initials: model.previewInitials, tone: model.tone,
-                          name: label.isEmpty ? L10n.Add.newName : label, muted: label.isEmpty)
-                    .listRowBackground(Color.clear)
-            }
             Section {
                 TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
                     .focused($focus, equals: .name)
@@ -221,7 +218,9 @@ struct AddSheet: View {
                     .submitLabel(.next)
                     .onSubmit { focus = .alias }
                     .fieldRules(.name, text: $model.name, model: model)
-                    .listRowBackground(PP.color.raised)
+                    .avatarSpace(avatarReserve)
+                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minX } action: { fieldContentMinX = $0 }
+                    .listRowBackground(fieldRowBackground(.name))
             } header: {
                 Text(L10n.Add.nameLabel)
             } footer: {
@@ -235,7 +234,8 @@ struct AddSheet: View {
                     .submitLabel(.done)
                     .onSubmit(save)
                     .fieldRules(.alias, text: $model.alias, model: model)
-                    .listRowBackground(PP.color.raised)
+                    .avatarSpace(avatarReserve)
+                    .listRowBackground(fieldRowBackground(.alias))
             } header: {
                 Text(L10n.Add.aliasLabel)
             } footer: {
@@ -243,6 +243,49 @@ struct AddSheet: View {
             }
             carrySection(.name)
         }
+        .overlay { avatarLayer }
+    }
+
+    /// The Name tab's avatar, in one layer above the form so it can travel
+    /// between its fields (a view can't move from one form row to another:
+    /// matched geometry and the glass morph both just swap). It sits on the
+    /// field it belongs to, at the start, inset to follow the row's rounded
+    /// end, and follows the row as the form scrolls.
+    private var avatarLayer: some View {
+        GeometryReader { layer in
+            if let row = fieldRows[model.avatarField] {
+                let origin = layer.frame(in: .global).origin
+                MonogramAvatar(initials: model.avatarInitials, tone: model.tone, size: PP.size.avatar.small)
+                    // The initials travel with the disc (new ones would
+                    // otherwise appear at the destination first).
+                    .geometryGroup()
+                    .position(x: row.minX - origin.x + row.height / 2, y: row.midY - origin.y)
+                    // Reduce Motion: a fade out of one field and into the
+                    // other instead of the move.
+                    .id(reduceMotion ? model.avatarField : .name)
+                    .transition(.opacity)
+            }
+        }
+        .animation(reduceMotion ? .easeOut(duration: PP.duration.quick) : .smooth(duration: PP.duration.settle),
+                   value: model.avatarField)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    /// A Name-tab field's row background, reporting where the row is (for
+    /// the avatar above it).
+    private func fieldRowBackground(_ field: AddSheetModel.Field) -> some View {
+        PP.color.raised
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { fieldRows[field] = $0 }
+    }
+
+    /// The leading space both Name fields keep for the avatar, so their text
+    /// never shifts: from the row's own content inset to just past the
+    /// avatar, plus the platform's spacing.
+    private var avatarReserve: CGFloat {
+        guard let row = fieldRows[.name], row.height > 0 else { return 0 }
+        let inset = fieldContentMinX - row.minX
+        return max(0, row.height / 2 + PP.size.avatar.small / 2 + PP.space.sm - inset)
     }
 
     // MARK: Intention tab
@@ -486,6 +529,9 @@ struct AddSheet: View {
 }
 
 private extension View {
+    /// Leading room for the Name tab's avatar.
+    func avatarSpace(_ reserve: CGFloat) -> some View { padding(.leading, reserve) }
+
     /// A field's rules: caps stop input; the contact-info check runs once
     /// typing pauses (and clears at once when fixed); typing again clears an
     /// offline or failed add.

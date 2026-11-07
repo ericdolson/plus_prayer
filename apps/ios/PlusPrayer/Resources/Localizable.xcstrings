@@ -477,18 +477,6 @@
         }
       }
     },
-    "add.preview.newName" : {
-      "comment" : "Add sheet, Name tab: the live preview row's muted serif name before anything is typed (screens.md).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New name"
-          }
-        }
-      }
-    },
     "add.person.offerHeader" : {
       "comment" : "Add sheet, offer step: the intention field's section header, in sentence case, without the name (it sits right above) (screens.md).",
       "extractionState" : "manual",

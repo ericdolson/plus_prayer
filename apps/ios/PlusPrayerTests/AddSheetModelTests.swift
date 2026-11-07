@@ -40,16 +40,20 @@ struct AddSheetModelTests {
         #expect(model.parent?.label == "Me")
     }
 
-    @Test func thePreviewFollowsHomesInitialsRuleLive() {
+    @Test func theAvatarSitsInTheFieldItsInitialsComeFrom() {
         defer { running.cancel() }
         let model = AddSheetModel(home: home)
-        #expect(model.previewInitials == "")
+        #expect(model.avatarField == .name)
+        #expect(model.avatarInitials == "…", "empty: the tone with an ellipsis")
         model.name = "Gary Olson"
-        #expect(model.previewInitials == "GO")
+        #expect(model.avatarField == .name)
+        #expect(model.avatarInitials == "GO")
         model.alias = "Dad"
-        #expect(model.previewInitials == "D")
+        #expect(model.avatarField == .alias, "moves on the alias's first character")
+        #expect(model.avatarInitials == "D")
         model.alias = "  "
-        #expect(model.previewInitials == "GO")
+        #expect(model.avatarField == .name, "back when the alias is cleared")
+        #expect(model.avatarInitials == "GO")
     }
 
     @Test func addIsDisabledWhileEmptyOrWhileAContactMessageShows() {
