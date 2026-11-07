@@ -54,38 +54,32 @@ _Last updated: 2026-10-18_
   - Form uses the **default** section spacing (compact made a footer read as
     belonging to the next section).
   - New items go to the **bottom** of their level.
-  - **Toolbar:** round glass **X** (leading; VoiceOver "Cancel") / **Add**
-    (trailing, a word). Offer step: **Skip** / **Add**, no back button (the
-    name is saved). No discard confirmation for now (open-questions D6).
+  - **Toolbar (Name and Intention tabs):** leading = the avatar (Name tab;
+    empty on the Intention tab) · center = the segmented control · the round
+    glass **X** fixed at the **far right** on both tabs (VoiceOver
+    "Cancel"); it never moves or changes meaning. **Add** (blue-tinted)
+    **splits off to the left of the X** (native toolbar glass morph) once
+    the tab's required text exists, and merges back if it's cleared. On a
+    narrow iPhone the segmented control compresses to fit. Offer step:
+    **Skip** / **Add**, no back button (the name is saved); from a name: X /
+    Add. No discard confirmation for now (open-questions D6).
   - **Form styling:** the form's own background is hidden so the sheet keeps
     its material; rows use `raised`; headers, footers and row text use the
     platform's styles with our color roles (ink, `inkMuted` via the system
     secondary role, blue only for actions).
   - **Name tab (form sections, top to bottom):**
-    1. **The avatar lives inside the field it comes from** (2026-11-06,
-       to try): a ~30 pt avatar sits at the start of the field, inset to
-       follow the field's rounded end, at the field's normal height (Name
-       and alias stay the same height). It sits in the **Name** field
-       while the alias is empty and moves into the **alias** field on the
-       alias's first character; clearing the alias moves it back. Empty
-       state: the tone with a "…" inside; then initials of the field it's
-       in. Both fields always reserve the avatar's leading space, so text
-       never shifts. VoiceOver reads it once, as part of its field. Tone
-       picked once at open (design-direction §1b); color never changes.
-       **Motion, tried in order, each time-boxed (~½ day), stop at the
-       first that looks right on device:** **A** — avatar slot in each
-       field row, moving between rows with the iOS 26 glass morph
-       (`glassEffectID`) or `matchedGeometryEffect` (a plain move without
-       glass still passes); **B** — if motion breaks between form rows, the
-       avatar in a layer above the form, anchored to the active field, with
-       the glass morph; **C** — A's structure, no travel: shrink out of one
-       field, grow into the other (~0.3 s). Report which shipped and why the
-       earlier ones failed (Eric judges the motion on his phone). **v1: not tappable**;
-       v2: tinted-glass avatar, tap → native menu for color / photo, here
-       and in Edit. SUPERSEDES the live preview row at the top (too busy)
-       and the avatar fixed in the Name row (initials followed the alias).
-    2. Header **Name** · field "e.g. Gary Olson" (single line; holds the
-       avatar while the alias is empty). Focused on open.
+    1. **The avatar is the toolbar's leading control** (Name tab only):
+       a tinted-glass monogram, the same object as your own avatar in
+       Home's header, showing the new person as they'll appear: tone
+       picked once at open (design-direction §1b), initials following the
+       display name live (alias if set, else the name; empty: the tone with
+       "…"). **v1: not tappable**; v2: tap → native menu for color / photo
+       (here and in Edit). No avatar in the form, so the carry section
+       stays in view. SUPERSEDES the in-field avatar and its motion (row to
+       row failed; glass merge needed glass fields that didn't match the
+       form) and the top preview row (busy).
+    2. Header **Name** · field "e.g. Gary Olson" (single line, a standard
+       form row). Focused on open.
     3. Header **What you call them · optional** · field "e.g. Dad" (single
        line) · footer **"Only you see this"**.
     4. **Carry section** (below).

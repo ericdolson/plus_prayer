@@ -1857,3 +1857,18 @@ showed the alias's initials beside the name. The glass morph is the
 platform's own motion, so it doesn't compete with Amen → seal.
 SUPERSEDES the live preview row (286bf14) for the Name tab; the offer step
 keeps its avatar + serif name header.
+
+### Decision: The new person's avatar is a toolbar control; Add splits off the X
+**Timestamp:** 2026-11-06
+- Name tab toolbar: leading = the new person's tinted-glass avatar (like
+  your own avatar in Home's header), initials following the display name;
+  v2 tap → color/photo. Center = segmented control. X fixed at the far
+  right on both tabs; Add (blue tint) splits off to its left once there's
+  text and merges back if cleared.
+- Name and alias are standard form rows; no avatar in the form.
+SUPERSEDES the in-field avatar (b54f6d9): animating between rows failed,
+and the glass merge forced glass fields that didn't match the form.
+Rejected: the X turning into Add in the same spot (one place must keep one
+meaning, or closing becomes saving by accident).
+Why: no form space used, so the carry section stays in view; the toolbar
+avatar is a glass control by nature, ready for v2 customizing.
