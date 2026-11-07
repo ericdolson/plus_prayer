@@ -77,7 +77,9 @@ the detail page, this file wins.
     in use", toggle disabled, **"Make room
     for {alias}"** under it (inert until Membership / Your portion exist;
     no typing pause, the name is known). Free pool: "Free carries you and
-    one intention of your own".
+    one intention of your own", but only while within the free pool; over
+    any pool (e.g. a lapsed trial still carrying names) the carried case
+    wins: "Uses 2 places · none left".
   - An intention page: "Also carries {alias} · uses N places" when its name
     isn't carried.
   - "Uses" never counts Answered intentions (they don't go on the list).

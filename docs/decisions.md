@@ -2013,3 +2013,13 @@ self page shows your name under "Me").
   line clears then too.
 - Known, not fixed: a stale client can re-add an item another device turned
   off and get "All {pool} places filled up." Rare; revisit if seen.
+
+### Decision: Lapsed-trial carry line; restore is pool-aware
+**Timestamp:** 2026-11-07
+- Over any pool, a carried name shows "Uses N places · none left"; the
+  free-pool line shows only within the free pool. A lapsed trial needs to
+  see why names can't go back on.
+- Restore never exceeds the pool: an item that would go over comes back
+  uncarried (own flag off; a name's intentions keep theirs). Previously
+  `restoreSubject` restored carried items with no pool check. Rejected:
+  blocking the restore (loses the item for a carry problem).

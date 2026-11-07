@@ -251,6 +251,9 @@ server functions (addSubject, updateSubject, setCarriedItems), `Prayer.countedAt
 7. Restoring an intention under an archived name is blocked ("Restore its name
    first"). **Restoring a Released intention clears its resolution** (open and
    list-eligible again). Answered stays Answered when restored.
+   Restore is pool-aware (2026-11-07): if the restored item would push
+   effectively carried items over the pool, it's restored with its own
+   `isCarried` false (a name's intentions keep their flags).
 8. "Over the free limit" definition approved.
 9. Print order: decided by the print step.
 10. Paid plan active at first prayer → no trial; no "trial" tier — approved.
