@@ -126,13 +126,15 @@ or links — inline: "Names and intentions can't include phone numbers, emails,
 or links." Must allow verse references ("John 3:16"), room numbers, dates.
 
 ### Add sheet (screens.md)
-One native sheet, Name | Intention segmented control; full spec in screens.md
-(revised 2026-11-06): labeled Name / "What you call them · optional" fields
-(only the alias has a caption, "Only you see this"), ~72 pt avatar preview, a For row that pushes a searchable
-"Who is this for?", a **carry row** ("Carry onto the list", toggle, "{left} {unit} left"; full pool → off + "Make room for {alias}", inert for
-now), one-tap save, then "{alias} is added." + intention offer with focus
-kept. "The list" always means the printed list. Home never marks an uncarried
-item.
+A native sheet built on the native **form** (SwiftUI `Form`): toolbar X /
+segmented Name | Intention / Add; a clear avatar-preview row; sections with
+headers "Name" and "What you call them · optional" (footer "Only you see
+this"); on Intention, a For navigation row pushing a searchable "Who is this
+for?" and a growing Intention field; a **carry section** (native Toggle "Carry
+onto the list ✱" with the meter as its subtitle; full pool → off + footer
+"Make room for {alias}", inert for now); one-tap save, then "{alias} is
+added." + intention offer with focus kept. "The list" always means the
+printed list. Home never marks an uncarried item.
 
 ### Name / Intention detail (stats-history.md)
 One page; intentions hide what doesn't apply and add parent name + resolve.

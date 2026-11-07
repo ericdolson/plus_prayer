@@ -36,156 +36,108 @@ _Last updated: 2026-10-18_
   what doesn't apply (no nested intentions, no avatar edit) and adds its parent
   name + Answered/Release.
 - **Add sheet (one bottom sheet, two entry points):** a native sheet with
-  detents (design-direction §0). Revised 2026-11-06.
+  detents (design-direction §0). Revised 2026-11-06: **built on the native
+  form** (SwiftUI `Form`, inset grouped; Compose equivalent later). The spec
+  defines content and behavior; the platform owns spacing, type, alignment
+  and row styling (Tier B).
   - **Copy rule (whole app):** "the list" only ever means the **printed** list
     (named by number where useful). The user's own screen is never called a
     list ("your list" is never used); their items are simply "added".
-  - From footer ＋: opens on **Name**; a native segmented control at the top
-    switches Name | Intention. From a name's detail page (or row): opens as
-    **Add intention for {alias}**, no For row (association implied).
-  - New items go to the **bottom** of their level. Content is top-aligned on
-    both tabs; the sheet keeps one height (the taller form), spare height
-    falls below the content.
-  - **Toolbar buttons:** a round glass **X** (leading; the iOS 26 sheet
-    convention, VoiceOver "Cancel") / Add (trailing, as a word). Offer step: Not
-    now (leading) / Add (trailing), no back button (the name is saved).
-  - **Name tab, top to bottom:**
-    - ~72 pt monogram avatar preview (detail-page size). Tone picked once at
-      open (design-direction §1b), shown on the empty circle; initials fill
-      in live following Home's rule (Name's initials until the alias has
-      text, then the alias's, "GO" → "D"; intended). Color never changes
-      while typing. **v1: preview only** (not tappable); v2: tap → tone
-      swatches (+ photo), here and in Edit together.
-    - Label **Name**, field placeholder "e.g. Gary Olson", no caption (the
-      carry row says what prints; with groups the name is also what members
-      see). Focused on open.
-    - Label **What you call them · optional**, placeholder "e.g. Dad",
-      caption "Only you see this".
-    - **Carry row** (below).
-  - **Intention tab, top to bottom:**
-    - **For row:** looks like a Home row: ~40 pt avatar with initials + the
-      serif name, trailing blue "Change". Default Me. Tapping it **pushes
-      "Who is this for?"** inside the sheet: a search field (focused, so the
-      keyboard stays up) over everyone in Home order, Me first, matching name
-      + alias like Home search. Picking someone pops back and refocuses the
-      intention field. No ranked strip or menu (nobody is "left off").
-    - Label **Intention**, placeholder "e.g. Healing after surgery", no
-      caption. Focused when the tab opens. **The intention field grows 1 → 3
-      lines** as you type (here and on the offer step), so all 80
-      characters stay visible; rows below move down smoothly, the sheet
-      height stays. No line breaks: Return keeps its submit job (same as
-      Add), pasted line breaks become spaces. Name and alias stay
-      single-line. (The offer step's field has no
-      label either; its question labels it.)
-    - "Who is this for?" keeps the sheet's height (list scrolls); the current
-      person has a neutral ink checkmark; Home search's placeholder
-      "Search"; no matches → 'Nothing matches "{query}".'; Return does
-      nothing. Changing the person resets the carry toggle to that person's
-      default.
-    - **Carry row** (below).
-  - **Form type (2026-11-06): the sheet is labeled controls stacked, one
-    rhythm: label → control → hint.** Labels (Name, What you call them ·
-    optional, Intention, Carry onto the list) = subheadline 15 pt
-    **semibold, ink**. Input text = body 17 pt regular, ink. Hints, captions,
-    the meter and placeholders = footnote 13 pt (placeholders at input size),
-    `inkMuted`. Muted is only for secondary or disappearing text; labels stay
-    ink because they persist. "Make room" = 13 pt, action blue. All text
-    shares one leading edge, including the offer step's serif header and
-    the top notice lines (offline, failure, cap: left-aligned, not
-    centered). Avatar rows (the For row, "Who is this for?") put the avatar
-    on that edge and the name after it, as on Home.
-    **Spacing:** one gap between groups, **~24 pt**, measured from the end
-    of a group (its field, or its hint if it has one) to the next label;
-    also avatar → first label and For row → first label. Inside a group:
-    label → field ~8 pt, and **one hint gap, ~6 pt, for every hint** (under
-    a field or under the carry label; no separate carry-row value). Gaps are optical: from the bottom of the element above (its
-    baseline for a label over its field; just below descenders for a hint
-    or the carry label) to the next text's cap height. On the offer step the
-    serif header and its question are one header block: ~10 pt optical
-    (trim the serif's descender room), then the question labels the field.
-    The toggle is **vertically centered on the whole label + hint block**,
-    as in an iOS Settings row with a subtitle.
-    **One component:** every group (Name, alias, Intention, carry row) is
-    the same form-group view: label (with an optional trailing mark),
-    control, optional hint, with an optional trailing accessory (the
-    toggle). Spacing comes only from the form tokens (`formGroup`,
-    `formLabelToField`, `formHint`); views add no ad-hoc padding.
-    Status lines (e.g. "Saved, but not carried…") = 15 pt regular ink;
-    validation errors = 13 pt ink (no red; ink sets them apart from muted
-    hints). The bloom sits 6 pt after its label (as on Home rows). "Who is
-    this for?" is the pushed view's native inline navigation title.
-  - **Carry row** (name tab, intention tab, offer step): label **"Carry
-    onto the list"** styled like the other labels, followed by the bloom
-    **trailing** it ("Carry onto the list ✱", as the mark trails names on
-    Home), ~15 pt (label size), **`inkMuted` in every state** (the toggle
-    carries the state; a dimmed mark would match Home's "carried" color and
-    say the opposite), vertically centered on the label's cap height, as the
-    mark sits on Home rows; the toggle trails the row. Under it,
-    a muted meter line saying what's **left** (below). (On the offer step,
-    the question "Add an intention for {alias}?" serves as the intention
-    field's label.) `{unit}` comes from one formatter ("places" under today's
-    rule; "people" if open-questions Q32 is adopted).
-    - **On by default** while there's room. The user may turn it off (kept
+  - From footer ＋: opens on **Name**; a native segmented control in the
+    toolbar switches Name | Intention. From a name's detail page (or row):
+    opens as **Add intention for {alias}**, no For row (association implied).
+  - New items go to the **bottom** of their level.
+  - **Toolbar:** round glass **X** (leading; VoiceOver "Cancel") / **Add**
+    (trailing, a word). Offer step: **Not now** / **Add**, no back button
+    (the name is saved). No discard confirmation for now (open-questions D6).
+  - **Form styling:** the form's own background is hidden so the sheet keeps
+    its material; rows use `raised`; headers, footers and row text use the
+    platform's styles with our color roles (ink, `inkMuted` via the system
+    secondary role, blue only for actions).
+  - **Name tab (form sections, top to bottom):**
+    1. **Avatar preview** — a clear row (no row background), ~72 pt monogram,
+       centered. Tone picked once at open (design-direction §1b), shown on
+       the empty circle; initials fill in live following Home's rule (Name's
+       initials until the alias has text, then the alias's, "GO" → "D";
+       intended). Color never changes while typing. **v1: preview only**;
+       v2: tap → tone swatches (+ photo), here and in Edit together.
+    2. Header **Name** · field "e.g. Gary Olson" (single line). Focused on
+       open.
+    3. Header **What you call them · optional** · field "e.g. Dad" (single
+       line) · footer **"Only you see this"**.
+    4. **Carry section** (below).
+  - **Intention tab:**
+    1. **For** — a native navigation row: ~40 pt avatar with initials + the
+       name, default Me. Pushes **"Who is this for?"** (native inline
+       title): a native list with a search field (focused, keyboard stays
+       up) over everyone in Home order, Me first, matching name + alias like
+       Home search; the current person has the native checkmark; no matches
+       → 'Nothing matches "{query}".' Picking pops back and refocuses the
+       intention field. Changing the person resets the carry toggle to that
+       person's default.
+    2. Header **Intention** · field "e.g. Healing after surgery", **grows
+       1 → 3 lines** (`axis: .vertical`, `lineLimit(1...3)`). No line
+       breaks: Return submits (same as Add), pasted breaks become spaces.
+       Focused when the tab opens.
+    3. **Carry section** (below).
+  - **Carry section** (name tab, intention tab, offer step): one native
+    **Toggle** whose label is the title **"Carry onto the list ✱"** with the
+    bloom trailing it (as the mark trails names on Home; `inkMuted` in every
+    state, sized to the title) and the **meter as the toggle's subtitle**
+    (the platform styles and aligns it). Section footer holds **"Make room
+    for {alias}"** (a blue button) when the pool is full. `{unit}` comes from
+    one formatter ("places" today; "people" if Q32 is adopted).
+    - **On by default** while there's room; the user may turn it off (kept
       for their own prayers).
-    - **Pool full:** off and disabled, with a small blue **"Make room for
-      {alias}"** ("Make room for this intention" for intentions) under the meter.
-      **Visible now but inert** until Membership / Your portion exist; what
-      its menu offers (add more places / free one up) is part of the
-      monetization decision (Q31/Q32).
-    - **Meter counts what's left, not including this item**, so it never
-      changes when the toggle flips: "{left} {unit} left" (e.g. "3 places
-      left"); toggle on and the item's full cost equals what's left: "This
-      uses your last place" / "This uses your last {N} places" (then the
-      "Also carries {alias}" line drops its "· uses N"); full or over the
-      pool (e.g. a lapsed trial): "All {pool} {unit} in use" (pool of 1:
-      "Your one place is in use"). SUPERSEDES the "8 of 10 used" preview,
-      which showed "10 of 10" while still allowed. Free pool, Name tab: toggle disabled, meter
-      "Free carries you and one intention of your own" (pending Q32 copy),
-      with "Make room" under it as usual (carrying others is membership).
-      "Uses N" counts everything turning it on carries, this item included
-      (Ruth + her new intention = "uses 2 places").
-    - **Server-disagrees state:** the line sits at the top with the other
-      inline lines; the toolbar shows only Done; the form becomes read-only
-      (text kept, keyboard down — this is an end state). On the offer step
-      the line sits under the header instead (Done only). With carryParent, it counts as not carried if either the
-      intention or the name comes back uncarried.
-    - **Intention under an uncarried name** (any reason): the row starts off,
-      enabled while there's room; turning it on shows the true cost, "Also
-      carries {alias} · uses N {unit}" (re-carrying the name brings back its
-      intentions still marked carried).
-    - **"Make room"** sits under the meter, always (no jumping with name
-      length). With nothing typed yet it reads "Make room"; it becomes "Make
-      room for {alias}" once typing **pauses ~0.6 s**, with a ~150 ms
-      crossfade (never mid-word updates). A name prefilled from search shows
-      at once; later edits, including clearing it, wait for the pause. Search results and avatar
-      initials stay live. Until it works it's a button
-      with the VoiceOver hint "Not available yet" and no action.
-    - **Server disagrees** (the pool filled from another device): if the
-      server saves uncarried while the toggle was on, the sheet doesn't close
-      silently: an inline line "Saved, but not carried. The list's places
-      filled up." (+ Done on the intention tab; on the offer step it sits
-      under the header).
+    - **Meter (what's left, not including this item; never changes when the
+      toggle flips):** "{left} {unit} left"; on, and the item's full cost
+      equals what's left: "This uses your last place" / "…your last {N}
+      places"; full or over the pool: "All {pool} {unit} in use" (pool of 1:
+      "Your one place is in use"). Free pool, Name tab: toggle disabled,
+      "Free carries you and one intention of your own" (pending Q32).
+    - **Pool full:** toggle off and disabled; footer "Make room for {alias}"
+      ("Make room for this intention" for intentions; bare "Make room"
+      before a name exists). **Visible but inert** until Membership / Your
+      portion exist (VoiceOver hint "Not available yet"); its menu is part of
+      the monetization decision (Q31/Q32). The name in it updates after
+      typing pauses ~0.6 s with a ~150 ms crossfade; a prefilled name shows
+      at once. Search results and avatar initials stay live.
+    - **Intention under an uncarried name** (any reason): starts off,
+      enabled while there's room; when on, the subtitle shows "Also carries
+      {alias} · uses N {unit}" (N counts everything it carries, this item
+      included: re-carrying the name brings back its intentions still
+      flagged). If that takes all that's left, it reads "This uses your last
+      {N} places" and drops the "· uses N".
     - Home never marks an uncarried item (design-direction §5).
   - **One tap to save.** Add saves at once; the sheet then pushes
-    (horizontal, forward) to the offer: serif header **"{alias} is added."**
-    (same in every case), "Add an intention for {alias}?", the intention
-    field **focused** (keyboard stays up, including when the pool is full),
-    and its carry row. {alias} falls back to the name. [Add] disabled while
-    empty; after Add the sheet closes (one offer; more from the name's page).
-  - **Intention tab Add:** saves and closes (the carry row already said
+    (horizontal, forward) to the **offer step**, also a form: a clear header
+    row with the serif **"{alias} is added."** and, under it, "Add an
+    intention for {alias}?" (one header block); the intention field
+    (focused, keyboard stays up even when the pool is full; grows like the
+    Intention tab's); the carry section. {alias} falls back to the name.
+    [Add] disabled while empty; after Add the sheet closes (one offer; more
+    from the name's page).
+  - **Intention tab Add:** saves and closes (the carry section already said
     whether it's carried).
   - **Keyboard stays up:** switching tabs focuses the new tab's field in the
     same frame; the For push focuses search, then returns focus. The app
     never hides the keyboard itself while a text field is next; user
     dismissal still works.
-  - **Validation & states:** contact-info message live under the field ~0.5 s
-    after typing pauses, Add disabled while shown. Caps stop input at the
-    limit; a muted "34/40" counter only in the last 10 characters. Inline
-    lines at the top: offline "Adding needs a connection." (Add disabled;
-    stays while offline); generic failure "Couldn't add this right now. Try
-    again in a little while." (Add stays enabled; clears on edit or next
-    Add); ~500 cap "You've reached 500 names and intentions. Archive some to
-    add more." (Add disabled). Text is always kept.
+  - **Validation & states** (as section footers or a top notice row, platform
+    styled; errors in ink, never red): contact-info message under the field
+    ~0.5 s after typing pauses, Add disabled while shown. Caps stop input at
+    the limit; a "34/40" counter in the footer only in the last 10
+    characters. Notice row at the top: offline "Adding needs a connection."
+    (Add disabled; stays while offline); generic failure "Couldn't add this
+    right now. Try again in a little while." (Add stays enabled; clears on
+    edit or next Add); ~500 cap "You've reached 500 names and intentions.
+    Archive some to add more." (Add disabled). Text is always kept.
+  - **Server disagrees** (pool filled from another device; `effectivelyCarried`
+    false while the toggle was on, or either item uncarried with
+    carryParent): don't close silently. The notice row says "Saved, but not
+    carried. The list's places filled up."; toolbar shows only Done; the
+    form becomes read-only (end state; keyboard down). On the offer step the
+    line sits under the header.
   - Least-used tone counts names only, Me included, by visible tone. `{pool}`
     comes from the entitlement; `basePremiumPool` from client `/config`
     (fallback 10).

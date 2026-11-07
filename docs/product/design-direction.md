@@ -35,7 +35,9 @@ button and its countdown · Amen → seal · color roles and tokens · type role
 **Tier B — Native chrome (platform component, platform metrics).**
 Use the platform's own component and accept its look: menus, popovers,
 context menus, sheets, alerts, search field, navigation and tool bars and their
-material, switches, pickers, date pickers, the share sheet, keyboards, the
+material, **forms and settings-style screens (SwiftUI `Form`: section
+headers, footers, text fields, toggle rows with subtitles, navigation rows;
+2026-11-06)**, switches, pickers, date pickers, the share sheet, keyboards, the
 scroll edge effect, and the platform's symbol set (§9). For these,
 the spec defines **content and behavior only**: items, order, labels, copy,
 counts, checked/active state, and what each does. It does **not** define padding,
@@ -429,6 +431,7 @@ list shows at a glance what goes on the printed list.
   the "Carry onto the list" label at ~15 pt, `inkMuted` in every state,
   centered on the label's cap height: louder than on rows because it
   appears once and teaches the mark, placed exactly as on rows (trailing).
+  It sits inside the native toggle's title (the add sheet is a native form).
 - **Glyph (for now):** the same logo glyph the streak badge used
   (`assets/img/+prayer_icon.svg`, the bloom with the "+" cut out), as a flat
   neutral silhouette — no wax, no sheen. Later: a dedicated bloom without the

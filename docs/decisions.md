@@ -1749,3 +1749,22 @@ overhanging without moving the layout.
 Why: Eric was finding per-element variances by eye; both came from the spec
 giving the carry row its own values. Tokens already existed (design/tokens.json
 → PP.space.form*); the fix is fewer special cases and one component.
+
+### Decision: The add sheet is a native Form
+**Timestamp:** 2026-11-06
+The add sheet is rebuilt on SwiftUI's native `Form` (inset grouped): section
+headers for labels, footers for hints ("Only you see this", "Make room…",
+validation), a native Toggle with the meter as its subtitle, a native
+navigation row for "For", a native searchable list for "Who is this for?".
+Forms and settings-style screens join design-direction §0's native (Tier B)
+list. SUPERSEDES today's hand-specified form type, spacing, optical gaps,
+toggle centering, shared text edge, form tokens (`formGroup`,
+`formLabelToField`, `formFieldToHint`, `formLabelToHint`) and the custom
+form-group component; behavior and copy are unchanged.
+Why: we were re-creating Apple's form by hand and Eric kept finding
+variances by eye; the native form gets spacing, alignment, Dynamic Type,
+VoiceOver and keyboard scrolling right for free. "The unique WOW things
+won't come from a custom form" (Eric): custom effort goes to the signature
+moments (Amen → seal, the ring, the cluster), not to forms.
+Cost accepted: platform section-header style instead of our 15 pt semibold
+labels; inset grouped rows instead of free-floating fields.
