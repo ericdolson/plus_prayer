@@ -223,6 +223,12 @@ export async function updateSubject(
  * Save "your portion": exactly `carriedIds` are carried. Blocked — never
  * trimmed — when the effective carry exceeds the effective entitlement; the
  * error details drive the meter / paywall ("17 / 15").
+ *
+ * A save that only reduces carrying is always accepted, even over the pool
+ * (a lapsed trial trims this way; schema-brief 2026-11-07). "Only reduces"
+ * = no item goes from not carried to carried: the new carried flags are a
+ * subset of the current ones, so the effectively carried set can only
+ * shrink. Any addition — including a mixed swap — is pool-checked.
  */
 export async function setCarriedItems(deps: Deps, uid: string, rawIds: unknown) {
   if (!Array.isArray(rawIds) || rawIds.some((id) => typeof id !== "string")) {
@@ -234,7 +240,7 @@ export async function setCarriedItems(deps: Deps, uid: string, rawIds: unknown) 
     s.isSelf || s.status !== "ACTIVE" || s.resolvedAt ? s : { ...s, isCarried: wanted.has(s.id) },
   );
   const check = checkPool(proposed, user, deps.now(), deps.cfg);
-  if (!check.ok) {
+  if (!check.ok && addsCarrying(subjects, proposed)) {
     throw new HttpsError("failed-precondition", "Over the carried limit", {
       reason: "OVER_LIMIT",
       carried: check.carried,
@@ -245,4 +251,10 @@ export async function setCarriedItems(deps: Deps, uid: string, rawIds: unknown) 
   const carriedIds = proposed.filter((s) => !s.isSelf && s.isCarried && s.status === "ACTIVE" && !s.resolvedAt).map((s) => s.id);
   await mutate(deps.db, "SetCarried", { uid, carriedIds });
   return { carried: check.carried, limit: check.limit };
+}
+
+/** Does `proposed` flag any item as carried that `current` doesn't? */
+export function addsCarrying(current: PoolSubject[], proposed: PoolSubject[]): boolean {
+  const before = new Map(current.map((s) => [s.id, s.isCarried]));
+  return proposed.some((s) => s.isCarried && before.get(s.id) !== true);
 }

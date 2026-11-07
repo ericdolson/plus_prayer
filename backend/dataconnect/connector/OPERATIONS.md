@@ -211,7 +211,10 @@ Callables (`functions/src/subjects.ts`):
 - **setCarriedItems** — the "your portion" save: exactly these ids carried.
   Over the effective entitlement → `failed-precondition` with
   `{ reason: "OVER_LIMIT", carried, limit, free }` for the meter/paywall;
-  nothing is trimmed. Uncarrying a name leaves its intentions' own flags
+  nothing is trimmed. Only saves that add carrying are checked: a save that
+  only turns items off (no item goes from not carried to carried) is always
+  accepted, even over the pool (a lapsed trial trims this way; 2026-11-07).
+  A swap (one off, one on) is still checked. Uncarrying a name leaves its intentions' own flags
   intact (they stop counting); re-carrying brings them back through the same
   check.
 

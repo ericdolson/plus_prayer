@@ -210,6 +210,51 @@ describe("the pool on the server (addSubject / setCarriedItems)", () => {
     assert.deepEqual(carried.map((r) => r.public_name), ["Dot"]);
   });
 
+  it("over the pool (a lapsed trial): uncarrying is always accepted; adding is still blocked", async () => {
+    const deps = makeDeps();
+    await createUser("lapsed", { includeLimit: 10, expiresInMs: -DAY }); // trial ended: free pool
+    const a = await addSubjectRow("lapsed", { name: "Ann", carried: true });
+    const b = await addSubjectRow("lapsed", { name: "Ben", carried: true });
+    await addSubjectRow("lapsed", { name: "Cy", carried: true });
+    const bNote = await addSubjectRow("lapsed", { parentId: b, name: "Ben: work", carried: true });
+    const d = await addSubjectRow("lapsed", { name: "Dee", carried: false });
+    const carriedNames = async () =>
+      (await sql<{ public_name: string }>(
+        "SELECT public_name FROM prayer_subject WHERE owner_id = $1 AND is_carried AND NOT is_self ORDER BY public_name", ["lapsed"],
+      )).map((r) => r.public_name);
+
+    // Turning Cy off still leaves them over the free pool — accepted.
+    assert.deepEqual(await setCarriedItems(deps, "lapsed", [a, b, bNote]), { carried: 3, limit: 1 });
+    assert.deepEqual(await carriedNames(), ["Ann", "Ben", "Ben: work"]);
+    // An intention alone, too.
+    assert.deepEqual(await setCarriedItems(deps, "lapsed", [a, b]), { carried: 2, limit: 1 });
+
+    // Adding while over is blocked, and so is a swap (one off, one on).
+    await assert.rejects(setCarriedItems(deps, "lapsed", [a, b, d]), (err: HttpsError) => {
+      assert.deepEqual(err.details, { reason: "OVER_LIMIT", carried: 3, limit: 1, free: true });
+      return true;
+    });
+    await assert.rejects(setCarriedItems(deps, "lapsed", [a, d]), /Over the carried limit/);
+    assert.deepEqual(await carriedNames(), ["Ann", "Ben"], "a rejected save writes nothing");
+
+    // Down to nothing is fine; the same set again is a no-op that's accepted.
+    assert.deepEqual(await setCarriedItems(deps, "lapsed", []), { carried: 0, limit: 1 });
+    assert.deepEqual(await setCarriedItems(deps, "lapsed", []), { carried: 0, limit: 1 });
+  });
+
+  it("under the pool, an addition is still pool-checked", async () => {
+    const deps = makeDeps();
+    await createUser("room", { includeLimit: 2, expiresInMs: 30 * DAY });
+    const a = await addSubjectRow("room", { name: "Ann", carried: true });
+    const b = await addSubjectRow("room", { name: "Ben", carried: false });
+    const c = await addSubjectRow("room", { name: "Cy", carried: false });
+    assert.deepEqual(await setCarriedItems(deps, "room", [a, b]), { carried: 2, limit: 2 });
+    await assert.rejects(setCarriedItems(deps, "room", [a, b, c]), (err: HttpsError) => {
+      assert.deepEqual(err.details, { reason: "OVER_LIMIT", carried: 3, limit: 2, free: false });
+      return true;
+    });
+  });
+
   it("free: only an intention under Me fits; an intention counts only if its name is carried", async () => {
     const deps = makeDeps();
     const { selfId } = await createUser("z");
