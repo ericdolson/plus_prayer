@@ -79,8 +79,8 @@ _Last updated: 2026-10-18_
        glass still passes); **B** — if motion breaks between form rows, the
        avatar in a layer above the form, anchored to the active field, with
        the glass morph; **C** — A's structure, no travel: shrink out of one
-       field, grow into the other (~0.3 s). Report which shipped, why the
-       earlier ones failed, and a screen recording. **v1: not tappable**;
+       field, grow into the other (~0.3 s). Report which shipped and why the
+       earlier ones failed (Eric judges the motion on his phone). **v1: not tappable**;
        v2: tinted-glass avatar, tap → native menu for color / photo, here
        and in Edit. SUPERSEDES the live preview row at the top (too busy)
        and the avatar fixed in the Name row (initials followed the alias).
