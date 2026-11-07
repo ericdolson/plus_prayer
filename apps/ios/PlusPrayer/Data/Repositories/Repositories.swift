@@ -21,6 +21,11 @@ protocol SubjectRepository {
     /// only (it needs the server's id and carry decision). Throws
     /// `AddSubjectError`.
     func addSubject(_ input: NewSubject) async throws -> AddedSubject
+
+    /// The setCarriedItems callable ("your portion" save): exactly `ids`
+    /// carried, or nothing changes (blocked, never trimmed, over the pool).
+    /// Throws `SetCarriedError`.
+    func setCarriedItems(_ ids: [String]) async throws
 }
 
 struct NewSubject: Equatable {
@@ -60,6 +65,15 @@ struct AddedSubject: Equatable {
     func differs(from input: NewSubject) -> Bool {
         input.carry && !effectivelyCarried
     }
+}
+
+/// From the setCarriedItems callable's codes: failed-precondition with
+/// `OVER_LIMIT` → `.overLimit`, no connection → `.offline`, anything else →
+/// `.failed`.
+enum SetCarriedError: Error, Equatable {
+    case overLimit
+    case offline
+    case failed
 }
 
 /// From the addSubject callable's codes (backend/functions/src/subjects.ts):

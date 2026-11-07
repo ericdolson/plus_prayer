@@ -146,3 +146,42 @@ struct CarryOfferTests {
         #expect(carryMeter(lapsed, kind: .soul, isOn: false) == .freeYouAndOneIntention)
     }
 }
+
+/// A name's carry row on its page.
+struct NameCarryOfferTests {
+    let now = Fixture.epoch
+    let tree = Fixture.tree // carried beyond Me: self-1, dad, dad-1, mom → 4; Bea off, bea-1 flagged
+    let free = UserHeader(id: "u", includeLimit: 10, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(-1))
+
+    func member(_ limit: Int) -> UserHeader {
+        UserHeader(id: "u", includeLimit: limit, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(86_400))
+    }
+
+    @Test func aCarriedNameIsOnAndLeftOutOfWhatsUsed() {
+        // Dad and dad-1 are his: 2 of the 4.
+        let offer = nameCarryOffer(nameId: "dad", in: tree, user: member(10), now: now)
+        #expect(offer.startsOn && offer.hasRoom)
+        #expect(offer.used == 2 && offer.cost == 2)
+        #expect(carryMeter(offer, kind: .soul, isOn: true) == .left(8))
+    }
+
+    @Test func reCarryingANameCountsItsFlaggedIntentions() {
+        let roomy = nameCarryOffer(nameId: "bea", in: tree, user: member(6), now: now)
+        #expect(!roomy.startsOn && roomy.hasRoom)
+        #expect(roomy.cost == 2, "Bea and bea-1")
+        #expect(carryMeter(roomy, kind: .soul, isOn: false) == .left(2))
+        let tight = nameCarryOffer(nameId: "bea", in: tree, user: member(5), now: now)
+        #expect(!tight.hasRoom, "1 left, Bea costs 2")
+    }
+
+    @Test func aCarriedNameCanStayOnOverThePoolAndTurnOff() {
+        let offer = nameCarryOffer(nameId: "dad", in: tree, user: free, now: now)
+        #expect(offer.hasRoom, "on already: nothing to fit")
+        #expect(carryMeter(offer, kind: .soul, isOn: true) == .freeYouAndOneIntention)
+    }
+
+    @Test func theFreePoolNeverFitsAName() {
+        let offer = nameCarryOffer(nameId: "bea", in: tree, user: free, now: now)
+        #expect(!offer.hasRoom)
+    }
+}

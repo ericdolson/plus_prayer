@@ -283,6 +283,54 @@ final class HomeModel {
         return PlusPrayerDomain.carryOffer(kind: kind, parentId: parentId, in: tree, user: header, now: clock())
     }
 
+    // MARK: A name's page (detail-page.md)
+
+    /// What a name's page shows, from the same rules as Home; nil until the
+    /// name is here (a name just added arrives with the next stream value).
+    func page(_ id: String) -> PersonPageValues? {
+        let tree = tree
+        guard let subject = tree[id], subject.isName else { return nil }
+        // Home's rows under All, in Home's order.
+        let group = visibleGroups(tree, today: today).first { $0.id == id }
+        let intentions = (group?.intentions ?? []).map { item($0, tree: tree) }
+        return PersonPageValues(
+            id: id, initials: monogram(subject), tone: subject.tone, isSelf: subject.isSelf,
+            label: subject.label, printedName: subject.label != subject.publicName ? subject.publicName : nil,
+            heldToday: isHeldToday(subject, today: today), status: pageStatus(subject, tree: tree),
+            intentions: intentions)
+    }
+
+    private func pageStatus(_ subject: Subject, tree: SubjectTree) -> PersonPageValues.Status? {
+        // The page may say what Home never does: absence (2026-11-07).
+        if !subject.isSelf && !isEffectivelyCarried(subject, in: tree) { return .notOnList }
+        guard let list else { return nil }
+        if let minutes = closingSoonMinutes(closesAt: list.closesAt, now: clock(),
+                                            prayedWithListToday: prayedWithListToday) {
+            return .closing(list: list.listNumber, minutes: minutes, next: list.listNumber + 1)
+        }
+        let status = tomorrowStatus(list: list, status: myStatus, local: localPrayers, header: effectiveHeader,
+                                    today: today)
+        return .list(status, next: list.listNumber + 1)
+    }
+
+    /// A name's carry row: its flag, and whether turning it on fits.
+    func nameCarryOffer(_ id: String) -> CarryOffer {
+        guard let header else {
+            return CarryOffer(hasRoom: false, startsOn: tree[id]?.isCarried ?? false, alsoCarriesParent: false,
+                              used: 0, pool: freeCarryLimit, isFree: true)
+        }
+        return PlusPrayerDomain.nameCarryOffer(nameId: id, in: tree, user: header, now: clock())
+    }
+
+    /// Carries the name `id` or stops carrying it (its intentions keep their
+    /// own flags) through setCarriedItems: what's carried now, with this one
+    /// changed. Throws `SetCarriedError`.
+    func setCarried(_ id: String, _ carried: Bool) async throws {
+        var ids = Set(tree.all.filter { !$0.isSelf && !$0.isResolved && $0.isCarried }.map(\.id))
+        if carried { ids.insert(id) } else { ids.remove(id) }
+        try await repositories.subjects.setCarriedItems(Array(ids))
+    }
+
     /// Active names and intentions; at the ~500 cap the add sheet says so.
     var subjectCount: Int { subjects?.count ?? 0 }
 
@@ -355,6 +403,33 @@ struct NameGroup: Identifiable, Equatable {
     let name: RowItem
     let intentions: [RowItem]
     var id: String { name.id }
+}
+
+/// A name's page: the person, their status line and their intentions.
+struct PersonPageValues: Equatable {
+    enum Status: Equatable {
+        /// "Dad will be on List 53" / "Your next prayer carries Dad onto
+        /// List 54" / "Pray to carry Dad onto List 53" (the self: "You'll be…").
+        case list(TomorrowStatus, next: Int)
+        /// Near the cutoff, if you haven't prayed with the list today.
+        case closing(list: Int, minutes: Int, next: Int)
+        /// Not carried: "Not on the list".
+        case notOnList
+    }
+
+    let id: String
+    let initials: String
+    let tone: Int
+    let isSelf: Bool
+    /// The alias ("Dad", "Me"), else the name: the title.
+    let label: String
+    /// The printed name, under an alias; nil without one.
+    let printedName: String?
+    let heldToday: Bool
+    /// nil until the current list has arrived.
+    let status: Status?
+    /// As on Home, in Home's order.
+    let intentions: [RowItem]
 }
 
 /// One name in the add sheet's For row and "Who is this for?".

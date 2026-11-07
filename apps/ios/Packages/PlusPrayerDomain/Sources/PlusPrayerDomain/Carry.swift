@@ -156,6 +156,29 @@ public func carryOffer(kind: SubjectKind, parentId: String?, in tree: SubjectTre
                       cost: effectiveCarried(after).count - used, isFree: isFree)
 }
 
+/// A name's carry row on its own page (detail-page.md, "Carry row"): the
+/// toggle shows the name's flag (`startsOn`); turning it on needs room for
+/// the name and the intentions still flagged under it (`cost`); `used`
+/// leaves the name out, so the meter says what's left before it. Turning
+/// it off always works.
+public func nameCarryOffer(nameId: String, in tree: SubjectTree, user: UserHeader, now: Date) -> CarryOffer {
+    let pool = effectivePoolLimit(user, now: now)
+    let isFree = !hasActiveEntitlement(user, now: now)
+    var subjects = Array(tree.all)
+    guard let index = subjects.firstIndex(where: { $0.id == nameId && $0.isName && !$0.isSelf }) else {
+        return CarryOffer(hasRoom: false, startsOn: false, alsoCarriesParent: false,
+                          used: effectiveCarried(tree).count, pool: pool, isFree: isFree)
+    }
+    let isCarried = subjects[index].isCarried
+    subjects[index].isCarried = false
+    let used = effectiveCarried(SubjectTree(subjects)).count
+    subjects[index].isCarried = true
+    let carried = SubjectTree(subjects)
+    return CarryOffer(hasRoom: isCarried || checkPool(carried, user: user, now: now).fits, startsOn: isCarried,
+                      alsoCarriesParent: false, used: used, pool: pool,
+                      cost: effectiveCarried(carried).count - used, isFree: isFree)
+}
+
 /// The carry row's muted meter line.
 public enum CarryMeter: Sendable, Equatable {
     /// "3 places left": what's left before this item.

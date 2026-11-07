@@ -7,6 +7,8 @@ import SwiftUI
 /// Runs on `HomeModel` (the repositories, through the domain rules) and
 /// `PrayerSession`. Amen ends in `PrayerSheet` (the list invitation, then the
 /// closing sheet). Search docks above the keyboard (`HomeSearch.swift`).
+/// Home is the root of a navigation stack (its own bar hidden): a name row
+/// pushes the name's page, and adding a name lands there.
 struct HomeView: View {
     @Environment(HomeModel.self) private var home
     @Environment(PrayerSession.self) private var session
@@ -14,8 +16,24 @@ struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var confirmingDiscard = false
     @State private var adding: AddSheetModel?
+    /// The pages pushed over Home: name ids.
+    @State private var path: [String] = []
 
     var body: some View {
+        NavigationStack(path: $path) {
+            homeContent
+                .toolbar(.hidden, for: .navigationBar)
+                .navigationDestination(for: String.self) { id in PersonPage(id: id) }
+        }
+        // Here, not on Home's content: a pushed page takes that off screen,
+        // which would cancel the streams the page needs too.
+        .task { await home.run() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { home.refreshToday() }
+        }
+    }
+
+    private var homeContent: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 if home.cardShown, let card = home.card {
@@ -64,11 +82,11 @@ struct HomeView: View {
         .confirmationDialog(L10n.Prayer.discardQuestion, isPresented: $confirmingDiscard,
                             titleVisibility: .visible) { discardActions }
         .sheet(isPresented: prayerSheetShown) { PrayerSheet() }
-        .sheet(item: $adding) { model in AddSheet(model: model) }
-        .task { await home.run() }
-
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active { home.refreshToday() }
+        .sheet(item: $adding) { model in
+            AddSheet(model: model)
+                // A name just added: its page, as Contacts opens what you
+                // just created.
+                .onDisappear { if let id = model.addedNameId { path.append(id) } }
         }
     }
 
@@ -150,7 +168,7 @@ struct HomeView: View {
                     held: held(name), secondary: secondary(name), hasIntentions: !group.intentions.isEmpty,
                     accessibilityLabel: name.accessibilityLabel(heldOutsidePrayer: !session.isPraying && name.heldToday),
                     check: session.isPraying ? session.check(name.id) : nil,
-                    onTap: { tap(name.id) })
+                    onTap: { tap(name.id, isName: true) })
                 // A name shown only for an intention the filter keeps: dimmed;
                 // the intention stays at full strength.
                 .opacity(name.isContext ? PP.number.contextRow : 1)
@@ -169,7 +187,7 @@ struct HomeView: View {
                              accessibilityLabel: intention.accessibilityLabel(
                                 heldOutsidePrayer: !session.isPraying && intention.heldToday),
                              check: session.isPraying ? session.check(intention.id) : nil,
-                             onTap: { tap(intention.id) })
+                             onTap: { tap(intention.id, isName: false) })
                     .transition(.opacity)
             }
         }
@@ -182,9 +200,14 @@ struct HomeView: View {
         row.secondary.map { SecondaryLine(text: $0.text, kind: $0.answered ? .answered : .notice) }
     }
 
-    /// In prayer a tap checks; in nav mode it opens the item (a later slice).
-    private func tap(_ id: String) {
-        if session.isPraying { session.toggle(id) }
+    /// In prayer a tap checks; in nav mode a name opens its page (an
+    /// intention's page is a later slice).
+    private func tap(_ id: String, isName: Bool) {
+        if session.isPraying {
+            session.toggle(id)
+        } else if isName {
+            path.append(id)
+        }
     }
 }
 

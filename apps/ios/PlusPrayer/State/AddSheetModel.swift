@@ -5,15 +5,14 @@ import PlusPrayerDomain
 /// The add sheet's flow (screens.md, "Add sheet", revised 2026-11-07). One
 /// sheet, one tap to save:
 ///
-///     form (Name | Intention) ──Add name──▶ close (to the person's page once
-///          │                                 it exists; Home for now)
+///     form (Name | Intention) ──Add name──▶ close, then the person's page
 ///          ├──Add intention──▶ close
 ///          └──For row──▶ choosing "Who is this for?" ──pick──▶ form
 ///
 ///     a Home row's long-press ──▶ person (the add-intention form) ──Add──▶ close
 ///
 /// A new name is auto-carried while there's room; its carrying is managed
-/// on its page. Intentions have a carry toggle, so nothing is reported
+/// on its page (whose "Not on the list" says when it isn't). Intentions have a carry toggle, so nothing is reported
 /// after the fact, except when the server disagrees (the pool filled from
 /// another device): "Saved, but not carried…", then Done instead of
 /// closing. The model holds the text, the step, the carry choices and what
@@ -80,20 +79,15 @@ final class AddSheetModel: Identifiable {
     /// available to try again; the text is kept.
     private(set) var failedGenerically = false
 
-    /// Saved, but not carried: an end state, Done only. Never silent.
-    enum NotCarried: Equatable {
-        /// A new name that didn't fit (no room, or the server disagreed):
-        /// "Saved, but not carried. All {pool} places are in use." Until the
-        /// person's page exists (its "Not on the list" will say it there).
-        case name(pool: Int)
-        /// An intention whose toggle was on: "Saved, but not carried. The
-        /// list's places filled up."
-        case intention
-    }
+    /// An intention saved but not carried although its toggle was on:
+    /// "Saved, but not carried. The list's places filled up." An end state,
+    /// Done only.
+    private(set) var notCarried = false
 
-    private(set) var notCarried: NotCarried?
+    var isSettled: Bool { notCarried }
 
-    var isSettled: Bool { notCarried != nil }
+    /// The name just added: Home opens its page as the sheet closes.
+    private(set) var addedNameId: String?
 
     /// What the user set on a carry row; nil = its default.
     private var carryChoice: [CarryRow: Bool] = [:]
@@ -152,7 +146,7 @@ final class AddSheetModel: Identifiable {
     /// The toolbar's Add. Disabled while the text is empty, while a contact
     /// message shows, offline, at the cap, or saving.
     var canAdd: Bool {
-        guard !isSaving, !isOffline, !isAtCap, notCarried == nil else { return false }
+        guard !isSaving, !isOffline, !isAtCap, !notCarried else { return false }
         let text = switch activeField {
         case .name: name
         case .intention: intention
@@ -288,16 +282,12 @@ final class AddSheetModel: Identifiable {
         do {
             switch step {
             case .form where tab == .name:
-                // Auto-carried while there's room; its page manages the
-                // rest. Closes (to that page once it exists; Home for now),
-                // unless it isn't carried: then it says so and waits for Done.
+                // Auto-carried while there's room; its page manages the rest
+                // (and says "Not on the list" when it isn't). Closes onto it.
                 let added = try await home.addSubject(NewSubject(kind: .soul, publicName: name, alias: alias,
                                                                  avatarTone: tone))
-                if added.effectivelyCarried {
-                    isFinished = true
-                } else {
-                    notCarried = .name(pool: home.carryOffer(kind: .soul, parentId: nil).pool)
-                }
+                addedNameId = added.id
+                isFinished = true
             case .form:
                 try await addIntention(intention, parentId: parentId, row: .intention)
             case .person(let nameId):
@@ -326,7 +316,7 @@ final class AddSheetModel: Identifiable {
                                carryParent: carry && carryOffer(row).alsoCarriesParent)
         let added = try await home.addSubject(input)
         if added.differs(from: input) {
-            notCarried = .intention
+            notCarried = true
         } else {
             isFinished = true
         }

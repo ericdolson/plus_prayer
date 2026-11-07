@@ -285,6 +285,57 @@ struct HomeModelTests {
         #expect(home.card?.sealVariant == nil, "being filmed")
         #expect(home.card?.heldToday == true, "the border stays until local midnight")
     }
+
+    // MARK: A name's page
+
+    @Test func aNamePageHasTheAliasThePrintedNameAndHomesIntentions() {
+        defer { running.cancel() }
+        let page = home.page("dad")
+        #expect(page?.label == "Dad")
+        #expect(page?.printedName == "Gary Olson", "the printed name under the alias")
+        #expect(page?.isSelf == false)
+        #expect(page?.intentions.map(\.id) == home.groups.first { $0.id == "dad" }?.intentions.map(\.id),
+                "Home's rows, in Home's order")
+        if case .list = page?.status {} else { Issue.record("a carried name has the list status") }
+        #expect(L10n.Page.status(.list(.covered, next: 53), name: "Dad", isSelf: false) == "Dad will be on List\u{00A0}53")
+        #expect(L10n.Page.status(.list(.prayToCarry, next: 53), name: "Dad", isSelf: false)
+                == "Pray to carry Dad onto List\u{00A0}53")
+    }
+
+    @Test func withoutAnAliasNothingRepeatsAndTheSelfIsMe() {
+        defer { running.cancel() }
+        #expect(home.page("daniel")?.label == "Daniel Kim")
+        #expect(home.page("daniel")?.printedName == nil)
+        let me = home.page("self")
+        #expect(me?.label == "Me")
+        #expect(me?.printedName == "Eric Olson")
+        #expect(L10n.Page.status(.list(.covered, next: 53), name: "Me", isSelf: true) == "You'll be on List\u{00A0}53")
+        #expect(L10n.Page.addIntention(for: "Me", isSelf: true) == "Add intention")
+        #expect(L10n.Page.firstIntention(for: "Dad", isSelf: false) == "Add Dad's first intention")
+    }
+
+    @Test func anUncarriedNameIsNotOnTheListAndCanBeCarriedFromItsPage() async throws {
+        defer { running.cancel() }
+        #expect(home.page("bea")?.status == .notOnList)
+        #expect(L10n.Page.status(.notOnList, name: "Aunt Bea", isSelf: false) == "Not on the list")
+        let offer = home.nameCarryOffer("bea")
+        #expect(!offer.startsOn && offer.hasRoom)
+        try await home.setCarried("bea", true)
+        await waitUntil { home.nameCarryOffer("bea").startsOn }
+        #expect(home.page("bea")?.status != .notOnList)
+        try await home.setCarried("bea", false)
+        await waitUntil { !home.nameCarryOffer("bea").startsOn }
+        #expect(home.page("bea")?.status == .notOnList)
+        #expect(backend.subjects.value.first { $0.id == "dad" }?.isCarried == true, "the others are kept")
+    }
+
+    @Test func carryingANameThatDoesntFitIsRefused() async {
+        defer { running.cancel() }
+        backend.header.update { $0?.entitlementExpiresAt = .now.addingTimeInterval(-60) }
+        await waitUntil { home.nameCarryOffer("bea").pool == 1 }
+        #expect(!home.nameCarryOffer("bea").hasRoom)
+        await #expect(throws: SetCarriedError.overLimit) { try await home.setCarried("bea", true) }
+    }
 }
 
 @MainActor

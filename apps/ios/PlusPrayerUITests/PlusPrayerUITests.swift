@@ -53,7 +53,8 @@ final class PlusPrayerUITests: XCTestCase {
 
     /// + → a name (no carry row; the keyboard stays up across tabs) → the
     /// For push (search inactive, keyboard down) and a pick (the intention
-    /// refocused) → back on Name, an alias → Add → closed, the name on Home.
+    /// refocused) → back on Name, an alias → Add → the new person's page →
+    /// back, the name on Home.
     @MainActor
     func testAddAName() throws {
         let app = XCUIApplication()
@@ -115,10 +116,18 @@ final class PlusPrayerUITests: XCTestCase {
         attach(app, "add 4 alias")
         app.navigationBars.buttons["Add"].tap()
 
+        // Lands on the person's page.
+        let page = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Gary Olson' AND label CONTAINS 'Dad'"))
+        XCTAssertTrue(page.firstMatch.waitForExistence(timeout: 3), "the new person's page: the alias, the name under it")
+        XCTAssertTrue(app.buttons["Add Dad's first intention"].exists, "no intentions yet: the invitation")
+        XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the carry row")
+        sleep(1)
+        attach(app, "add 5 page")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
         let row = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Dad, Gary Olson'"))
         XCTAssertTrue(row.firstMatch.waitForExistence(timeout: 3), "the new name on Home")
-        sleep(1)
-        attach(app, "add 5 home")
+        attach(app, "add 6 home")
     }
 
     /// Long-press Dad → "Add intention" → the add-intention form for him (X /
@@ -150,6 +159,42 @@ final class PlusPrayerUITests: XCTestCase {
         let added = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Strength for the week'"))
         XCTAssertTrue(added.firstMatch.waitForExistence(timeout: 3), "the intention on Home")
         attach(app, "row 3 home")
+    }
+
+    /// Aunt Bea's row → her page ("Not on the list", the carry row off, her
+    /// first-intention invitation) → carry her → the status changes → her
+    /// first intention → it's on the page.
+    @MainActor
+    func testANamesPage() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-PPEnvironment", "mock"]
+        app.launch()
+
+        let bea = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Aunt Bea'"))
+        XCTAssertTrue(bea.firstMatch.waitForExistence(timeout: 3))
+        bea.firstMatch.tap()
+        let header = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Aunt Bea'"))
+        XCTAssertTrue(header.firstMatch.waitForExistence(timeout: 3), "her page")
+        XCTAssertTrue(header.firstMatch.label.contains("Not on the list"), "the page states absence")
+        let carry = app.switches["Carry onto the list"].firstMatch
+        XCTAssertEqual(carry.value as? String, "0")
+        sleep(1)
+        attach(app, "page 1 not carried")
+
+        carry.switches.firstMatch.tap()
+        let carried = NSPredicate(format: "NOT (label CONTAINS 'Not on the list')")
+        wait(for: [expectation(for: carried, evaluatedWith: header.firstMatch)], timeout: 3)
+        XCTAssertEqual(carry.value as? String, "1")
+        attach(app, "page 2 carried")
+
+        app.buttons["Add Aunt Bea's first intention"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3), "the add-intention form, focused")
+        app.typeText("Her new home")
+        app.navigationBars.buttons["Add"].tap()
+        let added = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Her new home'"))
+        XCTAssertTrue(added.firstMatch.waitForExistence(timeout: 3), "on her page")
+        XCTAssertTrue(app.buttons["Add intention for Aunt Bea"].exists, "the link, once there's one")
+        attach(app, "page 3 intention")
     }
 
     /// 🔎 → the row docks above the keyboard with the compact pray button →

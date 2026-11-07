@@ -262,52 +262,6 @@
         }
       }
     },
-    "add.carry.notCarried.name.places" : {
-      "comment" : "Add sheet, Name tab: the notice row when a new name was saved but not carried (no room, or the server disagreed), with Done only (screens.md). The number is the pool (2 or more; a pool of 1 has its own line). Unit may become people (Q32).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saved, but not carried. All %#@pool@ are in use."
-          },
-          "substitutions" : {
-            "pool" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg place"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg places"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "add.carry.notCarried.name.one" : {
-      "comment" : "Add sheet, Name tab: the notice row when a new name was saved but not carried and the pool is 1 (the free pool), with Done only (screens.md).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saved, but not carried. Your one place is in use."
-          }
-        }
-      }
-    },
     "add.carry.title" : {
       "comment" : "Add sheet: the carry row's toggle label, on both tabs and the offer step (screens.md). \"The list\" is the printed list.",
       "extractionState" : "manual",
@@ -1390,6 +1344,138 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "page.status.covered" : {
+      "comment" : "A name's page: the status line when your prayer covers the next list. 1: the alias, else the name; 2: the list number (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ will be on List %2$lld"
+          }
+        }
+      }
+    },
+    "page.status.nextPrayer" : {
+      "comment" : "A name's page: the status line after you prayed with today's list, before the next is covered. 1: the alias, else the name; 2: the list number (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your next prayer carries %1$@ onto List %2$lld"
+          }
+        }
+      }
+    },
+    "page.status.prayToCarry" : {
+      "comment" : "A name's page: the status line when you haven't prayed with the list. 1: the alias, else the name; 2: the list number (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pray to carry %1$@ onto List %2$lld"
+          }
+        }
+      }
+    },
+    "page.status.notOnList" : {
+      "comment" : "A name's page: the status line when the name isn't carried. The page may state absence; Home never does (detail-page.md, 2026-11-07).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not on the list"
+          }
+        }
+      }
+    },
+    "page.closesSoon" : {
+      "comment" : "A name's page: replaces the status line near the cutoff, if you haven't prayed with the list today. 1: the list number; 2: minutes left; 3: the alias, else the name (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List %1$lld closes in %2$lld min · pray to carry %3$@"
+          }
+        }
+      }
+    },
+    "page.intentions" : {
+      "comment" : "A name's page: the Intentions section title (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intentions"
+          }
+        }
+      }
+    },
+    "page.addIntention.for" : {
+      "comment" : "A name's page: the link under its intentions that opens the add-intention form. The argument is the alias, else the name (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add intention for %@"
+          }
+        }
+      }
+    },
+    "page.addIntention.self" : {
+      "comment" : "Your own page (Me): the link under your intentions that opens the add-intention form (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add intention"
+          }
+        }
+      }
+    },
+    "page.firstIntention" : {
+      "comment" : "A name's page with no intentions: the prominent button that opens the add-intention form. The argument is the alias, else the name (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add %@'s first intention"
+          }
+        }
+      }
+    },
+    "page.firstIntention.self" : {
+      "comment" : "Your own page (Me) with no intentions: the prominent button that opens the add-intention form (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your first intention"
+          }
+        }
+      }
+    },
+    "page.carry.makeRoom" : {
+      "comment" : "A name's page: under the carry row when the name is off and doesn't fit; inert until Membership / Your portion exist. The argument is the alias, else the name (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make room for %@"
           }
         }
       }

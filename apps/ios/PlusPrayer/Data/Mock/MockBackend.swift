@@ -130,6 +130,24 @@ final class MockBackend {
                             effectivelyCarried: subject.isCarried && (parent.map { $0.isSelf || $0.isCarried } ?? true))
     }
 
+    /// The setCarriedItems callable: exactly `ids` carried (the self and
+    /// resolved items aside); blocked, never trimmed, over the pool.
+    func setCarriedItems(_ ids: [String]) async throws(SetCarriedError) {
+        try? await Task.sleep(for: latency)
+        guard online else { throw .offline }
+        guard !failsAdds else { throw .failed }
+        let wanted = Set(ids)
+        let proposed = subjects.value.map { subject in
+            var subject = subject
+            if !subject.isSelf && !subject.isResolved { subject.isCarried = wanted.contains(subject.id) }
+            return subject
+        }
+        if let header = header.value, !checkPool(SubjectTree(proposed), user: header, now: now()).fits {
+            throw .overLimit
+        }
+        subjects.send(proposed)
+    }
+
     // MARK: Scenario controls
 
     /// addSubject fails as the server would for anything unexpected (or the

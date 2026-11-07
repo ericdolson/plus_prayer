@@ -150,14 +150,6 @@ nonisolated enum L10n {
         static var makeRoomForIntention: String { t("add.carry.makeRoom.intention") }
         static var makeRoomHint: String { t("add.carry.makeRoom.hint") }
         static var notCarried: String { t("add.carry.notCarried") }
-        /// A new name saved uncarried: "Saved, but not carried. All 10
-        /// places are in use." (a pool of 1: "… Your one place is in use.").
-        static func notCarriedName(pool: Int, unit: PoolUnit = poolUnit) -> String {
-            switch (pool, unit) {
-            case (1, .places): t("add.carry.notCarried.name.one")
-            case (_, .places): String.localizedStringWithFormat(t("add.carry.notCarried.name.places"), pool)
-            }
-        }
         // Everything with a `{unit}` goes through these, keyed by the unit
         // (open-questions Q32): "places" today.
 
@@ -194,6 +186,39 @@ nonisolated enum L10n {
         static func capReached(_ cap: Int) -> String {
             String(format: t("add.capReached"), locale: .current, cap)
         }
+    }
+
+    /// A name's page (detail-page.md).
+    enum Page {
+        private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
+
+        /// The status line under the title; the self's reads as the card's
+        /// own ("You'll be on List 53").
+        static func status(_ status: PersonPageValues.Status, name: String, isSelf: Bool) -> String {
+            switch status {
+            case .notOnList:
+                return t("page.status.notOnList")
+            case .closing(let list, let minutes, let next):
+                return isSelf ? Card.closesSoon(list: list, minutes: minutes, next: next, aboutYouOnly: true)
+                    : String(format: t("page.closesSoon"), locale: .current, list, minutes, name)
+            case .list(let tomorrow, let next):
+                if isSelf { return Card.status(tomorrow, next: next, aboutYouOnly: true) }
+                let key = switch tomorrow {
+                case .covered: "page.status.covered"
+                case .nextPrayerCarries: "page.status.nextPrayer"
+                case .prayToCarry: "page.status.prayToCarry"
+                }
+                return String(format: t(key), locale: .current, name, next)
+            }
+        }
+        static var intentions: String { t("page.intentions") }
+        static func addIntention(for name: String, isSelf: Bool) -> String {
+            isSelf ? t("page.addIntention.self") : String(format: t("page.addIntention.for"), name)
+        }
+        static func firstIntention(for name: String, isSelf: Bool) -> String {
+            isSelf ? t("page.firstIntention.self") : String(format: t("page.firstIntention"), name)
+        }
+        static func makeRoom(for name: String) -> String { String(format: t("page.carry.makeRoom"), name) }
     }
 
     enum Common {

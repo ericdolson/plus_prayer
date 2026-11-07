@@ -20,13 +20,15 @@ and the domain models + mock data source: Home runs on `HomeModel` over the
 mock repositories, the filter works (counts, context rows, linger then fold,
 empty states); Amen ends in the list invitation and the closing sheet with
 the note; the add sheet (footer ＋) adds names and intentions; search docks
-above the keyboard. Next: build order step 3 (onboarding, auth, setSelfName)
-or the rest of Home (the detail page is step 5).
+above the keyboard; a name's page (first slice: the person, the status
+line, the carry row, intentions and adding one), where adding a name lands.
+Next: the rest of the page (counts, History, ⋯, the pray button and praying
+in place, intention pages), then build order step 3 (onboarding, auth,
+setSelfName).
 Still open in prayer mode: backgrounding and the welcome-back question, the
 presence draft, the first Amen's onboarding steps. Also pending: the offline
 queue (Data/Queue, replacing the mock's in-memory hold), a debug menu for the
-mock's scenario controls, and the add sheet's entry from a name's page (the
-row's long-press "Add intention" opens it: `AddSheetModel(home:intentionFor:)`).
+mock's scenario controls.
 
 ## Stack
 - SwiftUI, **iOS 26** minimum (Liquid Glass), **iPhone only** (2026-11-05),
@@ -425,9 +427,9 @@ compose queries; if an operation is missing, ask for a backend change.
   name, `PPIcon.person` while empty via `MonogramAvatar(placeholder:)`),
   then Name and "What you call them · optional" (footer "Only you see
   this"); **no carry row**: Add saves the name auto-carried while there's
-  room and closes (to the person's page once it exists; Home for now),
-  unless it ends up not carried: then the notice row "Saved, but not
-  carried. All {pool} places are in use." and Done only (never silent). (Tried and dropped 2026-11-06/07: the avatar inside or beside the
+  room and closes onto the person's page (`addedNameId`; HomeView pushes
+  it as the sheet goes), whose "Not on the list" says when it isn't
+  carried. (Tried and dropped 2026-11-06/07: the avatar inside or beside the
   fields, a preview row, a toolbar avatar with Add splitting off the X, a
   Contacts-style name block, a second "Added" step with a "Not now · Name ·
   Name + intention" control. A view can't move between `Form` rows, and an
@@ -464,6 +466,22 @@ compose queries; if an operation is missing, ask for a backend change.
   but not carried…" and waits for Done.
   `NewSubject.carry` / `carryParent` follow schema-brief.md ("addSubject
   carry inputs"); the mock has them, the callable gets them next.
+- `Features/Detail/PersonPage` (detail-page.md; first slice): a name's
+  page, pushed from a Home row (Home is a `NavigationStack` root with its
+  bar hidden; `home.run()` is a `.task` on the stack, not Home's content,
+  or a push would cancel the streams). `HomeModel.page(_:)` gives the
+  values: the 96 pt avatar (held ring), the alias in `displayTitle` with
+  the printed name under it, the status line (the card's rules; "Not on
+  the list" when not carried, the page's exception to never marking
+  absence), Home's intention rows. The carry row (not on the self page)
+  is a native Toggle titled by `CarryTitle` with the meter
+  (`nameCarryOffer` in PlusPrayerDomain: what's left before this name);
+  it calls `setCarriedItems` through `HomeModel.setCarried`, showing the
+  new state until the flag catches up. Off with no room: disabled, "Make
+  room for {alias}" (inert). No intentions: "＋ Add {alias}'s first
+  intention" (glass prominent); else the "＋ Add intention for {alias}"
+  link; both open the add-intention form. Not yet: counts, History, ⋯,
+  the pray button and praying in place, intention pages.
 - Search (`Features/Home/HomeSearch.swift`): 🔎 turns the pill into the
   search field (see Theming above); with text it stays a field until ×,
   even with the keyboard down. The query feeds Home's domain rules
@@ -475,7 +493,8 @@ compose queries; if an operation is missing, ask for a backend change.
   invitation → hold → Amen → closing → note → the card's status; ＋ → name
   (no carry row; tabs keep the keyboard; the For push drops it, a pick or
   back refocuses) → alias → Add → on Home;
-  long-press Dad → Add intention → on Home; search → results → no matches →
+  long-press Dad → Add intention → on Home; Aunt Bea's page → carry her →
+  her first intention; search → results → no matches →
   the match hint → ×. Screenshots are attached to
   the result bundle (`xcrun xcresulttool export attachments`). To check
   motion (the keyboard with the sheet), record the simulator during the

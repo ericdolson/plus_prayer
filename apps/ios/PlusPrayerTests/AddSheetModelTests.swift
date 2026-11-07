@@ -79,40 +79,25 @@ struct AddSheetModelTests {
         model.name = "Gary Olson"
         model.alias = "Dad"
         await model.add()
-        #expect(model.isFinished, "closes (to the person's page once it exists)")
+        #expect(model.isFinished, "closes onto the person's page")
         let added = backend.subjects.value.first { $0.publicName == "Gary Olson" && $0.id != "dad" }
+        #expect(model.addedNameId == added?.id)
         #expect(added?.alias == "Dad")
         #expect(added?.avatarTone == model.tone)
         #expect(added?.isCarried == true, "auto-carried: there's room")
     }
 
-    @Test func aNameThatDoesntFitIsSavedUncarriedAndSaysSo() async {
+    @Test func aNameThatDoesntFitIsSavedUncarriedAndClosesOntoItsPage() async {
         defer { running.cancel() }
         await makeFree()
         let model = AddSheetModel(home: home)
         model.name = "Ruth"
         #expect(model.canAdd, "no carry row: nothing to stop it")
         await model.add()
-        #expect(backend.subjects.value.contains { $0.publicName == "Ruth" && !$0.isCarried })
-        #expect(model.notCarried == .name(pool: 1), "never silent")
-        #expect(!model.isFinished, "waits for Done")
-        #expect(model.isSettled)
-        #expect(!model.canAdd)
-        #expect(L10n.Add.notCarriedName(pool: 1) == "Saved, but not carried. Your one place is in use.")
-        #expect(L10n.Add.notCarriedName(pool: 10) == "Saved, but not carried. All 10 places are in use.")
-        model.finish()
-        #expect(model.isFinished)
-    }
-
-    @Test func whenTheServerDoesntCarryANameItSaysSo() async {
-        defer { running.cancel() }
-        let model = AddSheetModel(home: home)
-        model.name = "Ruth"
-        fillThePoolElsewhere()
-        await model.add()
-        #expect(backend.subjects.value.contains { $0.publicName == "Ruth" && !$0.isCarried })
-        #expect(model.notCarried == .name(pool: 10))
-        #expect(!model.isFinished)
+        let ruth = backend.subjects.value.first { $0.publicName == "Ruth" }
+        #expect(ruth?.isCarried == false)
+        #expect(model.isFinished, "its page says \"Not on the list\"")
+        #expect(model.addedNameId == ruth?.id)
     }
 
     @Test func theAddIntentionFormForAPersonHasNoForRow() async {
@@ -276,7 +261,7 @@ struct AddSheetModelTests {
         #expect(model.isCarrying(.intention))
         fillThePoolElsewhere()
         await model.add()
-        #expect(model.notCarried == .intention)
+        #expect(model.notCarried)
         #expect(!model.isFinished, "doesn't close silently")
         #expect(model.isSettled)
         #expect(!model.canAdd, "saved; Done only")
@@ -317,7 +302,7 @@ struct AddSheetModelTests {
         }
         model.intention = "Rest"
         await model.add()
-        #expect(model.notCarried == .intention, "flagged, but it doesn't print: effectivelyCarried decides")
+        #expect(model.notCarried, "flagged, but it doesn't print: effectivelyCarried decides")
     }
 
     @Test func noMatchesSaysSo() {

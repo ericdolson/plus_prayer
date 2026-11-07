@@ -42,11 +42,7 @@ struct AddSheet: View {
     /// wrong. Text is kept. (The person form puts "Saved, but not carried"
     /// under its header row.)
     private var notice: String? {
-        switch model.notCarried {
-        case .name(let pool): return L10n.Add.notCarriedName(pool: pool)
-        case .intention where !isPerson: return L10n.Add.notCarried
-        default: break
-        }
+        if model.notCarried && !isPerson { return L10n.Add.notCarried }
         if model.isOffline { return L10n.Add.offline }
         if model.isAtCap { return L10n.Add.capReached(subjectCap) }
         if model.failedGenerically { return L10n.Add.failed }
@@ -83,6 +79,13 @@ struct AddSheet: View {
                 .accessibilityHidden(true)
         }
         .onAppear { focus = model.activeField }
+        // Opened from a row's context menu, the menu's dismissal sometimes
+        // takes the keyboard back as the sheet rises: once it has settled, a
+        // field that should have it takes it (late, rather than never).
+        .task {
+            try? await Task.sleep(for: .seconds(PP.duration.settle))
+            if focus == nil && path.isEmpty && !isSettled { focus = model.activeField }
+        }
         // A new tab's field takes the keyboard from the primer once it's in
         // the hierarchy. (Not from the form's onAppear: that also runs as
         // "Who is this for?" pops, and focusing mid-pop lost the toolbar.)
@@ -343,7 +346,7 @@ struct AddSheet: View {
                     if let person = model.person {
                         personRow(initials: person.initials, tone: person.tone, name: person.label)
                     }
-                    if model.notCarried != nil {
+                    if model.notCarried {
                         Text(L10n.Add.notCarried)
                             .foregroundStyle(PP.color.ink)
                             .transition(.opacity)
@@ -376,13 +379,9 @@ struct AddSheet: View {
         if let also = model.alsoCarries(row) {
             subtitle += "\n" + L10n.Add.alsoCarries(also.name, cost: also.cost)
         }
-        let bloom = Text(PPIcon.carried)
-            .font(.system(size: bloomHeight / PPIcon.carriedEm))
-            .baselineOffset(bloomOffset)
-            .foregroundStyle(PP.color.inkMuted)
         return Section {
             Toggle(isOn: isOn) {
-                Text("\(Text(L10n.Add.carryTitle))\u{00A0}\(bloom)")
+                CarryTitle.text(bloomHeight: bloomHeight, dynamicTypeSize: dynamicTypeSize)
                 Text(subtitle)
             }
             .ppSwitch()
@@ -393,14 +392,6 @@ struct AddSheet: View {
         } footer: {
             if !offer.hasRoom { makeRoom }
         }
-    }
-
-    /// Lowers the bloom (it sits on the baseline) so it centers on the
-    /// title's cap height.
-    private var bloomOffset: CGFloat {
-        let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(dynamicTypeSize))
-        let capHeight = UIFont.preferredFont(forTextStyle: .body, compatibleWith: traits).capHeight
-        return (capHeight - bloomHeight) / 2
     }
 
     /// Visible but inert for now: what its menu offers is part of the

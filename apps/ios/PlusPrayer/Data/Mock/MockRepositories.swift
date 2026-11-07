@@ -24,6 +24,10 @@ final class MockSubjectRepository: SubjectRepository {
     func addSubject(_ input: NewSubject) async throws -> AddedSubject {
         try await backend.addSubject(input)
     }
+
+    func setCarriedItems(_ ids: [String]) async throws {
+        try await backend.setCarriedItems(ids)
+    }
 }
 
 final class MockListRepository: ListRepository {
