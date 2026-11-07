@@ -25,7 +25,8 @@ or the rest of Home (the detail page is step 5).
 Still open in prayer mode: backgrounding and the welcome-back question, the
 presence draft, the first Amen's onboarding steps. Also pending: the offline
 queue (Data/Queue, replacing the mock's in-memory hold), a debug menu for the
-mock's scenario controls, and the add sheet's entry from a name's page.
+mock's scenario controls, and the add sheet's entries from a name's page and
+row (the form is built: `AddSheetModel(home:intentionFor:)`).
 
 ## Stack
 - SwiftUI, **iOS 26** minimum (Liquid Glass), **iPhone only** (2026-11-05),
@@ -413,15 +414,27 @@ compose queries; if an operation is missing, ask for a backend change.
 - `Features/AddSheet/AddSheet` + `State/AddSheetModel` (screens.md, Add
   sheet, rewritten 2026-11-06): **native `Form`s** (inset grouped, Tier B:
   no hand-set padding, type size or alignment), background hidden, rows
-  `raised`. Toolbar buttons, a segmented Name | Intention; section headers
+  `raised`, `.listSectionSpacing(.compact)`, the standard large sheet.
+  Toolbar buttons, a segmented Name | Intention; section headers
   for labels, footers for hints, errors (ink) and the counter; a top notice
-  row; a native Toggle whose subtitle is the meter, its footer "Make
-  room …". Each step's form stays in the hierarchy (faded or slid aside), so
-  focus moves without the keyboard dropping. "Who is this for?" is a real
-  push (`@State` path, `.searchable` + `.searchFocused`); the intention
-  field refocuses once the pop has begun (it's out of the window while
-  pushed). The intention fields grow 1 → 3 lines; Return submits, pasted
-  breaks become spaces. The carry
+  row; a native Toggle whose subtitle is the meter (its bloom
+  `size.carriedMark.carryRow` tall via `@ScaledMetric`), its footer "Make
+  room …". The Name row leads with the avatar (`avatar.row`). Each step's
+  form stays in the hierarchy (faded or slid aside), so focus moves without
+  the keyboard dropping. **The keyboard rises with the sheet** through
+  `KeyboardPrimer`: SwiftUI focuses a `Form` field only after the sheet
+  settles (~0.5 s late, `.defaultFocus` included; checked on a simulator
+  recording), so a hidden UIKit field takes first responder as the sheet
+  enters the window and hands over when SwiftUI focuses the real field
+  (keystrokes in between go through `typeAhead`). "Who is this for?" is a
+  real push (`@State` path, `.searchable`), its search inactive and the
+  keyboard down; the intention field refocuses in the root's `onAppear`
+  after the pop. The intention form for a known person (`Step.person`: the
+  offer after a name is saved, or `init(home:intentionFor:)` from a name)
+  is one layout: no title, avatar + serif name ("Added" on the offer), the
+  field ("Add an intention now?" / "Intention"), the carry section; Skip /
+  Add on the offer, X / Add from a name. The intention fields grow 1 → 3
+  lines; Return submits, pasted breaks become spaces. The carry
   row's rules are `carryOffer` and `carryMeter` in PlusPrayerDomain (room,
   default, true cost; the meter says what's left, not counting this item:
   "3 places left"; on, taking everything left, "This uses your last place"
@@ -444,6 +457,8 @@ compose queries; if an operation is missing, ask for a backend change.
   "In your archive" waits for the archive.
 - UI smoke tests (`PlusPrayerUITests`, its own scheme): pray → Amen →
   invitation → hold → Amen → closing → note → the card's status; ＋ → name
-  (tabs and the For push keep the keyboard) → offer → intention → on Home; search → results → no matches →
+  (tabs keep the keyboard; the For push drops it, a pick refocuses) → offer → intention → on Home; search → results → no matches →
   the match hint → ×. Screenshots are attached to
-  the result bundle (`xcrun xcresulttool export attachments`).
+  the result bundle (`xcrun xcresulttool export attachments`). To check
+  motion (the keyboard with the sheet), record the simulator during the
+  test (`xcrun simctl io <udid> recordVideo`) and look at frames.

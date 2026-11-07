@@ -406,7 +406,7 @@
       }
     },
     "add.intention.label" : {
-      "comment" : "Add sheet, Intention tab: the label above the Intention field (screens.md). The offer step's field has none.",
+      "comment" : "Add sheet: the section header above the Intention field, on the Intention tab and on the intention form opened from a name (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -453,38 +453,38 @@
         }
       }
     },
-    "add.notNow" : {
-      "comment" : "Add sheet: the offer step's leading toolbar button (the name is already saved).",
+    "add.skip" : {
+      "comment" : "Add sheet, offer step: the leading toolbar button; closes, the name is already saved (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Not now"
+            "value" : "Skip"
           }
         }
       }
     },
-    "add.offer.added" : {
-      "comment" : "Add sheet offer step: the serif header after a name is saved, in every case (screens.md). The argument is the alias, else the name.",
+    "add.person.added" : {
+      "comment" : "Add sheet, intention form for a known person, offer step only: the quiet subtitle under the person's name, the only confirmation that the name was saved (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ is added."
+            "value" : "Added"
           }
         }
       }
     },
-    "add.offer.question" : {
-      "comment" : "Add sheet offer step: the question above the intention field. The argument is the alias, else the name.",
+    "add.person.offerHeader" : {
+      "comment" : "Add sheet, offer step: the intention field's section header, in sentence case, without the name (it sits right above) (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add an intention for %@?"
+            "value" : "Add an intention now?"
           }
         }
       }

@@ -141,7 +141,7 @@ nonisolated enum L10n {
         static func noMatches(_ query: String) -> String { String(format: t("add.for.noMatches"), query) }
         static var add: String { t("add.add") }
         static var cancel: String { t("add.cancel") }
-        static var notNow: String { t("add.notNow") }
+        static var skip: String { t("add.skip") }
         static var contactError: String { t("add.error.contact") }
         static var offline: String { t("add.offline") }
         static var failed: String { t("add.failed") }
@@ -186,8 +186,10 @@ nonisolated enum L10n {
         static func counter(_ count: Int, _ cap: Int) -> String {
             String(format: t("add.counter"), locale: .current, count, cap)
         }
-        static func added(_ name: String) -> String { String(format: t("add.offer.added"), name) }
-        static func offerQuestion(_ name: String) -> String { String(format: t("add.offer.question"), name) }
+        /// The offer step's subtitle under the person's name.
+        static var added: String { t("add.person.added") }
+        /// The offer step's field header, "Add an intention now?".
+        static var offerHeader: String { t("add.person.offerHeader") }
         static func capReached(_ cap: Int) -> String {
             String(format: t("add.capReached"), locale: .current, cap)
         }

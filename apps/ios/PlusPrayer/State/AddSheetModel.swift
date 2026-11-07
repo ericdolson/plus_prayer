@@ -5,10 +5,12 @@ import PlusPrayerDomain
 /// The add sheet's flow (screens.md, "Add sheet", revised 2026-11-06). One
 /// sheet, one tap to save:
 ///
-///     form (Name | Intention) ──Add name──▶ offer "Dad is added. Add an intention for Dad?" ──Add──▶ close
-///          │                                  (Not now → close; the name is already saved)
+///     form (Name | Intention) ──Add name──▶ person (the offer: "Dad · Added") ──Add──▶ close
+///          │                                  (Skip → close; the name is already saved)
 ///          ├──Add intention──▶ close
 ///          └──For row──▶ choosing "Who is this for?" ──pick──▶ form
+///
+///     a name's page or row ──▶ person (the same form, no "Added") ──Add──▶ close
 ///
 /// Every step has a carry row ("Carry onto the list"), so nothing is
 /// reported after the fact, except when the server disagrees (the pool
@@ -23,25 +25,26 @@ final class AddSheetModel: Identifiable {
     }
 
     enum Field: Hashable {
-        case name, alias, intention, offer, search
+        case name, alias, intention, person, search
     }
 
     enum Step: Equatable {
         case form
         /// The For row's push: pick who the intention is for.
         case choosing
-        /// After a name is saved: offer one intention for it.
-        case offer(nameId: String)
+        /// The intention form for a known person: the offer after a name is
+        /// saved, or "+ Intention" from a name's page or row.
+        case person(nameId: String)
     }
 
     /// Where a carry row sits.
     enum CarryRow: Hashable {
-        case name, intention, offer
+        case name, intention, person
     }
 
     /// Saved, but the server didn't carry it although the toggle was on.
     enum NotCarried: Equatable {
-        /// The name: the offer still follows, with the line under its header.
+        /// The name: the offer still follows, with the line under its header row.
         case name
         /// An intention (either tab or the offer): Done only.
         case intention
@@ -52,8 +55,8 @@ final class AddSheetModel: Identifiable {
     var name = ""
     var alias = ""
     var intention = ""
-    /// The offer's intention, for the name just saved.
-    var offerText = ""
+    /// The known person's intention (the offer, or from a name).
+    var personText = ""
     /// "Who is this for?"'s search field.
     var chooserQuery = ""
     /// The intention's name (the For row); Me by default. Changing it puts
@@ -64,6 +67,9 @@ final class AddSheetModel: Identifiable {
     /// Picked once when the sheet opens (least used on Home); never changes
     /// while typing.
     let tone: Int
+    /// Opened for a known person (a name's page or row): only the person
+    /// form, with X / Add.
+    let isFromName: Bool
 
     /// Contact info the view has shown under a field (after the pause).
     private(set) var contactShown: Set<Field> = []
@@ -101,6 +107,18 @@ final class AddSheetModel: Identifiable {
         self.name = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(TextCap.name))
         self.parentId = parentId ?? home.pickerNames().first?.id ?? ""
         tone = home.toneForNewName()
+        isFromName = false
+    }
+
+    /// "+ Intention" from a name's page or row: the intention form for that
+    /// person, no For row.
+    init(home: HomeModel, intentionFor nameId: String) {
+        self.home = home
+        tab = .intention
+        parentId = nameId
+        tone = home.toneForNewName()
+        isFromName = true
+        step = .person(nameId: nameId)
     }
 
     // MARK: Derived
@@ -133,7 +151,7 @@ final class AddSheetModel: Identifiable {
         switch step {
         case .form: tab == .name ? .name : .intention
         case .choosing: .search
-        case .offer: .offer
+        case .person: .person
         }
     }
 
@@ -141,8 +159,13 @@ final class AddSheetModel: Identifiable {
     var activeCarryRow: CarryRow {
         switch step {
         case .form, .choosing: tab == .name ? .name : .intention
-        case .offer: .offer
+        case .person: .person
         }
+    }
+
+    /// The person form right after their name was saved: "Added", Skip / Add.
+    var isOffer: Bool {
+        if case .person = step { !isFromName } else { false }
     }
 
     /// The toolbar's Add. Disabled while the text is empty, while a contact
@@ -152,7 +175,7 @@ final class AddSheetModel: Identifiable {
         let text = switch activeField {
         case .name: name
         case .intention: intention
-        case .offer: offerText
+        case .person: personText
         case .alias, .search: ""
         }
         if cleanText(text).isEmpty || contactShown.contains(activeField) { return false }
@@ -160,15 +183,26 @@ final class AddSheetModel: Identifiable {
         return true
     }
 
-    /// The name just saved, for "{alias} is added." ({alias} falls back to
-    /// the name).
-    var offerName: String { addedName?.label ?? "" }
+    /// The person form's header: avatar + name as on Home. The name just
+    /// saved counts until Home's stream brings it.
+    var person: PickerName? {
+        guard let id = personId else { return nil }
+        if let name = home.pickerNames().first(where: { $0.id == id }) { return name }
+        return addedName.map { PickerName(id: $0.id, label: $0.label, initials: monogram($0), tone: $0.tone) }
+    }
+
+    private var personId: String? {
+        if case .person(let id) = step { id } else { nil }
+    }
+
+    /// The person's alias, else their name.
+    var personName: String { person?.label ?? "" }
 
     static func cap(_ field: Field) -> Int {
         switch field {
         case .name: TextCap.name
         case .alias: TextCap.alias
-        case .intention, .offer: TextCap.intention
+        case .intention, .person: TextCap.intention
         case .search: TextCap.name
         }
     }
@@ -179,7 +213,7 @@ final class AddSheetModel: Identifiable {
         switch field {
         case .name: validatePrinted(name, kind: .soul) == .contactInfo
         case .intention: validatePrinted(intention, kind: .intention) == .contactInfo
-        case .offer: validatePrinted(offerText, kind: .intention) == .contactInfo
+        case .person: validatePrinted(personText, kind: .intention) == .contactInfo
         case .alias, .search: false
         }
     }
@@ -191,7 +225,7 @@ final class AddSheetModel: Identifiable {
         switch row {
         case .name: home.carryOffer(kind: .soul, parentId: nil)
         case .intention: home.carryOffer(kind: .intention, parentId: parentId)
-        case .offer: home.carryOffer(kind: .intention, parentId: addedName?.id, justAdded: addedName)
+        case .person: home.carryOffer(kind: .intention, parentId: personId, justAdded: addedName)
         }
     }
 
@@ -222,7 +256,7 @@ final class AddSheetModel: Identifiable {
         switch row {
         case .name: return nil
         case .intention: return parent.map { ($0.label, cost) }
-        case .offer: return (offerName, cost)
+        case .person: return (personName, cost)
         }
     }
 
@@ -238,6 +272,22 @@ final class AddSheetModel: Identifiable {
     func textChanged() {
         failedOffline = false
         failedGenerically = false
+    }
+
+    /// Typed while the sheet was opening, before its first field had focus:
+    /// goes to that field ("" deletes a character). Caps still apply.
+    func typeAhead(_ text: String) {
+        func edit(_ value: inout String) {
+            if text.isEmpty { _ = value.popLast() } else { value += text }
+            value = String(value.prefix(Self.cap(activeField)))
+        }
+        switch activeField {
+        case .name: edit(&name)
+        case .alias: edit(&alias)
+        case .intention: edit(&intention)
+        case .person: edit(&personText)
+        case .search: edit(&chooserQuery)
+        }
     }
 
     /// The For row: push "Who is this for?" with an empty search.
@@ -268,13 +318,13 @@ final class AddSheetModel: Identifiable {
                 addedName = Subject(id: added.id, kind: .soul, publicName: cleanText(name),
                                     alias: alias.isEmpty ? nil : alias, isCarried: added.isCarried,
                                     sortOrder: .max, avatarTone: tone, createdAt: .now)
-                offerText = ""
+                personText = ""
                 notCarried = added.differs(from: input) ? .name : nil
-                step = .offer(nameId: added.id)
+                step = .person(nameId: added.id)
             case .form:
                 try await addIntention(intention, parentId: parentId, row: .intention)
-            case .offer(let nameId):
-                try await addIntention(offerText, parentId: nameId, row: .offer)
+            case .person(let nameId):
+                try await addIntention(personText, parentId: nameId, row: .person)
             case .choosing:
                 break
             }
@@ -305,6 +355,6 @@ final class AddSheetModel: Identifiable {
         }
     }
 
-    /// Not now, Cancel, Done.
+    /// Skip, Cancel, Done.
     func finish() { isFinished = true }
 }

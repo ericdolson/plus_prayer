@@ -51,9 +51,10 @@ final class PlusPrayerUITests: XCTestCase {
         attach(app, "5 home after")
     }
 
-    /// + → a name (the keyboard stays up across tabs) → the For push and
-    /// back (keyboard still up) → Add → "Dad is added." (pushed in, keyboard
-    /// still up) → an intention → Add → on Home.
+    /// + → a name (the keyboard stays up across tabs) → the For push (search
+    /// inactive, keyboard down) and a pick (the intention refocused) → Add →
+    /// the offer, "Dad · Added" (pushed in, keyboard still up) → an
+    /// intention → Add → on Home.
     @MainActor
     func testAddANameWithAnIntention() throws {
         let app = XCUIApplication()
@@ -78,15 +79,22 @@ final class PlusPrayerUITests: XCTestCase {
 
         // The For row pushes "Who is this for?"; picking comes back.
         app.buttons["For"].tap()
-        // The native bar (its title gives way to the active search field).
-        XCTAssertTrue(app.navigationBars["Who is this for?"].waitForExistence(timeout: 2), "the pushed list")
+        // The native bar, its title and back visible: the search starts inactive.
+        let chooser = app.navigationBars["Who is this for?"]
+        XCTAssertTrue(chooser.waitForExistence(timeout: 2), "the pushed list")
+        XCTAssertTrue(chooser.staticTexts["Who is this for?"].exists, "the title shows")
+        XCTAssertTrue(chooser.buttons.element(boundBy: 0).exists, "back shows")
         XCTAssertTrue(app.searchFields.firstMatch.exists, "its native search")
-        XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up into the search")
+        let keyboardDown = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: app.keyboards.firstMatch)
+        wait(for: [keyboardDown], timeout: 2)
+        sleep(1)
+        attach(app, "add 3a who is this for")
+        app.searchFields.firstMatch.tap()
         app.typeText("mo")
         sleep(1)
         attach(app, "add 3 who is this for")
         app.buttons["addSheet.for.mom"].tap()
-        XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up back on the intention")
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "the intention is refocused after the pick")
         XCTAssertEqual(app.buttons["For"].value as? String, "Mom")
         XCTAssertFalse(app.navigationBars.buttons["BackButton"].exists, "back on the form, nothing pushed")
 
@@ -98,8 +106,9 @@ final class PlusPrayerUITests: XCTestCase {
         attach(app, "add 4 alias")
         app.navigationBars.buttons["Add"].tap()
 
-        let offer = app.staticTexts["Dad is added."]
-        XCTAssertTrue(offer.waitForExistence(timeout: 3), "the offer step")
+        let offer = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Dad' AND label CONTAINS 'Added'"))
+        XCTAssertTrue(offer.firstMatch.waitForExistence(timeout: 3), "the offer step: the person, Added")
+        XCTAssertTrue(app.navigationBars.buttons["Skip"].exists, "Skip, not back: the name is saved")
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up into the offer")
         sleep(1)
         attach(app, "add 5 offer")

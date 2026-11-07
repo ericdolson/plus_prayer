@@ -9,9 +9,14 @@ import SwiftUI
 /// Keyboard: every step's form stays in the hierarchy (the hidden tab and
 /// the offer step are only faded or moved aside), so focus moves from one
 /// field to the next in the same transaction and the keyboard never hides
-/// and reappears. "Who is this for?" is a real navigation push whose search
-/// takes focus as it appears. The sheet keeps one height, the tallest any
-/// step's form has been.
+/// and reappears. The keyboard rises with the sheet (`KeyboardPrimer`) and
+/// the first field takes it over. "Who is this for?" is a real navigation
+/// push for tapping: its search starts inactive and the keyboard goes down.
+/// The standard large sheet.
+///
+/// The intention form for a known person (the offer after a name is saved,
+/// or "+ Intention" from a name) is one layout: no title, the person as on
+/// Home, the field, the carry section.
 struct AddSheet: View {
     @State var model: AddSheetModel
 
@@ -22,8 +27,10 @@ struct AddSheet: View {
     /// "Make room for {alias}": follows the typed name only once typing
     /// pauses, never mid-word.
     @State private var makeRoomName: String?
-    /// The tallest a form's content has been, for the sheet's one height.
-    @State private var contentHeight: CGFloat = 0
+    /// The carry title's bloom: `size.carriedMark.carryRow` tall at the
+    /// default size, scaling with the title's text.
+    @ScaledMetric(relativeTo: .body) private var bloomHeight = PP.size.carriedMark.carryRow
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     /// The navigation path: "Who is this for?" when pushed.
     @State private var path: [Route] = []
 
@@ -33,10 +40,10 @@ struct AddSheet: View {
 
     /// The one notice at the top: the intention tab's "Saved, but not
     /// carried…", no connection, the ~500 cap, or anything else that went
-    /// wrong. Text is kept. (The offer step puts "Saved, but not carried"
-    /// under its header.)
+    /// wrong. Text is kept. (The person form puts "Saved, but not carried"
+    /// under its header row.)
     private var notice: String? {
-        if model.notCarried == .intention && !isOffer { return L10n.Add.notCarried }
+        if model.notCarried == .intention && !isPerson { return L10n.Add.notCarried }
         if model.isOffline { return L10n.Add.offline }
         if model.isAtCap { return L10n.Add.capReached(subjectCap) }
         if model.failedGenerically { return L10n.Add.failed }
@@ -46,21 +53,35 @@ struct AddSheet: View {
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
-                page(nameForm, shown: !isOffer && model.tab == .name, slide: isOffer ? -width : 0)
-                page(intentionForm, shown: !isOffer && model.tab == .intention, slide: isOffer ? -width : 0)
-                page(offerForm, shown: isOffer, slide: isOffer ? 0 : width)
+                if !model.isFromName {
+                    page(nameForm, shown: !isPerson && model.tab == .name, slide: isPerson ? -width : 0)
+                    page(intentionForm, shown: !isPerson && model.tab == .intention, slide: isPerson ? -width : 0)
+                }
+                page(personForm, shown: isPerson, slide: isPerson || model.isFromName ? 0 : width)
             }
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
             .disabled(isSettled)
             .animation(reduceMotion ? .easeOut(duration: PP.duration.quick) : .easeInOut(duration: PP.duration.settle),
-                       value: isOffer)
+                       value: isPerson)
             .animation(.easeOut(duration: PP.duration.quick), value: notice)
             .toolbar { toolbar }
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: Route.self) { _ in chooser }
-            .fittedSheetHeight(contentHeight)
+            // Back from "Who is this for?" (a pick or back): the intention
+            // takes focus once it's in the window again.
+            .onAppear { if model.step == .form { focus = model.activeField } }
         }
         .tint(PP.color.ink)
+        .presentationDetents([.large])
+        // The keyboard rises with the sheet; the first field takes it over
+        // once SwiftUI focuses it (KeyboardPrimer).
+        .background {
+            KeyboardPrimer(autocapitalization: model.activeField == .name ? .words : .sentences,
+                           returnKey: model.activeField == .name ? .next : .done,
+                           onType: model.typeAhead)
+                .frame(width: 0, height: 0)
+                .accessibilityHidden(true)
+        }
         .onAppear { focus = model.activeField }
         .task(id: model.typedLabel) {
             guard makeRoomName != nil else {
@@ -76,8 +97,9 @@ struct AddSheet: View {
         .onChange(of: path) { _, path in
             if path.isEmpty, model.step == .choosing {
                 model.choose(nil)
-                refocusIntention()
             } else if !path.isEmpty, model.step == .form {
+                // A screen for tapping: the keyboard goes down with the push.
+                focus = nil
                 model.openChooser()
             }
         }
@@ -86,20 +108,16 @@ struct AddSheet: View {
     /// Saved, but not carried: nothing left to do but Done.
     private var isSettled: Bool { model.isSettled }
 
-    private var isOffer: Bool {
-        if case .offer = model.step { true } else { false }
+    /// The intention form for a known person: the offer, or from a name.
+    private var isPerson: Bool {
+        if case .person = model.step { true } else { false }
     }
 
     /// A step's form: faded out when it isn't shown, slid aside for the offer.
-    /// Its content height feeds the sheet's one height.
     private func page(_ form: some View, shown: Bool, slide: CGFloat) -> some View {
         form
             .scrollContentBackground(.hidden)
-            // Its content plus the top inset (the bar and the form's own top
-            // margin); the bottom inset is left out (it holds the keyboard).
-            .onScrollGeometryChange(for: CGFloat.self) { $0.contentSize.height + $0.contentInsets.top } action: { _, height in
-                contentHeight = max(contentHeight, height)
-            }
+            .listSectionSpacing(.compact)
             .offset(x: slide)
             .opacity(shown ? 1 : 0)
             .allowsHitTesting(shown)
@@ -113,10 +131,11 @@ struct AddSheet: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button(L10n.Common.done) { model.finish() }
             }
-        } else if isOffer {
-            // No back: the name is already saved.
+        } else if model.isOffer {
+            // No back: the name is already saved. No title: the person
+            // header says who.
             ToolbarItem(placement: .cancellationAction) {
-                Button(L10n.Add.notNow) { model.finish() }
+                Button(L10n.Add.skip) { model.finish() }
             }
             ToolbarItem(placement: .confirmationAction) { addButton }
         } else {
@@ -126,17 +145,21 @@ struct AddSheet: View {
                 Button(role: .close) { model.finish() }
                     .accessibilityLabel(L10n.Add.cancel)
             }
-            ToolbarItem(placement: .principal) {
-                Picker(selection: tabBinding) {
-                    Text(L10n.Add.tabName).tag(AddSheetModel.Tab.name)
-                    Text(L10n.Add.tabIntention).tag(AddSheetModel.Tab.intention)
-                } label: {
-                    EmptyView()
-                }
-                .pickerStyle(.segmented)
-                .fixedSize()
-            }
+            if !isPerson { segmentedControl }
             ToolbarItem(placement: .confirmationAction) { addButton }
+        }
+    }
+
+    private var segmentedControl: some ToolbarContent {
+        ToolbarItem(placement: .principal) {
+            Picker(selection: tabBinding) {
+                Text(L10n.Add.tabName).tag(AddSheetModel.Tab.name)
+                Text(L10n.Add.tabIntention).tag(AddSheetModel.Tab.intention)
+            } label: {
+                EmptyView()
+            }
+            .pickerStyle(.segmented)
+            .fixedSize()
         }
     }
 
@@ -160,7 +183,7 @@ struct AddSheet: View {
             await model.add()
             // A saved name pushes the offer: its field takes focus as the
             // step changes, so the keyboard stays up (pool full included).
-            if isOffer { focus = .offer }
+            if isPerson { focus = .person }
         }
     }
 
@@ -169,23 +192,22 @@ struct AddSheet: View {
     private var nameForm: some View {
         Form {
             noticeSection
-            // A preview only in v1: its tone from the start, initials live by
-            // Home's rule.
             Section {
-                MonogramAvatar(initials: model.previewInitials, tone: model.tone, size: PP.size.avatar.large)
-                    .frame(maxWidth: .infinity)
-                    .accessibilityHidden(true)
-                    .listRowBackground(Color.clear)
-            }
-            Section {
-                TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
-                    .focused($focus, equals: .name)
-                    .accessibilityLabel(L10n.Add.nameLabel)
-                    .textInputAutocapitalization(.words)
-                    .submitLabel(.next)
-                    .onSubmit { focus = .alias }
-                    .fieldRules(.name, text: $model.name, model: model)
-                    .listRowBackground(PP.color.raised)
+                // The avatar leads, so the row previews the person as on
+                // Home. A preview only in v1: its tone from the start,
+                // initials live by Home's rule.
+                HStack(spacing: PP.space.md) {
+                    MonogramAvatar(initials: model.previewInitials, tone: model.tone, size: PP.size.avatar.row)
+                        .accessibilityHidden(true)
+                    TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
+                        .focused($focus, equals: .name)
+                        .accessibilityLabel(L10n.Add.nameLabel)
+                        .textInputAutocapitalization(.words)
+                        .submitLabel(.next)
+                        .onSubmit { focus = .alias }
+                        .fieldRules(.name, text: $model.name, model: model)
+                }
+                .listRowBackground(PP.color.raised)
             } header: {
                 Text(L10n.Add.nameLabel)
             } footer: {
@@ -251,6 +273,8 @@ struct AddSheet: View {
 
     /// A native list with search, everyone in Home order, Me first; the
     /// current person has the checkmark. Picking pops back to the intention.
+    /// The search starts inactive (title and back stay; it's one tap away):
+    /// this screen is for tapping.
     private var chooser: some View {
         let names = model.chooserNames
         return List {
@@ -285,54 +309,66 @@ struct AddSheet: View {
         .searchFocused($focus, equals: .search)
         .navigationTitle(L10n.Add.whoIsThisFor)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear { focus = .search }
     }
 
     /// Picking someone returns to the intention, focused.
     private func choose(_ id: String) {
         model.choose(id)
         path = []
-        refocusIntention()
     }
 
-    /// The intention field is out of the window while the list is pushed, so
-    /// it takes focus once the pop has begun and it's back: straight from
-    /// the search field, so the keyboard stays up.
-    private func refocusIntention() {
-        Task { @MainActor in
-            await Task.yield()
-            focus = .intention
-        }
-    }
+    // MARK: The intention form for a known person
 
-    // MARK: The offer step
-
-    private var offerForm: some View {
+    /// The offer after a name is saved, and "+ Intention" from a name: the
+    /// person as on Home (avatar + serif name; "Added" on the offer only),
+    /// then the intention, then the carry section. No For row: the person
+    /// is given, not chosen.
+    private var personForm: some View {
         Form {
             noticeSection
-            // One clear header block; the question labels the field below.
             Section {
-                VStack(alignment: .leading) {
-                    Text(L10n.Add.added(model.offerName))
-                        .font(PP.type.displayLine)
-                        .foregroundStyle(PP.color.ink)
+                VStack(alignment: .leading, spacing: PP.space.md) {
+                    HStack(spacing: PP.space.md) {
+                        if let person = model.person {
+                            MonogramAvatar(initials: person.initials, tone: person.tone, size: PP.size.avatar.row)
+                        }
+                        VStack(alignment: .leading) {
+                            Text(verbatim: model.personName)
+                                .font(PP.type.name)
+                                .foregroundStyle(PP.color.ink)
+                                .lineLimit(1)
+                            if model.isOffer {
+                                Text(L10n.Add.added).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .accessibilityElement(children: .combine)
                     if model.notCarried != nil {
                         Text(L10n.Add.notCarried)
                             .foregroundStyle(PP.color.ink)
                             .transition(.opacity)
                     }
-                    Text(L10n.Add.offerQuestion(model.offerName))
-                        .foregroundStyle(.secondary)
                 }
                 .listRowBackground(Color.clear)
             }
             Section {
-                growingField(.offer, text: $model.offerText, label: L10n.Add.offerQuestion(model.offerName))
+                growingField(.person, text: $model.personText, label: personFieldHeader)
+            } header: {
+                if model.isOffer {
+                    Text(personFieldHeader).textCase(nil) // a question, in sentence case
+                } else {
+                    Text(personFieldHeader)
+                }
             } footer: {
-                fieldFooter(.offer, text: model.offerText, caption: nil)
+                fieldFooter(.person, text: model.personText, caption: nil)
             }
-            carrySection(.offer)
+            carrySection(.person)
         }
+    }
+
+    /// The offer asks, sentence case; from a name it's the plain label.
+    private var personFieldHeader: String {
+        model.isOffer ? L10n.Add.offerHeader : L10n.Add.intentionLabel
     }
 
     // MARK: The carry section
@@ -348,7 +384,10 @@ struct AddSheet: View {
         if let also = model.alsoCarries(row) {
             subtitle += "\n" + L10n.Add.alsoCarries(also.name, cost: also.cost)
         }
-        let bloom = Text(PPIcon.carried).foregroundStyle(PP.color.inkMuted)
+        let bloom = Text(PPIcon.carried)
+            .font(.system(size: bloomHeight / PPIcon.carriedEm))
+            .baselineOffset(bloomOffset)
+            .foregroundStyle(PP.color.inkMuted)
         return Section {
             Toggle(isOn: isOn) {
                 Text("\(Text(L10n.Add.carryTitle))\u{00A0}\(bloom)")
@@ -362,6 +401,14 @@ struct AddSheet: View {
         } footer: {
             if !offer.hasRoom { makeRoom(row) }
         }
+    }
+
+    /// Lowers the bloom (it sits on the baseline) so it centers on the
+    /// title's cap height.
+    private var bloomOffset: CGFloat {
+        let traits = UITraitCollection(preferredContentSizeCategory: UIContentSizeCategory(dynamicTypeSize))
+        let capHeight = UIFont.preferredFont(forTextStyle: .body, compatibleWith: traits).capHeight
+        return (capHeight - bloomHeight) / 2
     }
 
     /// Visible but inert for now: what its menu offers is part of the
@@ -459,21 +506,13 @@ private extension View {
     }
 }
 
-// MARK: Sheet height
-
-extension View {
-    /// A sheet as tall as its forms' content has been (one height for both
-    /// tabs and the offer step), the bar included.
-    func fittedSheetHeight(_ content: CGFloat) -> some View {
-        presentationDetents(content > 0 ? [.height(content)] : [.medium])
-    }
-}
-
 // MARK: Previews (on the mock)
 
 private struct AddSheetPreview: View {
     let tab: AddSheetModel.Tab
     var poolFull = false
+    /// "+ Intention" from this name's page or row.
+    var fromName: String?
     @State private var backend = MockBackend(latency: .zero, liveDrift: false)
     @State private var home: HomeModel?
     @State private var model: AddSheetModel?
@@ -489,13 +528,18 @@ private struct AddSheetPreview: View {
                 self.home = home
                 Task { await home.run() }
                 while !home.isLoaded || home.header == nil { try? await Task.sleep(for: .milliseconds(10)) }
-                model = AddSheetModel(home: home, tab: tab, name: poolFull ? "Gary Olson" : "")
+                model = if let fromName {
+                    AddSheetModel(home: home, intentionFor: fromName)
+                } else {
+                    AddSheetModel(home: home, tab: tab, name: poolFull ? "Gary Olson" : "")
+                }
             }
     }
 }
 
 #Preview("Name") { AddSheetPreview(tab: .name).preferredColorScheme(.dark) }
 #Preview("Intention") { AddSheetPreview(tab: .intention).preferredColorScheme(.light) }
+#Preview("From a name") { AddSheetPreview(tab: .intention, fromName: "dad").preferredColorScheme(.light) }
 #Preview("Pool full") { AddSheetPreview(tab: .name, poolFull: true).preferredColorScheme(.light) }
 #Preview("Pool full, large type") {
     AddSheetPreview(tab: .name, poolFull: true).dynamicTypeSize(.accessibility2)

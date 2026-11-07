@@ -165,11 +165,11 @@ nonisolated enum PP {
 
     enum size {
         enum avatar {
-            /// Name-row avatar.
+            /// Name-row avatar. Also the add sheet's Name row and the person header of its intention form for a known person (screens.md): they preview the Home row.
             static let row: CGFloat = 44
             /// Your avatar in Home's header: smaller so it doesn't compete.
             static let header: CGFloat = 32
-            /// The profile at the top of You; the add sheet's avatar preview (screens.md).
+            /// The profile at the top of You.
             static let large: CGFloat = 72
             /// The add sheet's For row and the rows of "Who is this for?" (screens.md).
             static let picker: CGFloat = 40

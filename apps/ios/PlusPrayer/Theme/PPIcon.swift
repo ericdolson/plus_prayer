@@ -10,6 +10,10 @@ nonisolated enum PPIcon {
     /// The bloom: the carried mark. Until open-questions D1 it's the logo glyph,
     /// with the "+" cut out.
     static let carried = Image("pp.bloom")
+    /// The bloom's height per point of font size: it sits on the baseline,
+    /// 72 template units tall against a 70.46-unit cap height
+    /// (design/generate/symbol.py), so about 0.72 em.
+    static let carriedEm: CGFloat = 0.72
 
     // SF Symbols.
     static let history = Image(systemName: "clock.arrow.circlepath")
