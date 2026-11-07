@@ -1962,3 +1962,17 @@ The detail page's avatar grows from ~72 to ~96 pt to match the add sheet
 (no visible shrink when adding lands on the page). When there's an alias,
 the name sits under the title in smaller inkMuted text for reference (the
 self page shows your name under "Me").
+
+### Decision: Add sheet cleanup after the two-step removal
+**Timestamp:** 2026-11-07
+- A name that ends up not carried is never saved silently: on the person
+  page the "Not on the list" status says it; in the interim (no page yet)
+  the sheet stays with "Saved, but not carried. All {pool} places are in
+  use." + Done.
+- "Make room for {alias}" (and its typing pause) moves to the person page;
+  the sheet keeps only "Make room for this intention" on the Intention tab.
+  The free-pool line belongs to a name's carry row on the person page.
+- Hidden-tab controls are removed from the accessibility tree.
+- `duration.labelPause` can be deleted from tokens.json if nothing uses it;
+  `duration.settle` likewise if unused.
+- Stale "step 2" / "Add/Done" wording fixed in screens.md.

@@ -81,8 +81,12 @@ _Last updated: 2026-10-18_
       prayed for at once, "＋ Add {alias}'s first intention" invites the
       next step, and the carry row ("Not on the list · Make room for
       {alias}" when full) is the upsell, every visit rather than only at
-      add time. **Interim, until the page exists in the app:** Add saves and
-      closes back to Home.
+      add time; the page's "Not on the list" status is how an uncarried name
+      is never saved silently. **Interim, until the page exists in the
+      app:** Add saves and closes back to Home, **except** when the name
+      ends up not carried (no room, or the server disagrees): then the sheet
+      stays with the notice row "Saved, but not carried. All {pool} places
+      are in use." and only Done (read-only end state).
   - **Add-intention form for a person** ("＋ Add intention" / "Add
     {alias}'s first intention" on their page, and the long-press "Add
     intention" on a Home row): toolbar **X** / **Add**, no title; a clear
@@ -103,7 +107,8 @@ _Last updated: 2026-10-18_
        matches → 'Nothing matches "{query}".' Picking, or going back,
        returns and refocuses the intention field. Changing the person resets
        the carry toggle to that person's default.
-    2. Header **Intention** · the growing field (as in step 2). Focused when
+    2. Header **Intention** · the growing intention field (1 → 3 lines;
+       Return = Add; no line breaks). Focused when
        the tab opens.
     3. **Carry row:** one native **Toggle** titled **"Carry onto the list ✱"**
        with the meter as its subtitle; footer "Make room for this intention"
@@ -117,18 +122,23 @@ _Last updated: 2026-10-18_
     "{left} {unit} left"; when the selected choice takes all that's left:
     "This uses your last place" / "…your last {N} places"; full or over:
     "All {pool} {unit} in use" (pool of 1: "Your one place is in use").
-    Free pool: "Free carries you and one intention of your own" (pending
-    Q32). `{unit}` from one formatter ("places" today; "people" if Q32 is
-    adopted). "Make room for {alias}" updates after typing pauses ~0.6 s
-    with a ~150 ms crossfade; bare "Make room" before a name exists. Home
-    never marks an uncarried item (design-direction §5).
+    Free pool, on a name's carry row (person page): "Free carries you and
+    one intention of your own" (pending Q32). `{unit}` from one formatter
+    ("places" today; "people" if Q32 is adopted). In the sheet, "Make room"
+    only appears on the Intention tab ("Make room for this intention"); the
+    person page shows "Make room for {alias}" (the name is known, so there's
+    no typing delay). Home never marks an uncarried item (design-direction
+    §5).
+  - **Accessibility:** only the visible tab's content is in the
+    accessibility tree (the hidden tab's controls are removed or
+    `accessibilityHidden`, never just faded).
   - **Keyboard stays up:** switching tabs focuses the new tab's field in the
     same frame; the For push drops it and returning refocuses. The app never
     hides the keyboard itself while a text field is next; user dismissal
     still works.
   - **Validation & states** (section footers or a top notice row: plain ink
     text on a clear row; errors in ink, never red): contact-info message
-    under the field ~0.5 s after typing pauses, Add/Done disabled while
+    under the field ~0.5 s after typing pauses, Add disabled while
     shown. Caps stop input at the limit; a "34/40" counter in the footer only
     in the last 10 characters. Notice row at the top: offline "Adding needs a
     connection." (Add disabled; stays while offline); generic failure
