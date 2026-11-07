@@ -33,10 +33,6 @@ struct AddSheet: View {
     /// default size, scaling with the title's text.
     @ScaledMetric(relativeTo: .body) private var bloomHeight = PP.size.carriedMark.carryRow
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    /// Add is in the toolbar (split off the X): the tab's required text
-    /// exists. Follows the model in its own animation, so the glass morph
-    /// runs every time.
-    @State private var addShown = false
     /// The navigation path: "Who is this for?" when pushed.
     @State private var path: [Route] = []
 
@@ -97,16 +93,7 @@ struct AddSheet: View {
             withAnimation(.easeInOut(duration: PP.duration.quick)) { makeRoomName = model.typedLabel }
         }
         .onChange(of: model.isFinished) { _, finished in if finished { dismiss() } }
-        .onChange(of: model.hasRequiredText, initial: true) { _, has in
-            // A tick after the keystroke, in its own animation (in the
-            // keystroke's update the toolbar doesn't always animate).
-            Task { @MainActor in
-                await Task.yield()
-                withAnimation(reduceMotion ? .easeOut(duration: PP.duration.quick) : .smooth(duration: PP.duration.settle)) {
-                    addShown = has
-                }
-            }
-        }
+
 
         // The For row pushes; the native back (or a pick) pops.
         .onChange(of: path) { _, path in
@@ -165,26 +152,12 @@ struct AddSheet: View {
                 Button(L10n.Add.skip) { model.finish() }
             }
             ToolbarItem(placement: .confirmationAction) { addButton }
-        } else if isPerson {
-            // From a name: X / Add, as before.
-            ToolbarItem(placement: .cancellationAction) { closeButton }
-            ToolbarItem(placement: .confirmationAction) { addButton }
         } else {
-            // Name tab: the new person's avatar leads (Intention tab: empty).
-            if model.tab == .name {
-                ToolbarItem(placement: .topBarLeading) { newPersonAvatar }
-                    .sharedBackgroundVisibility(.hidden)
-            }
-            segmentedControl
-            // Add splits off to the left of the X once there's text, and
-            // merges back when it's cleared: its own glass beside the X's.
-            if addShown {
-                ToolbarItem(placement: .topBarTrailing) { splitAddButton }
-                ToolbarSpacer(.fixed, placement: .topBarTrailing)
-            }
-            // The X stays at the far right on both tabs: one place, one
-            // meaning. No discard confirmation for now (open-questions D6).
-            ToolbarItem(placement: .topBarTrailing) { closeButton }
+            // X · segmented control (Name and Intention tabs only) · Add, at
+            // opposite ends. No discard confirmation for now (open-questions D6).
+            ToolbarItem(placement: .cancellationAction) { closeButton }
+            if !isPerson { segmentedControl }
+            ToolbarItem(placement: .confirmationAction) { addButton }
         }
     }
 
@@ -194,14 +167,6 @@ struct AddSheet: View {
             .accessibilityLabel(L10n.Add.cancel)
     }
 
-    /// The new person as they'll appear: a monogram on glass tinted with
-    /// their tone, like your own avatar in Home's header. Initials follow
-    /// the display name live ("…" until there's one). Not tappable in v1.
-    private var newPersonAvatar: some View {
-        MonogramAvatar(initials: model.avatarInitials, tone: model.tone, size: PP.size.avatar.row, filled: false)
-            .glassEffect(.regular.tint(MonogramAvatar.color(tone: model.tone)), in: .circle)
-            .accessibilityHidden(true)
-    }
 
     private var segmentedControl: some ToolbarContent {
         ToolbarItem(placement: .principal) {
@@ -221,15 +186,6 @@ struct AddSheet: View {
             .disabled(!model.canAdd)
     }
 
-    /// The Add that splits off the X: blue-tinted glass.
-    private var splitAddButton: some View {
-        Button { save() } label: {
-            Text(L10n.Add.add).foregroundStyle(PP.color.onPrimary)
-        }
-        .buttonStyle(.glassProminent)
-        .tint(PP.color.primary)
-        .disabled(!model.canAdd)
-    }
 
     /// Switching tabs moves focus to the new tab's field in the same
     /// transaction, so the keyboard stays up.
@@ -254,35 +210,60 @@ struct AddSheet: View {
     private var nameForm: some View {
         Form {
             noticeSection
+            // The iOS Contacts "new contact" layout: the avatar on the left
+            // spanning the two stacked fields, one footer for both. No
+            // headers, so the carry section stays in view above the keyboard.
             Section {
-                TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
-                    .focused($focus, equals: .name)
-                    .accessibilityLabel(L10n.Add.nameLabel)
-                    .textInputAutocapitalization(.words)
-                    .submitLabel(.next)
-                    .onSubmit { focus = .alias }
-                    .fieldRules(.name, text: $model.name, model: model)
-                    .listRowBackground(PP.color.raised)
-            } header: {
-                Text(L10n.Add.nameLabel)
+                HStack(spacing: PP.space.lg) {
+                    // A preview only in v1: its tone from the start, initials
+                    // following the display name live.
+                    MonogramAvatar(initials: model.avatarInitials, tone: model.tone, size: PP.size.avatar.nameBlock)
+                        .accessibilityHidden(true)
+                    VStack(spacing: 0) {
+                        TextField(L10n.Add.fullName, text: $model.name, prompt: prompt(L10n.Add.fullName))
+                            .focused($focus, equals: .name)
+                            .accessibilityLabel(L10n.Add.fullName)
+                            .textInputAutocapitalization(.words)
+                            .submitLabel(.next)
+                            .onSubmit { focus = .alias }
+                            .fieldRules(.name, text: $model.name, model: model)
+                            .padding(.vertical, PP.space.md)
+                        Divider()
+                        TextField(L10n.Add.aliasField, text: $model.alias, prompt: prompt(L10n.Add.aliasField))
+                            .focused($focus, equals: .alias)
+                            .accessibilityLabel(L10n.Add.aliasField)
+                            .textInputAutocapitalization(.words)
+                            .submitLabel(.done)
+                            .onSubmit(save)
+                            .fieldRules(.alias, text: $model.alias, model: model)
+                            .padding(.vertical, PP.space.md)
+                    }
+                }
+                .listRowBackground(PP.color.raised)
             } footer: {
-                fieldFooter(.name, text: model.name, caption: nil)
-            }
-            Section {
-                TextField(L10n.Add.aliasLabel, text: $model.alias, prompt: prompt(L10n.Add.aliasPlaceholder))
-                    .focused($focus, equals: .alias)
-                    .accessibilityLabel(L10n.Add.aliasLabel)
-                    .textInputAutocapitalization(.words)
-                    .submitLabel(.done)
-                    .onSubmit(save)
-                    .fieldRules(.alias, text: $model.alias, model: model)
-                    .listRowBackground(PP.color.raised)
-            } header: {
-                Text(L10n.Add.aliasLabel)
-            } footer: {
-                fieldFooter(.alias, text: model.alias, caption: L10n.Add.aliasCaption)
+                nameBlockFooter
             }
             carrySection(.name)
+        }
+    }
+
+    /// The name block's one footer: what each field is for, or the name's
+    /// contact-info message in its place; the counter of the field being
+    /// typed in, in its last 10 characters.
+    private var nameBlockFooter: some View {
+        let field: AddSheetModel.Field = focus == .alias ? .alias : .name
+        let text = field == .alias ? model.alias : model.name
+        let cap = AddSheetModel.cap(field)
+        return HStack(alignment: .firstTextBaseline) {
+            if model.contactShown.contains(.name) {
+                Text(L10n.Add.contactError).foregroundStyle(PP.color.ink)
+            } else {
+                Text(L10n.Add.nameFooter)
+            }
+            Spacer(minLength: 0)
+            if text.count >= cap - 10 {
+                Text(L10n.Add.counter(text.count, cap)).monospacedDigit()
+            }
         }
     }
 

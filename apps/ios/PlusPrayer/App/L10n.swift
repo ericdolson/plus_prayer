@@ -130,11 +130,10 @@ nonisolated enum L10n {
         private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
         static var tabName: String { t("add.tab.name") }
         static var tabIntention: String { t("add.tab.intention") }
-        static var nameLabel: String { t("add.name.label") }
-        static var namePlaceholder: String { t("add.name.placeholder") }
-        static var aliasLabel: String { t("add.alias.label") }
-        static var aliasPlaceholder: String { t("add.alias.placeholder") }
-        static var aliasCaption: String { t("add.alias.caption") }
+        static var fullName: String { t("add.name.fullName") }
+        static var aliasField: String { t("add.alias.field") }
+        /// The name block's one footer (draft copy).
+        static var nameFooter: String { t("add.name.footer") }
         static var intentionLabel: String { t("add.intention.label") }
         static var intentionPlaceholder: String { t("add.intention.placeholder") }
         static var forLabel: String { t("add.for") }

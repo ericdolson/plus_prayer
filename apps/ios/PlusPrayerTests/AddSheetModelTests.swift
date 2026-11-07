@@ -40,7 +40,7 @@ struct AddSheetModelTests {
         #expect(model.parent?.label == "Me")
     }
 
-    @Test func theToolbarAvatarFollowsTheDisplayName() {
+    @Test func theNameBlockAvatarFollowsTheDisplayName() {
         defer { running.cancel() }
         let model = AddSheetModel(home: home)
         #expect(model.avatarInitials == "…", "empty: the tone with an ellipsis")
@@ -50,22 +50,6 @@ struct AddSheetModelTests {
         #expect(model.avatarInitials == "D", "the alias once it has text")
         model.alias = "  "
         #expect(model.avatarInitials == "GO")
-    }
-
-    @Test func addSplitsOffOnceTheTabsRequiredTextExists() {
-        defer { running.cancel() }
-        let model = AddSheetModel(home: home)
-        #expect(!model.hasRequiredText)
-        model.alias = "Dad"
-        #expect(!model.hasRequiredText, "the alias alone isn't enough")
-        model.name = " Gary "
-        #expect(model.hasRequiredText)
-        model.tab = .intention
-        #expect(!model.hasRequiredText, "the Intention tab needs its own text")
-        model.intention = "Rest"
-        #expect(model.hasRequiredText)
-        model.intention = "   "
-        #expect(!model.hasRequiredText, "merges back when cleared")
     }
 
     @Test func addIsDisabledWhileEmptyOrWhileAContactMessageShows() {

@@ -37,38 +37,26 @@
         }
       }
     },
-    "add.alias.caption" : {
-      "comment" : "Add sheet: muted caption under the \"What you call them\" field (screens.md).",
+    "add.name.footer" : {
+      "comment" : "Add sheet, Name tab: the name block's one footer, explaining both fields (screens.md; DRAFT copy, to refine).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Only you see this"
+            "value" : "The full name is printed on the list. Only you see what you call them."
           }
         }
       }
     },
-    "add.alias.label" : {
-      "comment" : "Add sheet, Name tab: the label above the alias field (screens.md).",
+    "add.alias.field" : {
+      "comment" : "Add sheet, Name tab: the second field of the name block, its placeholder and VoiceOver label (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "What you call them · optional"
-          }
-        }
-      }
-    },
-    "add.alias.placeholder" : {
-      "comment" : "Add sheet: the \"What you call them\" field's placeholder (screens.md).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "e.g. Dad"
+            "value" : "What you call them (optional)"
           }
         }
       }
@@ -429,26 +417,14 @@
         }
       }
     },
-    "add.name.label" : {
-      "comment" : "Add sheet, Name tab: the label above the Name field (screens.md).",
+    "add.name.fullName" : {
+      "comment" : "Add sheet, Name tab: the first field of the name block, its placeholder and VoiceOver label (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Name"
-          }
-        }
-      }
-    },
-    "add.name.placeholder" : {
-      "comment" : "Add sheet: the Name field's placeholder (screens.md).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "e.g. Gary Olson"
+            "value" : "Full name"
           }
         }
       }

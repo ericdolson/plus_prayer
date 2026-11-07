@@ -419,18 +419,16 @@ compose queries; if an operation is missing, ask for a backend change.
   for labels, footers for hints, errors (ink) and the counter; a top notice
   row; a native Toggle whose subtitle is the meter (its bloom
   `size.carriedMark.carryRow` tall via `@ScaledMetric`), its footer "Make
-  room …". Toolbar on the Name and Intention tabs: the new person's avatar
-  leads on the Name tab (`avatar.row` on glass tinted with their tone, like
-  your own in Home's header, `sharedBackgroundVisibility(.hidden)`;
-  initials follow the display name, "…" when empty), the segmented control
-  in the middle, the round glass X fixed at the far right. Add
-  (`.glassProminent`, primary) splits off to the X's left (a
-  `ToolbarSpacer` keeps it its own glass) once the tab's required text
-  exists (`hasRequiredText`) and merges back when it's cleared; the change
-  runs in its own `withAnimation` a tick after the keystroke. (Tried and
-  dropped 2026-11-06: an avatar inside or beside the Name fields. A view
-  can't move between `Form` rows, an overlay layer animated only sometimes
-  on device, and glass fields didn't match the form.) Each step's
+  room …". Toolbar: X · segmented control · Add at opposite ends. The Name
+  tab is one **name block** in the iOS Contacts "new contact" layout: the
+  avatar (`avatar.nameBlock`, 64 pt; initials follow the display name, "…"
+  when empty) on the left spanning "Full name" and "What you call them
+  (optional)" stacked with a `Divider`, no headers, one footer (draft copy;
+  the name's contact message replaces it; the focused field's counter).
+  (Tried and dropped 2026-11-06: the avatar inside or beside the fields, a
+  preview row, a toolbar avatar with Add splitting off the X. A view can't
+  move between `Form` rows, and an overlay layer animated only sometimes on
+  device.) Each step's
   form stays in the hierarchy (faded or slid aside), so focus moves without
   the keyboard dropping. **The keyboard rises with the sheet** through
   `KeyboardPrimer`: SwiftUI focuses a `Form` field only after the sheet

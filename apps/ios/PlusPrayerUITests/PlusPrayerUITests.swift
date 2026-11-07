@@ -62,14 +62,12 @@ final class PlusPrayerUITests: XCTestCase {
         app.launch()
 
         app.buttons["Add"].firstMatch.tap()
-        let name = app.textFields["Name"]
+        let name = app.textFields["Full name"]
         XCTAssertTrue(name.waitForExistence(timeout: 3))
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "Name is focused on open")
         XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the carry row")
         XCTAssertTrue(app.navigationBars.buttons["Cancel"].exists, "the glass X, read as Cancel")
-        XCTAssertFalse(app.navigationBars.buttons["Add"].exists, "Add splits off the X only once there's a name")
         app.typeText("Gary Olson")
-        XCTAssertTrue(app.navigationBars.buttons["Add"].waitForExistence(timeout: 2), "Add, split off the X")
         sleep(1)
         attach(app, "add 1 name")
 
@@ -110,7 +108,7 @@ final class PlusPrayerUITests: XCTestCase {
         app.segmentedControls.buttons["Name"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up back on Name")
 
-        app.textFields["What you call them · optional"].tap()
+        app.textFields["What you call them (optional)"].tap()
         app.typeText("Dad")
         attach(app, "add 4 alias")
         app.navigationBars.buttons["Add"].tap()
