@@ -129,16 +129,15 @@ final class AddSheetModel: Identifiable {
         return initials(alias.isEmpty ? cleanText(name) : alias)
     }
 
-    /// The Name tab's avatar sits in the field its initials come from: the
-    /// alias once it has text, else the name.
-    var avatarField: Field { cleanText(alias).isEmpty ? .name : .alias }
+    /// The new person's avatar in the Name tab's toolbar: the display
+    /// name's initials (alias, else name), or "…" until there's one.
+    var avatarInitials: String { previewInitials.isEmpty ? "…" : previewInitials }
 
-    /// The Name tab's avatar beside `field`: that field's initials, or "…"
-    /// while it's empty. (Each field's own, so the avatar leaving the Name
-    /// field keeps the name's initials as it goes.)
-    func avatarInitials(_ field: Field) -> String {
-        let text = cleanText(field == .alias ? alias : name)
-        return text.isEmpty ? "…" : initials(text)
+    /// The form's required text exists (the name, or the intention): Add
+    /// splits off the X. (Whether it's enabled is `canAdd`.)
+    var hasRequiredText: Bool {
+        guard step == .form else { return false }
+        return !cleanText(tab == .name ? name : intention).isEmpty
     }
 
     /// What Home will call the name being typed: the alias, else the name

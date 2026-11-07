@@ -40,21 +40,32 @@ struct AddSheetModelTests {
         #expect(model.parent?.label == "Me")
     }
 
-    @Test func theAvatarSitsInTheFieldItsInitialsComeFrom() {
+    @Test func theToolbarAvatarFollowsTheDisplayName() {
         defer { running.cancel() }
         let model = AddSheetModel(home: home)
-        #expect(model.avatarField == .name)
-        #expect(model.avatarInitials(.name) == "…", "empty: the tone with an ellipsis")
+        #expect(model.avatarInitials == "…", "empty: the tone with an ellipsis")
         model.name = "Gary Olson"
-        #expect(model.avatarField == .name)
-        #expect(model.avatarInitials(.name) == "GO")
+        #expect(model.avatarInitials == "GO")
         model.alias = "Dad"
-        #expect(model.avatarField == .alias, "moves on the alias's first character")
-        #expect(model.avatarInitials(.alias) == "D")
-        #expect(model.avatarInitials(.name) == "GO", "the one leaving Name keeps its initials")
+        #expect(model.avatarInitials == "D", "the alias once it has text")
         model.alias = "  "
-        #expect(model.avatarField == .name, "back when the alias is cleared")
-        #expect(model.avatarInitials(.name) == "GO")
+        #expect(model.avatarInitials == "GO")
+    }
+
+    @Test func addSplitsOffOnceTheTabsRequiredTextExists() {
+        defer { running.cancel() }
+        let model = AddSheetModel(home: home)
+        #expect(!model.hasRequiredText)
+        model.alias = "Dad"
+        #expect(!model.hasRequiredText, "the alias alone isn't enough")
+        model.name = " Gary "
+        #expect(model.hasRequiredText)
+        model.tab = .intention
+        #expect(!model.hasRequiredText, "the Intention tab needs its own text")
+        model.intention = "Rest"
+        #expect(model.hasRequiredText)
+        model.intention = "   "
+        #expect(!model.hasRequiredText, "merges back when cleared")
     }
 
     @Test func addIsDisabledWhileEmptyOrWhileAContactMessageShows() {

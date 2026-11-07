@@ -33,13 +33,10 @@ struct AddSheet: View {
     /// default size, scaling with the title's text.
     @ScaledMetric(relativeTo: .body) private var bloomHeight = PP.size.carriedMark.carryRow
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    /// The field the Name tab's avatar sits beside (follows the model's
-    /// `avatarField` inside its own animation).
-    @State private var avatarIn: AddSheetModel.Field = .name
-    /// The alias avatar's initials: the alias's, kept as they were while it
-    /// melts back into an alias field that was just cleared (never "…").
-    @State private var leavingAliasInitials = ""
-    @Namespace private var glassNamespace
+    /// Add is in the toolbar (split off the X): the tab's required text
+    /// exists. Follows the model in its own animation, so the glass morph
+    /// runs every time.
+    @State private var addShown = false
     /// The navigation path: "Who is this for?" when pushed.
     @State private var path: [Route] = []
 
@@ -100,6 +97,16 @@ struct AddSheet: View {
             withAnimation(.easeInOut(duration: PP.duration.quick)) { makeRoomName = model.typedLabel }
         }
         .onChange(of: model.isFinished) { _, finished in if finished { dismiss() } }
+        .onChange(of: model.hasRequiredText, initial: true) { _, has in
+            // A tick after the keystroke, in its own animation (in the
+            // keystroke's update the toolbar doesn't always animate).
+            Task { @MainActor in
+                await Task.yield()
+                withAnimation(reduceMotion ? .easeOut(duration: PP.duration.quick) : .smooth(duration: PP.duration.settle)) {
+                    addShown = has
+                }
+            }
+        }
 
         // The For row pushes; the native back (or a pick) pops.
         .onChange(of: path) { _, path in
@@ -158,16 +165,42 @@ struct AddSheet: View {
                 Button(L10n.Add.skip) { model.finish() }
             }
             ToolbarItem(placement: .confirmationAction) { addButton }
-        } else {
-            // The iOS 26 sheet convention: a round glass X (VoiceOver "Cancel").
-            // No discard confirmation for now (open-questions D6).
-            ToolbarItem(placement: .cancellationAction) {
-                Button(role: .close) { model.finish() }
-                    .accessibilityLabel(L10n.Add.cancel)
-            }
-            if !isPerson { segmentedControl }
+        } else if isPerson {
+            // From a name: X / Add, as before.
+            ToolbarItem(placement: .cancellationAction) { closeButton }
             ToolbarItem(placement: .confirmationAction) { addButton }
+        } else {
+            // Name tab: the new person's avatar leads (Intention tab: empty).
+            if model.tab == .name {
+                ToolbarItem(placement: .topBarLeading) { newPersonAvatar }
+                    .sharedBackgroundVisibility(.hidden)
+            }
+            segmentedControl
+            // Add splits off to the left of the X once there's text, and
+            // merges back when it's cleared: its own glass beside the X's.
+            if addShown {
+                ToolbarItem(placement: .topBarTrailing) { splitAddButton }
+                ToolbarSpacer(.fixed, placement: .topBarTrailing)
+            }
+            // The X stays at the far right on both tabs: one place, one
+            // meaning. No discard confirmation for now (open-questions D6).
+            ToolbarItem(placement: .topBarTrailing) { closeButton }
         }
+    }
+
+    /// The iOS 26 sheet convention: a round glass X (VoiceOver "Cancel").
+    private var closeButton: some View {
+        Button(role: .close) { model.finish() }
+            .accessibilityLabel(L10n.Add.cancel)
+    }
+
+    /// The new person as they'll appear: a monogram on glass tinted with
+    /// their tone, like your own avatar in Home's header. Initials follow
+    /// the display name live ("…" until there's one). Not tappable in v1.
+    private var newPersonAvatar: some View {
+        MonogramAvatar(initials: model.avatarInitials, tone: model.tone, size: PP.size.avatar.row, filled: false)
+            .glassEffect(.regular.tint(MonogramAvatar.color(tone: model.tone)), in: .circle)
+            .accessibilityHidden(true)
     }
 
     private var segmentedControl: some ToolbarContent {
@@ -179,7 +212,6 @@ struct AddSheet: View {
                 EmptyView()
             }
             .pickerStyle(.segmented)
-            .fixedSize()
         }
     }
 
@@ -187,6 +219,16 @@ struct AddSheet: View {
         Button(L10n.Add.add) { save() }
             .tint(PP.color.primary)
             .disabled(!model.canAdd)
+    }
+
+    /// The Add that splits off the X: blue-tinted glass.
+    private var splitAddButton: some View {
+        Button { save() } label: {
+            Text(L10n.Add.add).foregroundStyle(PP.color.onPrimary)
+        }
+        .buttonStyle(.glassProminent)
+        .tint(PP.color.primary)
+        .disabled(!model.canAdd)
     }
 
     /// Switching tabs moves focus to the new tab's field in the same
@@ -213,30 +255,28 @@ struct AddSheet: View {
         Form {
             noticeSection
             Section {
-                glassField(.name) {
-                    TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
-                        .focused($focus, equals: .name)
-                        .accessibilityLabel(L10n.Add.nameLabel)
-                        .textInputAutocapitalization(.words)
-                        .submitLabel(.next)
-                        .onSubmit { focus = .alias }
-                        .fieldRules(.name, text: $model.name, model: model)
-                }
+                TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
+                    .focused($focus, equals: .name)
+                    .accessibilityLabel(L10n.Add.nameLabel)
+                    .textInputAutocapitalization(.words)
+                    .submitLabel(.next)
+                    .onSubmit { focus = .alias }
+                    .fieldRules(.name, text: $model.name, model: model)
+                    .listRowBackground(PP.color.raised)
             } header: {
                 Text(L10n.Add.nameLabel)
             } footer: {
                 fieldFooter(.name, text: model.name, caption: nil)
             }
             Section {
-                glassField(.alias) {
-                    TextField(L10n.Add.aliasLabel, text: $model.alias, prompt: prompt(L10n.Add.aliasPlaceholder))
-                        .focused($focus, equals: .alias)
-                        .accessibilityLabel(L10n.Add.aliasLabel)
-                        .textInputAutocapitalization(.words)
-                        .submitLabel(.done)
-                        .onSubmit(save)
-                        .fieldRules(.alias, text: $model.alias, model: model)
-                }
+                TextField(L10n.Add.aliasLabel, text: $model.alias, prompt: prompt(L10n.Add.aliasPlaceholder))
+                    .focused($focus, equals: .alias)
+                    .accessibilityLabel(L10n.Add.aliasLabel)
+                    .textInputAutocapitalization(.words)
+                    .submitLabel(.done)
+                    .onSubmit(save)
+                    .fieldRules(.alias, text: $model.alias, model: model)
+                    .listRowBackground(PP.color.raised)
             } header: {
                 Text(L10n.Add.aliasLabel)
             } footer: {
@@ -244,48 +284,6 @@ struct AddSheet: View {
             }
             carrySection(.name)
         }
-        // The avatar changes field in its own animation, so the morph runs
-        // every time (not only when a typing transaction happens to carry it).
-        .onChange(of: model.avatarInitials(.alias), initial: true) { _, initials in
-            if model.avatarField == .alias { leavingAliasInitials = initials }
-        }
-        .onChange(of: model.avatarField) { _, field in
-            Task { @MainActor in
-                await Task.yield()
-                withAnimation(reduceMotion ? .easeOut(duration: PP.duration.quick) : .smooth(duration: PP.duration.settle)) {
-                    avatarIn = field
-                }
-            }
-        }
-    }
-
-    /// A Name-tab field on glass, with the avatar beside it on its own tinted
-    /// glass while it's this field's (as the pray button sits beside Home's
-    /// pill). Both share one glass container, so the avatar morphs out of
-    /// the field (Apple's liquid split) when it arrives and back into it
-    /// when it leaves, and the field stretches to fill the row. Each row
-    /// morphs on its own: nothing travels between form rows.
-    private func glassField(_ field: AddSheetModel.Field, @ViewBuilder _ textField: () -> some View) -> some View {
-        GlassEffectContainer(spacing: PP.size.bar.gap) {
-            HStack(spacing: PP.size.bar.gap) {
-                if avatarIn == field {
-                    MonogramAvatar(initials: field == .alias ? leavingAliasInitials : model.avatarInitials(field),
-                                   tone: model.tone, size: PP.size.avatar.field,
-                                   filled: false)
-                        .glassEffect(.regular.tint(MonogramAvatar.color(tone: model.tone)), in: .circle)
-                        .glassEffectID("\(field).avatar", in: glassNamespace)
-                        .glassEffectTransition(reduceMotion ? .materialize : .matchedGeometry)
-                        .accessibilityHidden(true)
-                }
-                textField()
-                    .padding(.horizontal, PP.space.lg)
-                    .frame(maxWidth: .infinity, minHeight: PP.size.avatar.field, alignment: .leading)
-                    .glassEffect(.regular.tint(PP.color.raised), in: .capsule)
-                    .glassEffectID("\(field).field", in: glassNamespace)
-            }
-        }
-        .listRowInsets(EdgeInsets())
-        .listRowBackground(Color.clear)
     }
 
     // MARK: Intention tab
