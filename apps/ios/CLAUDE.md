@@ -411,27 +411,23 @@ compose queries; if an operation is missing, ask for a backend change.
   `amenFromInvitation()`) returns the `NewPrayer` for Home to log; the
   selection stays through closing so held rings don't blink.
 - `Features/AddSheet/AddSheet` + `State/AddSheetModel` (screens.md, Add
-  sheet, revised 2026-11-06): toolbar buttons, a segmented Name | Intention,
-  labeled fields, the For row, and a carry row on every step; "{alias} is
-  added." and the offer push in, and so does "Who is this for?" (a search
-  over `pickerNames(matching:)`). Every field stays in the hierarchy (the
-  pages only slide), so focus moves without the keyboard dropping. Form type
-  (screens.md): label → control → hint; labels `type.label` ink on one
-  leading edge (the fields' text inset), input `type.body` ink, hints and
-  the meter `type.caption` inkMuted, placeholders input-size inkMuted; "Make
-  room" `type.caption` blue; the carry row's bloom trails its
-  label 6 pt after it at `size.carriedMark.carryRow` (`CarriedMark.glyphEm`),
-  inkMuted in every state, centered on the cap height (`.capCenter`).
-  Spacing tokens `space.formGroup` / `formLabelToField` / `formFieldToHint`
-  / `formLabelToHint`, measured to the letters: texts are `.capTrimmed`
-  (Theme/CapTrim.swift) to their cap height on top, labels above a field
-  also to the baseline at the bottom. The carry
+  sheet, rewritten 2026-11-06): **native `Form`s** (inset grouped, Tier B:
+  no hand-set padding, type size or alignment), background hidden, rows
+  `raised`. Toolbar buttons, a segmented Name | Intention; section headers
+  for labels, footers for hints, errors (ink) and the counter; a top notice
+  row; a native Toggle whose subtitle is the meter, its footer "Make
+  room …". Each step's form stays in the hierarchy (faded or slid aside), so
+  focus moves without the keyboard dropping. "Who is this for?" is a real
+  push (`@State` path, `.searchable` + `.searchFocused`); the intention
+  field refocuses once the pop has begun (it's out of the window while
+  pushed). The intention fields grow 1 → 3 lines; Return submits, pasted
+  breaks become spaces. The carry
   row's rules are `carryOffer` and `carryMeter` in PlusPrayerDomain (room,
   default, true cost; the meter says what's left, not counting this item:
   "3 places left"; on, taking everything left, "This uses your last place"
   / "… last N places" (then "Also carries" drops its cost); "All N in use";
   the free pool's line); every `{unit}` string goes through `L10n.Add` keyed by
-  `poolUnit` (Q32). "Make room …" sits under the meter, a button with no
+  `poolUnit` (Q32). "Make room …" is a button with no
   action and the hint "Not available yet" (Q31); its name follows typing
   only after `duration.labelPause`, with a `quick` crossfade. If the server's carried
   result differs from the toggle (`AddedSubject.differs(from:)`, on

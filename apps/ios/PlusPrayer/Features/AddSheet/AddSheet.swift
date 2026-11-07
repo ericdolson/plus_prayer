@@ -1,15 +1,17 @@
 import PlusPrayerDomain
 import SwiftUI
 
-/// The add sheet (screens.md, "Add sheet", revised 2026-11-06): one native
-/// sheet, buttons in its toolbar, a native segmented control for Name |
-/// Intention, a carry row on every step.
+/// The add sheet (screens.md, "Add sheet", rewritten 2026-11-06): one native
+/// sheet over native forms (inset grouped, Tier B: the platform owns spacing,
+/// type, alignment and row styling). Buttons in the toolbar, a native
+/// segmented control for Name | Intention, a carry section on every step.
 ///
-/// Keyboard: every text field stays in the hierarchy (the hidden tab and the
-/// other pages are only moved or faded), so focus moves from one field to the
-/// next in the same transaction and the keyboard never hides and reappears.
-/// The sheet keeps one height, the tallest it has been (the name form); the
-/// offer step and "Who is this for?" push in from the trailing edge.
+/// Keyboard: every step's form stays in the hierarchy (the hidden tab and
+/// the offer step are only faded or moved aside), so focus moves from one
+/// field to the next in the same transaction and the keyboard never hides
+/// and reappears. "Who is this for?" is a real navigation push whose search
+/// takes focus as it appears. The sheet keeps one height, the tallest any
+/// step's form has been.
 struct AddSheet: View {
     @State var model: AddSheetModel
 
@@ -20,23 +22,21 @@ struct AddSheet: View {
     /// "Make room for {alias}": follows the typed name only once typing
     /// pauses, never mid-word.
     @State private var makeRoomName: String?
-    /// The carry row's bloom, ~15 pt tall (the label's size), scaling with it.
-    @ScaledMetric(relativeTo: .subheadline) private var bloomFont = PP.size.carriedMark.carryRow / CarriedMark.glyphEm
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    /// The carry row's toggle width, so text beside and under it stays clear.
-    @State private var toggleWidth: CGFloat = 0
+    /// The tallest a form's content has been, for the sheet's one height.
+    @State private var contentHeight: CGFloat = 0
+    /// The navigation path: "Who is this for?" when pushed.
+    @State private var path: [Route] = []
 
-    /// The labels' cap height, to center the carry row's bloom on it.
-    private var labelCapHeight: CGFloat {
-        systemFontMetrics(.subheadline, weight: .semibold, size: dynamicTypeSize).capHeight
+    private enum Route: Hashable {
+        case chooser
     }
 
-    /// The one line at the top: no connection, the ~500 cap, or anything
-    /// else that went wrong. Text is kept.
+    /// The one notice at the top: the intention tab's "Saved, but not
+    /// carried…", no connection, the ~500 cap, or anything else that went
+    /// wrong. Text is kept. (The offer step puts "Saved, but not carried"
+    /// under its header.)
     private var notice: String? {
-        // The intention tab's "Saved, but not carried…" (the offer step has
-        // it under its header).
-        if model.notCarried == .intention && model.step == .form { return L10n.Add.notCarried }
+        if model.notCarried == .intention && !isOffer { return L10n.Add.notCarried }
         if model.isOffline { return L10n.Add.offline }
         if model.isAtCap { return L10n.Add.capReached(subjectCap) }
         if model.failedGenerically { return L10n.Add.failed }
@@ -44,43 +44,21 @@ struct AddSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: PP.space.md) {
-                if let notice {
-                    // At the sheet's one text edge, left-aligned. The saved-
-                    // but-not-carried status is 15 pt ink, like on the offer step.
-                    Text(notice)
-                        .font(isSettled ? PP.type.bodySmall : PP.type.caption)
-                        .foregroundStyle(isSettled ? PP.color.ink : PP.color.inkMuted)
-                        .multilineTextAlignment(.leading)
-                        .capTrimmed(isSettled ? .subheadline : .footnote)
-                        .padding(.leading, PP.space.md)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .transition(.opacity)
-                }
-                ZStack(alignment: .topLeading) {
-                    page(formPage, shown: model.step == .form, before: true)
-                    page(offerPage, shown: isOffer, before: false)
-                }
-                // Sized to the pages (it never sets the sheet's height); its
-                // list scrolls inside.
-                .overlay(alignment: .topLeading) {
-                    page(chooserPage, shown: model.step == .choosing, before: false)
-                }
-                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
-                .disabled(isSettled)
+        NavigationStack(path: $path) {
+            ZStack {
+                page(nameForm, shown: !isOffer && model.tab == .name, slide: isOffer ? -width : 0)
+                page(intentionForm, shown: !isOffer && model.tab == .intention, slide: isOffer ? -width : 0)
+                page(offerForm, shown: isOffer, slide: isOffer ? 0 : width)
             }
-            .padding(.horizontal, PP.space.xl)
-            .padding(.top, PP.space.md)
-            .padding(.bottom, PP.space.xl)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+            .disabled(isSettled)
             .animation(reduceMotion ? .easeOut(duration: PP.duration.quick) : .easeInOut(duration: PP.duration.settle),
-                       value: model.step)
+                       value: isOffer)
             .animation(.easeOut(duration: PP.duration.quick), value: notice)
             .toolbar { toolbar }
-            // "Who is this for?" is the pushed page's native inline title.
-            .navigationTitle(model.step == .choosing ? L10n.Add.whoIsThisFor : "")
             .navigationBarTitleDisplayMode(.inline)
-            .fittedSheetHeight()
+            .navigationDestination(for: Route.self) { _ in chooser }
+            .fittedSheetHeight(contentHeight)
         }
         .tint(PP.color.ink)
         .onAppear { focus = model.activeField }
@@ -94,6 +72,15 @@ struct AddSheet: View {
             withAnimation(.easeInOut(duration: PP.duration.quick)) { makeRoomName = model.typedLabel }
         }
         .onChange(of: model.isFinished) { _, finished in if finished { dismiss() } }
+        // The For row pushes; the native back (or a pick) pops.
+        .onChange(of: path) { _, path in
+            if path.isEmpty, model.step == .choosing {
+                model.choose(nil)
+                refocusIntention()
+            } else if !path.isEmpty, model.step == .form {
+                model.openChooser()
+            }
+        }
     }
 
     /// Saved, but not carried: nothing left to do but Done.
@@ -103,11 +90,17 @@ struct AddSheet: View {
         if case .offer = model.step { true } else { false }
     }
 
-    /// A page that slides: the form leaves to the leading edge, the others
-    /// wait off the trailing edge.
-    private func page(_ content: some View, shown: Bool, before: Bool) -> some View {
-        content
-            .offset(x: shown ? 0 : (before ? -width : width))
+    /// A step's form: faded out when it isn't shown, slid aside for the offer.
+    /// Its content height feeds the sheet's one height.
+    private func page(_ form: some View, shown: Bool, slide: CGFloat) -> some View {
+        form
+            .scrollContentBackground(.hidden)
+            // Its content plus the top inset (the bar and the form's own top
+            // margin); the bottom inset is left out (it holds the keyboard).
+            .onScrollGeometryChange(for: CGFloat.self) { $0.contentSize.height + $0.contentInsets.top } action: { _, height in
+                contentHeight = max(contentHeight, height)
+            }
+            .offset(x: slide)
             .opacity(shown ? 1 : 0)
             .allowsHitTesting(shown)
             .accessibilityHidden(!shown)
@@ -120,14 +113,13 @@ struct AddSheet: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button(L10n.Common.done) { model.finish() }
             }
+        } else if isOffer {
+            // No back: the name is already saved.
+            ToolbarItem(placement: .cancellationAction) {
+                Button(L10n.Add.notNow) { model.finish() }
+            }
+            ToolbarItem(placement: .confirmationAction) { addButton }
         } else {
-            stepToolbar
-        }
-    }
-
-    @ToolbarContentBuilder private var stepToolbar: some ToolbarContent {
-        switch model.step {
-        case .form:
             // The iOS 26 sheet convention: a round glass X (VoiceOver "Cancel").
             // No discard confirmation for now (open-questions D6).
             ToolbarItem(placement: .cancellationAction) {
@@ -143,17 +135,6 @@ struct AddSheet: View {
                 }
                 .pickerStyle(.segmented)
                 .fixedSize()
-            }
-            ToolbarItem(placement: .confirmationAction) { addButton }
-        case .choosing:
-            ToolbarItem(placement: .topBarLeading) {
-                Button { choose(nil) } label: { PPIcon.back }
-                    .accessibilityLabel(L10n.Add.back)
-            }
-        case .offer:
-            // No back: the name is already saved.
-            ToolbarItem(placement: .cancellationAction) {
-                Button(L10n.Add.notNow) { model.finish() }
             }
             ToolbarItem(placement: .confirmationAction) { addButton }
         }
@@ -183,241 +164,204 @@ struct AddSheet: View {
         }
     }
 
-    /// The For row pushes "Who is this for?" with its search focused.
-    private func openChooser() {
-        model.openChooser()
-        focus = .search
-    }
-
-    /// Picking someone (or going back) returns to the intention, focused.
-    private func choose(_ id: String?) {
-        model.choose(id)
-        focus = .intention
-    }
-
-    // MARK: The form (Name | Intention)
-
-    private var formPage: some View {
-        ZStack(alignment: .top) {
-            nameForm
-                .opacity(model.tab == .name ? 1 : 0)
-                .allowsHitTesting(model.tab == .name)
-                .accessibilityHidden(model.tab != .name)
-            intentionForm
-                .opacity(model.tab == .intention ? 1 : 0)
-                .allowsHitTesting(model.tab == .intention)
-                .accessibilityHidden(model.tab != .intention)
-        }
-    }
+    // MARK: Name tab
 
     private var nameForm: some View {
-        VStack(spacing: PP.space.formGroup) {
+        Form {
+            noticeSection
             // A preview only in v1: its tone from the start, initials live by
             // Home's rule.
-            MonogramAvatar(initials: model.previewInitials, tone: model.tone, size: PP.size.avatar.large)
-                .accessibilityHidden(true)
-            field(.name, text: $model.name, label: L10n.Add.nameLabel, placeholder: L10n.Add.namePlaceholder,
-                  caption: nil)
-                .onSubmit { focus = .alias }
-                .submitLabel(.next)
-            field(.alias, text: $model.alias, label: L10n.Add.aliasLabel, placeholder: L10n.Add.aliasPlaceholder,
-                  caption: L10n.Add.aliasCaption)
-                .onSubmit(save)
-                .submitLabel(.done)
-            carryRow(.name)
+            Section {
+                MonogramAvatar(initials: model.previewInitials, tone: model.tone, size: PP.size.avatar.large)
+                    .frame(maxWidth: .infinity)
+                    .accessibilityHidden(true)
+                    .listRowBackground(Color.clear)
+            }
+            Section {
+                TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
+                    .focused($focus, equals: .name)
+                    .accessibilityLabel(L10n.Add.nameLabel)
+                    .textInputAutocapitalization(.words)
+                    .submitLabel(.next)
+                    .onSubmit { focus = .alias }
+                    .fieldRules(.name, text: $model.name, model: model)
+                    .listRowBackground(PP.color.raised)
+            } header: {
+                Text(L10n.Add.nameLabel)
+            } footer: {
+                fieldFooter(.name, text: model.name, caption: nil)
+            }
+            Section {
+                TextField(L10n.Add.aliasLabel, text: $model.alias, prompt: prompt(L10n.Add.aliasPlaceholder))
+                    .focused($focus, equals: .alias)
+                    .accessibilityLabel(L10n.Add.aliasLabel)
+                    .textInputAutocapitalization(.words)
+                    .submitLabel(.done)
+                    .onSubmit(save)
+                    .fieldRules(.alias, text: $model.alias, model: model)
+                    .listRowBackground(PP.color.raised)
+            } header: {
+                Text(L10n.Add.aliasLabel)
+            } footer: {
+                fieldFooter(.alias, text: model.alias, caption: L10n.Add.aliasCaption)
+            }
+            carrySection(.name)
         }
     }
+
+    // MARK: Intention tab
 
     private var intentionForm: some View {
-        VStack(alignment: .leading, spacing: PP.space.formGroup) {
-            forRow
-            field(.intention, text: $model.intention, label: L10n.Add.intentionLabel,
-                  placeholder: L10n.Add.intentionPlaceholder, caption: nil)
-                .onSubmit(save)
-                .submitLabel(.done)
-            carryRow(.intention)
-        }
-    }
-
-    /// Looks like a Home row: the avatar, the serif name, a blue "Change".
-    private var forRow: some View {
-        Button(action: openChooser) {
-            HStack(spacing: PP.space.md) {
-                if let parent = model.parent {
-                    MonogramAvatar(initials: parent.initials, tone: parent.tone, size: PP.size.avatar.picker)
-                    Text(parent.label)
-                        .font(PP.type.name)
-                        .foregroundStyle(PP.color.ink)
-                        .lineLimit(1)
+        Form {
+            noticeSection
+            Section {
+                NavigationLink(value: Route.chooser) {
+                    LabeledContent {
+                        if let parent = model.parent {
+                            HStack {
+                                MonogramAvatar(initials: parent.initials, tone: parent.tone,
+                                               size: PP.size.avatar.picker)
+                                Text(parent.label)
+                                    .foregroundStyle(PP.color.ink)
+                                    .lineLimit(1)
+                            }
+                        }
+                    } label: {
+                        Text(L10n.Add.forLabel)
+                    }
                 }
-                Spacer(minLength: PP.space.sm)
-                Text(L10n.Add.change)
-                    .font(PP.type.body)
-                    .foregroundStyle(PP.color.primary)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(L10n.Add.forLabel)
+                .accessibilityValue(model.parent?.label ?? "")
+                .accessibilityAddTraits(.isButton)
+                .listRowBackground(PP.color.raised)
             }
-            .padding(.leading, PP.space.md) // the avatar on the shared edge
-            .contentShape(Rectangle())
+            Section {
+                growingField(.intention, text: $model.intention, label: L10n.Add.intentionLabel)
+            } header: {
+                Text(L10n.Add.intentionLabel)
+            } footer: {
+                fieldFooter(.intention, text: model.intention, caption: nil)
+            }
+            carrySection(.intention)
         }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(L10n.Add.forLabel)
-        .accessibilityValue(model.parent?.label ?? "")
-        .accessibilityAddTraits(.isButton)
     }
 
     // MARK: Who is this for?
 
-    private var chooserPage: some View {
-        VStack(alignment: .leading, spacing: PP.space.md) {
-            HStack(spacing: PP.space.sm) {
-                PPIcon.search
-                    .foregroundStyle(PP.color.inkMuted)
-                    .accessibilityHidden(true)
-                TextField(text: $model.chooserQuery,
-                          prompt: Text(L10n.Search.placeholder).foregroundStyle(PP.color.inkMuted)) {
-                    Text(L10n.Search.placeholder)
-                }
-                    .focused($focus, equals: .search)
-                    .foregroundStyle(PP.color.ink)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    // Return doesn't lower the keyboard (screens.md, "Keyboard stays up").
-                    .onSubmit { focus = .search }
-            }
-            .font(PP.type.body)
-            .padding(PP.space.md)
-            .background(PP.color.raised, in: RoundedRectangle(cornerRadius: PP.radius.md))
-            let names = model.chooserNames
+    /// A native list with search, everyone in Home order, Me first; the
+    /// current person has the checkmark. Picking pops back to the intention.
+    private var chooser: some View {
+        let names = model.chooserNames
+        return List {
             if names.isEmpty {
                 Text(L10n.Add.noMatches(model.chooserQuery.trimmingCharacters(in: .whitespacesAndNewlines)))
-                    .font(PP.type.caption)
-                    .foregroundStyle(PP.color.inkMuted)
-                    .padding(.horizontal, PP.space.md)
-            } else {
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        ForEach(names) { name in
-                            chooserRow(name)
+                    .foregroundStyle(.secondary)
+                    .listRowBackground(Color.clear)
+            }
+            ForEach(names) { name in
+                Button { choose(name.id) } label: {
+                    HStack {
+                        MonogramAvatar(initials: name.initials, tone: name.tone, size: PP.size.avatar.picker)
+                        Text(name.label)
+                            .foregroundStyle(PP.color.ink)
+                            .lineLimit(1)
+                        Spacer(minLength: 0)
+                        if name.id == model.parentId {
+                            PPIcon.check.foregroundStyle(.tint)
                         }
                     }
                 }
-                .scrollBounceBehavior(.basedOnSize)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(name.label)
+                .accessibilityIdentifier("addSheet.for.\(name.id)")
+                .accessibilityAddTraits(name.id == model.parentId ? [.isButton, .isSelected] : .isButton)
+                .listRowBackground(PP.color.raised)
             }
         }
+        .scrollContentBackground(.hidden)
+        .searchable(text: $model.chooserQuery, placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: L10n.Search.placeholder)
+        .searchFocused($focus, equals: .search)
+        .navigationTitle(L10n.Add.whoIsThisFor)
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { focus = .search }
     }
 
-    private func chooserRow(_ name: PickerName) -> some View {
-        Button { choose(name.id) } label: {
-            HStack(spacing: PP.space.md) {
-                MonogramAvatar(initials: name.initials, tone: name.tone, size: PP.size.avatar.picker)
-                Text(name.label)
-                    .font(PP.type.name)
-                    .foregroundStyle(PP.color.ink)
-                    .lineLimit(1)
-                Spacer(minLength: PP.space.sm)
-                if name.id == model.parentId {
-                    PPIcon.check
-                        .font(PP.type.body)
-                        .foregroundStyle(PP.color.ink)
-                }
-            }
-            .padding(.leading, PP.space.md) // the avatar on the shared edge
-            .frame(minHeight: PP.size.row.name)
-            .contentShape(Rectangle())
+    /// Picking someone returns to the intention, focused.
+    private func choose(_ id: String) {
+        model.choose(id)
+        path = []
+        refocusIntention()
+    }
+
+    /// The intention field is out of the window while the list is pushed, so
+    /// it takes focus once the pop has begun and it's back: straight from
+    /// the search field, so the keyboard stays up.
+    private func refocusIntention() {
+        Task { @MainActor in
+            await Task.yield()
+            focus = .intention
         }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(name.label)
-        .accessibilityIdentifier("addSheet.for.\(name.id)")
-        .accessibilityAddTraits(name.id == model.parentId ? [.isButton, .isSelected] : .isButton)
     }
 
     // MARK: The offer step
 
-    private var offerPage: some View {
-        VStack(alignment: .leading, spacing: PP.space.formGroup) {
-            VStack(alignment: .leading, spacing: PP.space.sm) {
-                Text(L10n.Add.added(model.offerName))
-                    .font(PP.type.displayLine)
-                    .foregroundStyle(PP.color.ink)
-                if model.notCarried != nil {
-                    Text(L10n.Add.notCarried)
-                        .font(PP.type.bodySmall)
+    private var offerForm: some View {
+        Form {
+            noticeSection
+            // One clear header block; the question labels the field below.
+            Section {
+                VStack(alignment: .leading) {
+                    Text(L10n.Add.added(model.offerName))
+                        .font(PP.type.displayLine)
                         .foregroundStyle(PP.color.ink)
-                        .transition(.opacity)
+                    if model.notCarried != nil {
+                        Text(L10n.Add.notCarried)
+                            .foregroundStyle(PP.color.ink)
+                            .transition(.opacity)
+                    }
+                    Text(L10n.Add.offerQuestion(model.offerName))
+                        .foregroundStyle(.secondary)
                 }
+                .listRowBackground(Color.clear)
             }
-            .padding(.leading, PP.space.md) // the sheet's one text edge
-            // The question is the field's label (screens.md, Form type).
-            field(.offer, text: $model.offerText, label: L10n.Add.offerQuestion(model.offerName),
-                  placeholder: L10n.Add.intentionPlaceholder, caption: nil)
-                .onSubmit(save)
-                .submitLabel(.done)
-            carryRow(.offer)
+            Section {
+                growingField(.offer, text: $model.offerText, label: L10n.Add.offerQuestion(model.offerName))
+            } footer: {
+                fieldFooter(.offer, text: model.offerText, caption: nil)
+            }
+            carrySection(.offer)
         }
     }
 
-    // MARK: The carry row
+    // MARK: The carry section
 
-    /// "Carry onto the list ✱" (the bloom trailing the label, as on Home's
-    /// rows), the toggle trailing the row; under it, at the label edge, the
-    /// meter, "Also carries …", and with no room the blue "Make room …"
-    /// (inert until Membership / Your portion exist).
-    private func carryRow(_ row: AddSheetModel.CarryRow) -> some View {
+    /// A native toggle: the title "Carry onto the list ✱" (the bloom trailing
+    /// it, inkMuted in every state) and the meter as its subtitle. With no
+    /// room the footer holds "Make room …", inert until Membership / Your
+    /// portion exist.
+    private func carrySection(_ row: AddSheetModel.CarryRow) -> some View {
         let offer = model.carryOffer(row)
         let isOn = Binding(get: { model.isCarrying(row) }, set: { model.setCarrying(row, $0) })
-        let also = model.alsoCarries(row)
-        return VStack(alignment: .leading, spacing: PP.space.formLabelToHint) {
-            HStack(spacing: PP.space.sm) {
-                HStack(alignment: .capCenter, spacing: PP.size.carriedMark.nameGap) {
-                    Text(L10n.Add.carryTitle)
-                        .font(PP.type.label)
-                        .foregroundStyle(PP.color.ink)
-                        .alignmentGuide(.capCenter) { $0[.firstTextBaseline] - labelCapHeight / 2 }
-                        .capTrimmed(.subheadline, weight: .semibold)
-                    // inkMuted in every state: the toggle shows on/off (a
-                    // dimmed mark would be Home's "carried" color).
-                    // Centered on the cap height; it may overhang the label's
-                    // line without making the row taller (the gap above
-                    // reaches the label's caps).
-                    PPIcon.carried
-                        .font(.system(size: bloomFont))
-                        .foregroundStyle(PP.color.inkMuted)
-                        .frame(height: labelCapHeight)
-                }
-                .accessibilityHidden(true)
-                Spacer(minLength: PP.space.sm)
-            }
-            // The toggle trails the label's line but doesn't make it taller,
-            // so the group gap above reaches the label itself.
-            .padding(.trailing, toggleWidth + PP.space.sm)
-            .overlay(alignment: .trailing) {
-                Toggle(L10n.Add.carryTitle, isOn: isOn)
-                    .ppSwitch()
-                    .labelsHidden()
-                    .disabled(!offer.hasRoom)
-                    .fixedSize()
-                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { toggleWidth = $0 }
-            }
-            Text(L10n.Add.carryMeter(model.meter(row)))
-                .font(PP.type.caption)
-                .foregroundStyle(PP.color.inkMuted)
-                .capTrimmed(.footnote)
-                .padding(.trailing, toggleWidth + PP.space.sm)
-            if let also {
-                Text(L10n.Add.alsoCarries(also.name, cost: also.cost))
-                    .font(PP.type.caption)
-                    .foregroundStyle(PP.color.inkMuted)
-                    .transition(.opacity)
-            }
-            if !offer.hasRoom {
-                makeRoom(row)
-                    .padding(.top, PP.space.xxs)
-            }
+        var subtitle = L10n.Add.carryMeter(model.meter(row))
+        if let also = model.alsoCarries(row) {
+            subtitle += "\n" + L10n.Add.alsoCarries(also.name, cost: also.cost)
         }
-        // The labels' shared leading edge (the fields' text inset).
-        .padding(.leading, PP.space.md)
-        .animation(.easeOut(duration: PP.duration.quick), value: also?.name)
+        let bloom = Text(PPIcon.carried).foregroundStyle(PP.color.inkMuted)
+        return Section {
+            Toggle(isOn: isOn) {
+                Text("\(Text(L10n.Add.carryTitle))\u{00A0}\(bloom)")
+                Text(subtitle)
+            }
+            .ppSwitch()
+            .disabled(!offer.hasRoom)
+            .accessibilityLabel(L10n.Add.carryTitle)
+            .accessibilityHint(subtitle)
+            .listRowBackground(PP.color.raised)
+        } footer: {
+            if !offer.hasRoom { makeRoom(row) }
+        }
     }
 
     /// Visible but inert for now: what its menu offers is part of the
@@ -425,105 +369,103 @@ struct AddSheet: View {
     private func makeRoom(_ row: AddSheetModel.CarryRow) -> some View {
         Button(row == .name ? L10n.Add.makeRoom(for: makeRoomName ?? "") : L10n.Add.makeRoomForIntention) {}
             .contentTransition(.opacity)
-            .font(PP.type.caption)
             .tint(PP.color.primary)
-            .multilineTextAlignment(.leading)
             .accessibilityHint(L10n.Add.makeRoomHint)
     }
 
-    // MARK: A field
+    // MARK: Notices, fields and footers
 
-    /// A native text field with its label above (if any) and its muted
-    /// caption below (if any). Caps stop input; a muted "34/40" counter shows in the
-    /// last 10 characters. Contact info shows its message in place of the
-    /// caption once typing pauses.
-    private func field(_ field: AddSheetModel.Field, text: Binding<String>, label: String? = nil,
-                       placeholder: String, caption: String?) -> some View {
-        let cap = AddSheetModel.cap(field)
-        let count = text.wrappedValue.count
-        let issue = model.contactShown.contains(field)
-        return VStack(alignment: .leading, spacing: PP.space.formFieldToHint) {
-            VStack(alignment: .leading, spacing: PP.space.formLabelToField) {
-                if let label {
-                    Text(label)
-                        .font(PP.type.label)
-                        .foregroundStyle(PP.color.ink)
-                        .capTrimmed(.subheadline, weight: .semibold, toBaseline: true)
-                        .padding(.horizontal, PP.space.md)
-                        .accessibilityHidden(true)
-                }
-                TextField(text: text, prompt: Text(placeholder).foregroundStyle(PP.color.inkMuted)) {
-                    Text(label ?? placeholder)
-                }
-                    .focused($focus, equals: field)
-                    .font(PP.type.body)
+    /// The notice row at the top: offline, the cap, a failure, or the
+    /// intention tab's "Saved, but not carried…". Errors in ink, never red.
+    @ViewBuilder private var noticeSection: some View {
+        if let notice {
+            Section {
+                Text(notice)
                     .foregroundStyle(PP.color.ink)
-                    .textInputAutocapitalization(field == .name || field == .alias ? .words : .sentences)
-                    .padding(PP.space.md)
-                    .background(PP.color.raised, in: RoundedRectangle(cornerRadius: PP.radius.md))
-                    .accessibilityLabel(label ?? placeholder)
-                    .onChange(of: text.wrappedValue) { _, new in
-                        if new.count > cap { text.wrappedValue = String(new.prefix(cap)) }
-                        model.textChanged()
-                    }
-                    .task(id: text.wrappedValue) {
-                        // Clears at once when fixed; shows after typing pauses.
-                        guard model.hasContactIssue(field) else {
-                            model.showContactIssue(field, false)
-                            return
-                        }
-                        try? await Task.sleep(for: .seconds(PP.duration.validationPause))
-                        if !Task.isCancelled { model.showContactIssue(field, true) }
-                    }
-            }
-            // The line under the field, only when it has something to say.
-            if issue || caption != nil || count >= cap - 10 {
-                HStack(alignment: .firstTextBaseline, spacing: PP.space.sm) {
-                    if issue {
-                        Text(L10n.Add.contactError).foregroundStyle(PP.color.ink)
-                    } else if let caption {
-                        Text(caption).foregroundStyle(PP.color.inkMuted)
-                    }
-                    Spacer(minLength: 0)
-                    if count >= cap - 10 {
-                        Text(L10n.Add.counter(count, cap))
-                            .foregroundStyle(PP.color.inkMuted)
-                            .monospacedDigit()
-                    }
-                }
-                .font(PP.type.caption)
-                .capTrimmed(.footnote)
-                .padding(.horizontal, PP.space.md)
+                    .listRowBackground(Color.clear)
+                    .transition(.opacity)
             }
         }
+    }
+
+    private func prompt(_ placeholder: String) -> Text {
+        Text(placeholder).foregroundStyle(PP.color.inkMuted)
+    }
+
+    /// An intention field: grows from one line to three; no line breaks
+    /// (Return submits, as Add does; pasted breaks become spaces).
+    private func growingField(_ field: AddSheetModel.Field, text: Binding<String>, label: String) -> some View {
+        TextField(label, text: text, prompt: prompt(L10n.Add.intentionPlaceholder), axis: .vertical)
+            .lineLimit(1...3)
+            .focused($focus, equals: field)
+            .accessibilityLabel(label)
+            .textInputAutocapitalization(.sentences)
+            .submitLabel(.done)
+            .onChange(of: text.wrappedValue) { old, new in
+                guard new.contains(where: \.isNewline) else { return }
+                let typedReturn = new.count == old.count + 1 && new.filter { !$0.isNewline } == old
+                if typedReturn {
+                    text.wrappedValue = old
+                    save()
+                } else {
+                    text.wrappedValue = String(new.map { $0.isNewline ? " " : $0 })
+                }
+            }
+            .fieldRules(field, text: text, model: model)
+            .listRowBackground(PP.color.raised)
+    }
+
+    /// The section footer under a field: its contact-info message (ink) in
+    /// place of its hint, and the "34/40" counter in the last 10 characters.
+    @ViewBuilder private func fieldFooter(_ field: AddSheetModel.Field, text: String, caption: String?) -> some View {
+        let cap = AddSheetModel.cap(field)
+        let count = text.count
+        let issue = model.contactShown.contains(field)
+        if issue || caption != nil || count >= cap - 10 {
+            HStack(alignment: .firstTextBaseline) {
+                if issue {
+                    Text(L10n.Add.contactError).foregroundStyle(PP.color.ink)
+                } else if let caption {
+                    Text(caption)
+                }
+                Spacer(minLength: 0)
+                if count >= cap - 10 {
+                    Text(L10n.Add.counter(count, cap)).monospacedDigit()
+                }
+            }
+        }
+    }
+}
+
+private extension View {
+    /// A field's rules: caps stop input; the contact-info check runs once
+    /// typing pauses (and clears at once when fixed); typing again clears an
+    /// offline or failed add.
+    func fieldRules(_ field: AddSheetModel.Field, text: Binding<String>, model: AddSheetModel) -> some View {
+        let cap = AddSheetModel.cap(field)
+        return self
+            .onChange(of: text.wrappedValue) { _, new in
+                if new.count > cap { text.wrappedValue = String(new.prefix(cap)) }
+                model.textChanged()
+            }
+            .task(id: text.wrappedValue) {
+                guard model.hasContactIssue(field) else {
+                    model.showContactIssue(field, false)
+                    return
+                }
+                try? await Task.sleep(for: .seconds(PP.duration.validationPause))
+                if !Task.isCancelled { model.showContactIssue(field, true) }
+            }
     }
 }
 
 // MARK: Sheet height
 
 extension View {
-    /// A sheet as tall as the tallest its content has been (one height for
-    /// both tabs and the next step), measured inside a NavigationStack so the
-    /// bar is included.
-    func fittedSheetHeight() -> some View { modifier(FittedSheetHeight()) }
-}
-
-private struct FittedSheetHeight: ViewModifier {
-    @State private var content: CGFloat = 0
-    @State private var bar: CGFloat = 0
-
-    func body(content view: Content) -> some View {
-        view
-            .fixedSize(horizontal: false, vertical: true)
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { content = max(content, $0) }
-            .frame(maxHeight: .infinity, alignment: .top)
-            .background {
-                // Reaches under the bar, so its top inset is the bar's height.
-                Color.clear
-                    .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.top } action: { bar = $0 }
-                    .ignoresSafeArea(.container, edges: .top)
-            }
-            .presentationDetents(content > 0 ? [.height(content + bar)] : [.medium])
+    /// A sheet as tall as its forms' content has been (one height for both
+    /// tabs and the offer step), the bar included.
+    func fittedSheetHeight(_ content: CGFloat) -> some View {
+        presentationDetents(content > 0 ? [.height(content)] : [.medium])
     }
 }
 
@@ -557,15 +499,4 @@ private struct AddSheetPreview: View {
 #Preview("Pool full") { AddSheetPreview(tab: .name, poolFull: true).preferredColorScheme(.light) }
 #Preview("Pool full, large type") {
     AddSheetPreview(tab: .name, poolFull: true).dynamicTypeSize(.accessibility2)
-}
-
-// MARK: Alignment
-
-extension VerticalAlignment {
-    /// The middle of a text's cap height (the carry row's bloom sits on it,
-    /// as the mark does on Home's rows).
-    private enum CapCenter: AlignmentID {
-        static func defaultValue(in d: ViewDimensions) -> CGFloat { d[VerticalAlignment.center] }
-    }
-    static let capCenter = VerticalAlignment(CapCenter.self)
 }

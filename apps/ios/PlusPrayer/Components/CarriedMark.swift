@@ -10,10 +10,6 @@ import SwiftUI
 /// truncated.
 /// It scales with Dynamic Type (a custom symbol sized by a text style).
 enum CarriedMark {
-    /// The bloom symbol's height as a share of its font size: a font of
-    /// `glyph / glyphEm` draws a `glyph`-tall mark.
-    static let glyphEm: CGFloat = 0.72
-
     enum Context {
         /// After a Roca name: ~11 pt glyph, 6 pt gap.
         case name

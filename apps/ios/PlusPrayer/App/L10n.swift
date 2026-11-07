@@ -138,7 +138,6 @@ nonisolated enum L10n {
         static var forLabel: String { t("add.for") }
         static var change: String { t("add.for.change") }
         static var whoIsThisFor: String { t("add.for.title") }
-        static var back: String { t("add.for.back") }
         static func noMatches(_ query: String) -> String { String(format: t("add.for.noMatches"), query) }
         static var add: String { t("add.add") }
         static var cancel: String { t("add.cancel") }

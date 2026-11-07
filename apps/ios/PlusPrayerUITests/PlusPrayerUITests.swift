@@ -78,7 +78,9 @@ final class PlusPrayerUITests: XCTestCase {
 
         // The For row pushes "Who is this for?"; picking comes back.
         app.buttons["For"].tap()
-        XCTAssertTrue(app.navigationBars.staticTexts["Who is this for?"].waitForExistence(timeout: 2), "the native title")
+        // The native bar (its title gives way to the active search field).
+        XCTAssertTrue(app.navigationBars["Who is this for?"].waitForExistence(timeout: 2), "the pushed list")
+        XCTAssertTrue(app.searchFields.firstMatch.exists, "its native search")
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up into the search")
         app.typeText("mo")
         sleep(1)
@@ -86,6 +88,7 @@ final class PlusPrayerUITests: XCTestCase {
         app.buttons["addSheet.for.mom"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up back on the intention")
         XCTAssertEqual(app.buttons["For"].value as? String, "Mom")
+        XCTAssertFalse(app.navigationBars.buttons["BackButton"].exists, "back on the form, nothing pushed")
 
         app.segmentedControls.buttons["Name"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up back on Name")
