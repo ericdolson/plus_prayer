@@ -131,10 +131,10 @@ _Last updated: 2026-10-18_
     No For row: the person is given, not chosen. {alias} falls back to the
     name.
     - **Offer step:** a quiet **"Added"** subtitle under the name (the only
-      confirmation); field header **"Intention · optional"** (states the
-      offer without asking a question, mirroring "What you call them ·
-      optional"); toolbar **Skip** (leading; closes, the name is saved) /
-      **Add** (trailing).
+      confirmation); the field's section header is the question **"Add an
+      intention now?"** in sentence case (`.textCase(nil)`), without the
+      name (it's right above; long names would break it); toolbar **Skip**
+      (leading; closes, the name is saved) / **Add** (trailing).
     - **From a name's page or row:** no subtitle; field header
       **"Intention"**; toolbar **X** / **Add**.
   - **One tap to save.** Add saves the name at once; the sheet then pushes

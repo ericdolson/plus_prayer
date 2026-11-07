@@ -1802,3 +1802,14 @@ SUPERSEDES the "Add an intention" toolbar title (it competed with "Added")
 and "Not now" (it answered a question no longer asked).
 Why: with the question gone, the optional header states the offer, "Skip"
 names the alternative plainly, and "Added" is the single confirmation.
+
+### Decision: Offer step asks "Add an intention now?"
+**Timestamp:** 2026-11-06
+The offer step's field header is the question "Add an intention now?"
+(sentence case), replacing "Intention · optional". Skip / Add and the
+"Added" subtitle stay; the from-a-name form keeps "Intention".
+Why: the question keeps the offer's warmth; as the field's own header it
+reads as about the field; "now" pairs with Skip (later is fine); "intention"
+teaches the app's word. The name is omitted because it sits right above.
+Considered: "Anything specific to pray for?" (warmer, but doesn't teach
+"intention"); "…for {alias}?" (repeats the name, long names break).
