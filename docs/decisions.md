@@ -1768,3 +1768,27 @@ won't come from a custom form" (Eric): custom effort goes to the signature
 moments (Amen → seal, the ring, the cluster), not to forms.
 Cost accepted: platform section-header style instead of our 15 pt semibold
 labels; inset grouped rows instead of free-floating fields.
+
+### Decision: Add sheet native-rebuild follow-ups
+**Timestamp:** 2026-11-06
+- Avatar lives in the Name row (~40 pt, leading, Home-row size), not a 72 pt
+  centered row; `.listSectionSpacing(.compact)`. The big preview pushed the
+  carry section out of view, and avatar + name previews the Home row.
+- Standard large sheet. The keyboard rises with the sheet in one motion
+  (focus set before presentation; UIKit bridge if needed). On device it
+  arrived after a delay.
+- "Who is this for?": search starts inactive (title + back visible; keyboard
+  down on that tap-only screen). Auto-activating caused delayed focus and an
+  X-then-back exit.
+- Bloom: carryRow 15 pt via `@ScaledMetric(relativeTo: .body)`.
+- **One intention form for a known person** (offer step and "+ Intention"
+  from a name): toolbar "Add an intention", a header row with avatar +
+  serif name (as on Home), "Added." under it on the offer step only, then
+  "Intention" + field, then carry. Eric's call, from the Flutter long-press
+  "+ Intention" sheet: when the person is given, show them nicely rather
+  than as a selectable control. Rejected: a static "For" row (reads as a
+  disabled control); the "{alias} is added." + question header (the
+  question didn't label the field).
+- Confirmed agent calls: Settings-style For row in system font; notice row
+  as plain ink text; "Also carries…" as a second subtitle line; ink
+  checkmark.
