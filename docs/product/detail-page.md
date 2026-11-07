@@ -47,23 +47,41 @@ the detail page, this file wins.
   title and nothing repeats. Self page: title "Me", your name under it.
 - **Counts:** "Held by you · N prayers" always; "Carried by the world · N
   prayers · N lists" only once ever carried (never "0 lists").
-- **Intentions section** reuses Home's intention row exactly: thread, gold
-  "held today" dot, trailing carried mark (§5), gold "Answered · {date}".
+- **Intentions section** reuses Home's intention row: gold "held today"
+  dot, trailing carried mark (§5), gold "Answered · {date}", **but no
+  thread** (2026-11-07): on Home the thread ties intentions to the name row
+  above; here the page itself is the name, so a thread would hang from the
+  section title.
   Same order as Home (Answered stay in place under the name; Released aren't
   shown). Tapping an intention pushes its own detail page.
 - **Add link:** "＋ Add intention for {alias}"; on the self page just
   "＋ Add intention". **No intentions yet** (2026-11-07): the section shows
-  a prominent **"＋ Add {alias}'s first intention"** (blue tinted-glass
-  button; on the self page "＋ Add your first intention") instead of the
-  link. Both open the add-intention form for this person (screens.md).
+  a prominent **"＋ Add a first intention for {alias}"** (blue
+  tinted-glass button; on the self page "＋ Add your first intention")
+  instead of the link. (No possessive built from the alias: "James's",
+  "Mom & Dad's" and other languages break.) Both open the add-intention form for this person (screens.md).
 - **Carry row (2026-11-07)** — names and intentions, not the self page
   (self is always carried): under the counts, a native **Toggle "Carry
-  onto the list ✱"** with the add sheet's meter as its subtitle ("3 places
-  left" / "This uses your last place" / "All 10 places in use"). Off and
-  the pool is full → disabled, with **"Make room for {alias}"** under it
-  (inert until Membership / Your portion exist). An intention whose name
-  isn't carried shows "Also carries {alias} · uses N places" when on. This
-  page and Your portion are the places a person's carrying is managed.
+  onto the list ✱"** on the page background (not a card). Subtitle =
+  **what this costs + what's free overall**:
+  - Carried: "Uses 2 places · 3 left" (the person plus their carried
+    intentions; "Uses 1 place · 3 left" with none). "3 left" matches Home
+    and Your portion.
+  - Not carried: "Would use 2 places · 3 left" when turning it on brings
+    back intentions still marked carried (re-carrying restores them), else
+    "3 places left". If it would take all that's left: "This uses your last
+    {N} places". Full: "All 10 places in use", toggle disabled, **"Make room
+    for {alias}"** under it (inert until Membership / Your portion exist;
+    no typing pause, the name is known). Free pool: "Free carries you and
+    one intention of your own".
+  - An intention page: "Also carries {alias} · uses N places" when its name
+    isn't carried.
+  - **Feedback, never silent:** the toggle flips at once and is disabled
+    while saving; if saving fails it flips back with a footer line under
+    the row: pool filled from another device → "All {pool} places filled
+    up."; other failure → "Couldn't change this. Try again." Offline: the
+    toggle is disabled with "Needs a connection." under it.
+  This page and Your portion are the places a person's carrying is managed.
 
 ### Intention page
 - **No avatar.** Above the title: the parent name in small `inkMuted` text,
@@ -85,6 +103,8 @@ the detail page, this file wins.
   Allowed here as the subject's own management page (design-direction §5
   exception, 2026-11-07); Home rows still never mark absence.
 - **Answered intention:** gold "Answered · {date}" in place of the status.
+- An **uncarried** name always shows "Not on the list"; the closing notice
+  applies only while carried.
 - **Closing notice replaces the status line** under the card's rule (only if
   you haven't prayed with the list today): "List 52 closes in 5 min · pray to
   carry {alias}" / "· pray to be on List 53" (self) / "· pray to carry it".

@@ -1976,3 +1976,18 @@ self page shows your name under "Me").
 - `duration.labelPause` can be deleted from tokens.json if nothing uses it;
   `duration.settle` likewise if unused.
 - Stale "step 2" / "Add/Done" wording fixed in screens.md.
+
+### Decision: Person page details (app/ agent questions)
+**Timestamp:** 2026-11-07
+- Carry subtitle shows cost + free overall ("Uses 2 places · 3 left";
+  uncarried "Would use 2 places · 3 left" when intentions come back), so it
+  matches Home/Your portion and names the hidden cost of re-carrying.
+- Toggle failures are never silent (flip back + footer line); offline shows
+  "Needs a connection."
+- No "Make room" pause on the page; closing notice only while carried.
+- Intention rows on the page drop the thread (the page is the name).
+- "＋ Add a first intention for {alias}" (no possessive built from the
+  alias). Serif title at the nearest token (26 pt) is fine; the carry row
+  sits on the page background.
+- Confirmed agent calls: late-focus fallback for the long-press form;
+  Home's data updates continue while a page is pushed.

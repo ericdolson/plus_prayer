@@ -78,7 +78,7 @@ _Last updated: 2026-10-18_
     - **Add saves the name** (auto-carried while there's room), **closes
       the sheet and opens the person's page** (detail-page.md), as Contacts
       and Calendar open what you just created. There, the person can be
-      prayed for at once, "＋ Add {alias}'s first intention" invites the
+      prayed for at once, "＋ Add a first intention for {alias}" invites the
       next step, and the carry row ("Not on the list · Make room for
       {alias}" when full) is the upsell, every visit rather than only at
       add time; the page's "Not on the list" status is how an uncarried name
@@ -88,7 +88,7 @@ _Last updated: 2026-10-18_
       stays with the notice row "Saved, but not carried. All {pool} places
       are in use." and only Done (read-only end state).
   - **Add-intention form for a person** ("＋ Add intention" / "Add
-    {alias}'s first intention" on their page, and the long-press "Add
+    a first intention for {alias}" on their page, and the long-press "Add
     intention" on a Home row): toolbar **X** / **Add**, no title; a clear
     header row with the person as on Home (Home-row avatar 44 pt + serif
     name; VoiceOver one item); header **"Intention"** + the growing field
