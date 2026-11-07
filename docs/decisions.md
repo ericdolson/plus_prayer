@@ -1885,3 +1885,25 @@ Why: the classic iOS Contacts layout makes the avatar big enough to read as
 a person without adding height, so the carry section (the upgrade surface)
 stays in view. Open: per-field labels become placeholders (Eric unsure);
 footer copy needs work; fallback is the two section headers.
+
+### Decision: New name = two steps; carry decided once, in step 2
+**Timestamp:** 2026-11-07
+- Step 1 (Name tab): a centered ~64 pt avatar row, labeled "Name" ("e.g.
+  Gary Olson") and "What you call them · optional" ("e.g. Mom", footer "Only
+  you see this"); no carry row. Add saves the name (auto-carried if room).
+- Step 2 (the person form, also used by "+ Intention" from a name): title
+  "Added" + Done; avatar + serif name; "Add an intention now?" + field;
+  "Carry onto the list ✱" as a segmented **Not now · Name · Name +
+  intention** (default = most that fits; Name + intention enables once an
+  intention is typed); meter + "Make room for {alias}". Done applies both.
+- Intention tab keeps its single carry toggle.
+SUPERSEDES the Contacts-style block (91c28e7), the carry row on the Name
+tab, and Skip / Add on the offer step.
+Why (Eric): one place for the carry decision and the upsell instead of a
+duplicated carry row on both steps; removing it from step 1 frees room for
+the avatar on its own row and full labels with the alias's help text. The
+three choices show exactly what prints, which makes the value of more
+places concrete. "Not now" (gentler, implies later) over "No"; "Done" ends
+the flow whether or not an intention was typed.
+Rejected: "Name*" / "(Required)" placeholders (Add's disabled state already
+says it).

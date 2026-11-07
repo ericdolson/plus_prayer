@@ -126,17 +126,16 @@ or links — inline: "Names and intentions can't include phone numbers, emails,
 or links." Must allow verse references ("John 3:16"), room numbers, dates.
 
 ### Add sheet (screens.md)
-A native sheet built on the native **form** (SwiftUI `Form`): toolbar X /
-segmented Name | Intention / Add. Name tab: a Contacts-style block (a ~64 pt
-avatar left of the stacked "Full name" and "What you call them (optional)"
-fields, one footer), then a **carry section**
-(native Toggle "Carry onto the list ✱" with the meter as its subtitle; full
-pool → off + footer "Make room for {alias}", inert for now). Intention tab: a
-For navigation row pushing a searchable "Who is this for?", a growing
-Intention field, the carry section. After adding a name: the offer step
-(toolbar title "Added", Skip / Add, the same person header row, "Add an
-intention now?"). "+ Intention" from a name uses the same person form. "The
-list" always means the printed list. Home never marks an uncarried item.
+A native sheet on the native **form** (SwiftUI `Form`). Toolbar X /
+segmented Name | Intention / Add. **New name, two steps:** step 1 = a
+centered ~64 pt avatar, "Name" and "What you call them · optional" (footer
+"Only you see this"); Add saves the name. Step 2 ("Added", Done) = the
+person (avatar + serif name), "Add an intention now?", and **"Carry onto the
+list ✱"** as a segmented "Not now · Name · Name + intention" with the meter
+and "Make room for {alias}" (inert for now). "+ Intention" from a name opens
+the same step-2 form. The Intention tab (For row → searchable "Who is this
+for?", growing field, a carry toggle) adds one intention. "The list" always
+means the printed list. Home never marks an uncarried item.
 
 ### Name / Intention detail (stats-history.md)
 One page; intentions hide what doesn't apply and add parent name + resolve.
