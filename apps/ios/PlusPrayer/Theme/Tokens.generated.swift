@@ -171,8 +171,8 @@ nonisolated enum PP {
             static let header: CGFloat = 32
             /// The profile at the top of You.
             static let large: CGFloat = 72
-            /// The add sheet's Name tab: the new person's avatar on the left of the name block, spanning its two stacked fields (the iOS Contacts "new contact" layout; screens.md).
-            static let nameBlock: CGFloat = 64
+            /// The add sheet's Name tab: the new person's avatar, centered in its own row (screens.md).
+            static let newName: CGFloat = 64
             /// The add sheet's For row and the rows of "Who is this for?" (screens.md).
             static let picker: CGFloat = 40
             static let small: CGFloat = 28

@@ -412,25 +412,26 @@ compose queries; if an operation is missing, ask for a backend change.
   `amenFromInvitation()`) returns the `NewPrayer` for Home to log; the
   selection stays through closing so held rings don't blink.
 - `Features/AddSheet/AddSheet` + `State/AddSheetModel` (screens.md, Add
-  sheet, rewritten 2026-11-06): **native `Form`s** (inset grouped, Tier B:
+  sheet, revised 2026-11-07): **native `Form`s** (inset grouped, Tier B:
   no hand-set padding, type size or alignment), background hidden, rows
   `raised`, default section spacing, the standard large sheet.
   Toolbar buttons, a segmented Name | Intention; section headers
   for labels, footers for hints, errors (ink) and the counter; a top notice
   row; a native Toggle whose subtitle is the meter (its bloom
   `size.carriedMark.carryRow` tall via `@ScaledMetric`), its footer "Make
-  room …". Toolbar: X · segmented control · Add at opposite ends. The Name
-  tab is one **name block** in the iOS Contacts "new contact" layout: the
-  avatar (`avatar.nameBlock`, 64 pt; initials follow the display name, "…"
-  when empty) on the left spanning "Full name" and "What you call them
-  (optional)" stacked with a `Divider`, no headers, one footer (draft copy;
-  the name's contact message replaces it; the focused field's counter).
-  (Tried and dropped 2026-11-06: the avatar inside or beside the fields, a
-  preview row, a toolbar avatar with Add splitting off the X. A view can't
-  move between `Form` rows, and an overlay layer animated only sometimes on
-  device.) Each step's
-  form stays in the hierarchy (faded or slid aside), so focus moves without
-  the keyboard dropping. **The keyboard rises with the sheet** through
+  room for this intention". Toolbar: X · segmented control · Add at
+  opposite ends. The Name tab: the avatar centered on its own clear row
+  (`avatar.newName`, 64 pt; initials follow the display name, "…" when
+  empty), then Name and "What you call them · optional" (footer "Only you
+  see this"); **no carry row**: Add saves the name auto-carried while
+  there's room and closes (to the person's page once it exists; Home for
+  now). (Tried and dropped 2026-11-06/07: the avatar inside or beside the
+  fields, a preview row, a toolbar avatar with Add splitting off the X, a
+  Contacts-style name block, a second "Added" step with a "Not now · Name ·
+  Name + intention" control. A view can't move between `Form` rows, and an
+  overlay layer animated only sometimes on device.) Both tabs' forms stay
+  in the hierarchy (the hidden one faded), so focus moves without the
+  keyboard dropping. **The keyboard rises with the sheet** through
   `KeyboardPrimer`: SwiftUI focuses a `Form` field only after the sheet
   settles (~0.5 s late, `.defaultFocus` included; checked on a simulator
   recording), so a hidden UIKit field takes first responder as the sheet
@@ -439,13 +440,11 @@ compose queries; if an operation is missing, ask for a backend change.
   real push (`@State` path, `.searchable`), its search inactive and the
   keyboard down; the intention field refocuses in the list's `onDisappear`
   (pick or back; from the root's `onAppear` mid-pop it didn't always take).
-  The intention form for a known person (`Step.person`: the offer after a
-  name is saved, or `init(home:intentionFor:)` from a name's long-press
-  menu) is one layout under the same person row as the preview: the field
-  ("Add an intention now?" / "Intention"), the carry section; the offer is
-  titled "Added" with Skip / Add, from a name untitled with X / Add.
-  (Offsetting rows inside a `Form` to keep the person row still during the
-  push didn't stay in sync: the form animates its rows on its own timing.) The intention fields grow 1 → 3
+  The add-intention form for a person (`Step.person`,
+  `init(home:intentionFor:)`, from a Home row's long-press menu; the
+  person's page later) is untitled with X / Add: the person's row (44 pt
+  avatar + serif name), "Intention" and its field, the same carry toggle as
+  the Intention tab. The intention fields grow 1 → 3
   lines; Return submits, pasted breaks become spaces. The carry
   row's rules are `carryOffer` and `carryMeter` in PlusPrayerDomain (room,
   default, true cost; the meter says what's left, not counting this item:
@@ -453,11 +452,10 @@ compose queries; if an operation is missing, ask for a backend change.
   / "… last N places" (then "Also carries" drops its cost); "All N in use";
   the free pool's line); every `{unit}` string goes through `L10n.Add` keyed by
   `poolUnit` (Q32). "Make room …" is a button with no
-  action and the hint "Not available yet" (Q31); its name follows typing
-  only after `duration.labelPause`, with a `quick` crossfade. If the server's carried
-  result differs from the toggle (`AddedSubject.differs(from:)`, on
-  `effectivelyCarried`; carry is all or nothing), the sheet
-  says "Saved, but not carried…" (an intention waits for Done).
+  action and the hint "Not available yet" (Q31). If the server's carried
+  result differs from an intention's toggle (`AddedSubject.differs(from:)`,
+  on `effectivelyCarried`; carry is all or nothing), the sheet says "Saved,
+  but not carried…" and waits for Done.
   `NewSubject.carry` / `carryParent` follow schema-brief.md ("addSubject
   carry inputs"); the mock has them, the callable gets them next.
 - Search (`Features/Home/HomeSearch.swift`): 🔎 turns the pill into the
@@ -469,7 +467,8 @@ compose queries; if an operation is missing, ask for a backend change.
   "In your archive" waits for the archive.
 - UI smoke tests (`PlusPrayerUITests`, its own scheme): pray → Amen →
   invitation → hold → Amen → closing → note → the card's status; ＋ → name
-  (tabs keep the keyboard; the For push drops it, a pick or back refocuses) → offer → intention → on Home;
+  (no carry row; tabs keep the keyboard; the For push drops it, a pick or
+  back refocuses) → alias → Add → on Home;
   long-press Dad → Add intention → on Home; search → results → no matches →
   the match hint → ×. Screenshots are attached to
   the result bundle (`xcrun xcresulttool export attachments`). To check

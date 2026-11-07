@@ -4,7 +4,7 @@ import Testing
 @testable import PlusPrayer
 
 /// The add sheet's flow over the mock (screens.md, Add sheet, revised
-/// 2026-11-06). The seed carries 7 of the trial's 10 places; Aunt Bea is
+/// 2026-11-07). The seed carries 7 of the trial's 10 places; Aunt Bea is
 /// left uncarried.
 @MainActor
 struct AddSheetModelTests {
@@ -40,7 +40,7 @@ struct AddSheetModelTests {
         #expect(model.parent?.label == "Me")
     }
 
-    @Test func theNameBlockAvatarFollowsTheDisplayName() {
+    @Test func theAvatarFollowsTheDisplayName() {
         defer { running.cancel() }
         let model = AddSheetModel(home: home)
         #expect(model.avatarInitials == "…", "empty: the tone with an ellipsis")
@@ -73,51 +73,48 @@ struct AddSheetModelTests {
         #expect(!model.hasContactIssue(.alias))
     }
 
-    @Test func aCarriedNameIsAddedThenOffersOneIntentionThenCloses() async throws {
+    @Test func aNameIsAddedAutoCarriedAndTheSheetCloses() async {
         defer { running.cancel() }
         let model = AddSheetModel(home: home)
-        #expect(model.carryOffer(.name) == CarryOffer(hasRoom: true, startsOn: true, alsoCarriesParent: false,
-                                                      used: 7, pool: 10, cost: 1, isFree: false))
-        #expect(model.isCarrying(.name), "on by default with room")
-        #expect(model.meter(.name) == .left(3), "what's left, before this one")
-        model.setCarrying(.name, false)
-        #expect(model.meter(.name) == .left(3), "the toggle doesn't change it")
-        model.setCarrying(.name, true)
         model.name = "Gary Olson"
         model.alias = "Dad"
         await model.add()
-        guard case .person(let nameId) = model.step else { Issue.record("expected the offer"); return }
-        #expect(model.personName == "Dad")
-        #expect(subject(nameId)?.avatarTone == model.tone)
-        #expect(subject(nameId)?.isCarried == true)
-        #expect(model.activeField == .person, "the offer's field takes the keyboard")
-
-        #expect(!model.canAdd, "empty")
-        #expect(model.isCarrying(.person))
-        #expect(model.alsoCarries(.person) == nil)
-        #expect(model.meter(.person) == .left(2), "Dad is counted now")
-        #expect(model.notCarried == nil)
-        model.personText = "Healing"
-        await model.add()
-        #expect(model.isFinished)
-        #expect(backend.subjects.value.contains { $0.parentId == nameId && $0.publicName == "Healing" && $0.isCarried })
+        #expect(model.isFinished, "closes (to the person's page once it exists)")
+        let added = backend.subjects.value.first { $0.publicName == "Gary Olson" && $0.id != "dad" }
+        #expect(added?.alias == "Dad")
+        #expect(added?.avatarTone == model.tone)
+        #expect(added?.isCarried == true, "auto-carried: there's room")
     }
 
-    @Test func fromANameItIsThePersonFormWithoutTheOffer() async {
+    @Test func aNameThatDoesntFitIsSavedUncarriedAndTheSheetCloses() async {
+        defer { running.cancel() }
+        await makeFree()
+        let model = AddSheetModel(home: home)
+        model.name = "Ruth"
+        #expect(model.canAdd, "no carry row: nothing to stop it")
+        await model.add()
+        #expect(model.isFinished)
+        #expect(!model.isSettled, "no \"Saved, but not carried\" for a name")
+        #expect(backend.subjects.value.contains { $0.publicName == "Ruth" && !$0.isCarried })
+    }
+
+    @Test func theAddIntentionFormForAPersonHasNoForRow() async {
         defer { running.cancel() }
         let model = AddSheetModel(home: home, intentionFor: "dad")
         guard case .person("dad") = model.step else { Issue.record("expected the person form"); return }
         #expect(model.isFromName)
-        #expect(!model.isOffer, "no \"Added\", X / Add")
         #expect(model.person?.label == "Dad")
         #expect(model.person?.initials == "D")
         #expect(model.activeField == .person, "its field has the keyboard on open")
         #expect(model.isCarrying(.person), "Dad is carried and there's room")
+        #expect(model.meter(.person) == .left(3))
         #expect(!model.canAdd, "empty")
         model.personText = "Strength for the week"
         await model.add()
         #expect(model.isFinished)
-        #expect(backend.subjects.value.contains { $0.parentId == "dad" && $0.publicName == "Strength for the week" })
+        #expect(backend.subjects.value.contains {
+            $0.parentId == "dad" && $0.publicName == "Strength for the week" && $0.isCarried
+        })
     }
 
     @Test func whatIsTypedAsTheSheetOpensReachesTheFirstField() {
@@ -133,47 +130,25 @@ struct AddSheetModelTests {
         #expect(fromName.personText == "R")
     }
 
-    @Test func theOfferIsThePersonFormWithAdded() async {
-        defer { running.cancel() }
-        let model = AddSheetModel(home: home)
-        #expect(!model.isOffer && !model.isFromName)
-        model.name = "Ruth Kim"
-        await model.add()
-        #expect(model.isOffer)
-        #expect(model.person?.initials == "RK", "the header before Home's stream brings her too")
-    }
 
-    @Test func withNoAliasTheOfferUsesTheName() async {
-        defer { running.cancel() }
-        let model = AddSheetModel(home: home)
-        model.name = "  Ruth   Kim "
-        await model.add()
-        #expect(model.personName == "Ruth Kim")
-    }
 
-    @Test func aNameTurnedOffIsKeptForYourOwnPrayersAndItsIntentionStartsOff() async {
-        defer { running.cancel() }
-        let model = AddSheetModel(home: home)
-        model.name = "Ruth"
-        model.setCarrying(.name, false)
-        #expect(!model.isCarrying(.name))
-        await model.add()
-        guard case .person(let nameId) = model.step else { Issue.record("expected the offer, as always"); return }
-        #expect(subject(nameId)?.isCarried == false)
 
-        // Under a name left uncarried: off, but it can carry both.
+
+    @Test func forAnUncarriedPersonTheToggleStartsOffAndCanCarryBoth() async {
+        defer { running.cancel() }
+        let model = AddSheetModel(home: home, intentionFor: "bea")
         #expect(model.carryOffer(.person).hasRoom)
         #expect(!model.isCarrying(.person))
         #expect(model.alsoCarries(.person) == nil)
         model.setCarrying(.person, true)
-        #expect(model.alsoCarries(.person)?.name == "Ruth")
-        #expect(model.alsoCarries(.person)?.cost == 2, "the true cost: Ruth and the intention")
+        #expect(model.alsoCarries(.person)?.name == "Aunt Bea")
+        #expect(model.alsoCarries(.person)?.cost == 2, "the true cost: Aunt Bea and the intention")
         #expect(model.meter(.person) == .left(3))
         model.personText = "Courage"
         await model.add()
         #expect(model.isFinished)
-        #expect(subject(nameId)?.isCarried == true, "the name prints with its intention")
-        #expect(backend.subjects.value.contains { $0.parentId == nameId && $0.publicName == "Courage" && $0.isCarried })
+        #expect(subject("bea")?.isCarried == true, "the name prints with its intention")
+        #expect(backend.subjects.value.contains { $0.parentId == "bea" && $0.publicName == "Courage" && $0.isCarried })
     }
 
     @Test func anIntentionSavesAndClosesCarriedOrNot() async {
@@ -210,28 +185,22 @@ struct AddSheetModelTests {
         #expect(model.isCarrying(.intention), "a new name, its default again")
     }
 
-    @Test func aFullPoolIsOffAndDisabledAndTheNameIsStillAddedWithTheOffer() async {
+    @Test func aFullPoolIsOffAndDisabledAndTheIntentionIsStillAdded() async {
         defer { running.cancel() }
         await makeFree()
-        let model = AddSheetModel(home: home)
-        let offer = model.carryOffer(.name)
+        let model = AddSheetModel(home: home, intentionFor: "dad")
+        let offer = model.carryOffer(.person)
         #expect(!offer.hasRoom)
         #expect(offer.pool == 1)
-        #expect(model.meter(.name) == .freeYouAndOneIntention)
-        model.setCarrying(.name, true)
-        #expect(!model.isCarrying(.name), "disabled")
-        model.name = "Ruth"
-        await model.add()
-        guard case .person(let nameId) = model.step else { Issue.record("expected the offer"); return }
-        #expect(model.personName == "Ruth")
-        #expect(subject(nameId)?.isCarried == false)
-        #expect(!model.carryOffer(.person).hasRoom)
         #expect(model.meter(.person) == .allInUse(pool: 1), "7 carried on a pool of 1: never \"7 of 1\"")
-        #expect(model.notCarried == nil, "the toggle was off: nothing to report")
+        model.setCarrying(.person, true)
+        #expect(!model.isCarrying(.person), "disabled")
         model.personText = "Courage"
         #expect(model.canAdd, "the keyboard and Add stay, pool full or not")
         await model.add()
         #expect(model.isFinished)
+        #expect(!model.isSettled, "the toggle was off: nothing to report")
+        #expect(backend.subjects.value.contains { $0.parentId == "dad" && $0.publicName == "Courage" && !$0.isCarried })
     }
 
     @Test func whoIsThisForSearchesEveryoneAndPickingReturnsToTheIntention() async {
@@ -280,19 +249,7 @@ struct AddSheetModelTests {
         }
     }
 
-    @Test func whenTheServerDoesntCarryANameTheOfferSaysSo() async {
-        defer { running.cancel() }
-        let model = AddSheetModel(home: home)
-        model.name = "Ruth"
-        #expect(model.isCarrying(.name))
-        fillThePoolElsewhere()
-        await model.add()
-        guard case .person(let nameId) = model.step else { Issue.record("expected the offer"); return }
-        #expect(subject(nameId)?.isCarried == false)
-        #expect(model.notCarried == .name, "under the header")
-        model.personText = "Courage"
-        #expect(model.canAdd, "the offer still works")
-    }
+
 
     @Test func whenTheServerDoesntCarryAnIntentionItWaitsForDone() async {
         defer { running.cancel() }
@@ -302,7 +259,7 @@ struct AddSheetModelTests {
         #expect(model.isCarrying(.intention))
         fillThePoolElsewhere()
         await model.add()
-        #expect(model.notCarried == .intention)
+        #expect(model.notCarried)
         #expect(!model.isFinished, "doesn't close silently")
         #expect(model.isSettled)
         #expect(!model.canAdd, "saved; Done only")
@@ -343,7 +300,7 @@ struct AddSheetModelTests {
         }
         model.intention = "Rest"
         await model.add()
-        #expect(model.notCarried == .intention, "flagged, but it doesn't print: effectivelyCarried decides")
+        #expect(model.notCarried, "flagged, but it doesn't print: effectivelyCarried decides")
     }
 
     @Test func noMatchesSaysSo() {
@@ -369,7 +326,7 @@ struct AddSheetModelTests {
         backend.failsAdds = false
         await model.add()
         #expect(!model.failedGenerically)
-        guard case .person = model.step else { Issue.record("expected the offer"); return }
+        #expect(model.isFinished)
     }
 
     @Test func atTheCapTheLineShowsAndAddIsDisabled() async {

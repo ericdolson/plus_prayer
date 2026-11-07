@@ -51,21 +51,21 @@ final class PlusPrayerUITests: XCTestCase {
         attach(app, "5 home after")
     }
 
-    /// + → a name (the keyboard stays up across tabs) → the For push (search
-    /// inactive, keyboard down) and a pick (the intention refocused) → Add →
-    /// the offer, titled "Added" under Dad's row (pushed in, keyboard still
-    /// up) → an intention → Add → on Home.
+    /// + → a name (no carry row; the keyboard stays up across tabs) → the
+    /// For push (search inactive, keyboard down) and a pick (the intention
+    /// refocused) → back on Name, an alias → Add → closed, the name on Home.
     @MainActor
-    func testAddANameWithAnIntention() throws {
+    func testAddAName() throws {
         let app = XCUIApplication()
         app.launchArguments += ["-PPEnvironment", "mock"]
         app.launch()
 
         app.buttons["Add"].firstMatch.tap()
-        let name = app.textFields["Full name"]
+        let name = app.textFields["Name"]
         XCTAssertTrue(name.waitForExistence(timeout: 3))
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "Name is focused on open")
-        XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the carry row")
+        XCTAssertFalse(app.switches["Carry onto the list"].firstMatch.isHittable,
+                       "no carry row on the Name tab (the Intention tab's is only faded)")
         XCTAssertTrue(app.navigationBars.buttons["Cancel"].exists, "the glass X, read as Cancel")
         app.typeText("Gary Olson")
         sleep(1)
@@ -74,6 +74,7 @@ final class PlusPrayerUITests: XCTestCase {
         // Switch tabs: the keyboard never goes down.
         app.segmentedControls.buttons["Intention"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up on Intention")
+        XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the intention's carry toggle")
         sleep(1)
         attach(app, "add 2 intention tab")
 
@@ -108,28 +109,19 @@ final class PlusPrayerUITests: XCTestCase {
         app.segmentedControls.buttons["Name"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up back on Name")
 
-        app.textFields["What you call them (optional)"].tap()
+        app.textFields["What you call them · optional"].tap()
         app.typeText("Dad")
         attach(app, "add 4 alias")
-        app.navigationBars.buttons["Add"].tap()
-
-        XCTAssertTrue(app.navigationBars["Added"].waitForExistence(timeout: 3), "the offer step, titled Added")
-        XCTAssertTrue(app.staticTexts["Dad"].exists, "under the person's row")
-        XCTAssertTrue(app.navigationBars.buttons["Skip"].exists, "Skip, not back: the name is saved")
-        XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up into the offer")
-        sleep(1)
-        attach(app, "add 5 offer")
-        app.typeText("Healing after surgery")
         app.navigationBars.buttons["Add"].tap()
 
         let row = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Dad, Gary Olson'"))
         XCTAssertTrue(row.firstMatch.waitForExistence(timeout: 3), "the new name on Home")
         sleep(1)
-        attach(app, "add 6 home")
+        attach(app, "add 5 home")
     }
 
-    /// Long-press Dad → "Add intention" → the intention form for him (X /
-    /// Add, keyboard up) → Add → on Home under Dad.
+    /// Long-press Dad → "Add intention" → the add-intention form for him (X /
+    /// Add, keyboard up, the carry toggle) → Add → on Home under Dad.
     @MainActor
     func testAddAnIntentionFromANameRow() throws {
         let app = XCUIApplication()
@@ -146,8 +138,9 @@ final class PlusPrayerUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["Dad"].waitForExistence(timeout: 3), "the person's row")
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "the intention is focused")
-        XCTAssertTrue(app.navigationBars.buttons["Cancel"].exists, "X, not Skip")
+        XCTAssertTrue(app.navigationBars.buttons["Cancel"].exists, "the glass X")
         XCTAssertFalse(app.buttons["For"].exists, "no For row: the person is given")
+        XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the same carry toggle")
         app.typeText("Strength for the week")
         sleep(1)
         attach(app, "row 2 intention form")

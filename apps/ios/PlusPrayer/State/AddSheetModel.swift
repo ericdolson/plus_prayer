@@ -2,22 +2,23 @@ import Foundation
 import Observation
 import PlusPrayerDomain
 
-/// The add sheet's flow (screens.md, "Add sheet", revised 2026-11-06). One
+/// The add sheet's flow (screens.md, "Add sheet", revised 2026-11-07). One
 /// sheet, one tap to save:
 ///
-///     form (Name | Intention) ──Add name──▶ person (the offer: "Dad · Added") ──Add──▶ close
-///          │                                  (Skip → close; the name is already saved)
+///     form (Name | Intention) ──Add name──▶ close (to the person's page once
+///          │                                 it exists; Home for now)
 ///          ├──Add intention──▶ close
 ///          └──For row──▶ choosing "Who is this for?" ──pick──▶ form
 ///
-///     a name's page or row ──▶ person (the same form, no "Added") ──Add──▶ close
+///     a Home row's long-press ──▶ person (the add-intention form) ──Add──▶ close
 ///
-/// Every step has a carry row ("Carry onto the list"), so nothing is
-/// reported after the fact, except when the server disagrees (the pool
-/// filled from another device): "Saved, but not carried…", and an intention
-/// then waits for Done instead of closing. The model holds the text, the step, the carry
-/// choices and what the toolbar can do; the view owns focus and the live
-/// contact check's pause.
+/// A new name is auto-carried while there's room; its carrying is managed
+/// on its page. Intentions have a carry toggle, so nothing is reported
+/// after the fact, except when the server disagrees (the pool filled from
+/// another device): "Saved, but not carried…", then Done instead of
+/// closing. The model holds the text, the step, the carry choices and what
+/// the toolbar can do; the view owns focus and the live contact check's
+/// pause.
 @MainActor @Observable
 final class AddSheetModel: Identifiable {
     enum Tab: Hashable {
@@ -32,22 +33,15 @@ final class AddSheetModel: Identifiable {
         case form
         /// The For row's push: pick who the intention is for.
         case choosing
-        /// The intention form for a known person: the offer after a name is
-        /// saved, or "+ Intention" from a name's page or row.
+        /// The add-intention form for a known person ("Add intention" from
+        /// their page or a Home row).
         case person(nameId: String)
     }
 
-    /// Where a carry row sits.
+    /// Where a carry toggle sits: the Intention tab, or the add-intention
+    /// form for a person.
     enum CarryRow: Hashable {
-        case name, intention, person
-    }
-
-    /// Saved, but the server didn't carry it although the toggle was on.
-    enum NotCarried: Equatable {
-        /// The name: the offer still follows, with the line under its header row.
-        case name
-        /// An intention (either tab or the offer): Done only.
-        case intention
+        case intention, person
     }
 
     var tab: Tab
@@ -55,7 +49,7 @@ final class AddSheetModel: Identifiable {
     var name = ""
     var alias = ""
     var intention = ""
-    /// The known person's intention (the offer, or from a name).
+    /// The known person's intention (the add-intention form).
     var personText = ""
     /// "Who is this for?"'s search field.
     var chooserQuery = ""
@@ -67,8 +61,8 @@ final class AddSheetModel: Identifiable {
     /// Picked once when the sheet opens (least used on Home); never changes
     /// while typing.
     let tone: Int
-    /// Opened for a known person (a name's page or row): only the person
-    /// form, with X / Add.
+    /// Opened for a known person (their page or a Home row): only the
+    /// add-intention form, with X / Add.
     let isFromName: Bool
 
     /// Contact info the view has shown under a field (after the pause).
@@ -79,9 +73,6 @@ final class AddSheetModel: Identifiable {
     private(set) var failedOffline = false
     /// The sheet's work is done: close it.
     private(set) var isFinished = false
-    /// The name just saved, as Home will have it (counted by the offer's
-    /// carry row until Home's stream brings it).
-    private(set) var addedName: Subject?
 
     /// The server refused for the ~500 cap.
     private(set) var failedAtCap = false
@@ -89,11 +80,12 @@ final class AddSheetModel: Identifiable {
     /// available to try again; the text is kept.
     private(set) var failedGenerically = false
 
-    /// "Saved, but not carried. The list's places filled up."
-    private(set) var notCarried: NotCarried?
+    /// An intention saved but not carried although its toggle was on:
+    /// "Saved, but not carried. The list's places filled up." An end state,
+    /// Done only.
+    private(set) var notCarried = false
 
-    /// An intention saved but not carried: an end state, Done only.
-    var isSettled: Bool { notCarried == .intention }
+    var isSettled: Bool { notCarried }
 
     /// What the user set on a carry row; nil = its default.
     private var carryChoice: [CarryRow: Bool] = [:]
@@ -110,8 +102,8 @@ final class AddSheetModel: Identifiable {
         isFromName = false
     }
 
-    /// "+ Intention" from a name's page or row: the intention form for that
-    /// person, no For row.
+    /// "Add intention" from a person's page or a Home row: the add-intention
+    /// form for that person, no For row.
     init(home: HomeModel, intentionFor nameId: String) {
         self.home = home
         tab = .intention
@@ -129,16 +121,9 @@ final class AddSheetModel: Identifiable {
         return initials(alias.isEmpty ? cleanText(name) : alias)
     }
 
-    /// The new person's avatar in the Name tab's name block: the display
-    /// name's initials (alias, else name), or "…" until there's one.
+    /// The new person's avatar on the Name tab: the display name's initials
+    /// (alias, else name), or "…" until there's one.
     var avatarInitials: String { previewInitials.isEmpty ? "…" : previewInitials }
-
-    /// What Home will call the name being typed: the alias, else the name
-    /// ("Make room for Dad"). Empty while both are.
-    var typedLabel: String {
-        let alias = cleanText(self.alias)
-        return alias.isEmpty ? cleanText(name) : alias
-    }
 
     var isOffline: Bool { !home.isOnline || failedOffline }
 
@@ -159,23 +144,10 @@ final class AddSheetModel: Identifiable {
         }
     }
 
-    /// The carry row on screen at this step.
-    var activeCarryRow: CarryRow {
-        switch step {
-        case .form, .choosing: tab == .name ? .name : .intention
-        case .person: .person
-        }
-    }
-
-    /// The person form right after their name was saved: "Added", Skip / Add.
-    var isOffer: Bool {
-        if case .person = step { !isFromName } else { false }
-    }
-
     /// The toolbar's Add. Disabled while the text is empty, while a contact
     /// message shows, offline, at the cap, or saving.
     var canAdd: Bool {
-        guard !isSaving, !isOffline, !isAtCap, notCarried != .intention else { return false }
+        guard !isSaving, !isOffline, !isAtCap, !notCarried else { return false }
         let text = switch activeField {
         case .name: name
         case .intention: intention
@@ -187,12 +159,10 @@ final class AddSheetModel: Identifiable {
         return true
     }
 
-    /// The person form's header: avatar + name as on Home. The name just
-    /// saved counts until Home's stream brings it.
+    /// The add-intention form's header: avatar + name as on Home.
     var person: PickerName? {
         guard let id = personId else { return nil }
-        if let name = home.pickerNames().first(where: { $0.id == id }) { return name }
-        return addedName.map { PickerName(id: $0.id, label: $0.label, initials: monogram($0), tone: $0.tone) }
+        return home.pickerNames().first { $0.id == id }
     }
 
     private var personId: String? {
@@ -227,9 +197,8 @@ final class AddSheetModel: Identifiable {
     /// What the pool allows for this row, now.
     func carryOffer(_ row: CarryRow) -> CarryOffer {
         switch row {
-        case .name: home.carryOffer(kind: .soul, parentId: nil)
         case .intention: home.carryOffer(kind: .intention, parentId: parentId)
-        case .person: home.carryOffer(kind: .intention, parentId: personId, justAdded: addedName)
+        case .person: home.carryOffer(kind: .intention, parentId: personId)
         }
     }
 
@@ -247,7 +216,7 @@ final class AddSheetModel: Identifiable {
 
     /// The meter, previewing the toggle's result.
     func meter(_ row: CarryRow) -> CarryMeter {
-        carryMeter(carryOffer(row), kind: row == .name ? .soul : .intention, isOn: isCarrying(row))
+        carryMeter(carryOffer(row), kind: .intention, isOn: isCarrying(row))
     }
 
     /// "Also carries Dad · uses 2 places": the toggle is on and it carries
@@ -258,7 +227,6 @@ final class AddSheetModel: Identifiable {
         guard isCarrying(row), offer.alsoCarriesParent else { return nil }
         let cost: Int? = if case .usesLast = meter(row) { nil } else { offer.cost }
         switch row {
-        case .name: return nil
         case .intention: return parent.map { ($0.label, cost) }
         case .person: return (personName, cost)
         }
@@ -315,16 +283,11 @@ final class AddSheetModel: Identifiable {
         do {
             switch step {
             case .form where tab == .name:
-                let input = NewSubject(kind: .soul, publicName: name, alias: alias, avatarTone: tone,
-                                       carry: isCarrying(.name))
-                let added = try await home.addSubject(input)
-                let alias = cleanText(self.alias)
-                addedName = Subject(id: added.id, kind: .soul, publicName: cleanText(name),
-                                    alias: alias.isEmpty ? nil : alias, isCarried: added.isCarried,
-                                    sortOrder: .max, avatarTone: tone, createdAt: .now)
-                personText = ""
-                notCarried = added.differs(from: input) ? .name : nil
-                step = .person(nameId: added.id)
+                // Auto-carried while there's room; its page manages the
+                // rest. Closes (to that page once it exists; Home for now).
+                _ = try await home.addSubject(NewSubject(kind: .soul, publicName: name, alias: alias,
+                                                         avatarTone: tone))
+                isFinished = true
             case .form:
                 try await addIntention(intention, parentId: parentId, row: .intention)
             case .person(let nameId):
@@ -353,12 +316,12 @@ final class AddSheetModel: Identifiable {
                                carryParent: carry && carryOffer(row).alsoCarriesParent)
         let added = try await home.addSubject(input)
         if added.differs(from: input) {
-            notCarried = .intention
+            notCarried = true
         } else {
             isFinished = true
         }
     }
 
-    /// Skip, Cancel, Done.
+    /// Cancel, or Done once settled.
     func finish() { isFinished = true }
 }

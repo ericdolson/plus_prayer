@@ -37,30 +37,6 @@
         }
       }
     },
-    "add.name.footer" : {
-      "comment" : "Add sheet, Name tab: the name block's one footer, explaining both fields (screens.md; DRAFT copy, to refine).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The full name is printed on the list. Only you see what you call them."
-          }
-        }
-      }
-    },
-    "add.alias.field" : {
-      "comment" : "Add sheet, Name tab: the second field of the name block, its placeholder and VoiceOver label (screens.md).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What you call them (optional)"
-          }
-        }
-      }
-    },
     "add.cancel" : {
       "comment" : "Add sheet: the toolbar's close button on the form.",
       "extractionState" : "manual",
@@ -213,18 +189,6 @@
         }
       }
     },
-    "add.carry.makeRoom" : {
-      "comment" : "Add sheet, Name tab, pool full, before a name is typed: the link with no name yet (approved 2026-11-06).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Make room"
-          }
-        }
-      }
-    },
     "add.carry.makeRoom.hint" : {
       "comment" : "Add sheet: VoiceOver hint on \"Make room…\", which has no action until Membership / Your portion exist (screens.md).",
       "extractionState" : "manual",
@@ -245,18 +209,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Make room for this intention"
-          }
-        }
-      }
-    },
-    "add.carry.makeRoom.name" : {
-      "comment" : "Add sheet, Name tab, pool full: the small blue link beside the disabled toggle (inert until Membership / Your portion exist; Q31). The argument is the alias, else the name.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Make room for %@"
           }
         }
       }
@@ -417,50 +369,62 @@
         }
       }
     },
-    "add.name.fullName" : {
-      "comment" : "Add sheet, Name tab: the first field of the name block, its placeholder and VoiceOver label (screens.md).",
+    "add.name.label" : {
+      "comment" : "Add sheet, Name tab: the header above the Name field (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Full name"
+            "value" : "Name"
           }
         }
       }
     },
-    "add.skip" : {
-      "comment" : "Add sheet, offer step: the leading toolbar button; closes, the name is already saved (screens.md).",
+    "add.name.placeholder" : {
+      "comment" : "Add sheet: the Name field's placeholder (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Skip"
+            "value" : "e.g. Gary Olson"
           }
         }
       }
     },
-    "add.person.added" : {
-      "comment" : "Add sheet, offer step: the native toolbar title after a name is saved, the only confirmation (screens.md).",
+    "add.alias.label" : {
+      "comment" : "Add sheet, Name tab: the header above the alias field (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Added"
+            "value" : "What you call them · optional"
           }
         }
       }
     },
-    "add.person.offerHeader" : {
-      "comment" : "Add sheet, offer step: the intention field's section header, in sentence case, without the name (it sits right above) (screens.md).",
+    "add.alias.placeholder" : {
+      "comment" : "Add sheet: the \"What you call them\" field's placeholder (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add an intention now?"
+            "value" : "e.g. Mom"
+          }
+        }
+      }
+    },
+    "add.alias.caption" : {
+      "comment" : "Add sheet: the footer under the \"What you call them\" field (screens.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only you see this"
           }
         }
       }

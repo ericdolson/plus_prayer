@@ -130,10 +130,11 @@ nonisolated enum L10n {
         private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
         static var tabName: String { t("add.tab.name") }
         static var tabIntention: String { t("add.tab.intention") }
-        static var fullName: String { t("add.name.fullName") }
-        static var aliasField: String { t("add.alias.field") }
-        /// The name block's one footer (draft copy).
-        static var nameFooter: String { t("add.name.footer") }
+        static var nameLabel: String { t("add.name.label") }
+        static var namePlaceholder: String { t("add.name.placeholder") }
+        static var aliasLabel: String { t("add.alias.label") }
+        static var aliasPlaceholder: String { t("add.alias.placeholder") }
+        static var aliasCaption: String { t("add.alias.caption") }
         static var intentionLabel: String { t("add.intention.label") }
         static var intentionPlaceholder: String { t("add.intention.placeholder") }
         static var forLabel: String { t("add.for") }
@@ -142,7 +143,6 @@ nonisolated enum L10n {
         static func noMatches(_ query: String) -> String { String(format: t("add.for.noMatches"), query) }
         static var add: String { t("add.add") }
         static var cancel: String { t("add.cancel") }
-        static var skip: String { t("add.skip") }
         static var contactError: String { t("add.error.contact") }
         static var offline: String { t("add.offline") }
         static var failed: String { t("add.failed") }
@@ -150,10 +150,6 @@ nonisolated enum L10n {
         static var makeRoomForIntention: String { t("add.carry.makeRoom.intention") }
         static var makeRoomHint: String { t("add.carry.makeRoom.hint") }
         static var notCarried: String { t("add.carry.notCarried") }
-        /// "Make room for Dad"; with nothing typed yet, "Make room".
-        static func makeRoom(for name: String) -> String {
-            name.isEmpty ? t("add.carry.makeRoom") : String(format: t("add.carry.makeRoom.name"), name)
-        }
         // Everything with a `{unit}` goes through these, keyed by the unit
         // (open-questions Q32): "places" today.
 
@@ -187,10 +183,6 @@ nonisolated enum L10n {
         static func counter(_ count: Int, _ cap: Int) -> String {
             String(format: t("add.counter"), locale: .current, count, cap)
         }
-        /// The offer step's toolbar title.
-        static var added: String { t("add.person.added") }
-        /// The offer step's field header, "Add an intention now?".
-        static var offerHeader: String { t("add.person.offerHeader") }
         static func capReached(_ cap: Int) -> String {
             String(format: t("add.capReached"), locale: .current, cap)
         }

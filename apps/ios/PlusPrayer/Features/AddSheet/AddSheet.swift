@@ -1,34 +1,29 @@
 import PlusPrayerDomain
 import SwiftUI
 
-/// The add sheet (screens.md, "Add sheet", rewritten 2026-11-06): one native
+/// The add sheet (screens.md, "Add sheet", revised 2026-11-07): one native
 /// sheet over native forms (inset grouped, Tier B: the platform owns spacing,
 /// type, alignment and row styling). Buttons in the toolbar, a native
-/// segmented control for Name | Intention, a carry section on every step.
+/// segmented control for Name | Intention. The Name tab has no carry row (a
+/// new name is auto-carried while there's room; its page manages the rest);
+/// intentions have a carry toggle.
 ///
-/// Keyboard: every step's form stays in the hierarchy (the hidden tab and
-/// the offer step are only faded or moved aside), so focus moves from one
-/// field to the next in the same transaction and the keyboard never hides
-/// and reappears. The keyboard rises with the sheet (`KeyboardPrimer`) and
-/// the first field takes it over. "Who is this for?" is a real navigation
-/// push for tapping: its search starts inactive and the keyboard goes down.
-/// The standard large sheet.
+/// Keyboard: both tabs' forms stay in the hierarchy (the hidden one is only
+/// faded), so focus moves from one field to the next in the same
+/// transaction and the keyboard never hides and reappears. The keyboard
+/// rises with the sheet (`KeyboardPrimer`) and the first field takes it
+/// over. "Who is this for?" is a real navigation push for tapping: its
+/// search starts inactive and the keyboard goes down. The standard large
+/// sheet.
 ///
-/// On the Name tab the avatar sits inside the field its initials come from
-/// (Name, or the alias once it has text) and travels between them. The
-/// intention form for a known person (the offer after a name is saved, or
-/// "+ Intention" from a name) is one layout: the person as on Home, the
-/// field, the carry section.
+/// The add-intention form for a person ("Add intention" from their page or
+/// a Home row) is its own layout: the person as on Home, the intention, the
+/// carry toggle.
 struct AddSheet: View {
     @State var model: AddSheetModel
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var focus: AddSheetModel.Field?
-    @State private var width: CGFloat = 0
-    /// "Make room for {alias}": follows the typed name only once typing
-    /// pauses, never mid-word.
-    @State private var makeRoomName: String?
     /// The carry title's bloom: `size.carriedMark.carryRow` tall at the
     /// default size, scaling with the title's text.
     @ScaledMetric(relativeTo: .body) private var bloomHeight = PP.size.carriedMark.carryRow
@@ -45,7 +40,7 @@ struct AddSheet: View {
     /// wrong. Text is kept. (The person form puts "Saved, but not carried"
     /// under its header row.)
     private var notice: String? {
-        if model.notCarried == .intention && !isPerson { return L10n.Add.notCarried }
+        if model.notCarried && !isPerson { return L10n.Add.notCarried }
         if model.isOffline { return L10n.Add.offline }
         if model.isAtCap { return L10n.Add.capReached(subjectCap) }
         if model.failedGenerically { return L10n.Add.failed }
@@ -55,19 +50,17 @@ struct AddSheet: View {
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
-                if !model.isFromName {
-                    page(nameForm, shown: !isPerson && model.tab == .name, slide: isPerson ? -width : 0)
-                    page(intentionForm, shown: !isPerson && model.tab == .intention, slide: isPerson ? -width : 0)
+                if isPerson {
+                    page(personForm, shown: true)
+                } else {
+                    page(nameForm, shown: model.tab == .name)
+                    page(intentionForm, shown: model.tab == .intention)
                 }
-                page(personForm, shown: isPerson, slide: isPerson || model.isFromName ? 0 : width)
             }
-            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
             .disabled(isSettled)
-            .animation(reduceMotion ? .easeOut(duration: PP.duration.quick) : .easeInOut(duration: PP.duration.settle),
-                       value: isPerson)
             .animation(.easeOut(duration: PP.duration.quick), value: notice)
             .toolbar { toolbar }
-            .navigationTitle(model.isOffer ? L10n.Add.added : "")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: Route.self) { _ in chooser }
         }
@@ -83,15 +76,6 @@ struct AddSheet: View {
                 .accessibilityHidden(true)
         }
         .onAppear { focus = model.activeField }
-        .task(id: model.typedLabel) {
-            guard makeRoomName != nil else {
-                makeRoomName = model.typedLabel // a prefilled name shows at once
-                return
-            }
-            try? await Task.sleep(for: .seconds(PP.duration.labelPause))
-            guard !Task.isCancelled else { return }
-            withAnimation(.easeInOut(duration: PP.duration.quick)) { makeRoomName = model.typedLabel }
-        }
         .onChange(of: model.isFinished) { _, finished in if finished { dismiss() } }
 
 
@@ -110,16 +94,15 @@ struct AddSheet: View {
     /// Saved, but not carried: nothing left to do but Done.
     private var isSettled: Bool { model.isSettled }
 
-    /// The intention form for a known person: the offer, or from a name.
+    /// The add-intention form for a person.
     private var isPerson: Bool {
         if case .person = model.step { true } else { false }
     }
 
-    /// A step's form: faded out when it isn't shown, slid aside for the offer.
-    private func page(_ form: some View, shown: Bool, slide: CGFloat) -> some View {
+    /// A tab's form: faded out when it isn't shown.
+    private func page(_ form: some View, shown: Bool) -> some View {
         form
             .scrollContentBackground(.hidden)
-            .offset(x: slide)
             .opacity(shown ? 1 : 0)
             .allowsHitTesting(shown)
             .accessibilityHidden(!shown)
@@ -145,16 +128,10 @@ struct AddSheet: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button(L10n.Common.done) { model.finish() }
             }
-        } else if model.isOffer {
-            // No back: the name is already saved. No title: the person
-            // header says who.
-            ToolbarItem(placement: .cancellationAction) {
-                Button(L10n.Add.skip) { model.finish() }
-            }
-            ToolbarItem(placement: .confirmationAction) { addButton }
         } else {
             // X · segmented control (Name and Intention tabs only) · Add, at
-            // opposite ends. No discard confirmation for now (open-questions D6).
+            // opposite ends; the add-intention form has no title. No discard
+            // confirmation for now (open-questions D6).
             ToolbarItem(placement: .cancellationAction) { closeButton }
             if !isPerson { segmentedControl }
             ToolbarItem(placement: .confirmationAction) { addButton }
@@ -197,72 +174,52 @@ struct AddSheet: View {
     }
 
     private func save() {
-        Task {
-            await model.add()
-            // A saved name pushes the offer: its field takes focus as the
-            // step changes, so the keyboard stays up (pool full included).
-            if isPerson { focus = .person }
-        }
+        Task { await model.add() }
     }
 
     // MARK: Name tab
 
+    /// Who they are: the avatar on its own row, the name, what you call
+    /// them. No carry row (auto-carried while there's room; their page
+    /// manages it).
     private var nameForm: some View {
         Form {
             noticeSection
-            // The iOS Contacts "new contact" layout: the avatar on the left
-            // spanning the two stacked fields, one footer for both. No
-            // headers, so the carry section stays in view above the keyboard.
+            // A preview only in v1: its tone from the start, initials
+            // following the display name live.
             Section {
-                HStack(spacing: PP.space.lg) {
-                    // A preview only in v1: its tone from the start, initials
-                    // following the display name live.
-                    MonogramAvatar(initials: model.avatarInitials, tone: model.tone, size: PP.size.avatar.nameBlock)
-                        .accessibilityHidden(true)
-                    VStack(spacing: 0) {
-                        TextField(L10n.Add.fullName, text: $model.name, prompt: prompt(L10n.Add.fullName))
-                            .focused($focus, equals: .name)
-                            .accessibilityLabel(L10n.Add.fullName)
-                            .textInputAutocapitalization(.words)
-                            .submitLabel(.next)
-                            .onSubmit { focus = .alias }
-                            .fieldRules(.name, text: $model.name, model: model)
-                            .padding(.vertical, PP.space.md)
-                        Divider()
-                        TextField(L10n.Add.aliasField, text: $model.alias, prompt: prompt(L10n.Add.aliasField))
-                            .focused($focus, equals: .alias)
-                            .accessibilityLabel(L10n.Add.aliasField)
-                            .textInputAutocapitalization(.words)
-                            .submitLabel(.done)
-                            .onSubmit(save)
-                            .fieldRules(.alias, text: $model.alias, model: model)
-                            .padding(.vertical, PP.space.md)
-                    }
-                }
-                .listRowBackground(PP.color.raised)
+                MonogramAvatar(initials: model.avatarInitials, tone: model.tone, size: PP.size.avatar.newName)
+                    .frame(maxWidth: .infinity)
+                    .accessibilityHidden(true)
+                    .listRowBackground(Color.clear)
+            }
+            Section {
+                TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
+                    .focused($focus, equals: .name)
+                    .accessibilityLabel(L10n.Add.nameLabel)
+                    .textInputAutocapitalization(.words)
+                    .submitLabel(.next)
+                    .onSubmit { focus = .alias }
+                    .fieldRules(.name, text: $model.name, model: model)
+                    .listRowBackground(PP.color.raised)
+            } header: {
+                Text(L10n.Add.nameLabel)
             } footer: {
-                nameBlockFooter
+                fieldFooter(.name, text: model.name, caption: nil)
             }
-            carrySection(.name)
-        }
-    }
-
-    /// The name block's one footer: what each field is for, or the name's
-    /// contact-info message in its place; the counter of the field being
-    /// typed in, in its last 10 characters.
-    private var nameBlockFooter: some View {
-        let field: AddSheetModel.Field = focus == .alias ? .alias : .name
-        let text = field == .alias ? model.alias : model.name
-        let cap = AddSheetModel.cap(field)
-        return HStack(alignment: .firstTextBaseline) {
-            if model.contactShown.contains(.name) {
-                Text(L10n.Add.contactError).foregroundStyle(PP.color.ink)
-            } else {
-                Text(L10n.Add.nameFooter)
-            }
-            Spacer(minLength: 0)
-            if text.count >= cap - 10 {
-                Text(L10n.Add.counter(text.count, cap)).monospacedDigit()
+            Section {
+                TextField(L10n.Add.aliasLabel, text: $model.alias, prompt: prompt(L10n.Add.aliasPlaceholder))
+                    .focused($focus, equals: .alias)
+                    .accessibilityLabel(L10n.Add.aliasLabel)
+                    .textInputAutocapitalization(.words)
+                    .submitLabel(.done)
+                    .onSubmit(save)
+                    .fieldRules(.alias, text: $model.alias, model: model)
+                    .listRowBackground(PP.color.raised)
+            } header: {
+                Text(L10n.Add.aliasLabel)
+            } footer: {
+                fieldFooter(.alias, text: model.alias, caption: L10n.Add.aliasCaption)
             }
         }
     }
@@ -357,11 +314,11 @@ struct AddSheet: View {
         path = []
     }
 
-    // MARK: The intention form for a known person
+    // MARK: The add-intention form for a person
 
-    /// The offer after a name is saved ("Added" is its title), and
-    /// "+ Intention" from a name: the person as on Home, then the intention,
-    /// then the carry section. No For row: the person is given, not chosen.
+    /// "Add intention" from a person's page or a Home row: the person as on
+    /// Home, then the intention, then the same carry toggle as the Intention
+    /// tab. No For row: the person is given, not chosen.
     private var personForm: some View {
         Form {
             noticeSection
@@ -370,7 +327,7 @@ struct AddSheet: View {
                     if let person = model.person {
                         personRow(initials: person.initials, tone: person.tone, name: person.label)
                     }
-                    if model.notCarried != nil {
+                    if model.notCarried {
                         Text(L10n.Add.notCarried)
                             .foregroundStyle(PP.color.ink)
                             .transition(.opacity)
@@ -379,9 +336,9 @@ struct AddSheet: View {
                 .listRowBackground(Color.clear)
             }
             Section {
-                growingField(.person, text: $model.personText, label: personFieldHeader)
+                growingField(.person, text: $model.personText, label: L10n.Add.intentionLabel)
             } header: {
-                Text(personFieldHeader)
+                Text(L10n.Add.intentionLabel)
             } footer: {
                 fieldFooter(.person, text: model.personText, caption: nil)
             }
@@ -389,16 +346,12 @@ struct AddSheet: View {
         }
     }
 
-    /// The offer asks; from a name it's the plain label.
-    private var personFieldHeader: String {
-        model.isOffer ? L10n.Add.offerHeader : L10n.Add.intentionLabel
-    }
-
     // MARK: The carry section
 
-    /// A native toggle: the title "Carry onto the list ✱" (the bloom trailing
-    /// it, inkMuted in every state) and the meter as its subtitle. With no
-    /// room the footer holds "Make room …", inert until Membership / Your
+    /// A native toggle (the Intention tab and the add-intention form): the
+    /// title "Carry onto the list ✱" (the bloom trailing it, inkMuted in
+    /// every state) and the meter as its subtitle. With no room the footer
+    /// holds "Make room for this intention", inert until Membership / Your
     /// portion exist.
     private func carrySection(_ row: AddSheetModel.CarryRow) -> some View {
         let offer = model.carryOffer(row)
@@ -422,7 +375,7 @@ struct AddSheet: View {
             .accessibilityHint(subtitle)
             .listRowBackground(PP.color.raised)
         } footer: {
-            if !offer.hasRoom { makeRoom(row) }
+            if !offer.hasRoom { makeRoom }
         }
     }
 
@@ -436,9 +389,8 @@ struct AddSheet: View {
 
     /// Visible but inert for now: what its menu offers is part of the
     /// monetization decision (open-questions Q31/Q32).
-    private func makeRoom(_ row: AddSheetModel.CarryRow) -> some View {
-        Button(row == .name ? L10n.Add.makeRoom(for: makeRoomName ?? "") : L10n.Add.makeRoomForIntention) {}
-            .contentTransition(.opacity)
+    private var makeRoom: some View {
+        Button(L10n.Add.makeRoomForIntention) {}
             .tint(PP.color.primary)
             .accessibilityHint(L10n.Add.makeRoomHint)
     }
@@ -534,7 +486,7 @@ private extension View {
 private struct AddSheetPreview: View {
     let tab: AddSheetModel.Tab
     var poolFull = false
-    /// "+ Intention" from this name's page or row.
+    /// "Add intention" for this person (their page or a Home row).
     var fromName: String?
     @State private var backend = MockBackend(latency: .zero, liveDrift: false)
     @State private var home: HomeModel?
@@ -554,7 +506,7 @@ private struct AddSheetPreview: View {
                 model = if let fromName {
                     AddSheetModel(home: home, intentionFor: fromName)
                 } else {
-                    AddSheetModel(home: home, tab: tab, name: poolFull ? "Gary Olson" : "")
+                    AddSheetModel(home: home, tab: tab)
                 }
             }
     }
@@ -562,8 +514,8 @@ private struct AddSheetPreview: View {
 
 #Preview("Name") { AddSheetPreview(tab: .name).preferredColorScheme(.dark) }
 #Preview("Intention") { AddSheetPreview(tab: .intention).preferredColorScheme(.light) }
-#Preview("From a name") { AddSheetPreview(tab: .intention, fromName: "dad").preferredColorScheme(.light) }
-#Preview("Pool full") { AddSheetPreview(tab: .name, poolFull: true).preferredColorScheme(.light) }
+#Preview("Add intention for a person") { AddSheetPreview(tab: .intention, fromName: "dad").preferredColorScheme(.light) }
+#Preview("Pool full") { AddSheetPreview(tab: .intention, poolFull: true).preferredColorScheme(.light) }
 #Preview("Pool full, large type") {
-    AddSheetPreview(tab: .name, poolFull: true).dynamicTypeSize(.accessibility2)
+    AddSheetPreview(tab: .intention, poolFull: true).dynamicTypeSize(.accessibility2)
 }
