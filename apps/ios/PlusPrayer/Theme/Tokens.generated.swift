@@ -171,6 +171,8 @@ nonisolated enum PP {
             static let header: CGFloat = 32
             /// The profile at the top of You.
             static let large: CGFloat = 72
+            /// The add sheet's Name-tab avatar: its own tinted glass circle beside the Name or alias field, as tall as the glass field (as the pray button matches the pill). It morphs out of one field and into the other (screens.md).
+            static let field: CGFloat = 52
             /// The add sheet's For row and the rows of "Who is this for?" (screens.md).
             static let picker: CGFloat = 40
             static let small: CGFloat = 28

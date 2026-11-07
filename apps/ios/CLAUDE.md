@@ -419,15 +419,18 @@ compose queries; if an operation is missing, ask for a backend change.
   for labels, footers for hints, errors (ink) and the counter; a top notice
   row; a native Toggle whose subtitle is the meter (its bloom
   `size.carriedMark.carryRow` tall via `@ScaledMetric`), its footer "Make
-  room …". On the Name tab a 28 pt avatar (`avatar.small`) sits inside the
-  field its initials come from (Name, or the alias once it has text; "…"
-  when empty), centered on the row's rounded end; both fields keep its
-  leading space (measured from the row, so text never shifts). It travels
-  between the fields in **one layer above the form** (`avatarLayer`,
-  anchored to the rows' measured frames, `.geometryGroup()` so the initials
-  move with the disc; Reduce Motion fades): a view can't move between
-  `Form` rows (`matchedGeometryEffect` and the glass morph both swap in one
-  frame; tried 2026-11-06). Each step's
+  room …". On the Name tab the Name and alias fields are **glass capsules**
+  (tinted `raised`, row insets and background cleared), and the avatar
+  (`avatar.field`, 52 pt, as tall as the field) is its own tone-tinted glass
+  circle beside the field its initials come from (Name, or the alias once
+  it has text; "…" when empty). Each row is one `GlassEffectContainer`: the
+  avatar morphs out of / into its field (`glassEffectID`, the liquid split)
+  and the field stretches. Nothing travels between rows: a view can't move
+  between `Form` rows (`matchedGeometryEffect` and a cross-row glass morph
+  both swap in one frame), and an overlay layer animated only sometimes on
+  device. The change runs in its own `withAnimation` one tick after the
+  keystroke (in the same update, the row being typed in didn't animate);
+  the leaving alias avatar keeps its initials. Each step's
   form stays in the hierarchy (faded or slid aside), so focus moves without
   the keyboard dropping. **The keyboard rises with the sheet** through
   `KeyboardPrimer`: SwiftUI focuses a `Form` field only after the sheet

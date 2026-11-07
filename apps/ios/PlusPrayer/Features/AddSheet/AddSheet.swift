@@ -33,11 +33,13 @@ struct AddSheet: View {
     /// default size, scaling with the title's text.
     @ScaledMetric(relativeTo: .body) private var bloomHeight = PP.size.carriedMark.carryRow
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    /// The Name tab's field rows (their backgrounds' frames) and where the
-    /// Name field's content starts: the avatar is placed on its row and the
-    /// text kept clear of it.
-    @State private var fieldRows: [AddSheetModel.Field: CGRect] = [:]
-    @State private var fieldContentMinX: CGFloat = 0
+    /// The field the Name tab's avatar sits beside (follows the model's
+    /// `avatarField` inside its own animation).
+    @State private var avatarIn: AddSheetModel.Field = .name
+    /// The alias avatar's initials: the alias's, kept as they were while it
+    /// melts back into an alias field that was just cleared (never "…").
+    @State private var leavingAliasInitials = ""
+    @Namespace private var glassNamespace
     /// The navigation path: "Who is this for?" when pushed.
     @State private var path: [Route] = []
 
@@ -211,31 +213,30 @@ struct AddSheet: View {
         Form {
             noticeSection
             Section {
-                TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
-                    .focused($focus, equals: .name)
-                    .accessibilityLabel(L10n.Add.nameLabel)
-                    .textInputAutocapitalization(.words)
-                    .submitLabel(.next)
-                    .onSubmit { focus = .alias }
-                    .fieldRules(.name, text: $model.name, model: model)
-                    .avatarSpace(avatarReserve)
-                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minX } action: { fieldContentMinX = $0 }
-                    .listRowBackground(fieldRowBackground(.name))
+                glassField(.name) {
+                    TextField(L10n.Add.nameLabel, text: $model.name, prompt: prompt(L10n.Add.namePlaceholder))
+                        .focused($focus, equals: .name)
+                        .accessibilityLabel(L10n.Add.nameLabel)
+                        .textInputAutocapitalization(.words)
+                        .submitLabel(.next)
+                        .onSubmit { focus = .alias }
+                        .fieldRules(.name, text: $model.name, model: model)
+                }
             } header: {
                 Text(L10n.Add.nameLabel)
             } footer: {
                 fieldFooter(.name, text: model.name, caption: nil)
             }
             Section {
-                TextField(L10n.Add.aliasLabel, text: $model.alias, prompt: prompt(L10n.Add.aliasPlaceholder))
-                    .focused($focus, equals: .alias)
-                    .accessibilityLabel(L10n.Add.aliasLabel)
-                    .textInputAutocapitalization(.words)
-                    .submitLabel(.done)
-                    .onSubmit(save)
-                    .fieldRules(.alias, text: $model.alias, model: model)
-                    .avatarSpace(avatarReserve)
-                    .listRowBackground(fieldRowBackground(.alias))
+                glassField(.alias) {
+                    TextField(L10n.Add.aliasLabel, text: $model.alias, prompt: prompt(L10n.Add.aliasPlaceholder))
+                        .focused($focus, equals: .alias)
+                        .accessibilityLabel(L10n.Add.aliasLabel)
+                        .textInputAutocapitalization(.words)
+                        .submitLabel(.done)
+                        .onSubmit(save)
+                        .fieldRules(.alias, text: $model.alias, model: model)
+                }
             } header: {
                 Text(L10n.Add.aliasLabel)
             } footer: {
@@ -243,49 +244,48 @@ struct AddSheet: View {
             }
             carrySection(.name)
         }
-        .overlay { avatarLayer }
-    }
-
-    /// The Name tab's avatar, in one layer above the form so it can travel
-    /// between its fields (a view can't move from one form row to another:
-    /// matched geometry and the glass morph both just swap). It sits on the
-    /// field it belongs to, at the start, inset to follow the row's rounded
-    /// end, and follows the row as the form scrolls.
-    private var avatarLayer: some View {
-        GeometryReader { layer in
-            if let row = fieldRows[model.avatarField] {
-                let origin = layer.frame(in: .global).origin
-                MonogramAvatar(initials: model.avatarInitials, tone: model.tone, size: PP.size.avatar.small)
-                    // The initials travel with the disc (new ones would
-                    // otherwise appear at the destination first).
-                    .geometryGroup()
-                    .position(x: row.minX - origin.x + row.height / 2, y: row.midY - origin.y)
-                    // Reduce Motion: a fade out of one field and into the
-                    // other instead of the move.
-                    .id(reduceMotion ? model.avatarField : .name)
-                    .transition(.opacity)
+        // The avatar changes field in its own animation, so the morph runs
+        // every time (not only when a typing transaction happens to carry it).
+        .onChange(of: model.avatarInitials(.alias), initial: true) { _, initials in
+            if model.avatarField == .alias { leavingAliasInitials = initials }
+        }
+        .onChange(of: model.avatarField) { _, field in
+            Task { @MainActor in
+                await Task.yield()
+                withAnimation(reduceMotion ? .easeOut(duration: PP.duration.quick) : .smooth(duration: PP.duration.settle)) {
+                    avatarIn = field
+                }
             }
         }
-        .animation(reduceMotion ? .easeOut(duration: PP.duration.quick) : .smooth(duration: PP.duration.settle),
-                   value: model.avatarField)
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 
-    /// A Name-tab field's row background, reporting where the row is (for
-    /// the avatar above it).
-    private func fieldRowBackground(_ field: AddSheetModel.Field) -> some View {
-        PP.color.raised
-            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { fieldRows[field] = $0 }
-    }
-
-    /// The leading space both Name fields keep for the avatar, so their text
-    /// never shifts: from the row's own content inset to just past the
-    /// avatar, plus the platform's spacing.
-    private var avatarReserve: CGFloat {
-        guard let row = fieldRows[.name], row.height > 0 else { return 0 }
-        let inset = fieldContentMinX - row.minX
-        return max(0, row.height / 2 + PP.size.avatar.small / 2 + PP.space.sm - inset)
+    /// A Name-tab field on glass, with the avatar beside it on its own tinted
+    /// glass while it's this field's (as the pray button sits beside Home's
+    /// pill). Both share one glass container, so the avatar morphs out of
+    /// the field (Apple's liquid split) when it arrives and back into it
+    /// when it leaves, and the field stretches to fill the row. Each row
+    /// morphs on its own: nothing travels between form rows.
+    private func glassField(_ field: AddSheetModel.Field, @ViewBuilder _ textField: () -> some View) -> some View {
+        GlassEffectContainer(spacing: PP.size.bar.gap) {
+            HStack(spacing: PP.size.bar.gap) {
+                if avatarIn == field {
+                    MonogramAvatar(initials: field == .alias ? leavingAliasInitials : model.avatarInitials(field),
+                                   tone: model.tone, size: PP.size.avatar.field,
+                                   filled: false)
+                        .glassEffect(.regular.tint(MonogramAvatar.color(tone: model.tone)), in: .circle)
+                        .glassEffectID("\(field).avatar", in: glassNamespace)
+                        .glassEffectTransition(reduceMotion ? .materialize : .matchedGeometry)
+                        .accessibilityHidden(true)
+                }
+                textField()
+                    .padding(.horizontal, PP.space.lg)
+                    .frame(maxWidth: .infinity, minHeight: PP.size.avatar.field, alignment: .leading)
+                    .glassEffect(.regular.tint(PP.color.raised), in: .capsule)
+                    .glassEffectID("\(field).field", in: glassNamespace)
+            }
+        }
+        .listRowInsets(EdgeInsets())
+        .listRowBackground(Color.clear)
     }
 
     // MARK: Intention tab
@@ -529,9 +529,6 @@ struct AddSheet: View {
 }
 
 private extension View {
-    /// Leading room for the Name tab's avatar.
-    func avatarSpace(_ reserve: CGFloat) -> some View { padding(.leading, reserve) }
-
     /// A field's rules: caps stop input; the contact-info check runs once
     /// typing pauses (and clears at once when fixed); typing again clears an
     /// offline or failed add.

@@ -44,16 +44,17 @@ struct AddSheetModelTests {
         defer { running.cancel() }
         let model = AddSheetModel(home: home)
         #expect(model.avatarField == .name)
-        #expect(model.avatarInitials == "…", "empty: the tone with an ellipsis")
+        #expect(model.avatarInitials(.name) == "…", "empty: the tone with an ellipsis")
         model.name = "Gary Olson"
         #expect(model.avatarField == .name)
-        #expect(model.avatarInitials == "GO")
+        #expect(model.avatarInitials(.name) == "GO")
         model.alias = "Dad"
         #expect(model.avatarField == .alias, "moves on the alias's first character")
-        #expect(model.avatarInitials == "D")
+        #expect(model.avatarInitials(.alias) == "D")
+        #expect(model.avatarInitials(.name) == "GO", "the one leaving Name keeps its initials")
         model.alias = "  "
         #expect(model.avatarField == .name, "back when the alias is cleared")
-        #expect(model.avatarInitials == "GO")
+        #expect(model.avatarInitials(.name) == "GO")
     }
 
     @Test func addIsDisabledWhileEmptyOrWhileAContactMessageShows() {
