@@ -99,7 +99,9 @@ _Last updated: 2026-10-18_
         they've picked a segment themselves, typing never overrides it.
         Clearing the intention while "Name + intention" is selected (auto or
         picked) falls back to "Name" and disables that segment; a picked
-        "Not now" or "Name" is never changed. "Name + intention" is disabled
+        "Not now" or "Name" is never changed. The forced fallback is **not**
+        a user pick: the control remembers the preference ("Name +
+        intention"), so typing an intention again restores it. "Name + intention" is disabled
         while the intention is empty.
       - Segments that don't fit the pool are disabled, and "Make room for
         {alias}" (blue, **visible but inert** until Membership / Your

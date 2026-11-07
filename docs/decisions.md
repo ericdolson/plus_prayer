@@ -1914,3 +1914,10 @@ Typing an intention auto-selects "Name + intention" only while the user
 hasn't touched the segmented control; a manual pick is never overridden.
 Clearing the intention with "Name + intention" selected falls back to "Name"
 (that segment disables).
+
+### Decision: A forced fallback isn't a pick
+**Timestamp:** 2026-11-07
+The carry control keeps the user's preference separate from what's shown.
+If "Name + intention" was the preference (picked or auto) and clearing the
+intention forced "Name", typing an intention again restores "Name +
+intention". Only a deliberate tap changes the preference.
