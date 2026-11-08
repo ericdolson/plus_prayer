@@ -90,7 +90,10 @@ the detail page, this file wins.
        "All 10 places in use", toggle disabled, **"Make room for {alias}"**
        under it (inert until Membership / Your portion exist).
      - Free tier: "Free carries you and your intention", disabled, "Make
-       room for {alias}".
+       room for {alias}". A name still carried on the free tier (a lapsed
+       trial) shows the same line with the toggle enabled, so it can be
+       turned off (2026-11-08; replaces "over any pool, the carried case
+       wins": a pool of 0 has no "All 0 places" to show).
   2. **"Prints with  {chosen intention} ›"** (only while carried and the
      person has open intentions; "Name only" when none is chosen). Pushes a
      native list titled "Prints with": **Name only**, then the person's open

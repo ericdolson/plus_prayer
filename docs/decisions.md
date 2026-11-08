@@ -2102,4 +2102,11 @@ self page shows your name under "Me").
 - Supersedes: monetization "Paid unit = a pool of carried names and
   intentions" (2026-10-17), R8's unit, and the item-count meter wording
   from 2026-11-07 ("Uses 2 places", "Would use 2 places · 1 left").
+- **Build follow-ups (orchestrator calls, same day):** past the trial soft
+  landing the self prints with its chosen intention (it's free under Q32);
+  a lapsed trial's carried name shows "Free carries you and your intention"
+  with the toggle still enabled to turn it off; the add sheet's "Print with
+  {alias}" starts off under an uncarried person (no place spent by
+  default); only an explicit `carry: true` swaps at the cap; old over-cap
+  data is trimmed by the migration and by assembly, not by unrelated saves.
 

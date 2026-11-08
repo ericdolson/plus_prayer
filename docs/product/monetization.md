@@ -22,7 +22,7 @@ _Last updated: 2026-10-17_
   subscription ⇒ free limit (no scheduled job).
 - **Trial-end soft landing:** assembly keeps carrying the full trial portion
   until the user completes the trial-end choice, up to 7 days; after that only
-  the self name until they choose. Portion screen shows "Waiting for your choice".
+  the self name, with its chosen intention (free under Q32), until they choose. Portion screen shows "Waiting for your choice".
   Never a silent drop. **Applies to any entitlement ending** — trial end or a
   lapsed subscription (2026-10-18). No extra field: "over the free limit with no
   active entitlement" triggers it. For lapsed payments, the store's own billing
