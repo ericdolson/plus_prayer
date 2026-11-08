@@ -33,11 +33,17 @@
           },
           "instagram": {
             "post_id": "6af0f0678d48d49ba89a25d3",
-            "status": "publishing"
+            "status": "published",
+            "platform_post_id": "18646161217009856",
+            "platform_post_url": "https://www.instagram.com/reel/DffyMUPjM6Q/",
+            "published_at": "2026-11-08T22:03:51Z"
           },
           "threads": {
             "post_id": "6af0f06a3b38351b7fb253f3",
-            "status": "publishing"
+            "status": "published",
+            "platform_post_id": "18135969380505389",
+            "platform_post_url": "https://www.threads.com/@plusprayer/post/DffyVd_uqgP",
+            "published_at": "2026-11-08T22:04:47Z"
           },
           "tiktok": {
             "post_id": "6af0f06d8d48d49ba89a25e5",
@@ -59,6 +65,14 @@
             "mechanic_at": "2026-11-08T22:04:13Z",
             "prayer_id": "122142336938983291_1619679529398546",
             "prayer_at": "2026-11-08T22:04:13Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "instagram": {
+            "mechanic_id": "18099750656405995",
+            "mechanic_at": "2026-11-08T22:07:52Z",
+            "prayer_id": "18415551973084611",
+            "prayer_at": "2026-11-08T22:07:52Z",
             "closeout": "pending",
             "retired_id": null
           }
@@ -133,8 +147,8 @@
             "mechanic_at": "2026-11-07T23:29:31Z",
             "prayer_id": "18147386836598218",
             "prayer_at": "2026-11-07T23:29:31Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "18026626877939386"
           }
         }
       }
