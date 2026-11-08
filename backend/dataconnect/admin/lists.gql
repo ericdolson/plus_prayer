@@ -115,8 +115,10 @@ mutation CloseList(
 #   no active entitlement, names fit free      → $freeLimit (0: you, with your intention)
 #   no active entitlement, over free, ended
 #     within $softLandingDays                  → includeLimit (soft landing)
-#   otherwise                                  → self name only (no names,
-#                                                no intentions) until they choose
+#   otherwise                                  → 0: the self name with its
+#                                                chosen intention (free under
+#                                                Q32), no other names, until
+#                                                they choose
 # Each printed person (the self included) prints with their CHOSEN
 # intentions: open (ACTIVE, unresolved), flagged isCarried, at most
 # $intentionsPerPerson each, first by sortOrder. Intentions never use the
@@ -237,9 +239,7 @@ mutation AssembleList(
           WHEN u.entitlement_expires_at > $3::timestamptz - make_interval(days => $6::int)
             THEN u.include_limit
           ELSE 0
-        END AS n,
-        (u.active OR st.n IS NULL OR st.n <= $5::int
-          OR u.entitlement_expires_at > $3::timestamptz - make_interval(days => $6::int)) AS with_intentions
+        END AS n
       FROM u LEFT JOIN st ON st.owner_id = u.id
     ), picked_names AS (
       SELECT r.id, r.owner_id, r.public_name
@@ -257,9 +257,7 @@ mutation AssembleList(
         row_number() OVER (PARTITION BY s.parent_id ORDER BY s.sort_order, s.created_at, s.id) AS rn
       FROM prayer_subject s
       JOIN persons pr ON pr.id = s.parent_id
-      JOIN lim ON lim.owner_id = s.owner_id
       WHERE s.kind = 'INTENTION' AND s.status = 'ACTIVE' AND s.resolved_at IS NULL AND s.is_carried
-        AND lim.with_intentions
     ), picked AS (
       SELECT r.*,
         CASE

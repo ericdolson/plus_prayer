@@ -386,13 +386,14 @@ and offline-friendly): see onPrayerLogged.
      (`prayedAt`) in the 30h before `N.closesAt` (server param). A prayer
      after the cutoff belongs to N+1 only — one prayer never earns two
      lists. Per qualifying user:
-     self + effectively carried, ACTIVE, unresolved items up to the EFFECTIVE
-     entitlement (free: intentions under Me only), with `parentEntry` linking
-     intentions to their name's entry. SOFT LANDING (any entitlement end —
-     trial or lapsed subscription): no active entitlement and the effective
-     carry still over the free limit (= the choice not yet made) → keep
-     carrying the full portion for up to 7 days after entitlementExpiresAt;
-     after that only the self name until they choose. Store billing grace
+     self + carried names up to the EFFECTIVE entitlement in people (free:
+     0; Q32), each person (the self included) with their chosen intentions
+     (≤ `intentionsPerPerson`), with `parentEntry` linking intentions to
+     their name's entry. SOFT LANDING (any entitlement end — trial or lapsed
+     subscription): no active entitlement and carried names still over the
+     free limit (= the choice not yet made) → keep carrying the full portion
+     for up to 7 days after entitlementExpiresAt; after that the self name
+     with its chosen intention (free) until they choose. Store billing grace
      periods count as active, so the 7 days start after them. Plus social ExternalPersons from the
      harvest and the active base set (activeUntil null or future). Freeze
      publicName/kind; source APP | SOCIAL | BASE_SET; exactly one of subject /

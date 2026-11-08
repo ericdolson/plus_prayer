@@ -102,25 +102,28 @@ describe("assembly: each user's portion", () => {
     assert.deepEqual(names(await entries(res.listId, "f")), ["Fay", "Fay: courage"]);
   });
 
-  it("free and over the free limit (a carried name), never premium: self name only", async () => {
+  it("free and over the free limit (a carried name), never premium: you, with your intention", async () => {
     const deps = makeDeps();
     const { selfId } = await createUser("g", { name: "Gus" });
     await addSubjectRow("g", { name: "Mom" });
-    await addSubjectRow("g", { parentId: selfId, name: "Gus: work" }); // waits for their choice too
+    await addSubjectRow("g", { parentId: selfId, name: "Gus: work" });
     const res = await setupAndAssemble(deps, ["g"]);
-    assert.deepEqual(names(await entries(res.listId, "g")), ["Gus"]);
+    assert.deepEqual(names(await entries(res.listId, "g")), ["Gus", "Gus: work"]);
   });
 
-  it("soft landing: ≤7 days after an entitlement ends the full portion stays; after that, self only", async () => {
+  it("soft landing: ≤7 days after an entitlement ends the full portion stays; after that, you with your intention", async () => {
     const deps = makeDeps();
     await createUser("s", { name: "Sol", includeLimit: 10, expiresInMs: -2 * DAY });
     await addSubjectRow("s", { name: "Tia", sortOrder: 1 });
     await addSubjectRow("s", { name: "Uma", sortOrder: 2 });
-    await createUser("t", { name: "Ted", includeLimit: 10, expiresInMs: -8 * DAY });
-    await addSubjectRow("t", { name: "Val", sortOrder: 1 });
+    const { selfId: tedSelf } = await createUser("t", { name: "Ted", includeLimit: 10, expiresInMs: -8 * DAY });
+    const val = await addSubjectRow("t", { name: "Val", sortOrder: 1 });
+    await addSubjectRow("t", { parentId: val, name: "Val: rest", sortOrder: 1 });
+    await addSubjectRow("t", { parentId: tedSelf, name: "Ted: patience", sortOrder: 1 });
     const res = await setupAndAssemble(deps, ["s", "t"]);
     assert.deepEqual(names(await entries(res.listId, "s")), ["Sol", "Tia", "Uma"]);
-    assert.deepEqual(names(await entries(res.listId, "t")), ["Ted"]);
+    assert.deepEqual(names(await entries(res.listId, "t")), ["Ted", "Ted: patience"],
+      "past the soft landing: still over the free pool, so no other names — but your intention is free (Q32)");
   });
 
   it("an intention under an archived name is not carried", async () => {
