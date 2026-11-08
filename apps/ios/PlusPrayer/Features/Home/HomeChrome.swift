@@ -39,19 +39,28 @@ struct HomeHeader: View {
                     .glassEffect(.regular.interactive(), in: .capsule)
                     .transition(.opacity)
             } else {
-                // On interactive glass tinted with your tone, like the pray
-                // button, so it gives under the finger like the other controls.
-                Button(action: onYou) {
-                    MonogramAvatar(initials: initials, tone: tone, size: PP.size.avatar.header, filled: false)
-                        .contentShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .glassEffect(.regular.tint(MonogramAvatar.color(tone: tone)).interactive(), in: .circle)
-                .accessibilityLabel(L10n.Home.you)
-                .transition(.opacity)
+                // One glass container so the avatar and streak blend into
+                // each other when either grows under a tap (otherwise each
+                // renders alone and the streak always sits on top). Same
+                // pattern as HomeBar: container spacing = the gap. sm, not xs:
+                // two separate controls read as two pieces, not crowded.
+                GlassEffectContainer(spacing: PP.space.sm) {
+                    HStack(spacing: PP.space.sm) {
+                        // On interactive glass tinted with your tone, like the
+                        // pray button, so it gives under the finger like the
+                        // other controls.
+                        Button(action: onYou) {
+                            MonogramAvatar(initials: initials, tone: tone, size: PP.size.avatar.header, filled: false)
+                                .contentShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .glassEffect(.regular.tint(MonogramAvatar.color(tone: tone)).interactive(), in: .circle)
+                        .accessibilityLabel(L10n.Home.you)
 
-                StreakBadge(state: streakState, days: streakDays, onTap: onStreak)
-                    .transition(.opacity)
+                        StreakBadge(state: streakState, days: streakDays, onTap: onStreak)
+                    }
+                }
+                .transition(.opacity)
             }
 
             Spacer(minLength: PP.space.md)
