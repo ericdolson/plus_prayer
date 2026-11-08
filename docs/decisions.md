@@ -2138,3 +2138,16 @@ self page shows your name under "Me").
   gap labels like "3 days" (a ledger of absence); a fourth tab now.
 - Idea logged, not decided: standalone journal entries (Q33, post-MVP).
 
+### Decision: Answered gets a tile and a History tab
+**Timestamp:** 2026-11-08
+- Person page tile **"N · answered"** (gold number, hidden at zero; four
+  tiles → 2×2). History's fourth tab **Answered**: newest first, intention →
+  person → gold "Answered {date}" → prayer/list counts; Released never
+  shown; no celebration. In Days, an answered day's node gets a small gold
+  ✦ and the day sheet says "Answered · {intention}".
+- Why: Answered is the gratitude payoff the product points toward and was
+  only a gold line on an intention. Breaks the "three tabs for now" rule on
+  purpose; Places stays later.
+- Also: the day sheet never says "No prayer this day"; it shows only what
+  happened.
+

@@ -25,8 +25,8 @@ differently, this file wins.
 - **Self ("Me")** is filterable like anyone.
 
 ### Tabs
-A native segmented control: **Days · Journal · Lists**. Days is the
-default. (A fourth, **Places**, a map of where you prayed, can come later
+A native segmented control: **Days · Journal · Lists · Answered**
+(Answered added 2026-11-08). Days is the default. (A fourth, **Places**, a map of where you prayed, can come later
 with consent-gated location; not now.)
 
 ### Days — the strand
@@ -50,6 +50,8 @@ top left, and reads left to right, then down, back in time.
   - **gold ring** (the held ring) = **you prayed for them** that day;
   - both, or either. No hollow states.
   - **A small neutral dot on the corner** = a journal entry that day.
+  - **A small gold ✦ in the opposite (lower) corner** = an intention was
+    answered that day (rare, so it earns a mark).
 - **Only days where something happened get a node.** A run of empty days
   collapses to one small **`··`**, the same whatever its length: it shows
   that time passed without counting it (no "N days" — that's a ledger of
@@ -69,10 +71,12 @@ top left, and reads left to right, then down, back in time.
   gold = you prayed. The streak line and "Time in prayer" sit above the
   strand (about you; hidden when filtered).
 - **Tapping a node** opens a native **half-height sheet** for that day: the
-  date, "On List 46 · 3,475 prayers" (if on a list), then each prayer you
-  prayed that day (time · length, who it held when unfiltered, its journal
-  entry in full). A prayer row opens Prayer detail. A sheet can't sit below
-  the fold, unlike an inline panel.
+  date, "On List 46 · 3,475 prayers" (if on a list), **"Answered · {intention}"**
+  (gold, if one was answered that day), then each prayer you prayed that day
+  (time · length, who it held when unfiltered, its journal entry in full). A
+  prayer row opens Prayer detail. **A day with no prayer shows only what
+  happened** (the list line); never "No prayer this day". A sheet can't sit
+  below the fold, unlike an inline panel.
 - **Accessibility:** each node is a button labeled with its day and what
   happened ("Thursday, November 5. On List 49. You prayed. Journal
   entry."); `··` reads "No activity"; the month tab is a heading.
@@ -89,6 +93,17 @@ top left, and reads left to right, then down, back in time.
   "3,475 prayers". Filtered: the lists that person was on. Everyone: the
   lists you were on. A row opens that past list's page. Wax belongs to a
   list, so this is where history wears wax.
+
+### Answered (2026-11-08)
+- Answered intentions, **newest first**. Row: the intention's text (sans) →
+  the person's name (small, `inkMuted`) → **"Answered Nov 3"** in
+  `heldGoldText` → "You prayed 12 times · On 30 lists" (`inkMuted`). A row
+  opens the intention's page. When the thanks entry on Answered exists (v2),
+  it shows in full under its row, as in Journal.
+- Filtered to a person: their answered intentions. Everyone: all of yours.
+- **Released intentions never appear** (release implies no gratitude).
+- **No celebration**: no animation, emoji or exclamation. "Answered", the
+  date and the counts.
 
 ## Words: "journal" (2026-11-08)
 - The collection is the **Journal** (tab; tile "3 in your journal").

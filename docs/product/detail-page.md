@@ -169,9 +169,14 @@ Replaces the page's History calendar; the full history is `history.md`.
   - **"14 · your prayers"** → Days;
   - **"40 · lists"** with a second line **"138,994 prayers"** (the world
     prayed those lists) → Lists;
-  - **"3 · in your journal"** → Journal.
-  A tile at zero is hidden (marking presence; a new person shows none). An
-  intention's page has the same preview, filtered to the intention.
+  - **"3 · in your journal"** → Journal;
+  - **"1 · answered"** → Answered (2026-11-08). The number is in
+    `heldGoldText`, the color "Answered · {date}" already uses; the only tile
+    with color, so it needs no other emphasis.
+  A tile at zero is hidden (marking presence; a new person shows none).
+  Three or fewer sit in one row; four become a **2×2 grid**. An intention's
+  page has the same preview, filtered to the intention, without the
+  Answered tile (its title area already says "Answered · {date}").
 - **Section titles** ("Intentions", "History"): **system sans, Title 3
   semibold** (2026-11-08; were Roca).
 
