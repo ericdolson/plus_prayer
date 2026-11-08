@@ -141,16 +141,13 @@ person's own page may say "Not on the list".
 One page; intentions hide what doesn't apply and add parent name + resolve.
 - Header cards: "Held by you · N prayers" (always); "Carried by the world · N
   prayers · N lists" (only if ever carried; live-stitched for the current list).
-- **Bead strand history**: period rows (This week, Last week, Earlier in {month},
-  months, years; last "Begun · {date}"), each "♡ You prayed N times" + "On N
-  lists" (+ "· current"); beads = lists it was on, colored by that list's wax;
-  gaps = one neutral line "Off the list · N days". Hints: "✎ 3" notes,
-  "✦ Answered". Tap period → prayers with notes, list numbers, answered moment.
+- **History**: month calendars + older text rows. Current rules: detail-page.md
+  (which wins).
 - Actions: Pray (with focus), Add intention (names), Edit (name 40 / alias /
   note / avatar tone), Archive; intentions: **Resolve** → Answered (optional
   thanks note; leaves the list; stays on Home as "Answered · praying in
   gratitude") or Release (no gratitude implied; to archive).
-- "Me" detail shows your own beads (lists you were on).
+- "Me" detail shows your own History (lists you were on).
 
 ### Today's list (list-lifecycle.md)
 Seal, full-bleed self-hosted video (sound off until tapped; "being filmed"
@@ -244,7 +241,7 @@ to free → second invite if still over. Same flow when a subscription lapses
 2. Home + in-prayer mode + invitation + add sheet (mock).
 3. Onboarding + auth + `setSelfName`.
 4. Wire generated SDK + RTDB (once the backend session ships operations).
-5. Detail page (bead strand), Today's list, History, streak sheet.
+5. Detail page (History calendar), Today's list, History, streak sheet.
 6. Your portion, settings, archive, deletion, local notifications, analytics.
 7. Membership/trial flows (Stage 2 billing; beta uses a grant).
 

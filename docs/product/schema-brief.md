@@ -98,7 +98,7 @@ Resolved NamUs cases: set `activeUntil` (removed quietly). — list-lifecycle
 | `reasonCategory` | ADD enum LANGUAGE \| CONTACT_OR_LINK \| NAME_CHANGES \| OTHER |
 | `publicName`, `kind` | keep — frozen snapshots |
 
-This table is also the **bead strand** source (with `PrayerList.sealVariant`).
+This table is also the **History calendar** source (list days).
 No per-assembly outcome table is needed (decided — stats-history).
 
 ### Prayer — changes
@@ -125,7 +125,7 @@ by `prayer.user`. Checking an intention also writes a link to its parent name.
 
 ## 2. Derived on read (do not store)
 Tier-1 counts (raw + cycles) · tier-3 world count (closed lists + live stitch) ·
-per-item "last prayed" (local date) · bead strand + "Off the list · N days" gaps
+per-item "last prayed" (local date) · History calendar days
 · period rows (prayers, notes count, answered marker) · "Days in prayer this
 month" · "carried on N lists" · answered running total · prayer time per prayer
 / week / all time. Only the user streak/grace fields and list counts are stored.
@@ -262,7 +262,7 @@ server functions (addSubject, updateSubject, setCarriedItems), `Prayer.countedAt
 12. Push copy: "List 52 is up · 4,345 people, including you."
 13. Merged streak rule approved.
 14. List date = Mountain date at assembly; draft counts incl. held, published
-    counts approved only. **Bead strand / world-count operations return only
+    counts approved only. **History / world-count operations return only
     APPROVED entries (server-side), not an app-side filter.**
 15. Draft fields added to §3.
 

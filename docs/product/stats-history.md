@@ -26,11 +26,14 @@ _Last updated: 2026-10-17_
 - **Ops:** getSubjectDetail, getSubjectWorldCount, getSubjectLists,
   getSubjectPrayerHistory, getMyPrayerHistory, getMyArchivedSubjects.
 
-## Detail-page history — the bead strand (2026-10-18)
-**Revised 2026-11-03:** beads are drawn for **this week only**; older periods
-are text rows, and the "Off the list · N days" gap line is retired. Rendering
-and current rules are in `detail-page.md`, which wins where this section
-differs.
+## Detail-page history (2026-10-18)
+**Revised 2026-11-08:** the bead strand is replaced by **month calendars**
+(current and previous month: gold ring = held, ink bloom = on the list);
+older periods are text rows. Your prayers **are** now drawn as days, as gold
+rings; empty days are faint `thread` dots, the calendar's shape, not a gap
+line. Rendering and current rules are in `detail-page.md`, which wins where
+this section differs. (2026-11-03 had cut beads to this week only and
+retired "Off the list · N days".)
 SUPERSEDES the seed's v3 thick/thin/dashed line (seeds/2026-10-11 §4.4–4.7) and
 its per-assembly outcome recording (§5). Applies to names, intentions, and "Me".
 - **Header:** "Held by you · N prayers" (always) and "Carried by the world · N
@@ -38,24 +41,20 @@ its per-assembly outcome recording (§5). Applies to names, intentions, and "Me"
 - **Period rows**, newest first: This week, Last week, Earlier in {month}, then
   months, then years; last row "Begun · {date}". Each row: "You prayed N
   times" (counts only, never ratios) + "On N lists" (+ "· current").
-- **Beads:** one bead per list the item was on, **colored by that list's wax
-  (`sealVariant`)**. Prayer beads are cross-faith (rosary, mala, misbaha,
-  prayer rope) and tie the app to the physical seals.
-- **Gaps:** one quiet, neutral line — "Off the list · N days" — with no reason
-  given (didn't pray, removed, no room are not distinguished). N = missed lists,
-  labeled in days.
-- **Your prayers are never drawn as days**, so the page never becomes a ledger of
-  absences.
+- **Days (2026-11-08):** one cell per day in the two grid months: ink bloom =
+  on a printed list, gold ring = you held it, both, or a faint `thread` dot.
+  No gap lines, no wax colors. (Was: wax-colored beads per list, then "Off
+  the list · N days" gaps; then "your prayers are never drawn as days". The
+  calendar draws them, as presence only.)
 - **Hints on period rows:** a small note glyph with count ("✎ 3") when prayers in
   that period have notes, and an "Answered" mark on the period where it was
   answered. Tapping a period expands to individual prayers (with notes), list
   numbers, and the answered moment.
-- **Data:** beads = existing `PrayerListEntry` + `PrayerList.sealVariant`; gaps =
-  distance between beads; prayers/notes = `PrayerSubjectLink` → `Prayer`;
+- **Data:** list days = existing `PrayerListEntry` (list number, date); prayers/notes = `PrayerSubjectLink` → `Prayer`;
   answered = subject `resolvedAt`. **No outcome table, nothing extra recorded at
   assembly.** One operation returns the subject + its entries (list number, date,
   sealVariant, prayerCount) + its prayers (prayedAt, localDate, note); the client
-  buckets into periods. Paginate by period if histories get very long.
+  buckets into days and periods. Paginate by period if histories get very long.
 - Lifetime "carried on N lists" lives on Today's list page; never show a
   list-number sequence beside the streak.
 

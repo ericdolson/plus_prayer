@@ -2040,3 +2040,29 @@ self page shows your name under "Me").
   crowded and, sharing glass, the avatar's tint bled onto the streak.
 - Parity notes for Android collected in apps/android/CLAUDE.md.
 
+### Decision: Detail page slice 2 design — History calendar, carry card, sans titles
+**Timestamp:** 2026-11-08
+- **History = month calendars** (current + previous month), older periods as
+  text rows. Day cells reuse Home's vocabulary: gold ring = held, ink bloom =
+  on a printed list, both, or a faint `thread` dot. Month grid (like Fitness)
+  over a GitHub-style strip: universally readable on a phone. **Supersedes**
+  the wax bead strand (2026-11-03; colors carried no meaning, older rows said
+  nothing at a glance) and stats-history's "your prayers are never drawn as
+  days" (2026-10-18): they are now, as presence only; empty days are the
+  calendar's shape, not gap lines. History no longer wears wax.
+- **Status line moves into a carry card** and is reworded around praying
+  *with the list* ("Pray with today's list to carry Dad onto List 53"): the
+  old "Pray to carry Dad onto List 53" sat above "Pray for Dad" and implied
+  praying for him carries him. The card (flat `cardSurface`) holds the carry
+  toggle, its cost line and the status as footer, so the toggle no longer
+  floats on the page. Nothing under the name but the name.
+- **Held ring scales in steps** (≤32: 1.5/1.5, 40–44: 2/2, ~96: 3/3), not
+  proportionally (~4.5 pt at 96 is heavy).
+- **Roca only for proper names** (people, "List 52") plus the splash and
+  invitation lines. Section titles and intention titles are system sans.
+- **＋ on the Intentions header** replaces the add link; the empty state keeps
+  the prominent first-intention button and drops the header ＋.
+- Orchestrator calls (overrule freely): self page's card holds only the
+  status; Answered intentions have no carry card; a covered upcoming list
+  shows its bloom on its date; grids are one accessibility element each.
+

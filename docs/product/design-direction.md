@@ -28,9 +28,9 @@ both apps target them. Tune by eye on both, then update the spec so they stay
 in step:
 avatars and the held ring · threads and the gold dot · Home row layout and
 spacing · the community card (including the avatar cluster) · the streak seal ·
-wax seals · the bead strand · prayer mode (halo, checks, check bloom) · the pray
+wax seals · the History calendar · prayer mode (halo, checks, check bloom) · the pray
 button and its countdown · Amen → seal · color roles and tokens · type roles
-(Roca for names/numbers/big lines, system sans for body).
+(Roca for proper names and the list's name, system sans for everything else).
 
 **Tier B — Native chrome (platform component, platform metrics).**
 Use the platform's own component and accept its look: menus, popovers,
@@ -170,8 +170,12 @@ gold.
   mismatched grays.
 
 ## 2. Typography
-- **Serif (Roca)** only for: names on Home, list numbers ("List 52"), and big
-  lines (splash, invitation, section titles on detail pages).
+- **Serif (Roca)** only for **proper names** (2026-11-08): people's names
+  (Home rows, the detail page title, wherever a name is the title) and the
+  list's name ("List 52"), plus two ceremonial lines (the splash and the Amen
+  invitation). **Everything else is the system sans** in its native weights
+  and sizes, including section titles on detail pages ("Intentions",
+  "History") and intention titles.
 - **Body sans = the platform system font**: SF Pro on iOS (via the system
   font), Roboto on Android. Roboto on iOS is the biggest thing making it feel
   like an Android port.
@@ -402,7 +406,11 @@ gold.
   gold ring and **keeps it until local midnight**. Everyone else simply looks
   normal. This is the same signal as checking them in prayer.
   - **Ring spec:** 2 pt ring with a 2 pt gap from the avatar on 40–44 pt
-    avatars. **Crisp ring only, both themes — no static glow** (2026-10-27:
+    avatars. **Scales in steps, not proportionally** (2026-11-08; a
+    proportional ring at 96 pt is ~4.5 pt and heavy): up to ~32 pt →
+    1.5 / 1.5; 40–44 pt → 2 / 2; ~96 pt (detail page, add sheet) → 3 / 3
+    (ring / gap). One token per step; the History calendar's ~24 pt day
+    ring uses the smallest. **Crisp ring only, both themes — no static glow** (2026-10-27:
     with the bright avatar palette, the glow muddied the edges and cheapened
     the look).
   - **Always solid** (2026-10-24): holding a name is whole, however you prayed
@@ -413,7 +421,7 @@ gold.
   `heldGoldText`), "Not printed on List 53 · {category}. Edit to include it next
   time." Otherwise, no second line.
 - The **"Still to hold" filter** still exists; it just isn't painted on rows.
-- History and "last prayed" live on the detail page (bead strand).
+- History and "last prayed" live on the detail page (History calendar).
 
 ### Carried mark (2026-11-01)
 A tiny neutral glyph **after** every carried name and intention, so a long
@@ -423,7 +431,7 @@ list shows at a glance what goes on the printed list.
   **not time-indexed**: no "on List 52" vs "staged for List 53" per row. The
   gate is per user, so the community card owns timing ("Pray to carry them
   onto List 53" / "They'll be on List 53", "Mom joins you on List 53"); the
-  detail page's bead strand owns history. The mark does not change when the
+  detail page's History calendar owns history. The mark does not change when the
   user prays or lapses.
 - **Name carried, intention not:** the name has the mark, the intention
   doesn't. An intention can't be carried without its name, so the mark never
@@ -462,7 +470,8 @@ list shows at a glance what goes on the printed list.
   **Wax** (the bloom pressed into the day's wax) = sealed, an event — the
   community card's seal (and Today's list). The streak badge is the same
   seal **unwaxed, in pewter** (§4). The record of an item having
-  been on sealed lists is the detail page's bead strand (wax colors). Rows
+  been on lists is the detail page's History calendar, in ink blooms (no
+  wax since 2026-11-08). Rows
   never wear wax: on paper each name is printed in ink and the whole sheet
   gets one seal, and the carried mark is a standing promise, not a dated
   record.
@@ -477,8 +486,7 @@ list shows at a glance what goes on the printed list.
 
 ### Intentions on a thread
 - A thin neutral `thread` line drops from the **bottom-center of the name's
-  avatar** and curves to each intention (like a prayer strand — the same
-  metaphor as the bead history).
+  avatar** and curves to each intention (like a prayer strand).
 - **Intention text is left-aligned with the name text.** No bullets, no icons
   — except the trailing carried mark (§5).
 - **Held today:** a small **gold dot (~5 pt)** where the thread meets the
@@ -542,7 +550,7 @@ on Today's list or Your portion.
   large sizes (≥ ~40 pt: community card, Today's list, Amen invitation) the
   seal becomes a **real macro photo** of each weekday's stamp, cut out as a
   transparent image, bundled in the app (one per `sealVariant`). Vectors stay
-  for small sizes (beads; the pewter streak badge). `WaxSeal` keeps its API
+  for small sizes (the pewter streak badge). `WaxSeal` keeps its API
   and picks photo vs vector by size. It is the only photographed thing in the
   UI. Later, the day's own seal from the ritual can replace the set.
   - **Shoot guide:** all 7 in one session; same soft light from the upper
@@ -569,7 +577,7 @@ on Today's list or Your portion.
   card. The wax names and light-theme colors stay true to the physical wax.
   - **Scope:** part of the `WaxSeal` component (theme-aware), so it applies
     wherever a seal sits on a dark surface — card, Amen invitation, Today's
-    list. Below ~24 pt (beads) the lift applies but no rim.
+    list. Below ~24 pt the lift applies but no rim.
   - **Rim:** an even rim (outline copy behind the seal) is fine for now, kept
     subtle; a directional rim on the lit edge comes with the layered D2 art.
   - **Lift only waxes that need it:** Sunday's gold gets no lift (it already

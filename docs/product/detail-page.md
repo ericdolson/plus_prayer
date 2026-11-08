@@ -1,9 +1,9 @@
 # Detail Page — names and intentions
 
-_Last updated: 2026-11-03 (history simplified: one strand, this week only)_
+_Last updated: 2026-11-08 (History calendar; status moves into the carry card; sans titles; ＋ on Intentions)_
 
 One shared layout for a name (soul) and an intention. Builds on
-`stats-history.md` (bead strand data and counts), `screens.md` (screen map),
+`stats-history.md` (history data and counts), `screens.md` (screen map),
 `subjects.md` (selection rules, lifecycle) and `design-direction.md` (tokens,
 type, color roles, motion). Where this file and an older file disagree about
 the detail page, this file wins.
@@ -13,32 +13,43 @@ the detail page, this file wins.
 ### Layout (browsing) — name page
 ```
 ‹                                         ⋯
-            ( D )        ← ~96 pt avatar; gold ring if held today
+            ( D )        ← ~96 pt avatar; gold ring if held today (3 pt / 3 pt)
              Dad         ← Roca ~28 (the alias, else the name)
          Gary Olson      ← the name, smaller inkMuted, only if there's an alias
-      Dad will be on List 53   ← inkMuted status line (rules below)
 
   Held by you · 47 prayers
   Carried by the world · 61,204 prayers · 19 lists
 
-  Intentions                              ← Roca section title
+  ┌──────────────────────────────────────┐
+  │ Carry onto the list ✱          [ON]  │   ← the carry card (cardSurface)
+  │ Uses 2 places · 3 left               │
+  │ ──────────────────────────────────── │
+  │ Pray with today's list to carry      │   ← status line (rules below)
+  │ Dad onto List 53                     │
+  └──────────────────────────────────────┘
+
+  Intentions                          ＋    ← sans section title; ＋ adds
    Healing after his surgery          ✿ •   ← same intention row as Home
    Rest for his heart
-   ＋ Add intention for Dad
 
   History
-  This week                         ✎ 2
-  ●─●─●─●─●          ← the only strand: ~12–14 pt wax beads
-  You prayed 6 times · On 5 lists · current
-  Last week                         ✎ 1
-  You prayed 4 times · On 5 lists
-  October
-  You prayed 11 times · On 9 lists
+  November                            ✎ 2
+   S   M   T   W   T   F   S
+                           ·   ✿
+   ·  (✿) (✿)  ✿   ·  (·)  ✿
+   ✿  (✿)
+  You prayed 6 times · On 9 lists
+  October                             ✎ 1
+   … (grid)
+  You prayed 16 times · On 21 lists
+  September
+  You prayed 4 times · On 16 lists
   Begun · Sep 12
 
                                ( 🙏 Pray for Dad )   ← blue capsule, pray-button slot
 ```
-- **Order:** top section (avatar + name + status) → counts → Intentions → History.
+```
+- **Order:** top section (avatar + name) → counts → carry card → Intentions → History.
 - **Avatar ~96 pt** (2026-11-07), the same size as the add sheet's Name tab,
   so adding someone and landing on their page shows one continuous person.
 - **Name under the alias** (2026-11-07): when the person has an alias, the
@@ -55,15 +66,25 @@ the detail page, this file wins.
   flush with the section title (dot, then text).
   Same order as Home (Answered stay in place under the name; Released aren't
   shown). Tapping an intention pushes its own detail page.
-- **Add link:** "＋ Add intention for {alias}"; on the self page just
-  "＋ Add intention". **No intentions yet** (2026-11-07): the section shows
-  a prominent **"＋ Add a first intention for {alias}"** (blue
-  tinted-glass button; on the self page "＋ Add your first intention")
-  instead of the link. (No possessive built from the alias: "James's",
-  "Mom & Dad's" and other languages break.) Both open the add-intention form for this person (screens.md).
+- **Adding (2026-11-08):** a plain action-blue **＋** (SF Symbol `plus`, no
+  glass: it lives in the content) on the trailing edge of the Intentions
+  section title, 44 pt hit target, label "Add intention for {alias}" (self:
+  "Add intention"). Replaces the "＋ Add intention for {alias}" link under
+  the rows. **No intentions yet** (2026-11-07): no header ＋; the section
+  shows a prominent **"＋ Add a first intention for {alias}"** (blue
+  tinted-glass button; on the self page "＋ Add your first intention"), so
+  there's never two add buttons. (No possessive built from the alias:
+  "James's", "Mom & Dad's" and other languages break.) Both open the
+  add-intention form for this person (screens.md).
 - **Carry row (2026-11-07)** — names and intentions, not the self page
   (self is always carried): under the counts, a native **Toggle "Carry
-  onto the list ✱"** on the page background (not a card). Subtitle =
+  onto the list ✱"** inside the **carry card** (2026-11-08): a flat
+  `cardSurface` container with the in-content radius (design-direction §4
+  "Glass vs. surface"), the only box on the page. Toggle row on top, a
+  hairline, then the **status line** as the card's footer (rules below),
+  because the status only means something next to carrying. The self page's
+  card holds the status line only (self is always carried, no toggle). An
+  Answered intention has no carry card (it's never printed). Subtitle =
   **what this costs + what's free overall**:
   - Carried: "Uses 2 places · 3 left" (the person plus their carried
     intentions; "Uses 1 place · 3 left" with none). "3 left" matches Home
@@ -96,87 +117,92 @@ the detail page, this file wins.
 
 ### Intention page
 - **No avatar.** Above the title: the parent name in small `inkMuted` text,
-  tappable → pushes the parent's page. Title = intention text in Roca
-  (~22–24, wraps). A **gold dot (~6 pt)** before the title when held today
+  tappable → pushes the parent's page. Title = intention text in the
+  **system sans, Title 2 semibold** (wraps; not Roca, 2026-11-08: Roca is
+  for proper names). A **gold dot (~6 pt)** before the title when held today
   (same mark as Home's intention end-dot).
 - No Intentions section. Answered/Release live in ⋯.
 
-### Status line (under the title)
-- **Name:** covered → "{alias} will be on List 53"; prayed but next list not
-  covered yet → "Your next prayer carries {alias} onto List 54"; not prayed →
-  "Pray to carry {alias} onto List 53".
-- **Self ("Me"):** "You'll be on List 53" / "Your next prayer puts you on
-  List 54" / "Pray to be on List 53".
-- **Intention (carried):** "It'll be on List 53" / "Your next prayer carries it
-  onto List 54" / "Pray to carry it onto List 53".
+### Status line (in the carry card, 2026-11-08)
+Moved from under the title into the carry card's footer, and reworded: what
+carries someone is **praying with the list** (the invitation at Amen), not
+praying for them, and the old "Pray to carry Dad onto List 53" sat right
+above "Pray for Dad".
+- **Name:** covered → "{alias} will be on List 53"; prayed with the list but
+  the next list isn't covered yet → "Your next prayer with the list carries
+  {alias} onto List 54"; not prayed → "Pray with today's list to carry
+  {alias} onto List 53".
+- **Self ("Me"):** "You'll be on List 53" / "Your next prayer with the list
+  puts you on List 54" / "Pray with today's list to be on List 53".
+- **Intention (carried):** "It'll be on List 53" / "Your next prayer with the
+  list carries it onto List 54" / "Pray with today's list to carry it onto
+  List 53".
 - **Not carried** (private, or an intention whose name isn't carried, which
-  makes it not carried): status line **"Not on the list"** (`inkMuted`).
+  makes it not carried): footer **"Not on the list"** (`inkMuted`).
   Allowed here as the subject's own management page (design-direction §5
   exception, 2026-11-07); Home rows still never mark absence.
-- **Answered intention:** gold "Answered · {date}" in place of the status.
-- An **uncarried** name always shows "Not on the list"; the closing notice
-  applies only while carried.
-- **Closing notice replaces the status line** under the card's rule (only if
-  you haven't prayed with the list today): "List 52 closes in 5 min · pray to
-  carry {alias}" / "· pray to be on List 53" (self) / "· pray to carry it".
-- Weight follows state, as on the card: not covered → `ink`; covered →
-  `inkMuted`.
+- **Answered intention:** gold "Answered · {date}" under the title, no carry
+  card.
+- **Closing notice replaces the footer** (only while carried and if you
+  haven't prayed with the list today): "List 52 closes in 5 min · pray with
+  the list to carry {alias}" / "· pray with the list to be on List 53"
+  (self) / "· pray with the list to carry this".
+- Weight follows state, as on the community card: not covered → `ink`;
+  covered → `inkMuted`.
 
 ### Pray button label
 - Name: "Pray for {alias}". **Self page and intention pages: "Pray".**
 
-### History (simplified 2026-11-03)
-**One bead strand, for this week only. Every older period is text.** (An
-earlier version drew a strand on every row; in the render it read as confetti,
-repeated the counts, and its labeled gaps marked absence.)
-- **Row layout:** period label (✎ count and "Answered" hints right-aligned on
-  that line) → [this week only: bead strand] → text line in `inkMuted`.
-  **No ♡ glyph.**
-- **This week's strand:** one bead per list this week, colored by that
-  list's `sealVariant`, **~13 pt on a ~22 pt pitch** (tune by eye) so each
-  reads as an object, with the
-  `WaxSeal` dark-theme lift (rim only from ~24 pt). Beads read **oldest →
-  newest, left to right**, on a thin neutral thread, left-aligned, fixed
-  pitch. A full week is the whole set of weekday waxes. The current list's
-  bead **while unsealed ("being filmed")** is a **hollow ring** (~1.5 pt
-  stroke in `inkMuted`, no fill) in both themes, and fills with its wax once
-  sealed. (A filled gray bead out-shone five of the seven waxes on dark.)
-- **Wax contrast:** the waxes keep their real colors; several sit below 3:1 on
-  dark (Mon/Wed ~1.6:1). That's accepted: the beads are decorative and the
-  counts line beside them carries the meaning. Don't brighten waxes for the
-  strand.
-- **Sunday's gold** bead (amber, darker) reads distinct enough from the held
-  gold ring. No change.
-- **The current list always counts in This week**, even when its date falls
-  in the next local week after a flip (a rare eighth bead is fine). Stamp detail isn't drawn, so
-  **D2 doesn't block this screen.**
-- **Missed lists this week:** a quiet break in the thread, **no label**,
-  always **one spacing step of bare thread** however many lists were missed
-  (the break doesn't measure absence). No break before the first bead or
-  after the last.
-- **No gaps anywhere else.** Older rows state counts only; "Off the list · N
-  days" is retired.
-- **No strand this week** (not on any list this week): the row shows text
-  only, like an older row.
-- **Periods:** rows newest first. Week start follows the device locale. "This
-  week", "Last week", then "Earlier in {current month}" (only days of the
-  current month not already shown; skip the row if none), then one row per
-  earlier month of the current year, then one row per earlier year. Last row
-  "Begun · {date}" = the date the subject was created.
+### History (calendar, 2026-11-08)
+**Month calendars for the current and previous month; every older period is
+text.** Replaces the wax bead strand (2026-11-03): the wax colors read as
+decoration with no meaning, and the text rows didn't say anything at a
+glance. The grid reuses Home's vocabulary, so it needs no legend:
+**gold ring = you held them, bloom = on the printed list.**
+- **Layout:** month label (sans, Headline; ✎ count and the "Answered" hint
+  right-aligned on that line) → weekday initials (caption, `inkMuted`; week
+  start follows the device locale) → the grid → "You prayed N times · On N
+  lists" in `inkMuted`. Seven columns across the content width, ~32 pt
+  rows, each glyph centered in its cell.
+- **Day cells:**
+  - nothing that day → a **~4 pt dot in `thread`**: the calendar's shape,
+    not a mark of absence (it sits at the thread's level and recedes);
+  - on a printed list → the **bloom** (the carried-mark glyph, ~14 pt) in
+    `inkMuted` (stronger than the row mark's `carriedMark`: here it's the
+    content); ink, not wax, as each name is printed in ink on the paper;
+  - you held them (prayed, crediting this item) → a **gold ring** (~24 pt,
+    1.5 pt, the held-ring token for that size) around the cell;
+  - both → the bloom inside the gold ring.
+  - Future days and days before "Begun" are **blank** (that alone shows
+    where today is; no today marker).
+- **Which day:** list blooms go on the **list's date**; held rings on the
+  **local date you prayed**. They can sit a day apart around the flip;
+  that's fine. A covered upcoming list shows its bloom on its date as soon
+  as its entry exists. No hollow "being filmed" state.
+- **Months shown as grids:** the current month and the previous one, only
+  from "Begun" on (begun this month → one grid).
+- **Older periods are text rows**, newest first: each earlier month of the
+  current year, then each earlier year; last row "Begun · {date}".
+  Period label (✎ / "Answered" hints right-aligned) → "You prayed N times ·
+  On N lists". "This week", "Last week", "Earlier in {month}" and "· current"
+  are retired.
 - **Empty halves are left out:** a period with lists but no prayers shows only
-  "On N lists"; prayers but no lists shows only "You prayed N times"; a period
-  with neither is left out.
-- **"Answered" hint** on the period where it was answered is in v1 (not
-  tappable), **on the intention's own page only** (the name page's
-  Intentions section already shows "Answered · {date}"). A period that has
-  only the Answered moment stays, showing just the hint.
+  "On N lists"; prayers but no lists shows only "You prayed N times"; an
+  older period with neither is left out (the two grid months always show).
+- **"Answered" hint** on the period where it was answered, **on the
+  intention's own page only** (the name page's Intentions section already
+  shows "Answered · {date}"). Not tappable.
 - **Wording:** "You prayed once", then "You prayed N times" (2+).
   "Begun · Sep 12" in the current year; "Begun · Sep 12, 2025" in earlier
   years.
 - **✎ counts** reflect synced notes; a note added offline appears once it
   syncs.
-- **Section titles** ("Intentions", "History"): Roca, same size and weight as
-  names on Home.
+- **Accessibility:** each grid is one element whose label is the month and
+  its summary ("November. On 9 lists. You prayed 6 times."); days aren't
+  focusable one by one in v1.
+- **Tapping a day or period** to see its prayers is v2.
+- **Section titles** ("Intentions", "History"): **system sans, Title 3
+  semibold** (2026-11-08; were Roca).
 
 ### Praying on the page (in place)
 Praying from a detail page **stays on the page**. It does not go to Home.
@@ -192,7 +218,7 @@ Praying from a detail page **stays on the page**. It does not go to Home.
 ```
 - **Strip the page down; don't disable it.** On start, everything that isn't
   the subject fades out together (~250 ms; plain fades under Reduce Motion):
-  status line, counts, History, "＋ Add intention", ⋯ and ‹.
+  counts, the carry card, History, the Intentions ＋, ⋯ and ‹.
 - **Controls match Home's prayer mode:** "Cancel" text button top-left
   (replaces ‹; same "Discard this prayer?" confirm after ~30 s). The blue
   capsule morphs into the round pray button (countdown → Amen) and the pill fades
