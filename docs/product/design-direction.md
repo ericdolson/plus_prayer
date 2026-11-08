@@ -190,6 +190,10 @@ gold.
   sizes; sans reads as a badge, keeps the serif special for names, and suits
   the bright palette. Medium/semibold weight, ~40% of the avatar diameter,
   slight letter-spacing on two letters, optically centered.
+- **Sans page roles** (tokens, 2026-11-08): `type.sectionTitle` (Title 3
+  semibold: "Intentions", "History"), `type.intentionTitle` (Title 2
+  semibold: an intention page's title), `type.periodLabel` (Headline: a
+  History period's label).
 - Respect Dynamic Type / font scaling; layouts must not clip at large sizes.
 
 ---
@@ -211,6 +215,8 @@ gold.
   still reaches 40 pt); ~24 pt between the community
   card and the list. Each person reads as one unit.
 - **Bottom padding** so the last row scrolls fully clear of the floating bar.
+- **Bare glyph buttons in the content** (the ＋ on a page's Intentions title)
+  get a 44 pt tap target: `size.hitTarget`.
 - **No chevrons anywhere on Home.** The whole row is tappable. The trailing
   slot stays empty in nav mode; the checkbox fades in there in prayer mode.
 
@@ -409,8 +415,12 @@ gold.
     avatars. **Scales in steps, not proportionally** (2026-11-08; a
     proportional ring at 96 pt is ~4.5 pt and heavy): up to ~32 pt →
     1.5 / 1.5; 40–44 pt → 2 / 2; ~96 pt (detail page, add sheet) → 3 / 3
-    (ring / gap). One token per step; the History calendar's ~24 pt day
-    ring uses the smallest. **Crisp ring only, both themes — no static glow** (2026-10-27:
+    (ring / gap). One token per step (`size.held.ringSmall` /
+    `ringGapSmall`, `ring` / `ringGap`, `ringLarge` / `ringGapLarge`); the
+    History calendar's ~24 pt day ring uses the smallest.
+  - **History calendar** (detail-page.md): `size.history.row` 32 (a week
+    row), `.dayDot` 4 (`thread`), `.bloom` 14 (`inkMuted`), `.ring` 24 (the
+    day ring's outer size). **Crisp ring only, both themes — no static glow** (2026-10-27:
     with the bright avatar palette, the glow muddied the edges and cheapened
     the look).
   - **Always solid** (2026-10-24): holding a name is whole, however you prayed
