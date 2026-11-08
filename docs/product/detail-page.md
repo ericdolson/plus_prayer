@@ -1,6 +1,6 @@
 # Detail Page — names and intentions
 
-_Last updated: 2026-11-08 (History calendar; status moves into the carry card; sans titles; ＋ on Intentions)_
+_Last updated: 2026-11-08 (a dashboard: carry card, Intentions, a history preview row and tiles; full history moves to history.md)_
 
 One shared layout for a name (soul) and an intention. Builds on
 `stats-history.md` (history data and counts), `screens.md` (screen map),
@@ -17,9 +17,6 @@ the detail page, this file wins.
              Dad         ← Roca ~28 (the alias, else the name)
          Gary Olson      ← the name, smaller inkMuted, only if there's an alias
 
-  Held by you · 47 prayers
-  Carried by the world · 61,204 prayers · 19 lists
-
   ┌──────────────────────────────────────┐
   │ Carry onto the list ✱          [ON]  │   ← the carry card (cardSurface)
   │ 3 places left                        │
@@ -33,32 +30,32 @@ the detail page, this file wins.
    Healing after his surgery          ✿ •   ← same intention row as Home
    Rest for his heart
 
-  History
-  November                            ✎ 2
-   S   M   T   W   T   F   S
-                           ·   ✿
-   ·  (✿) (✿)  ✿   ·  (·)  ✿
-   ✿  (✿)
-  You prayed 6 times · On 9 lists
-  October                             ✎ 1
-   … (grid)
-  You prayed 16 times · On 21 lists
-  September
-  You prayed 4 times · On 16 lists
-  Begun · Sep 12
+  History                        See all ›
+  Today
+   ▾
+  (◉)  ◉   ●   ◉   ··  ◉   ●             ← one row, the most recent days
+  ┌───────────┐ ┌────────────────┐ ┌────────────┐
+  │    14     │ │       40       │ │     3      │
+  │your prayers│ │     lists      │ │  in your   │
+  │           │ │ 138,994 prayers │ │  journal   │
+  └───────────┘ └────────────────┘ └────────────┘
 
                                ( 🙏 Pray for Dad )   ← blue capsule, pray-button slot
 ```
 ```
-- **Order:** top section (avatar + name) → counts → carry card → Intentions → History.
+- **A dashboard for managing this person** (2026-11-08): whether they're
+  carried, their intentions, praying for them. History gets a preview and
+  doors; the full history is the History screen filtered to them
+  (history.md).
+- **Order:** top section (avatar + name) → carry card → Intentions →
+  History preview (row + tiles).
 - **Avatar ~96 pt** (2026-11-07), the same size as the add sheet's Name tab,
   so adding someone and landing on their page shows one continuous person.
 - **Name under the alias** (2026-11-07): when the person has an alias, the
   title is the alias and the **name** (what's printed) sits under it in
   smaller `inkMuted` text (body), for reference. No alias → the name is the
   title and nothing repeats. Self page: title "Me", your name under it.
-- **Counts:** "Held by you · N prayers" always; "Carried by the world · N
-  prayers · N lists" only once ever carried (never "0 lists").
+- **Counts live in the tiles** (2026-11-08; were two lines under the name).
 - **Intentions section** reuses Home's intention row: gold "held today"
   dot, trailing carried mark (§5), gold "Answered · {date}", **but no
   thread** (2026-11-07): on Home the thread ties intentions to the name row
@@ -159,54 +156,22 @@ above "Pray for Dad".
 ### Pray button label
 - Name: "Pray for {alias}". **Self page and intention pages: "Pray".**
 
-### History (calendar, 2026-11-08)
-**Month calendars for the current and previous month; every older period is
-text.** Replaces the wax bead strand (2026-11-03): the wax colors read as
-decoration with no meaning, and the text rows didn't say anything at a
-glance. The grid reuses Home's vocabulary, so it needs no legend:
-**gold ring = you held them, bloom = on the printed list.**
-- **Layout:** month label (sans, Headline; ✎ count and the "Answered" hint
-  right-aligned on that line) → weekday initials (caption, `inkMuted`; week
-  start follows the device locale) → the grid → "You prayed N times · On N
-  lists" in `inkMuted`. Seven columns across the content width, ~32 pt
-  rows, each glyph centered in its cell.
-- **Day cells:**
-  - nothing that day → a **~4 pt dot in `thread`**: the calendar's shape,
-    not a mark of absence (it sits at the thread's level and recedes);
-  - on a printed list → the **bloom** (the carried-mark glyph, ~14 pt) in
-    `inkMuted` (stronger than the row mark's `carriedMark`: here it's the
-    content); ink, not wax, as each name is printed in ink on the paper;
-  - you held them (prayed, crediting this item) → a **gold ring** (~24 pt,
-    1.5 pt, the held-ring token for that size) around the cell;
-  - both → the bloom inside the gold ring.
-  - Future days and days before "Begun" are **blank** (that alone shows
-    where today is; no today marker).
-- **Which day:** list blooms go on the **list's date**; held rings on the
-  **local date you prayed**. They can sit a day apart around the flip;
-  that's fine. A covered upcoming list shows its bloom on its date as soon
-  as its entry exists. No hollow "being filmed" state.
-- **Months shown as grids:** the current month and the previous one, only
-  from "Begun" on (begun this month → one grid).
-- **Older periods are text rows**, newest first: each earlier month of the
-  current year, then each earlier year; last row "Begun · {date}".
-  Period label (✎ / "Answered" hints right-aligned) → "You prayed N times ·
-  On N lists". "This week", "Last week", "Earlier in {month}" and "· current"
-  are retired.
-- **Empty halves are left out:** a period with lists but no prayers shows only
-  "On N lists"; prayers but no lists shows only "You prayed N times"; an
-  older period with neither is left out (the two grid months always show).
-- **"Answered" hint** on the period where it was answered, **on the
-  intention's own page only** (the name page's Intentions section already
-  shows "Answered · {date}"). Not tappable.
-- **Wording:** "You prayed once", then "You prayed N times" (2+).
-  "Begun · Sep 12" in the current year; "Begun · Sep 12, 2025" in earlier
-  years.
-- **✎ counts** reflect synced notes; a note added offline appears once it
-  syncs.
-- **Accessibility:** each grid is one element whose label is the month and
-  its summary ("November. On 9 lists. You prayed 6 times."); days aren't
-  focusable one by one in v1.
-- **Tapping a day or period** to see its prayers is v2.
+### History preview (2026-11-08)
+Replaces the page's History calendar; the full history is `history.md`.
+- **Title "History"** with a trailing **"See all ›"** (opens History
+  filtered to this person, Days tab).
+- **One row of recent days**, never wrapping: the strand's nodes (history.md
+  "Days"), newest first, with **"Today ▾"** above the first node, as many
+  as fit the width. Tapping a node opens History filtered to this person on
+  that day's sheet.
+- **Tiles** (flat `cardSurface`, in-content radius, equal width), each
+  opening History filtered to this person on the matching tab:
+  - **"14 · your prayers"** → Days;
+  - **"40 · lists"** with a second line **"138,994 prayers"** (the world
+    prayed those lists) → Lists;
+  - **"3 · in your journal"** → Journal.
+  A tile at zero is hidden (marking presence; a new person shows none). An
+  intention's page has the same preview, filtered to the intention.
 - **Section titles** ("Intentions", "History"): **system sans, Title 3
   semibold** (2026-11-08; were Roca).
 
@@ -224,7 +189,7 @@ Praying from a detail page **stays on the page**. It does not go to Home.
 ```
 - **Strip the page down; don't disable it.** On start, everything that isn't
   the subject fades out together (~250 ms; plain fades under Reduce Motion):
-  counts, the carry card, History, the Intentions ＋, ⋯ and ‹.
+  the carry card, the History preview, the Intentions ＋, ⋯ and ‹.
 - **Controls match Home's prayer mode:** "Cancel" text button top-left
   (replaces ‹; same "Discard this prayer?" confirm after ~30 s). The blue
   capsule morphs into the round pray button (countdown → Amen) and the pill fades
@@ -265,9 +230,8 @@ Praying from a detail page **stays on the page**. It does not go to Home.
 
 ### v1 scope
 - **In:** everything above.
-- **v2:** tapping a period to expand it into individual prayers (time, notes,
-  list numbers, the Answered moment); a thanks note on Answered; editing note
-  and avatar tone.
+- **v2:** a thanks journal entry on Answered; editing avatar tone. (Day
+  detail moved into History's day sheet, 2026-11-08.)
 
 ## OPEN
 - Whether the subject should be lockable as checked on its own page.

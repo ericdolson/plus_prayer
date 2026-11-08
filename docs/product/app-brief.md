@@ -112,7 +112,7 @@ and the 2026-10 Flutter build) is **reference only**, not a pattern to follow.
   invitation — "Hold the 4,345 on List 52 in your prayer" + who'll be carried
   ("You, Daniel + 4 others will be on List 53"). **Tap** → the same 5s countdown
   (the pie inside the button) → Amen appears; may stay longer. Extends the same prayer.
-- After the final Amen: optional "Add a note" (private), then the closing line.
+- After the final Amen: optional "Add to journal" (private), then the closing line.
 - Starting from a detail page returns to Home in prayer with that item checked.
 - Backgrounding: back within ~30 min → resume quietly; later → "Welcome back.
   Finish your prayer from 7:42?" [Amen] [Discard]. Drafts are per device; no
@@ -141,8 +141,8 @@ person's own page may say "Not on the list".
 One page; intentions hide what doesn't apply and add parent name + resolve.
 - Header cards: "Held by you · N prayers" (always); "Carried by the world · N
   prayers · N lists" (only if ever carried; live-stitched for the current list).
-- **History**: month calendars + older text rows. Current rules: detail-page.md
-  (which wins).
+- **History**: a preview row + tiles; the full history is the History screen
+  (history.md, which wins).
 - Actions: Pray (with focus), Add intention (names), Edit (name 40 / alias /
   note / avatar tone), Archive; intentions: **Resolve** → Answered (optional
   thanks note; leaves the list; stays on Home as "Answered · praying in
@@ -168,8 +168,9 @@ include it next time." (shown only after assembly), "Waiting for your choice"
 (entitlement ended). **Never show "in review" / pending.**
 
 ### History (stats-history.md)
-Prayers grouped by day: time · duration ("7:42 am · 12 min"; auto-saved "~38
-min"), what it held, note indicator. Header: "Time in prayer · 2h 14m this week
+Superseded by history.md (2026-11-08): one screen, filterable, Days ·
+Journal · Lists. Kept from here: prayer time · duration ("7:42 am · 12 min";
+auto-saved "~38 min") in the day sheet, and the header line below. Header: "Time in prayer · 2h 14m this week
 · 61h all time". Link to the streak sheet. Never ranked or celebrated.
 
 ### Prayer detail
@@ -241,7 +242,7 @@ to free → second invite if still over. Same flow when a subscription lapses
 2. Home + in-prayer mode + invitation + add sheet (mock).
 3. Onboarding + auth + `setSelfName`.
 4. Wire generated SDK + RTDB (once the backend session ships operations).
-5. Detail page (History calendar), Today's list, History, streak sheet.
+5. Detail page (history preview), Today's list, History, streak sheet.
 6. Your portion, settings, archive, deletion, local notifications, analytics.
 7. Membership/trial flows (Stage 2 billing; beta uses a grant).
 

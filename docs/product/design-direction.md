@@ -28,7 +28,7 @@ both apps target them. Tune by eye on both, then update the spec so they stay
 in step:
 avatars and the held ring · threads and the gold dot · Home row layout and
 spacing · the community card (including the avatar cluster) · the streak seal ·
-wax seals · the History calendar · prayer mode (halo, checks, check bloom) · the pray
+wax seals · the History strand · prayer mode (halo, checks, check bloom) · the pray
 button and its countdown · Amen → seal · color roles and tokens · type roles
 (Roca for proper names and the list's name, system sans for everything else).
 
@@ -417,10 +417,10 @@ gold.
     1.5 / 1.5; 40–44 pt → 2 / 2; ~96 pt (detail page, add sheet) → 3 / 3
     (ring / gap). One token per step (`size.held.ringSmall` /
     `ringGapSmall`, `ring` / `ringGap`, `ringLarge` / `ringGapLarge`); the
-    History calendar's ~24 pt day ring uses the smallest.
-  - **History calendar** (detail-page.md): `size.history.row` 32 (a week
-    row), `.dayDot` 4 (`thread`), `.bloom` 14 (`inkMuted`), `.ring` 24 (the
-    day ring's outer size). **Crisp ring only, both themes — no static glow** (2026-10-27:
+    History strand's node ring follows its own size (history.md).
+  - **History strand** (history.md, 2026-11-08; replaces the calendar
+    tokens): node disc ~30 in a 44 tap area, bloom ~19 at ~55% opacity,
+    note dot on the corner; exact tokens set at build. **Crisp ring only, both themes — no static glow** (2026-10-27:
     with the bright avatar palette, the glow muddied the edges and cheapened
     the look).
   - **Always solid** (2026-10-24): holding a name is whole, however you prayed
@@ -431,7 +431,7 @@ gold.
   `heldGoldText`), "Not printed on List 53 · {category}. Edit to include it next
   time." Otherwise, no second line.
 - The **"Still to hold" filter** still exists; it just isn't painted on rows.
-- History and "last prayed" live on the detail page (History calendar).
+- History lives on the History screen (history.md); the detail page has a preview.
 
 ### Carried mark (2026-11-01)
 A tiny neutral glyph **after** every carried name and intention, so a long
@@ -442,7 +442,7 @@ list shows at a glance what goes on the printed list.
   **not time-indexed**: no "on List 52" vs "staged for List 53" per row. The
   gate is per user, so the community card owns timing ("Pray to carry them
   onto List 53" / "They'll be on List 53", "Mom joins you on List 53"); the
-  detail page's History calendar owns history. The mark does not change when the
+  History screen owns history. The mark does not change when the
   user prays or lapses.
 - **Name carried, intention not:** the name has the mark, the intention
   doesn't. An intention can't be carried without its name, so the mark never
@@ -481,8 +481,8 @@ list shows at a glance what goes on the printed list.
   **Wax** (the bloom pressed into the day's wax) = sealed, an event — the
   community card's seal (and Today's list). The streak badge is the same
   seal **unwaxed, in pewter** (§4). The record of an item having
-  been on lists is the detail page's History calendar, in ink blooms (no
-  wax since 2026-11-08). Rows
+  been on lists is History's Days strand, in ink blooms; its Lists tab
+  shows each list with its wax (history.md). Rows
   never wear wax: on paper each name is printed in ink and the whole sheet
   gets one seal, and the carried mark is a standing promise, not a dated
   record.

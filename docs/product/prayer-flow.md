@@ -28,8 +28,9 @@ _Last updated: 2026-10-17_
 - **Location: DEFERRED past MVP** (2026-10-18; supersedes "capture from day
   one"). Accepted that early prayers won't have it. Schema fields can stay
   nullable/unused.
-- **Prayer notes at MVP** (2026-10-18): optional "Add a note" after Amen;
-  private, editable later (note-only edits).
+- **Prayer notes at MVP** (2026-10-18): optional **"Add to journal"** after
+  Amen (wording 2026-11-08, history.md); private, editable later (note-only
+  edits). Schema field stays `note`.
 - **Live "in prayer" state is RTDB presence, not a Prayer row.**
 
 

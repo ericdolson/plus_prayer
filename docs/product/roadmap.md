@@ -84,6 +84,9 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
       first-intention button + carry row; adding a name lands here
       (detail-page.md). Then the rest of prayer mode (invitation, closing
       sheet), then search.
+- [ ] [app] **History screen** (history.md, 2026-11-08): one screen, filter
+      chip, Days (strand + day sheet) · Journal · Lists; the person page's
+      preview row and tiles open it. Replaces the page's History calendar.
 - [ ] [app] In-prayer mode: halo, nav removed, footer prayer bar (timer, "with N
       others", ✕), check = holding with ember + haptic, selection rules,
       FAB ring → Amen at 5s

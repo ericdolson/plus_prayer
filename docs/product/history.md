@@ -1,0 +1,101 @@
+# History — one screen, any scope
+
+_Last updated: 2026-11-08 (new: replaces the detail page's History calendar)_
+
+One History screen for the whole app. Opened from Home's footer it shows
+**everyone combined**; a filter narrows it to one person (or, from an
+intention's page, one intention). A person's history is this screen
+filtered, never a second design. Data and counts: `stats-history.md`. Where
+an older file describes per-page history or the account-wide History
+differently, this file wins.
+
+## DECIDED (2026-11-08)
+
+### Scope and filter
+- **From the footer:** everyone combined.
+- **Filter:** a toolbar button, the same control as Home's filter, opens a
+  **searchable list of people** (the add sheet's "Who is this for?" pattern;
+  the list can be long). Choosing someone turns the control into a **chip
+  "{alias} ×"**, as on Home. People only; a person's scope includes their
+  intentions.
+- **From a person's page** (tiles, the preview row, "See all"): opens with
+  the chip already set. × widens to everyone without leaving the screen.
+- **From an intention's page:** the chip shows the intention's text
+  (truncated); scope = that intention.
+- **Self ("Me")** is filterable like anyone.
+
+### Tabs
+A native segmented control: **Days · Journal · Lists**. Days is the
+default. (A fourth, **Places**, a map of where you prayed, can come later
+with consent-gated location; not now.)
+
+### Days — the strand
+**Newest first.** One strand that wraps like a sentence: it starts at today,
+top left, and reads left to right, then down, back in time.
+```
+ Today
+  ▾
+ (◉)  ◉   ●   ◉   ··  ◉  [Nov]  ◉   ●   ◉   ●
+  ◉   ◉   ●   ◉   ●   ●   ◉  [Oct]  ··  ◉   ●
+
+ September              2 prayers · 6 lists
+ Begun · Sep 24
+```
+- **Node = a full neutral disc** (~30 pt, inside a 44 pt tap area made with
+  the spacing). Neutral, not the avatar's color: photo avatars would leave a
+  colored disc meaning nothing. The meaning comes from Home's two marks:
+  - **bloom pressed into the disc** (the carried-mark glyph, ~19 pt at
+    ~55% opacity, like initials on an avatar) = **on that day's printed
+    list**;
+  - **gold ring** (the held ring) = **you prayed for them** that day;
+  - both, or either. No hollow states.
+  - **A small neutral dot on the corner** = a journal entry that day.
+- **Only days where something happened get a node.** A run of empty days
+  collapses to one small **`··`**, the same whatever its length: it shows
+  that time passed without counting it (no "N days" — that's a ledger of
+  absence, retired 2026-11-03).
+- **Month tab:** a tiny calendar-page shape with the short month ("Nov")
+  inline where the month turns, like a chat date separator. No dates on
+  nodes.
+- **Today is marked:** a small **"Today ▾"** caption above the first node,
+  always. Today's node exists even before anything happened (a plain disc;
+  it gains the bloom when covered and the ring when you pray, so Amen
+  visibly fills it).
+- **How far back:** the strand covers this month and last. Older months are
+  **two-column rows** (month left; "N prayers · N lists · ✎ N" right in
+  `inkMuted`, tabular figures), then older years, then **"Begun · {date}"**
+  (scoped: the subject's creation; everyone: your first prayer).
+- **Everyone scope:** a node is *your* day: bloom = you were on that list,
+  gold = you prayed. The streak line and "Time in prayer" sit above the
+  strand (about you; hidden when filtered).
+- **Tapping a node** opens a native **half-height sheet** for that day: the
+  date, "On List 46 · 3,475 prayers" (if on a list), then each prayer you
+  prayed that day (time · length, who it held when unfiltered, its journal
+  entry in full). A prayer row opens Prayer detail. A sheet can't sit below
+  the fold, unlike an inline panel.
+- **Accessibility:** each node is a button labeled with its day and what
+  happened ("Thursday, November 5. On List 49. You prayed. Journal
+  entry."); `··` reads "No activity"; the month tab is a heading.
+
+### Journal
+- Your journal entries, **newest first, in full**, set for reading, with day
+  headings ("Today", "Yesterday", "Thursday, Nov 5"). Filtered to a person:
+  every entry from a prayer that held them. Everyone: each entry shows a
+  small avatar cluster of who that prayer held.
+- Tapping an entry opens Prayer detail (where it can be edited).
+
+### Lists
+- One row per list: wax seal (small) · "List 52" (Roca) · "Sat, Nov 7" ·
+  "3,475 prayers". Filtered: the lists that person was on. Everyone: the
+  lists you were on. A row opens that past list's page. Wax belongs to a
+  list, so this is where history wears wax.
+
+## Words: "journal" (2026-11-08)
+- The collection is the **Journal** (tab; tile "3 in your journal").
+- After Amen the action is **"Add to journal"**; on an existing one,
+  **Edit**.
+- "Entry" only where a noun is unavoidable (VoiceOver "3 journal entries").
+- The ✎ mark stays an icon. Schema keeps `note`; this is user-facing only.
+
+## OPEN
+- **Standalone journal entries** (IDEA, post-MVP): open-questions Q33.

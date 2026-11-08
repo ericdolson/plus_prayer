@@ -2110,3 +2110,31 @@ self page shows your name under "Me").
   default); only an explicit `carry: true` swaps at the cap; old over-cap
   data is trimmed by the migration and by assembly, not by unrelated saves.
 
+### Decision: One History screen; the person page becomes a dashboard; "journal"
+**Timestamp:** 2026-11-08
+- **History is one screen** (history.md), everyone by default, with a filter
+  (Home's filter control → searchable people list → "{alias} ×" chip). A
+  person's or intention's history is that screen filtered, never a second
+  design. Tabs: **Days · Journal · Lists** (Places/map maybe later with
+  location).
+- **Days = a newest-first strand**: wraps like a sentence from today back;
+  neutral discs; bloom pressed in at ~55% = on that list; gold ring = you
+  prayed; corner dot = journal entry; empty runs fold to one unlabeled
+  `··`; month tabs inline; "Today ▾" above the first node. Tapping a node
+  opens a half-height day sheet (an inline panel could sit below the fold).
+  This month and last as strand; older months as two-column rows; Begun.
+- **Person page = a dashboard**: carry card, Intentions, then a History
+  preview: one row of recent nodes with "Today ▾", and tiles (your prayers →
+  Days; lists + world prayers → Lists; in your journal → Journal), hidden at
+  zero. The counts lines under the name are gone.
+- **"Journal"**: tab "Journal", action "Add to journal", Edit; "entry" only
+  when unavoidable. Schema keeps `note`.
+- **Why:** the month calendar read backwards and stopped short; Eric wanted
+  newest-first like the old This week / Last week rows, and worried the page
+  was carrying too much. Supersedes the 2026-11-08 History calendar (built
+  in 78c6ad4, to be replaced) and the detail page's in-page history.
+- **Rejected:** month calendars (dead space, upward order); avatar-color
+  nodes (meaningless with photo avatars); hollow node states (read as noise);
+  gap labels like "3 days" (a ledger of absence); a fourth tab now.
+- Idea logged, not decided: standalone journal entries (Q33, post-MVP).
+

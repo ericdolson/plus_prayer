@@ -154,7 +154,8 @@ _Last updated: 2026-10-18_
     (fallback 10).
 - **Screens:** Home · Today's list (seal, video, counts, who's carried →
   portion) · Past lists · Name/Intention detail · Your portion · History
-  (account-wide, grouped by day, streak/grace marks) · Prayer detail (note) ·
+  (one screen: everyone or filtered to a person; Days · Journal · Lists;
+  history.md) · Prayer detail (journal entry) ·
   You (settings) · Archived · Membership/paywall · Onboarding.
 - **You (settings) contents:** name (edit limit), sign-in/link, membership
   (trial, upgrade, restore), reminders, notifications (incl. "Show names in

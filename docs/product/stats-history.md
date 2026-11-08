@@ -27,6 +27,10 @@ _Last updated: 2026-10-17_
   getSubjectPrayerHistory, getMyPrayerHistory, getMyArchivedSubjects.
 
 ## Detail-page history (2026-10-18)
+**Superseded again 2026-11-08 (later):** history is now one History screen
+with a filter and Days · Journal · Lists tabs (`history.md`, which wins);
+the person page keeps only a preview row and tiles. The text below is the
+older record.
 **Revised 2026-11-08:** the bead strand is replaced by **month calendars**
 (current and previous month: gold ring = held, ink bloom = on the list);
 older periods are text rows. Your prayers **are** now drawn as days, as gold
