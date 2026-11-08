@@ -137,10 +137,12 @@ above "Pray for Dad".
 - **Intention (carried):** "It'll be on List 53" / "Your next prayer with the
   list carries it onto List 54" / "Pray with today's list to carry it onto
   List 53".
-- **Not carried** (private, or an intention whose name isn't carried, which
-  makes it not carried): footer **"Not on the list"** (`inkMuted`).
-  Allowed here as the subject's own management page (design-direction §5
-  exception, 2026-11-07); Home rows still never mark absence.
+- **Not carried** (2026-11-08): footer **"Private · in your prayers only"**
+  (`inkMuted`): it states what is, not what's missing, and teaches the list
+  by contrast with the carried line. An intention switched on whose name
+  isn't carried: **"Private while {alias} isn't carried"** (teaches that an
+  intention prints only with its name). Replaces "Not on the list"; Home
+  rows still never mark absence.
 - **Answered intention:** gold "Answered · {date}" under the title, no carry
   card.
 - **Closing notice replaces the footer** (only while carried and if you

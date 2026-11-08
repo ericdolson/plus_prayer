@@ -2065,4 +2065,9 @@ self page shows your name under "Me").
 - Orchestrator calls (overrule freely): self page's card holds only the
   status; Answered intentions have no carry card; a covered upcoming list
   shows its bloom on its date; grids are one accessibility element each.
+- **Carry-off footer** (same day): "Private · in your prayers only"; an
+  intention on under an uncarried name: "Private while {alias} isn't
+  carried". Rejected: "Not on the list for community prayers" ("community"
+  reads as performed, and "the list" only means the printed list); "Not on
+  the list" (marks absence; uncarried is the private default, not a lack).
 
