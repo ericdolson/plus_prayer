@@ -80,9 +80,9 @@ _Last updated: 2026-10-18_
       the sheet and opens the person's page** (detail-page.md), as Contacts
       and Calendar open what you just created. There, the person can be
       prayed for at once, "＋ Add a first intention for {alias}" invites the
-      next step, and the carry row ("Not on the list · Make room for
-      {alias}" when full) is the upsell, every visit rather than only at
-      add time; the page's "Not on the list" status is how an uncarried name
+      next step, and the carry card ("Private · in your prayers only",
+      "Make room for {alias}" when full) is the upsell, every visit rather
+      than only at add time; that private footer is how an uncarried name
       is never saved silently. **Interim, until the page exists in the
       app:** Add saves and closes back to Home, **except** when the name
       ends up not carried (no room, or the server disagrees): then the sheet
