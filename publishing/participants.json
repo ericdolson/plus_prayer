@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-11-07T21:28:12Z",
+  "last_aggregated_at": "2026-11-08T19:50:36Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -237,7 +237,10 @@
     "youtube:rR9Y2q8SEwk": 2,
     "facebook:1033072079891934_122142096086983291": 2,
     "instagram:18183666091429833": 2,
-    "youtube:UngvksY9pvI": 2
+    "youtube:UngvksY9pvI": 2,
+    "facebook:1033072079891934_122142253448983291": 2,
+    "instagram:18160777444511323": 2,
+    "youtube:9b8hHHLS7Bo": 2
   },
   "pending": {
     "7": [],
@@ -916,6 +919,7 @@
         "comment_url": null,
         "note": "Added directly by Eric 2026-11-07 — manual addition, not sourced from a social 🙏 comment."
       }
-    ]
+    ],
+    "71": []
   }
 }
