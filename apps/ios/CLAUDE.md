@@ -19,12 +19,15 @@ and signature components, Home's rows, shell, community card and prayer mode,
 and the domain models + mock data source: Home runs on `HomeModel` over the
 mock repositories, the filter works (counts, context rows, linger then fold,
 empty states); Amen ends in the list invitation and the closing sheet with
-the note; the add sheet (footer ＋) adds names and intentions; search docks
-above the keyboard; a name's page (the person, counts, the carry card with
-"Prints with", intentions with the ＋, History calendar), where adding a
-name lands, and a minimal intention page; the pool counts people (Q32).
-Next: the rest of the pages (⋯, the pray button and praying in place,
-tapping a day), then build order step 3 (onboarding, auth, setSelfName).
+the journal entry; the add sheet (footer ＋) adds names and intentions; search docks
+above the keyboard; a name's page as a dashboard (the person, the carry
+card with "Prints with", intentions with the ＋, the History preview), where
+adding a name lands, and a minimal intention page; the pool counts people
+(Q32); the History screen (filter, All · Held · Lists · Journal · Answered,
+the strand, the day sheet). Next: the rest of the pages (⋯, the pray button
+and praying in place), Prayer detail and past lists' pages (their History
+rows are inert until then), then build order step 3 (onboarding, auth,
+setSelfName).
 Still open in prayer mode: backgrounding and the welcome-back question, the
 presence draft, the first Amen's onboarding steps. Also pending: the offline
 queue (Data/Queue, replacing the mock's in-memory hold), a debug menu for the
@@ -168,9 +171,10 @@ Theme/        tokens + semantic access; no logic
   enum; no boolean soup.
 
 ## Navigation
-- One `NavigationStack` with a typed path (`enum Route: Hashable`). Home is
-  the root and the only screen with the floating bar; everything else pushes
-  (`.subject(id)`, `.history`, `.todaysList`, …).
+- One `NavigationStack` with a typed path (`enum Route: Hashable`,
+  `App/Route.swift`; `.routes()` maps it). Home is the root and the only
+  screen with the floating bar; everything else pushes (`.subject(id)`,
+  `.history(HistoryRequest)`; later `.todaysList`, …).
 - **You** (settings) is a native sheet over Home, opened from the header
   avatar. The add sheet, the Amen invitation, the closing sheet and the note
   are native sheets with detents; Tier A components (ring button, cluster,
@@ -186,10 +190,11 @@ Screens never touch the SDK or RTDB. Same surfaces as the Flutter build:
   updateSubject / setCarriedItems / restoreSubject (callables; restore is
   pool- and cap-aware, no connector mutation: a name over the pool or an
   intention to a person at the cap comes back off, `restoredCarryFlag` in
-  PlusPrayerDomain, the mock mirrors it); `detail(id)` (GetSubjectDetail:
-  the lists it printed on and the prayers that held it, mapped to
-  `SubjectDetail`; History and the counts); reorder / resolve / archive /
-  purge.
+  PlusPrayerDomain, the mock mirrors it); `history()` (a `HistoryLog`:
+  getMyPrayerHistory's prayers with what each held, and every list entry of
+  your subjects, the entries getSubjectDetail returns per subject; an
+  account-wide entries read is a backend ask before the real repository);
+  reorder / resolve / archive / purge.
 - `ListRepository`: getCurrentListMeta / getMyListStatus (SQL Connect)
   merged with RTDB `/lists/current` (live count, `closesAt`).
 - `UserRepository`: getMyHeader, reminders, updateMySettings. Settings writes
@@ -399,7 +404,7 @@ compose queries; if an operation is missing, ask for a backend change.
 ## Data and state so far (build step 2)
 - PlusPrayerDomain: models (`Subject`, `CurrentList`, `MyListStatus`,
   `UserHeader`, `LiveStats`, `AppConfig`, `NewPrayer`, `LocalDate`,
-  `SubjectDetail`) and rules: `SubjectTree`, carry (`Carry.swift`, Q32
+  `HistoryLog`) and rules: `SubjectTree`, carry (`Carry.swift`, Q32
   2026-11-08: the pool counts people, `carriedPeople`, `checkPool`; an
   intention's `isCarried` = chosen to print with its person, at most
   `AppConfig.intentionsPerPerson` (/config, default 1) per person;
@@ -407,8 +412,13 @@ compose queries; if an operation is missing, ask for a backend change.
   `nameCarryOffer` / `nameCarryMeter` for a person's toggle,
   `intentionCarryOffer` for "Print with {alias}", `choosing` /
   `printsWith` build setCarriedItems' set, `restoredCarryFlag`), the
-  carry card's footer (`carryStatus`), History (`history`: grids, older
-  rows, Begun; `detailCounts`),
+  carry card's footer (`carryStatus`), History (`History.swift`:
+  `scopedHistory` for everyone / a person with their intentions / an
+  intention, `historyDays`, `strand` (today first, empty runs folded to one
+  gap per month, month tabs, this month and last; older months and years as
+  rows; Begun), `recentStrand` (the preview row), `historyTotals` (the
+  tiles), `heldByDay` / `journalByDay` / `answeredSummaries` /
+  `peopleHeld`, `prayerTime`, the local-prayer fold),
   Home's filter (`visibleGroups`, `filterCount`, `communityCardShown`),
   streak (`effectiveStreak`, `afterListPrayer`, `streakBadgeState`), the
   local-prayer fold, the gate (`tomorrowStatus(list:…)`), row status,
@@ -419,7 +429,12 @@ compose queries; if an operation is missing, ask for a backend change.
 - `Data/Mock`: `MockBackend` (main-actor, in-memory, applies the server's
   rules; `online`, `advanceClock`, `flipList`, `setSealed`, `setClosesAt`,
   `setStats`, live drift), `MockSeed.standard` (Flutter's seed: the
-  reference screenshots), repositories over it. `MockPrayerRepository`
+  reference screenshots, plus Lena Park added today), repositories over it.
+  `MockHistory.seeded`: ~50 days of lists (you and what you carried, a few
+  missed) and prayers that each hold several people (some days two, one
+  auto-saved, some journal entries); nobody held after their `lastPrayed`,
+  so Home's gold matches. Dad near-daily; Aunt Bea private with gaps; Mom's
+  answered intention (its day has an entry); Lena only today. `MockPrayerRepository`
   holds prayers in memory until the backend takes them; the real queue
   replaces it.
 - `App/AppEnvironment`: `-PPEnvironment mock|emulator|firebase`; only mock
@@ -427,7 +442,10 @@ compose queries; if an operation is missing, ask for a backend change.
 - `State/HomeModel`: watches the repositories in `run()` (the view's
   `.task`), derives rows, counts, header and card through the domain;
   `log(_:)` sends Amen's prayer and starts the linger under Still to hold;
-  `saveNote` queues the note after it.
+  `saveNote` queues the journal entry after it. `HomeModel+History`: the
+  log (watched in `run()`, unsent prayers folded in) shaped into
+  `historyPreview(_:)`, `historyScreen(_:)`, `historyDaySheet(_:scope:)`,
+  `historyChip(_:)`.
 - `PrayerSession`: phases idle → praying → (invitation) → closing → idle.
   The committing Amen (`amen(prayedWithListToday:)` or
   `amenFromInvitation()`) returns the `NewPrayer` for Home to log; the
@@ -493,10 +511,8 @@ compose queries; if an operation is missing, ask for a backend change.
   `SubjectPage`, which shows a person's or an intention's page).
   `HomeModel.page(_:)` gives the values: the 96 pt avatar (held ring, large
   step), the alias in Roca `displayTitle` with the printed name under it and
-  nothing else (the status moved into the card); the counts ("Held by you
-  · N prayers", "Carried by the world · N prayers · N lists" once ever
-  carried; `detailCounts`, the live count stitched for the current list);
-  the **carry card** (`CarryCard`): the native Toggle "Carry onto the list
+  nothing else (the status moved into the card; the counts moved into the
+  tiles); the **carry card** (`CarryCard`): the native Toggle "Carry onto the list
   ✱" with `nameCarryMeter` as subtitle ("3 places left", "This uses your
   last place", "All 10 places in use" never negative, free "Free carries
   you and your intention"; off and full: disabled + "Make room for {alias}",
@@ -513,18 +529,38 @@ compose queries; if an operation is missing, ask for a backend change.
   semibold); a plain blue ＋ (`size.hitTarget`, label "Add intention for
   {alias}") on the Intentions title; none yet: only the prominent "＋ Add a
   first intention for {alias}". Intention rows (Home's, no thread) push the
-  intention's page. **History** (`HistorySection`): `HomeModel.history(_:)`
-  over `watchDetail` (the page's `.task`; unsent prayers folded in): grids
-  for the current and previous month (week start from the locale; thread
-  dot, ink bloom, gold ring `size.history.*`; one accessibility element
-  each), older rows, "Begun · {date}", ✎ counts.
+  intention's page. **History preview** (`HistoryPreviewSection`, from
+  `historyPreview`): "History" with "See all ›", one non-wrapping row of the
+  most recent strand items (as many as fit; no month tabs; never ending on
+  a fold) under "Today ▾", then the tiles (flat `cardSurface`, hidden at
+  zero; ≤3 in a row, 4 as 2×2): "N · your prayers" → Held, "N · lists" +
+  "N prayers" (the world, live-stitched) → Lists, "N · in your journal" →
+  Journal, "N · answered" (gold number) → Answered. "See all" → All; a node
+  → All with that day's sheet. All push `Route.history`.
+- **History** (`Features/History`, history.md): `HistoryScreen` (pushed as
+  `Route.history(HistoryRequest)`: scope, tab, day; Home's footer opens it
+  unfiltered). The filter sits in the toolbar: the glyph opens
+  `HistoryPeopleList` (searchable, Home order, Me first, the current one
+  checked); then a chip "{alias} ×" (an intention's text, truncated at
+  `size.history.chipMaxWidth`), × widens to everyone. Tabs: a native
+  segmented `Picker` in a `safeAreaBar` (a `.menu` picker at accessibility
+  sizes). All: the streak line and "Time in prayer" (unfiltered), "Today ▾",
+  the strand in `StrandFlow` (Components/HistoryStrand: `StrandNodeMark`,
+  `StrandGapMark`, `StrandMonthTab`), older rows, Begun; a node (a button
+  labelled with its day and what happened) opens `HistoryDaySheet` (medium
+  / large detents). Held and Journal: day headings, time · length, the
+  cluster unfiltered (`AvatarCluster` with `trailing: nil`), ✎. Lists:
+  `WaxSeal` at `size.history.listSeal` · "List 52" · date · prayers.
+  Answered: rows push the intention's page. Held, Journal, the day sheet's
+  prayers and Lists rows are inert (Prayer detail and past lists' pages
+  don't exist yet).
 - `Features/Detail/IntentionPage` (minimal): the person's name above
   (pushes their page), the title in `type.intentionTitle` (Title 2 semibold)
   with the gold dot when held, the counts, the carry card ("Print with
   {alias} ✱", "Instead of …", "Also carries …", footer incl. "Private while
   {alias} isn't carried"; none when Answered: gold "Answered · {date}"),
-  History with the Answered hint. Not yet: ⋯, the pray button, praying in
-  place, tapping a day. Home's intention rows push it in browse mode (in
+  the History preview filtered to it (no Answered tile). Not yet: ⋯, the
+  pray button, praying in place. Home's intention rows push it in browse mode (in
   prayer a tap checks the row).
 - Search (`Features/Home/HomeSearch.swift`): 🔎 turns the pill into the
   search field (see Theming above); with text it stays a field until ×,
@@ -534,7 +570,9 @@ compose queries; if an operation is missing, ask for a backend change.
   prefilled (hidden in prayer), the match hint when a filter hides matches.
   "In your archive" waits for the archive.
 - UI smoke tests (`PlusPrayerUITests`, its own scheme): pray → Amen →
-  invitation → hold → Amen → closing → note → the card's status; ＋ → name
+  invitation → hold → Amen → closing → "Add to journal" → the card's status;
+  Dad's "your prayers" tile → History (chip "Dad", Held) → × → back → a
+  preview node → its day sheet; ＋ → name
   (no carry row; tabs keep the keyboard; the For push drops it, a pick or
   back refocuses) → alias → Add → on Home;
   long-press Dad → Add intention ("Print with Dad") → on Home; Aunt Bea's

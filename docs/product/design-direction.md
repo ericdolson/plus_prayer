@@ -419,8 +419,17 @@ gold.
     `ringGapSmall`, `ring` / `ringGap`, `ringLarge` / `ringGapLarge`); the
     History strand's node ring follows its own size (history.md).
   - **History strand** (history.md, 2026-11-08; replaces the calendar
-    tokens): node disc ~30 in a 44 tap area, bloom ~19 at ~55% opacity,
-    note dot on the corner; exact tokens set at build. **Crisp ring only, both themes — no static glow** (2026-10-27:
+    tokens; set at build): the node disc `size.history.node` 30 in
+    `color.historyNode` (raisedHigh dark / hairline light) inside its
+    `size.history.nodePitch` 44 slot (the tap area); the bloom
+    `size.history.bloom` 19 in ink at `number.historyBloom` 0.55; the held
+    ring at the small step (`held.ringSmall` / `ringGapSmall`); the journal
+    dot `size.history.journalDot` 6 (inkMuted, upper trailing corner); the
+    answered ✦ `size.history.answeredMark` 10 (heldGold, lower leading
+    corner); the `··` slot `size.history.gap` 28; the month tab
+    (`size.history.monthTab` 30 min width, `monthTabBand` 3, `monthTabRadius`
+    4); the Lists tab's seal `size.history.listSeal` 28; the filter chip's
+    `size.history.chipMaxWidth` 200. **Crisp ring only, both themes — no static glow** (2026-10-27:
     with the bright avatar palette, the glow muddied the edges and cheapened
     the look).
   - **Always solid** (2026-10-24): holding a name is whole, however you prayed
