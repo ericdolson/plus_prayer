@@ -2162,4 +2162,11 @@ self page shows your name under "Me").
 - Five is the segmented-control cap: no sixth tab (Places would be a
   toolbar button). At large accessibility text the control becomes a menu
   button ("All ⌄").
+- **Build calls (349abcc, orchestrator, overrule freely):** month tabs sit
+  before the older month's nodes like chat separators (the current month
+  has none; "Today ▾" anchors it); the preview row has no month tabs; the
+  journal dot is top-trailing and ✦ bottom-leading; the people list has no
+  "Everyone" row (× widens); the Journal tab omits prayer times. Open:
+  empty-tab copy (tabs show nothing today); tile words use one/other keys,
+  which won't localize well (revisit with localization).
 
