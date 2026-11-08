@@ -427,7 +427,8 @@ gold.
 A tiny neutral glyph **after** every carried name and intention, so a long
 list shows at a glance what goes on the printed list.
 - **Meaning = carried**, the same set the Carried filter shows: the owner chose
-  it for the list (intention effectively carried = intention ∧ its name). It is
+  it for the list (an intention's mark = chosen to print ∧ its person
+  carried; Q32). It is
   **not time-indexed**: no "on List 52" vs "staged for List 53" per row. The
   gate is per user, so the community card owns timing ("Pray to carry them
   onto List 53" / "They'll be on List 53", "Mom joins you on List 53"); the

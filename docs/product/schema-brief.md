@@ -21,7 +21,7 @@ per-operation `@auth`; names are never public.
 | `displayName` | keep, **nullable** until `setSelfName`; then mirrors the self-subject's `publicName` | auth-onboarding |
 | `locale: String` | ADD — effective UI language (device or override) | screens (Language) |
 | `timezone: String` | ADD — IANA, updated from device | streaks-reminders |
-| `includeLimit: Int` | REDEFINE — size of the carried pool **beyond the self name**. Free = 1, restricted to intentions under the self name ("Me"). Premium = N names/intentions | monetization |
+| `includeLimit: Int` | REDEFINE — size of the carried pool **beyond the self name**, in **people** (Q32, 2026-11-08). Free = 0 (you, with your intention). Premium = N people | monetization |
 | `trialStartedAt`, `entitlementExpiresAt: Timestamp` | ADD — 14-day no-card reverse trial, starts at first prayer | monetization |
 | `currentStreak`, `bestStreak` | keep — streak = **local days prayed WITH THE LIST** | streaks-reminders |
 | `lastPrayedListNumber` | REMOVE → `lastListLocalDate: Date` (stored; app shows an *effective* streak from stored fields + today) | streaks-reminders |
@@ -42,7 +42,7 @@ reminders (cap 5–7) are later but the table supports them. — notifications
 | `parent: PrayerSubject` | ADD — **required for INTENTION, null for SOUL**; parent must be a SOUL with the same owner; one level only | subjects |
 | `publicName` | keep — printed text. Cap 40 (name) / 80 (intention), counted in **grapheme clusters**; any script | subjects, screens |
 | `personalLabel` | keep — surfaced as "alias", owner-only. Self alias = "Me" | subjects |
-| `isCarried: Boolean` | ADD — user's choice to print; auto-set true on create while the pool has room | monetization |
+| `isCarried: Boolean` | ADD — user's choice to print. On a name: carried (counts a place; auto-set on create while the pool has room). On an intention: **chosen to print with its person** (≤ `intentionsPerPerson` per person, server-enforced; auto-set when under the cap) | monetization |
 | `sortOrder` | keep — manual order only (names; intentions within a name); new items at bottom | subjects |
 | `avatarTone: Int` | ADD — palette index; default from hash of id | prayer-flow |
 | `avatarPath: String` | ADD (nullable seam for photos, private Storage) | prayer-flow |
@@ -50,8 +50,8 @@ reminders (cap 5–7) are later but the table supports them. — notifications
 | `status` | keep ACTIVE \| ARCHIVED \| PURGED. RELEASE also sets ARCHIVED | subjects |
 | `groupId` / `visibility` | **DO NOT ADD** — groups will use a Share table (§4) | roadmap |
 
-Effective carry: an intention is carried only if `isCarried && parent.isCarried`;
-the pool counts effective items. Archive/purge cascade from a name to its
+Effective carry: an intention prints only if `isCarried && parent.isCarried`;
+the pool counts carried **names** beyond the self name (Q32, 2026-11-08). Archive/purge cascade from a name to its
 intentions; ADD `archivedByCascade: Boolean` on intentions. **Restore** brings
 back only intentions with `archivedByCascade = true` — never Released ones or
 ones the user archived on their own.
@@ -314,8 +314,8 @@ setCarriedItems (two calls can race with another device).
 - `carryParent` where it has no effect (with `carry: false`, on a name, under
   Me, under a carried name) is ignored, not rejected. Free tier: carryParent
   can't succeed; the item saves uncarried.
-- The cost of re-carrying a name includes its intentions still flagged; the
-  app's "uses N" line must count the same way.
+- Re-carrying a name costs one place (Q32, 2026-11-08); its chosen
+  intention comes back with it at no cost.
 - **Known gap (accepted 2026-11-06):** read-then-write, so two devices adding
   at the same instant can both pass and exceed the pool by a little (same as
   setCarriedItems). No User version counter for now; the existing over-limit
@@ -327,3 +327,21 @@ only removes carrying (uncarry a name or intention) even while the user is
 over their pool (e.g. a lapsed trial). Only changes that add carrying are
 pool-checked. Today the backend blocks every carry change while over the
 pool, so a lapsed-trial user can't trim from a person's page.
+
+## Pool counts people (Q32, 2026-11-08)
+- **Pool usage = carried names beyond the self name.** Intentions never count.
+- **Per-person cap:** RTDB `/config` `intentionsPerPerson` (default 1). The
+  server rejects a save that leaves a person (Me included) with more chosen
+  intentions than the cap. Choosing a different intention is a swap (one off,
+  one on in the same save) and is never pool-checked, only cap-checked.
+- **Pool check** applies only to names going from off to on (the
+  2026-11-07 "reductions always allowed" rule still holds).
+- **addSubject:** a new intention is chosen when its person is under the cap;
+  `carry: true` on an intention whose person is at the cap swaps it in
+  (unchooses the other). `carryParent` carries the name (pool-checked).
+- **Assembly** prints each carried person with their chosen intention(s); no
+  "and N more".
+- **Migration (beta data):** any person with more chosen intentions than the
+  cap keeps the first by `sortOrder`; `includeLimit` free = 0. Production step
+  for Eric when deployed.
+

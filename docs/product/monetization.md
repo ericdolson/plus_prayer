@@ -11,9 +11,9 @@ _Last updated: 2026-10-17_
 - **Engagement gate applies to all tiers.** Paid users must pray the list like
   everyone else; no convenience bypass.
 - **`includeLimit`** stored as a concrete number on User (supports one-off
-  grants), server-written only on billing events. **Free = 1** (an intention
-  under "Me"). The **pool** = everything carried beyond the user's own name; each
-  extra name and each intention counts as one.
+  grants), server-written only on billing events. The **pool** = carried
+  **people** beyond the user's own name (Q32, 2026-11-08); intentions never
+  cost a place. **Free = 0** (you, with your intention).
 - **`basePremiumPool = 10`** (2026-10-18, server config): the reverse trial grants
   exactly the base subscription's pool, so subscribing changes nothing. One
   value drives both; tune before launch. **One source:** RTDB `/config`
@@ -49,20 +49,22 @@ _Last updated: 2026-10-17_
   copy: "Archive some to add more."); a quiet ~5,000 total-row hard cap
   backs it (2026-11-06). Power users like pastors are the future group/organization customer.
 
-- **PROPOSED (2026-11-06, open-questions Q32) — people as the unit:** the pool
-  counts carried **people** (names; Me is free and always carried), not
-  names + intentions. Each carried person prints with up to **1** chosen
-  intention (`/config` cap; raise later if needed, never lower), and the rest
-  print as "and N more". Private intentions stay unlimited. Free tier would
-  read "you, with your intention"; carrying others is membership. More
-  intentions per person, if ever wanted, would be a tier property (a higher
-  per-person cap), never an à la carte add-on (Q32). Until decided, the rule
-  below stands.
-- **Paid unit = a pool of carried names and intentions** (2026-10-17). Each
-  name or intention counts as one; not called "lines" (printing word-wraps).
-  Managed on the **"your portion"** screen, which shows an illustrative preview
-  of how it reads on the list (not an exact print layout). An intention can only
-  be carried if its name is.
+- **Paid unit = carried people** (Q32, decided 2026-11-08; supersedes
+  "names and intentions", 2026-10-17). One carried person = one **place**
+  (the word the app uses; upsell copy may say "Carry 10 people"). Me is
+  free and always carried. Each carried person, Me included, prints with
+  **up to 1 chosen intention** (`/config` `intentionsPerPerson`, start at
+  1; raising is the generous direction, never lower it). Intentions cost
+  nothing; choosing which one prints is the choice. Private intentions stay
+  unlimited. No "and N more" on the paper: with a chosen intention there's
+  nothing left over to count, and printing how many private intentions
+  someone has would leak what they didn't choose to print. **Free tier:**
+  you, with your intention; carrying others is membership. More intentions
+  per person, if ever wanted, is a **tier property** (a higher per-person
+  cap, e.g. Plus: up to 3 each), never an à la carte add-on. Tiers and
+  prices stay open. Managed on the person's page and the **"your portion"**
+  screen (illustrative preview: each person with their chosen intention).
+  Not called "lines" (printing word-wraps).
 - **Over-limit paywall** (2026-10-17): users may select beyond their limit; the
   meter shows e.g. "17 / 15" with an upgrade mark, and saving invites the
   upgrade.
@@ -75,8 +77,10 @@ _Last updated: 2026-10-17_
 - **Declining at an over-limit save blocks the save** (2026-10-17): the user
   returns to the portion screen to trim, extras highlighted. We never make silent
   choices about who is carried.
-- **Auto-carry** (2026-10-17): new names/intentions are carried automatically
-  while the pool has room. When the pool is full, a new item is saved for
+- **Auto-carry** (2026-10-17; Q32 2026-11-08): new names are carried
+  automatically while the pool has room; a new intention is auto-chosen to
+  print when its person has fewer than the cap chosen (else it's saved
+  unchosen, and the add sheet offers to print it instead). When the pool is full, a new item is saved for
   private prayer and the add sheet says so (never silently); on Home it simply
   has no carried mark (design-direction §5 — absence is never marked).
 - **Add-sheet upsell cadence — PROPOSED, not decided** (2026-11-06; build as a

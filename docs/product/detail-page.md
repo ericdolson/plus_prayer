@@ -22,7 +22,8 @@ the detail page, this file wins.
 
   ┌──────────────────────────────────────┐
   │ Carry onto the list ✱          [ON]  │   ← the carry card (cardSurface)
-  │ Uses 2 places · 3 left               │
+  │ 3 places left                        │
+  │ Prints with  Healing after his su… › │   ← person's chosen intention (Q32)
   │ ──────────────────────────────────── │
   │ Pray with today's list to carry      │   ← status line (rules below)
   │ Dad onto List 53                     │
@@ -76,34 +77,29 @@ the detail page, this file wins.
   there's never two add buttons. (No possessive built from the alias:
   "James's", "Mom & Dad's" and other languages break.) Both open the
   add-intention form for this person (screens.md).
-- **Carry row (2026-11-07)** — names and intentions, not the self page
-  (self is always carried): under the counts, a native **Toggle "Carry
-  onto the list ✱"** inside the **carry card** (2026-11-08): a flat
-  `cardSurface` container with the in-content radius (design-direction §4
-  "Glass vs. surface"), the only box on the page. Toggle row on top, a
-  hairline, then the **status line** as the card's footer (rules below),
-  because the status only means something next to carrying. The self page's
-  card holds the status line only (self is always carried, no toggle). An
-  Answered intention has no carry card (it's never printed). Subtitle =
-  **what this costs + what's free overall**:
-  - Carried: "Uses 2 places · 3 left" (the person plus their carried
-    intentions; "Uses 1 place · 3 left" with none). "3 left" matches Home
-    and Your portion.
-  - Not carried: "Would use 2 places · 3 left" when turning it on brings
-    back intentions still marked carried (re-carrying restores them), else
-    "3 places left". If it would take all that's left: "This uses your last
-    {N} places". Some room but not enough: "Would use 2 places · 1 left",
-    disabled + "Make room". Carried with none free (or over the pool):
-    "Uses 2 places · none left" (never a negative). Full: "All 10 places
-    in use", toggle disabled, **"Make room
-    for {alias}"** under it (inert until Membership / Your portion exist;
-    no typing pause, the name is known). Free pool: "Free carries you and
-    one intention of your own", but only while within the free pool; over
-    any pool (e.g. a lapsed trial still carrying names) the carried case
-    wins: "Uses 2 places · none left".
-  - An intention page: "Also carries {alias} · uses N places" when its name
-    isn't carried.
-  - "Uses" never counts Answered intentions (they don't go on the list).
+- **Carry card (2026-11-07; Q32 2026-11-08)** — names and intentions; the
+  self page's card holds only the status (Me is always carried; Me's
+  chosen intention is set from its own page). A flat `cardSurface`
+  container with the in-content radius (design-direction §4 "Glass vs.
+  surface"), the only box on the page:
+  1. Native **Toggle "Carry onto the list ✱"**. Subtitle = the meter (one
+     place = one person; intentions cost nothing):
+     - Carried: "3 places left"; with none free or over the pool: "All 10
+       places in use" (never negative).
+     - Not carried: "3 places left"; "This uses your last place"; full:
+       "All 10 places in use", toggle disabled, **"Make room for {alias}"**
+       under it (inert until Membership / Your portion exist).
+     - Free tier: "Free carries you and your intention", disabled, "Make
+       room for {alias}".
+  2. **"Prints with  {chosen intention} ›"** (only while carried and the
+     person has open intentions; "Name only" when none is chosen). Pushes a
+     native list titled "Prints with": **Name only**, then the person's open
+     intentions (Answered/Released not listed), with a checkmark. At the
+     cap (1) tapping another moves the check; a higher tier cap later allows
+     that many checks, same screen. Turning the person off hides the row
+     and keeps the choice; turning them on prints them as they were.
+  3. Hairline, then the **status line** as the footer (rules below).
+  - **Turning off asks nothing** (nothing is lost; it's one tap back).
   - **Feedback, never silent:** the toggle flips at once and is disabled
     while saving; if saving fails it flips back with a footer line under
     the row: pool filled from another device → "All {pool} places filled
@@ -111,8 +107,7 @@ the detail page, this file wins.
     toggle is disabled with "Needs a connection." under it. The failure
     line stays until the next tap or leaving the page (ink, like other
     errors). **Turning carrying off always succeeds when online**, even
-    over the pool (it frees places; it's how a lapsed trial trims), so the
-    backend must never block a change that only reduces carrying.
+    over the pool (it frees a place; it's how a lapsed trial trims).
   This page and Your portion are the places a person's carrying is managed.
 
 ### Intention page
@@ -122,6 +117,12 @@ the detail page, this file wins.
   for proper names). A **gold dot (~6 pt)** before the title when held today
   (same mark as Home's intention end-dot).
 - No Intentions section. Answered/Release live in ⋯.
+- **Carry card** (Q32): native **Toggle "Print with {alias} ✱"** (on Me's
+  intentions: "Print with your name ✱"). Subtitle when another intention is
+  chosen: "Instead of “{chosen}”" (on = swap). Person not carried: on also
+  carries them, subtitle "Also carries {alias} · 3 places left"; disabled
+  with "Make room for {alias}" when full. Footer = the status line; on with
+  the person off: "Private while {alias} isn't carried".
 
 ### Status line (in the carry card, 2026-11-08)
 Moved from under the title into the carry card's footer, and reworded: what

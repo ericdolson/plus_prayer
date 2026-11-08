@@ -2071,3 +2071,35 @@ self page shows your name under "Me").
   reads as performed, and "the list" only means the printed list); "Not on
   the list" (marks absence; uncarried is the private default, not a lack).
 
+### Decision: Q32 — the pool counts people; each prints with one chosen intention
+**Timestamp:** 2026-11-08
+- A **place = one carried person** (Me free, always carried). Intentions
+  never cost a place. Each person, Me included, prints with **up to 1
+  chosen intention** (`/config` `intentionsPerPerson`); a higher cap can
+  become a tier property later. Free = you, with your intention
+  (`includeLimit` 0). Tiers and prices stay open.
+- **Why now:** the detail page's carry card was about to be built on the
+  item model ("Uses 2 places", per-intention switches). Eric found the flow
+  odd: intentions "on" while their person is off. With one remembered
+  choice per person the oddness goes away, and the unit is hard to change
+  after people pay for it.
+- **Flow:** person page carry card = toggle + "Prints with {intention} ›"
+  (native checkmark list: Name only + open intentions). Turning a person off
+  asks nothing and keeps the choice; turning them on prints them as they
+  were. An intention's page and the add sheet use "Print with {alias} ✱";
+  when another is chosen, "Instead of “…”" (on = swap).
+- **Rejected:** a confirm popup when turning a person off (nothing is lost;
+  iOS confirms only destructive actions); not restoring intentions when a
+  person is re-carried (people expect switching back on to restore);
+  Q32's "and N more" on the paper (nothing is left over with a chosen
+  intention, and it would print a count of private intentions);
+  "first intention rides free" (unpredictable swaps, in Q32); à la carte
+  extra intentions (two meters, sells "the why").
+- **Orchestrator calls:** "place" stays the app's word (upsell may say
+  "Carry 10 people"); a new intention is auto-chosen when its person is
+  under the cap; answering the chosen intention frees the choice, nothing
+  auto-picked; beta-data migration keeps the first chosen by sortOrder.
+- Supersedes: monetization "Paid unit = a pool of carried names and
+  intentions" (2026-10-17), R8's unit, and the item-count meter wording
+  from 2026-11-07 ("Uses 2 places", "Would use 2 places · 1 left").
+

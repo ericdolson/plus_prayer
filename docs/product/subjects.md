@@ -57,18 +57,24 @@ _Last updated: 2026-10-17_
   only when the number is meaningful (PROPOSED: a cumulative running total,
   e.g. "312 intentions answered", which only grows; per-list numbers only above
   a threshold). Mention in privacy terms.
-- **Name ↔ intention carrying** (2026-10-18): an intention is *effectively*
-  carried only when `intention.isCarried && parent.isCarried`. Uncarrying a name
-  leaves its intentions' own flags intact; re-carrying the name brings them back
-  (over-limit flow if needed). The pool counts only effectively carried items.
+- **Name ↔ intention carrying** (2026-10-18; Q32 2026-11-08): an intention's
+  `isCarried` now means **chosen to print with its person**; at most
+  `intentionsPerPerson` (1) chosen per person, Me included. It prints only
+  when `intention.isCarried && parent.isCarried`. Turning a person off keeps
+  their choice (no confirm: nothing is lost); turning them back on prints
+  them as they were. **The pool counts carried people only** (beyond Me);
+  choosing or swapping an intention never costs a place. Answered
+  intentions aren't eligible: answering the chosen one frees the choice
+  (nothing is auto-picked).
 - **Cascade:** archive / purge on a name applies to its intentions. Restore brings
   back only intentions archived *by that cascade* — never Released ones or ones
   the user archived themselves. Restoring an intention whose name is archived is
   blocked ("Restore its name first"). Restoring a Released intention clears its
   release (open and list-eligible again); Answered stays Answered.
-  **Restore never exceeds the pool** (2026-11-07): if bringing an item back
-  carried would go over the owner's pool, it comes back uncarried (a name's
-  own flag off, its intentions' flags kept; an intention's own flag off).
+  **Restore never exceeds the pool** (2026-11-07): if bringing a name back
+  carried would go over the owner's pool, it comes back uncarried (its
+  intentions' choices kept). An intention restored to a person who already
+  has the cap chosen comes back unchosen (Q32).
   The user turns it on from its page.
 - **Selection rules in prayer** (2026-10-17): checking an intention also holds
   its name (both linked → counts toward the name); checking a name does not
@@ -76,8 +82,9 @@ _Last updated: 2026-10-17_
   shows a partial state when only some intentions are held.
 
 ## RESOLVED (see monetization.md)
-- Paid capacity is a pool of carried names/intentions, chosen on the "your
-  portion" screen with auto-carry while room remains (replaces the fold).
+- Paid capacity is a pool of carried **people**, each printing with up to 1
+  chosen intention (Q32, 2026-11-08), managed on the person page and "your
+  portion" with auto-carry while room remains (replaces the fold).
 - Private names/intentions are unlimited and free.
 
 ## DEFERRED

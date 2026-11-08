@@ -111,24 +111,21 @@ _Last updated: 2026-10-18_
     2. Header **Intention** · the growing intention field (1 → 3 lines;
        Return = Add; no line breaks). Focused when
        the tab opens.
-    3. **Carry row:** one native **Toggle** titled **"Carry onto the list ✱"**
-       with the meter as its subtitle; footer "Make room for this intention"
-       when it doesn't fit. On by default while there's room. **Intention
-       under an uncarried name:** starts off, enabled while there's room;
-       when on, a second subtitle line "Also carries {alias} · uses N {unit}"
-       (N counts everything it carries, this item included: re-carrying the
-       name brings back its intentions still flagged).
+    3. **Carry row** (Q32, 2026-11-08): one native **Toggle "Print with
+       {alias} ✱"** (under Me: "Print with your name ✱"). On by default when
+       the person has no chosen intention; when one is already chosen it
+       starts off, with subtitle **"Instead of “{chosen intention}”"** (on =
+       swap). Intentions cost no place. **Person not carried:** on also
+       carries them: subtitle "Also carries {alias} · {left} places left";
+       disabled with "Make room for {alias}" when the pool is full.
     - Add saves and closes.
-  - **Meter** (every carry control; what's left, not including this item):
-    "{left} {unit} left"; when the selected choice takes all that's left:
-    "This uses your last place" / "…your last {N} places"; full or over:
-    "All {pool} {unit} in use" (pool of 1: "Your one place is in use").
-    Free pool, on a name's carry row (person page): "Free carries you and
-    one intention of your own" (pending Q32). `{unit}` from one formatter
-    ("places" today; "people" if Q32 is adopted). In the sheet, "Make room"
-    only appears on the Intention tab ("Make room for this intention"); the
-    person page shows "Make room for {alias}" (the name is known, so there's
-    no typing delay). Home never marks an uncarried item (design-direction
+  - **Meter** (carry controls on people; a place = one carried person, Q32
+    2026-11-08): "{left} places left"; when this person takes the last one:
+    "This uses your last place"; full or over: "All {pool} places in use"
+    (never negative). Free tier, on a person: "Free carries you and your
+    intention" with "Make room for {alias}". "Make room for {alias}" on the
+    person page and the sheet's Name tab when full (the name is known, so
+    there's no typing delay). Home never marks an uncarried item (design-direction
     §5).
   - **Accessibility:** only the visible tab's content is in the
     accessibility tree (the hidden tab's controls are removed or
