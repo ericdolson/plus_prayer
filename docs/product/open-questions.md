@@ -26,6 +26,7 @@ decisions.md. **MVP** = blocks MVP build._
 | D6 | **Discard confirmation in the add sheet (deferred 2026-11-06):** whether X / swipe-down with typed text should ask "Discard this name?" first. Not now: accidental X taps seem unlikely; revisit if testers lose text | app |
 | D6 | **DEFERRED (2026-11-06): prayer info while searching in prayer.** Searching mid-prayer turns the pill into the search field, so the timer and "with N" are hidden until ✕ (focus is elsewhere; the halo and Amen still show the prayer). Revisit only if people miss them, e.g. a quiet timer inside the field | app |
 | D7 | **Android launch screen.** Android 12+ (SplashScreen API) shows a centered icon on a color, not a full wordmark. Options: the mark alone on `ground`, or the icon then a brief wordmark. Flutter's generated res (`drawable*/splash.png`, `values-v31`) is the starting point. Decide when Android starts | design |
+| D8 | **Custom quill symbol `pp.quill` for the journal** (2026-11-08). SF Symbols has no feather, quill, fountain pen or nib (checked). Draw a quill as a custom symbol beside `pp.bloom` / `pp.pray` (antique over modern; a pencil reads as editing a document). Replaces the pencil (`PPIcon.journal`) wherever the journal shows: the ✎ mark on prayers and older-month rows, and possibly the "Add to journal" button. Keep the pencil until it exists (change the symbol once) | design |
 
 ## Resolved
 | # | Resolution | Date |
