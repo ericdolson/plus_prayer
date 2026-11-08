@@ -14,6 +14,7 @@ import { backfillLists, planBackfill } from "./backfill";
 import { CLIENT_CONFIG_DEFAULTS } from "./config";
 import { Deps } from "./deps";
 import * as lists from "./lists";
+import { migrateQ32 } from "./migrations";
 import { seedBlocklist } from "./moderation";
 
 export const USAGE = `Usage: npm run admin -- <command> [options]   (prints JSON)
@@ -36,6 +37,8 @@ Accounts and setup
   seed-config                              seed RTDB /config and /moderation/blocklist (missing keys only)
   backfill [--only N] [--dry-run] [--lists FILE] [--participants FILE]
                                            lists 1..N from publishing/*.json; lists already in the DB are skipped
+  migrate-q32 [--dry-run]                  Q32 beta data: each person keeps the first intentionsPerPerson
+                                           chosen (by sortOrder); never-entitled free users → includeLimit 0
 
 FILE is a JSON file, or - for stdin. --list defaults to the current list.`;
 
@@ -166,6 +169,9 @@ export async function runAdminCommand(deps: Deps, argv: string[], io: CliIO): Pr
       );
       return backfillLists(deps, plans, { only, dryRun: o["dry-run"] === true });
     }
+
+    case "migrate-q32":
+      return migrateQ32(deps, { dryRun: o["dry-run"] === true });
 
     case undefined:
     case "help":

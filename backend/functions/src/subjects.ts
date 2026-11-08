@@ -7,7 +7,8 @@ import { DAY_MS } from "./dates";
 import { hasCheck, mutate, query } from "./db";
 import { Deps } from "./deps";
 import { selfSubjectId } from "./ids";
-import { checkPool, effectiveCarried, Entitlement, PoolSubject } from "./pool";
+import { getClientConfig } from "./clientConfig";
+import { addsName, checkPool, chosenIntentions, Entitlement, overCap, PoolSubject } from "./pool";
 import { optionalText, requireName, requireNoContact } from "./text";
 
 const ALIAS_CAP = 40;
@@ -85,12 +86,19 @@ function optionalBool(value: unknown, fallback: boolean, field: string): boolean
 
 /**
  * "Add name" (40) or "Add intention" (80, under a name; default "Me").
- * Appended to the bottom of its level. `carry` (default true) asks for it to
- * be carried; false saves it for private prayer only. `carryParent` (an
- * intention under an uncarried name) carries the name too, which also brings
- * back its intentions still flagged. One pool check covers the whole result:
- * if it doesn't fit, nothing is carried — the item is saved for private
- * prayer and the name is left as it was.
+ * Appended to the bottom of its level. The pool counts people (Q32,
+ * 2026-11-08):
+ * - A name is carried while the pool has room (`carry`, default true; false
+ *   saves it for private prayer only).
+ * - An intention is chosen to print with its person when that person has
+ *   fewer than `intentionsPerPerson` chosen (/config). At the cap it's saved
+ *   unchosen — unless `carry: true` is passed explicitly, which swaps it in:
+ *   the person's last chosen intention(s) by sortOrder are unchosen in the
+ *   same write (`unchosenIds`). Choosing costs no place.
+ * - `carryParent` (an intention under an uncarried name) carries the name
+ *   too, pool-checked. All or nothing: if the name doesn't fit, neither the
+ *   name nor the intention changes (no swap), and the item is saved
+ *   unchosen for private prayer.
  *
  * Returns the stored flags — `isCarried` (the item's) and, for an intention,
  * `parentCarried` (its name is the self or carried) — and
@@ -116,6 +124,7 @@ export async function addSubject(
   const personalLabel = optionalText(input.personalLabel, ALIAS_CAP, "personalLabel") ?? null;
   const note = optionalText(input.note, NOTE_CAP, "note") ?? null;
   const carry = optionalBool(input.carry, true, "carry");
+  const carryAsked = input.carry === true; // explicit: swap in at the cap
   const carryParent = optionalBool(input.carryParent, false, "carryParent");
 
   const { user, subjects } = await poolState(deps, uid);
@@ -146,47 +155,64 @@ export async function addSubject(
   const level = subjects.filter((s) => !s.isSelf && (s.parent?.id ?? null) === parentId);
   const sortOrder = level.reduce((max, s) => Math.max(max, s.sortOrder), 0) + 1;
 
-  // carryParent only acts with carry, on a name that isn't already carried
-  // (the self is always carried); otherwise it's a no-op.
-  const liftParent = carry && carryParent && !!parent && !parent.isSelf && !parent.isCarried;
-  let isCarried = false;
-  if (carry) {
-    const draft: PoolSubject = {
-      id: "new",
-      kind,
-      isSelf: false,
-      isCarried: true,
-      status: "ACTIVE",
-      resolvedAt: null,
-      parent: parentId ? { id: parentId } : null,
-      sortOrder,
-    };
-    const proposed = liftParent ? subjects.map((s) => (s.id === parentId ? { ...s, isCarried: true } : s)) : subjects;
-    isCarried = checkPool([...proposed, draft], user, deps.now(), deps.cfg).ok;
-  }
-
   let id: string;
-  if (isCarried && liftParent) {
-    try {
-      const res = await mutate<{ prayerSubject_insert: { id: string } }>(deps.db, "InsertSubjectCarryingParent", {
-        uid, parentId, publicName, personalLabel, note, sortOrder,
-      });
-      id = res.prayerSubject_insert.id;
-    } catch (err) {
-      // The name was archived from another device since the read.
-      if (hasCheck(err, "That name was not found")) throw new HttpsError("invalid-argument", "That name was not found");
-      throw err;
-    }
-  } else {
+  if (!parent) {
+    const draft: PoolSubject = {
+      id: "new", kind: "SOUL", isSelf: false, isCarried: true, status: "ACTIVE", resolvedAt: null, parent: null, sortOrder,
+    };
+    const isCarried = carry && checkPool([...subjects, draft], user, deps.now(), deps.cfg).ok;
     const res = await mutate<{ prayerSubject_insert: { id: string } }>(deps.db, "InsertSubject", {
-      uid, kind, parentId, publicName, personalLabel, note, isCarried, sortOrder,
+      uid, kind, parentId: null, publicName, personalLabel, note, isCarried, sortOrder,
     });
     id = res.prayerSubject_insert.id;
+    return { id, isCarried, parentCarried: null, effectivelyCarried: isCarried, sortOrder, unchosenIds: [] as string[] };
   }
 
-  const parentCarried = parent ? parent.isSelf || parent.isCarried || (isCarried && liftParent) : null;
-  const effectivelyCarried = isCarried && parentCarried !== false;
-  return { id, isCarried, parentCarried, effectivelyCarried, sortOrder };
+  const { intentionsPerPerson: cap } = await getClientConfig(deps.live);
+  const chosen = chosenIntentions(subjects, parent.id);
+  // carryParent only acts with carry, on a name that isn't already carried
+  // (the self is always carried); otherwise it's a no-op.
+  const liftParent = carry && carryParent && !parent.isSelf && !parent.isCarried;
+  const parentFits = !liftParent ||
+    checkPool(subjects.map((s) => (s.id === parent!.id ? { ...s, isCarried: true } : s)), user, deps.now(), deps.cfg).ok;
+
+  let isCarried = false;
+  let unchosenIds: string[] = [];
+  if (carry && parentFits && cap > 0) {
+    if (chosen.length < cap) {
+      isCarried = true;
+    } else if (carryAsked) {
+      isCarried = true;
+      unchosenIds = chosen.slice(cap - 1).map((s) => s.id);
+    }
+  }
+  const lifted = isCarried && liftParent;
+
+  try {
+    if (lifted) {
+      const res = await mutate<{ prayerSubject_insert: { id: string } }>(deps.db, "InsertSubjectCarryingParent", {
+        uid, parentId, publicName, personalLabel, note, sortOrder, unchooseIds: unchosenIds,
+      });
+      id = res.prayerSubject_insert.id;
+    } else if (isCarried) {
+      const res = await mutate<{ prayerSubject_insert: { id: string } }>(deps.db, "InsertChosenIntention", {
+        uid, parentId, publicName, personalLabel, note, sortOrder, unchooseIds: unchosenIds,
+      });
+      id = res.prayerSubject_insert.id;
+    } else {
+      const res = await mutate<{ prayerSubject_insert: { id: string } }>(deps.db, "InsertSubject", {
+        uid, kind, parentId, publicName, personalLabel, note, isCarried: false, sortOrder,
+      });
+      id = res.prayerSubject_insert.id;
+    }
+  } catch (err) {
+    // The name was archived from another device since the read.
+    if (hasCheck(err, "That name was not found")) throw new HttpsError("invalid-argument", "That name was not found");
+    throw err;
+  }
+
+  const parentCarried = parent.isSelf || parent.isCarried || lifted;
+  return { id, isCarried, parentCarried, effectivelyCarried: isCarried && parentCarried, sortOrder, unchosenIds };
 }
 
 /** Text edits on a non-self item (the self name goes through setSelfName). */
@@ -220,15 +246,17 @@ export async function updateSubject(
 }
 
 /**
- * Save "your portion": exactly `carriedIds` are carried. Blocked — never
- * trimmed — when the effective carry exceeds the effective entitlement; the
- * error details drive the meter / paywall ("17 / 15").
- *
- * A save that only reduces carrying is always accepted, even over the pool
- * (a lapsed trial trims this way; schema-brief 2026-11-07). "Only reduces"
- * = no item goes from not carried to carried: the new carried flags are a
- * subset of the current ones, so the effectively carried set can only
- * shrink. Any addition — including a mixed swap — is pool-checked.
+ * Save "your portion": exactly `carriedIds` are carried (names) or chosen
+ * (intentions). Q32 (2026-11-08):
+ * - **Pool:** only names going from off to on are pool-checked. Blocked —
+ *   never trimmed — when the carried names would then exceed the effective
+ *   entitlement (`OVER_LIMIT`; details drive the meter).
+ * - **Cap:** a person (Me included) whose chosen intentions grow must end
+ *   with at most `intentionsPerPerson` (`OVER_CAP`). Choosing a different
+ *   intention (one off, one on) is a swap: cap-checked, never pool-checked.
+ * - A save that only reduces carrying is always accepted, even over the
+ *   pool or the cap (a lapsed trial trims this way; schema-brief
+ *   2026-11-07).
  */
 export async function setCarriedItems(deps: Deps, uid: string, rawIds: unknown) {
   if (!Array.isArray(rawIds) || rawIds.some((id) => typeof id !== "string")) {
@@ -240,7 +268,7 @@ export async function setCarriedItems(deps: Deps, uid: string, rawIds: unknown) 
     s.isSelf || s.status !== "ACTIVE" || s.resolvedAt ? s : { ...s, isCarried: wanted.has(s.id) },
   );
   const check = checkPool(proposed, user, deps.now(), deps.cfg);
-  if (!check.ok && addsCarrying(subjects, proposed)) {
+  if (!check.ok && addsName(subjects, proposed)) {
     throw new HttpsError("failed-precondition", "Over the carried limit", {
       reason: "OVER_LIMIT",
       carried: check.carried,
@@ -248,30 +276,31 @@ export async function setCarriedItems(deps: Deps, uid: string, rawIds: unknown) 
       free: check.free,
     });
   }
+  const { intentionsPerPerson: cap } = await getClientConfig(deps.live);
+  const over = overCap(subjects, proposed, cap);
+  if (over.length > 0) {
+    throw new HttpsError("failed-precondition", "Over the intentions per person", {
+      reason: "OVER_CAP",
+      cap,
+      personIds: over,
+    });
+  }
   const carriedIds = proposed.filter((s) => !s.isSelf && s.isCarried && s.status === "ACTIVE" && !s.resolvedAt).map((s) => s.id);
   await mutate(deps.db, "SetCarried", { uid, carriedIds });
   return { carried: check.carried, limit: check.limit };
 }
 
-/** Does `proposed` flag any item as carried that `current` doesn't? */
-export function addsCarrying(current: PoolSubject[], proposed: PoolSubject[]): boolean {
-  const before = new Map(current.map((s) => [s.id, s.isCarried]));
-  return proposed.some((s) => s.isCarried && before.get(s.id) !== true);
-}
-
 /**
  * Restore an archived item (subjects.md, schema-brief §7). Never blocked for
- * the pool, never over it (2026-11-07): if bringing it back with its own
- * flag would push the effectively carried items over the owner's pool, it
- * comes back uncarried — a name's own flag off (its cascade-archived
- * intentions keep theirs, so they don't count while it's off), an
- * intention's own flag off. "Push over" = the result doesn't fit AND the
- * restore adds to what prints; a restore that adds nothing (an Answered
- * intention, an item already off) keeps its flag even if the user is
- * already over (a lapsed trial).
+ * the pool or the cap, never over them (2026-11-07; Q32 2026-11-08):
+ * - A carried name that would go over the owner's pool comes back
+ *   uncarried; its cascade-archived intentions keep their choices.
+ * - A chosen intention whose person already has `intentionsPerPerson`
+ *   chosen comes back unchosen. One that comes back resolved (Answered)
+ *   isn't counted and keeps its flag.
  *
  * Returns `isCarried` (the item's stored flag after) and `uncarried` (true
- * when the pool turned it off), so the app can say so.
+ * when the pool or the cap turned it off), so the app can say so.
  */
 export async function restoreSubject(deps: Deps, uid: string, rawId: unknown) {
   if (typeof rawId !== "string") throw new HttpsError("invalid-argument", "id is required");
@@ -299,10 +328,15 @@ export async function restoreSubject(deps: Deps, uid: string, rawId: unknown) {
 
   let isCarried = item.isCarried;
   if (isCarried) {
-    const before = new Set(effectiveCarried(subjects).map((s) => s.id));
     const after = subjects.map((s) => restore(s, true));
-    const adds = effectiveCarried(after).some((s) => !before.has(s.id));
-    if (adds && !checkPool(after, user, deps.now(), deps.cfg).ok) isCarried = false;
+    if (item.kind === "SOUL") {
+      if (!checkPool(after, user, deps.now(), deps.cfg).ok) isCarried = false;
+    } else {
+      const { intentionsPerPerson: cap } = await getClientConfig(deps.live);
+      const chosenAfter = chosenIntentions(after, item.parent!.id);
+      const counted = chosenAfter.some((s) => s.id === item.id); // open after the restore
+      if (counted && chosenAfter.length > cap) isCarried = false;
+    }
   }
 
   try {

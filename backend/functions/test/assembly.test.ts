@@ -6,8 +6,9 @@ import { HttpsError } from "firebase-functions/v2/https";
 import { mutate } from "../src/db";
 import { assembleNextList, closeList, getListForPrint, listLiveCopy, moderateEntry, publishList, publishListVideo } from "../src/lists";
 import { addSubject, setCarriedItems } from "../src/subjects";
+import { resetClientConfigCache } from "../src/clientConfig";
 import {
-  addList, addSubjectRow, adminDb, clientDb, createUser, DAY, impersonate, logPrayer, makeDeps, resetDb, sql, TestDeps,
+  addList, addSubjectRow, adminDb, clientDb, createUser, DAY, exec, impersonate, logPrayer, makeDeps, resetDb, sql, TestDeps,
 } from "./helpers";
 
 interface EntryRow {
@@ -44,22 +45,38 @@ async function setupAndAssemble(deps: TestDeps, users: string[], social?: unknow
 describe("assembly: each user's portion", () => {
   beforeEach(resetDb);
 
-  it("premium: self, then self's intentions, then each name with its intentions, up to the limit", async () => {
+  it("premium (Q32): the pool counts people; each prints with its first chosen intention", async () => {
     const deps = makeDeps();
-    const { selfId } = await createUser("p", { name: "Pat", includeLimit: 3, expiresInMs: 30 * DAY });
+    const { selfId } = await createUser("p", { name: "Pat", includeLimit: 2, expiresInMs: 30 * DAY });
     await addSubjectRow("p", { parentId: selfId, name: "Me: steady work", sortOrder: 1 });
+    await addSubjectRow("p", { parentId: selfId, name: "Me: patience", sortOrder: 2 }); // over the cap (old data)
     const a = await addSubjectRow("p", { name: "Ann", sortOrder: 1 });
+    await addSubjectRow("p", { parentId: a, name: "Ann: rest", sortOrder: 2 }); // over the cap: second by sortOrder
     await addSubjectRow("p", { parentId: a, name: "Ann: healing", sortOrder: 1 });
-    await addSubjectRow("p", { parentId: a, name: "Ann: rest", sortOrder: 2 }); // 4th — over the limit
-    await addSubjectRow("p", { name: "Bo", sortOrder: 2 }); // over the limit
+    await addSubjectRow("p", { parentId: a, name: "Ann: job", sortOrder: 3, carried: false }); // not chosen
+    await addSubjectRow("p", { name: "Bo", sortOrder: 2 }); // 2nd person: intentions cost nothing, so Bo fits
+    await addSubjectRow("p", { name: "Dee", sortOrder: 4 }); // 3rd person — over the limit
     const c = await addSubjectRow("p", { name: "Cy (not carried)", sortOrder: 3, carried: false });
-    await addSubjectRow("p", { parentId: c, name: "Cy: job", sortOrder: 1 }); // name not carried → not effective
+    await addSubjectRow("p", { parentId: c, name: "Cy: job", sortOrder: 1 }); // chosen, but Cy isn't carried
 
     const res = await setupAndAssemble(deps, ["p"]);
     const rows = await entries(res.listId, "p");
-    assert.deepEqual(names(rows), ["Ann", "Ann: healing", "Me: steady work", "Pat"]);
+    assert.deepEqual(names(rows), ["Ann", "Ann: healing", "Bo", "Me: steady work", "Pat"]);
     assert.equal(rows.find((r) => r.public_name === "Ann: healing")?.parent_name, "Ann");
     assert.equal(rows.find((r) => r.public_name === "Me: steady work")?.parent_name, "Pat");
+    assert.equal(res.soulCount, 3);
+    assert.equal(res.intentionCount, 2, "no \"and N more\": only chosen intentions print");
+  });
+
+  it("the cap comes from /config intentionsPerPerson", async () => {
+    const deps = makeDeps();
+    deps.live.config = { intentionsPerPerson: 2 };
+    const { selfId } = await createUser("p2", { name: "Pia" });
+    await addSubjectRow("p2", { parentId: selfId, name: "Me: one", sortOrder: 1 });
+    await addSubjectRow("p2", { parentId: selfId, name: "Me: two", sortOrder: 2 });
+    await addSubjectRow("p2", { parentId: selfId, name: "Me: three", sortOrder: 3 });
+    const res = await setupAndAssemble(deps, ["p2"]);
+    assert.deepEqual(names(await entries(res.listId, "p2")), ["Me: one", "Me: two", "Pia"]);
   });
 
   it("resolved and archived items are never carried and don't use the pool", async () => {
@@ -76,18 +93,20 @@ describe("assembly: each user's portion", () => {
     assert.deepEqual(names(await entries(res.listId, "q")), ["Dee", "Eli", "Quinn"]);
   });
 
-  it("free: the self name plus one intention under Me", async () => {
+  it("free (0 people): you, with your intention", async () => {
     const deps = makeDeps();
     const { selfId } = await createUser("f", { name: "Fay" });
-    await addSubjectRow("f", { parentId: selfId, name: "Fay: courage" });
+    await addSubjectRow("f", { parentId: selfId, name: "Fay: courage", sortOrder: 1 });
+    await addSubjectRow("f", { parentId: selfId, name: "Fay: rest", sortOrder: 2 }); // over the cap (old data)
     const res = await setupAndAssemble(deps, ["f"]);
     assert.deepEqual(names(await entries(res.listId, "f")), ["Fay", "Fay: courage"]);
   });
 
   it("free and over the free limit (a carried name), never premium: self name only", async () => {
     const deps = makeDeps();
-    await createUser("g", { name: "Gus" });
+    const { selfId } = await createUser("g", { name: "Gus" });
     await addSubjectRow("g", { name: "Mom" });
+    await addSubjectRow("g", { parentId: selfId, name: "Gus: work" }); // waits for their choice too
     const res = await setupAndAssemble(deps, ["g"]);
     assert.deepEqual(names(await entries(res.listId, "g")), ["Gus"]);
   });
@@ -187,7 +206,9 @@ describe("the pool on the server (addSubject / setCarriedItems)", () => {
 
   it("auto-carries while there is room, then saves for private prayer", async () => {
     const deps = makeDeps();
-    await createUser("x", { includeLimit: 1, expiresInMs: 30 * DAY });
+    const { selfId } = await createUser("x", { includeLimit: 1, expiresInMs: 30 * DAY });
+    // Intentions cost no place (Q32).
+    await addSubject(deps, "x", { kind: "INTENTION", parentId: selfId, publicName: "Me: rest" });
     const first = await addSubject(deps, "x", { kind: "SOUL", publicName: "Abe" });
     const second = await addSubject(deps, "x", { kind: "SOUL", publicName: "Bea" });
     assert.equal(first.isCarried, true);
@@ -223,23 +244,23 @@ describe("the pool on the server (addSubject / setCarriedItems)", () => {
         "SELECT public_name FROM prayer_subject WHERE owner_id = $1 AND is_carried AND NOT is_self ORDER BY public_name", ["lapsed"],
       )).map((r) => r.public_name);
 
-    // Turning Cy off still leaves them over the free pool — accepted.
-    assert.deepEqual(await setCarriedItems(deps, "lapsed", [a, b, bNote]), { carried: 3, limit: 1 });
+    // Turning Cy off still leaves them over the free pool (0 people) — accepted.
+    assert.deepEqual(await setCarriedItems(deps, "lapsed", [a, b, bNote]), { carried: 2, limit: 0 });
     assert.deepEqual(await carriedNames(), ["Ann", "Ben", "Ben: work"]);
     // An intention alone, too.
-    assert.deepEqual(await setCarriedItems(deps, "lapsed", [a, b]), { carried: 2, limit: 1 });
+    assert.deepEqual(await setCarriedItems(deps, "lapsed", [a, b]), { carried: 2, limit: 0 });
 
-    // Adding while over is blocked, and so is a swap (one off, one on).
+    // Adding a person while over is blocked, and so is a swap of people (one off, one on).
     await assert.rejects(setCarriedItems(deps, "lapsed", [a, b, d]), (err: HttpsError) => {
-      assert.deepEqual(err.details, { reason: "OVER_LIMIT", carried: 3, limit: 1, free: true });
+      assert.deepEqual(err.details, { reason: "OVER_LIMIT", carried: 3, limit: 0, free: true });
       return true;
     });
     await assert.rejects(setCarriedItems(deps, "lapsed", [a, d]), /Over the carried limit/);
     assert.deepEqual(await carriedNames(), ["Ann", "Ben"], "a rejected save writes nothing");
 
     // Down to nothing is fine; the same set again is a no-op that's accepted.
-    assert.deepEqual(await setCarriedItems(deps, "lapsed", []), { carried: 0, limit: 1 });
-    assert.deepEqual(await setCarriedItems(deps, "lapsed", []), { carried: 0, limit: 1 });
+    assert.deepEqual(await setCarriedItems(deps, "lapsed", []), { carried: 0, limit: 0 });
+    assert.deepEqual(await setCarriedItems(deps, "lapsed", []), { carried: 0, limit: 0 });
   });
 
   it("under the pool, an addition is still pool-checked", async () => {
@@ -255,15 +276,70 @@ describe("the pool on the server (addSubject / setCarriedItems)", () => {
     });
   });
 
-  it("free: only an intention under Me fits; an intention counts only if its name is carried", async () => {
+  it("free = 0 people: no name fits; choosing intentions costs nothing (Me's, or under an uncarried name)", async () => {
     const deps = makeDeps();
     const { selfId } = await createUser("z");
     const mom = await addSubjectRow("z", { name: "Mom", carried: false });
     const momIntention = await addSubjectRow("z", { parentId: mom, name: "Mom: surgery", carried: false });
     const mine = await addSubjectRow("z", { parentId: selfId, name: "Me: patience", carried: false });
-    await assert.rejects(setCarriedItems(deps, "z", [mom]), /Over the carried limit/);
-    // Mom's intention flagged but Mom isn't carried → not effective → fits.
-    assert.deepEqual(await setCarriedItems(deps, "z", [mine, momIntention]), { carried: 1, limit: 1 });
+    await assert.rejects(setCarriedItems(deps, "z", [mom]), (err: HttpsError) => {
+      assert.deepEqual(err.details, { reason: "OVER_LIMIT", carried: 1, limit: 0, free: true });
+      return true;
+    });
+    assert.deepEqual(await setCarriedItems(deps, "z", [mine, momIntention]), { carried: 0, limit: 0 });
+  });
+
+  it("Q32: the pool counts names only — a person with their intention uses one place", async () => {
+    const deps = makeDeps();
+    const { selfId } = await createUser("pp", { includeLimit: 1, expiresInMs: 30 * DAY });
+    const dad = await addSubjectRow("pp", { name: "Dad", carried: false });
+    const knee = await addSubjectRow("pp", { parentId: dad, name: "Dad: knee", carried: false });
+    const mine = await addSubjectRow("pp", { parentId: selfId, name: "Me: rest", carried: false });
+    const mom = await addSubjectRow("pp", { name: "Mom", carried: false });
+    const momNote = await addSubjectRow("pp", { parentId: mom, name: "Mom: sleep", carried: false });
+    assert.deepEqual(await setCarriedItems(deps, "pp", [dad, knee, mine, momNote]), { carried: 1, limit: 1 });
+    await assert.rejects(setCarriedItems(deps, "pp", [dad, knee, mine, mom, momNote]), /Over the carried limit/);
+  });
+
+  it("Q32: the per-person cap is enforced, Me included; a reduction over the cap is still accepted", async () => {
+    const deps = makeDeps();
+    const { selfId } = await createUser("cp", { includeLimit: 5, expiresInMs: 30 * DAY });
+    const dad = await addSubjectRow("cp", { name: "Dad" });
+    const knee = await addSubjectRow("cp", { parentId: dad, name: "Dad: knee", sortOrder: 1 });
+    const sleep = await addSubjectRow("cp", { parentId: dad, name: "Dad: sleep", sortOrder: 2, carried: false });
+    const m1 = await addSubjectRow("cp", { parentId: selfId, name: "Me: one", sortOrder: 1 });
+    const m2 = await addSubjectRow("cp", { parentId: selfId, name: "Me: two", sortOrder: 2, carried: false });
+    await assert.rejects(setCarriedItems(deps, "cp", [dad, knee, sleep, m1]), (err: HttpsError) => {
+      assert.equal(err.code, "failed-precondition");
+      assert.deepEqual(err.details, { reason: "OVER_CAP", cap: 1, personIds: [dad] });
+      return true;
+    });
+    await assert.rejects(setCarriedItems(deps, "cp", [dad, knee, m1, m2]), (err: HttpsError) => {
+      assert.deepEqual((err.details as { personIds: string[] }).personIds, [selfId]);
+      return true;
+    });
+    // A swap (one off, one on) is fine.
+    assert.deepEqual(await setCarriedItems(deps, "cp", [dad, sleep, m2]), { carried: 1, limit: 5 });
+
+    // Old data over the cap: removing something else is still accepted.
+    await exec("UPDATE prayer_subject SET is_carried = true WHERE owner_id = 'cp'");
+    assert.deepEqual(await setCarriedItems(deps, "cp", [dad, knee, sleep, m1]), { carried: 1, limit: 5 }, "Me trimmed, Dad unchanged");
+    deps.live.config = { intentionsPerPerson: 2 };
+    resetClientConfigCache();
+    assert.deepEqual(await setCarriedItems(deps, "cp", [dad, knee, sleep, m1, m2]), { carried: 1, limit: 5 }, "cap from /config");
+  });
+
+  it("Q32: choosing a different intention at the cap is allowed even over the pool (a swap is never pool-checked)", async () => {
+    const deps = makeDeps();
+    await createUser("sw", { includeLimit: 10, expiresInMs: -DAY }); // lapsed: free pool, 0 people
+    const ann = await addSubjectRow("sw", { name: "Ann" });
+    const ben = await addSubjectRow("sw", { name: "Ben" });
+    const x = await addSubjectRow("sw", { parentId: ann, name: "Ann: x", sortOrder: 1 });
+    const y = await addSubjectRow("sw", { parentId: ann, name: "Ann: y", sortOrder: 2, carried: false });
+    assert.deepEqual(await setCarriedItems(deps, "sw", [ann, ben, y]), { carried: 2, limit: 0 });
+    const chosen = await sql<{ id: string }>("SELECT id FROM prayer_subject WHERE owner_id = 'sw' AND kind = 'INTENTION' AND is_carried");
+    assert.deepEqual(chosen.map((r) => r.id), [y]);
+    assert.ok(x);
   });
 
   it("the ~500 cap counts what's on Home; archiving makes room; a quiet hard cap counts every row not purged", async () => {
@@ -326,32 +402,68 @@ describe("addSubject carry inputs (carry / carryParent)", () => {
     assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [true, true, true]);
   });
 
-  it("carryParent carries the name too, bringing back its intentions still flagged", async () => {
+  it("carryParent carries the name too (one place); carry: true at the cap swaps the new intention in", async () => {
     const deps = makeDeps();
-    await createUser("c3", { includeLimit: 3, expiresInMs: 30 * DAY });
+    await createUser("c3", { includeLimit: 1, expiresInMs: 30 * DAY });
     const dad = await addSubjectRow("c3", { name: "Dad", carried: false });
-    await addSubjectRow("c3", { parentId: dad, name: "Dad: knee", carried: true });
-    const res = await addSubject(deps, "c3", { kind: "INTENTION", parentId: dad, publicName: "Dad: sleep", carryParent: true });
+    const knee = await addSubjectRow("c3", { parentId: dad, name: "Dad: knee", carried: true });
+    const res = await addSubject(deps, "c3", {
+      kind: "INTENTION", parentId: dad, publicName: "Dad: sleep", carry: true, carryParent: true,
+    });
     assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [true, true, true]);
+    assert.deepEqual(res.unchosenIds, [knee]);
     assert.deepEqual(await flags("c3"), [
       { public_name: "Dad", is_carried: true },
-      { public_name: "Dad: knee", is_carried: true },
+      { public_name: "Dad: knee", is_carried: false },
       { public_name: "Dad: sleep", is_carried: true },
     ]);
   });
 
-  it("all or nothing: if the name, its flagged intentions, and the item don't fit, nothing is carried", async () => {
+  it("all or nothing: if the name doesn't fit, nothing changes (no swap) and the item is saved unchosen", async () => {
     const deps = makeDeps();
-    await createUser("c4", { includeLimit: 2, expiresInMs: 30 * DAY }); // Dad + knee fit; + sleep doesn't
+    await createUser("c4", { includeLimit: 1, expiresInMs: 30 * DAY });
+    await addSubjectRow("c4", { name: "Ann" }); // the one place
     const dad = await addSubjectRow("c4", { name: "Dad", carried: false });
     await addSubjectRow("c4", { parentId: dad, name: "Dad: knee", carried: true });
-    const res = await addSubject(deps, "c4", { kind: "INTENTION", parentId: dad, publicName: "Dad: sleep", carryParent: true });
+    const res = await addSubject(deps, "c4", {
+      kind: "INTENTION", parentId: dad, publicName: "Dad: sleep", carry: true, carryParent: true,
+    });
     assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [false, false, false]);
+    assert.deepEqual(res.unchosenIds, []);
     assert.deepEqual(await flags("c4"), [
+      { public_name: "Ann", is_carried: true },
       { public_name: "Dad", is_carried: false },
       { public_name: "Dad: knee", is_carried: true },
       { public_name: "Dad: sleep", is_carried: false },
     ]);
+  });
+
+  it("Q32: a new intention is auto-chosen under the cap; at the cap it's saved unchosen unless carry: true swaps it in", async () => {
+    const deps = makeDeps();
+    const { selfId } = await createUser("c8"); // free: intentions cost nothing
+    const first = await addSubject(deps, "c8", { kind: "INTENTION", parentId: selfId, publicName: "Me: one" });
+    assert.deepEqual([first.isCarried, first.effectivelyCarried, first.unchosenIds], [true, true, []]);
+    const second = await addSubject(deps, "c8", { kind: "INTENTION", parentId: selfId, publicName: "Me: two" });
+    assert.deepEqual([second.isCarried, second.effectivelyCarried, second.unchosenIds], [false, false, []]);
+    const third = await addSubject(deps, "c8", { kind: "INTENTION", parentId: selfId, publicName: "Me: three", carry: true });
+    assert.deepEqual([third.isCarried, third.effectivelyCarried, third.unchosenIds], [true, true, [first.id]]);
+    assert.deepEqual(await flags("c8"), [
+      { public_name: "Me: one", is_carried: false },
+      { public_name: "Me: three", is_carried: true },
+      { public_name: "Me: two", is_carried: false },
+    ]);
+    // Another person's choices are untouched by a swap.
+    const mom = await addSubjectRow("c8", { name: "Mom", carried: false });
+    const momOne = await addSubject(deps, "c8", { kind: "INTENTION", parentId: mom, publicName: "Mom: rest", carry: true });
+    assert.deepEqual([momOne.isCarried, momOne.parentCarried, momOne.unchosenIds], [true, false, []]);
+    assert.equal((await flags("c8")).find((r) => r.public_name === "Me: three")?.is_carried, true);
+  });
+
+  it("free = 0: a new name is saved for private prayer", async () => {
+    const deps = makeDeps();
+    await createUser("c9");
+    const res = await addSubject(deps, "c9", { kind: "SOUL", publicName: "Mom" });
+    assert.deepEqual([res.isCarried, res.effectivelyCarried], [false, false]);
   });
 
   it("without carryParent, an intention under an uncarried name keeps its flag but its name stays off", async () => {

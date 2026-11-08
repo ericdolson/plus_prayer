@@ -100,9 +100,15 @@ against the emulator and the admin CLI runs the same code locally.
 the world-count historical sum reads settled values (see Counts model below)
 — and drafts N+1's entries in one statement: app carried items, the 🙏
 harvest (SOCIAL), and the base set (BASE_SET), with moderation flags.
+**The pool counts people** (Q32, 2026-11-08): carried names up to the
+effective limit, each (and the self) printed with its chosen intentions, at
+most RTDB `/config` `intentionsPerPerson` (default 1); no "and N more".
 
-Data scripts (admin CLI): `seed-config` (RTDB `/config` + blocklist) and
-`backfill` (lists 1..N from `publishing/*.json`). The NamUs base-set import
+Data scripts (admin CLI): `seed-config` (RTDB `/config` + blocklist),
+`backfill` (lists 1..N from `publishing/*.json`) and `migrate-q32` (Q32
+beta data, 2026-11-08: each person keeps the first `intentionsPerPerson`
+chosen intentions by sortOrder; never-entitled free users → includeLimit 0;
+`--dry-run` reports counts only; idempotent). The NamUs base-set import
 is not written yet.
 
 ### Daily transition timing (UPDATED 2026-06-24, Option C)

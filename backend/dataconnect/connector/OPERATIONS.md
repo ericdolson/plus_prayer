@@ -58,13 +58,16 @@ List N · {category}"). "Printed" everywhere (print, counts, beads, world
 count, "first printed", "carried on N lists") = not EXCLUDED.
 
 Two computed rules used throughout (never swept by a job):
-- **Effective carry** — an intention is carried only if `isCarried &&
-  parent.isCarried`; the pool counts only effectively carried items beyond the
-  self name.
-- **Effective entitlement** — `includeLimit` while `entitlementExpiresAt` is in
-  the future (or a subscription is active); otherwise the free limit (1, an
-  intention under "Me"). Trial and base tier both grant `basePremiumPool`
-  (server config, 10).
+- **Effective carry** — an intention prints only if `isCarried &&
+  parent.isCarried`. **The pool counts carried people** (names beyond the
+  self name; Q32, 2026-11-08); intentions never cost a place. On an
+  intention, `isCarried` means **chosen to print with its person**: at most
+  `intentionsPerPerson` (RTDB `/config`, default 1) open intentions chosen
+  per person, Me included, enforced by every carry write and at assembly.
+- **Effective entitlement** — `includeLimit` (people) while
+  `entitlementExpiresAt` is in the future (or a subscription is active);
+  otherwise the free limit (0: you, with your intention). Trial and base
+  tier both grant `basePremiumPool` (RTDB `/config`, 10).
 
 ---
 
@@ -189,18 +192,25 @@ Callables (`functions/src/subjects.ts`):
   phone numbers, emails, or links.", details `{ reason: "CONTACT_OR_LINK",
   field }` for an inline message. Verse references, room numbers, dates,
   year ranges, and "St." pass (`functions/src/contact.ts`). Appended to the
-  bottom of its level. `isCarried` auto-set while the pool (effective carry vs.
-  effective entitlement) has room, else false and marked not on the list.
+  bottom of its level. A **name**'s `isCarried` is auto-set while the pool
+  (carried names vs. effective entitlement) has room, else false. An
+  **intention** is auto-chosen while its person has fewer than
+  `intentionsPerPerson` chosen, else saved unchosen (Q32, 2026-11-08).
   Rejected past the ~500 cap ("contact us").
-  Carry inputs (2026-11-06): `carry: Boolean = true` (false = private prayer
-  only) and `carryParent: Boolean = false` (an intention under an uncarried
-  name: carry the name too, which brings back its intentions still flagged).
-  One pool check covers the whole result, all or nothing: if it doesn't fit,
-  the item is saved uncarried and the name is untouched. `carryParent` is a
-  no-op with `carry: false`, on a name, under Me, or under a name already
-  carried. Item + name are written in one transaction
-  (InsertSubjectCarryingParent). Returns `{ id, isCarried, parentCarried,
-  effectivelyCarried, sortOrder }`: `isCarried` is the item's stored flag;
+  Carry inputs (2026-11-06; Q32 2026-11-08): `carry: Boolean = true` (false =
+  private prayer only). **An explicit `carry: true` on an intention whose
+  person is at the cap swaps it in**: that person's last chosen intention(s)
+  by sortOrder are unchosen in the same transaction (returned as
+  `unchosenIds`); left out, `carry` only auto-chooses under the cap.
+  `carryParent: Boolean = false` (an intention under an uncarried name:
+  carry the name too, one place, pool-checked; its chosen intention comes
+  back with it). All or nothing: if the name doesn't fit, nothing changes —
+  no swap, the name is untouched, the item is saved unchosen. `carryParent`
+  is a no-op with `carry: false`, on a name, under Me, or under a name
+  already carried. Item, swap and name are written in one transaction
+  (InsertChosenIntention / InsertSubjectCarryingParent). Returns `{ id,
+  isCarried, parentCarried, effectivelyCarried, sortOrder, unchosenIds }`:
+  `isCarried` is the item's stored flag;
   `parentCarried` (null for a name) is true under Me or a carried name;
   `effectivelyCarried` = it prints (own flag && parent's) — the app's "Saved,
   but not carried" check. Known gap (accepted): read-then-write, so two
@@ -209,27 +219,34 @@ Callables (`functions/src/subjects.ts`):
 - **updateSubject** — publicName, personalLabel, note on a non-self item (same
   contact check on the name; the alias is free). Not
   kind, not parent. The self name uses setSelfName.
-- **setCarriedItems** — the "your portion" save: exactly these ids carried.
-  Over the effective entitlement → `failed-precondition` with
-  `{ reason: "OVER_LIMIT", carried, limit, free }` for the meter/paywall;
-  nothing is trimmed. Only saves that add carrying are checked: a save that
-  only turns items off (no item goes from not carried to carried) is always
-  accepted, even over the pool (a lapsed trial trims this way; 2026-11-07).
-  A swap (one off, one on) is still checked. Uncarrying a name leaves its intentions' own flags
-  intact (they stop counting); re-carrying brings them back through the same
-  check.
+- **setCarriedItems** — the "your portion" save: exactly these ids carried
+  (names) or chosen (intentions). Nothing is ever trimmed. Q32 (2026-11-08):
+  - **Pool:** only names going from off to on are checked. Carried names over
+    the effective entitlement → `failed-precondition` with `{ reason:
+    "OVER_LIMIT", carried, limit, free }` (carried/limit in people). A
+    people swap (one name off, one on) is still checked.
+  - **Cap:** a person (Me included) whose chosen intentions grow must end at
+    or under `intentionsPerPerson` → else `failed-precondition` with `{
+    reason: "OVER_CAP", cap, personIds }`. Choosing a different intention
+    (one off, one on) is a swap: cap-checked, never pool-checked, so it
+    works even over the pool.
+  - A save that only turns items off is always accepted, even over the pool
+    or the cap (a lapsed trial trims this way; 2026-11-07). Uncarrying a
+    name keeps its intentions' choices; re-carrying it prints them again.
 - **restoreSubject** (`id`) — ARCHIVED → ACTIVE. On a name, brings back
   ONLY its intentions with `archivedByCascade = true` (flag cleared) — never
   Released ones or ones archived on their own. An intention whose name is
   still archived can't be restored on its own ("Restore its name first").
   Restoring a Released intention reopens it (resolution cleared: open and
-  list-eligible again); an Answered one stays Answered. **Pool-aware, never
-  blocked (2026-11-07):** if bringing it back with its own flag would add to
-  what prints AND the result is over the owner's pool, it comes back with
-  its own `isCarried` false (a name's intentions keep their flags; they
-  don't count while it's off). A restore that adds nothing to what prints
-  keeps its flag, even over the pool. Returns `{ id, isCarried, uncarried }`
-  (`uncarried`: the pool turned it off). Read-then-write, like addSubject.
+  list-eligible again); an Answered one stays Answered. **Pool- and
+  cap-aware, never blocked (2026-11-07; Q32 2026-11-08):** a carried name
+  that would put the carried names over the owner's pool comes back with
+  its own `isCarried` false (its intentions keep their choices); a chosen
+  intention whose person already has `intentionsPerPerson` chosen comes
+  back unchosen. An intention restored resolved (Answered) isn't counted and
+  keeps its flag; restoring an intention never touches the pool. Returns `{
+  id, isCarried, uncarried }` (`uncarried`: the pool or the cap turned it
+  off). Read-then-write, like addSubject.
   Moved here from the connector so the check can't be skipped.
 
 Connector mutations (`connector/mutations.gql`):

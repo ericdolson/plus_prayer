@@ -9,7 +9,7 @@ import { beforeEach, describe, it } from "node:test";
 import { errorJson, runAdminCommand } from "../src/adminCli";
 import { DEFAULT_SERVER_CONFIG } from "../src/config";
 import { serverConfigFromEnv } from "../src/runtime";
-import { addList, createUser, DAY, logPrayer, makeDeps, resetDb, sql, TestDeps } from "./helpers";
+import { addList, addSubjectRow, createUser, DAY, exec, logPrayer, makeDeps, resetDb, sql, TestDeps } from "./helpers";
 
 const files = (map: Record<string, unknown>) => ({
   async readJson(path: string) {
@@ -91,6 +91,40 @@ describe("admin CLI: the morning flow", () => {
     assert.equal(deps.live.config?.graceCap, 2);
     const again = (await run(deps, "seed-config")) as { blocklistSeeded: boolean };
     assert.equal(again.blocklistSeeded, false, "never overwrites an edited list");
+  });
+
+  it("migrate-q32: dry run, then each person keeps the first chosen intention; free defaults → 0; idempotent", async () => {
+    const deps = makeDeps();
+    const { selfId } = await createUser("old"); // free, never entitled: the old default includeLimit 1
+    await exec(`UPDATE "user" SET include_limit = 1 WHERE id = 'old'`);
+    const m1 = await addSubjectRow("old", { parentId: selfId, name: "Me: one", sortOrder: 1 });
+    const m2 = await addSubjectRow("old", { parentId: selfId, name: "Me: two", sortOrder: 2 });
+    const dad = await addSubjectRow("old", { name: "Dad", carried: false });
+    const d2 = await addSubjectRow("old", { parentId: dad, name: "Dad: two", sortOrder: 2 });
+    const d1 = await addSubjectRow("old", { parentId: dad, name: "Dad: one", sortOrder: 1 });
+    const d3 = await addSubjectRow("old", { parentId: dad, name: "Dad: three", sortOrder: 3 });
+    const d0 = await addSubjectRow("old", { parentId: dad, name: "Dad: answered", sortOrder: 0 });
+    await exec("UPDATE prayer_subject SET resolution = 'ANSWERED', resolved_at = now() WHERE id = $1::uuid", [d0]);
+    await createUser("paid", { includeLimit: 10, expiresInMs: 30 * DAY, planTier: "plan_a" });
+    const paid = await sql<{ include_limit: number }>(`SELECT include_limit FROM "user" WHERE id = 'paid'`);
+
+    const dry = (await run(deps, "migrate-q32 --dry-run")) as { wouldChange: Record<string, number> };
+    assert.deepEqual(dry.wouldChange, { owners: 1, people: 2, intentions: 3, freeDefaults: 1 });
+    const chosenIds = async () =>
+      (await sql<{ id: string }>("SELECT id FROM prayer_subject WHERE kind = 'INTENTION' AND is_carried ORDER BY public_name")).map((r) => r.id);
+    assert.equal((await chosenIds()).length, 6, "a dry run writes nothing");
+
+    const res = (await run(deps, "migrate-q32")) as { unchosenIntentions: number; freeIncludeLimitsReset: number; after: Record<string, number> };
+    assert.equal(res.unchosenIntentions, 3);
+    assert.equal(res.freeIncludeLimitsReset, 1);
+    assert.deepEqual(res.after, { owners: 0, people: 0, intentions: 0, freeDefaults: 0 });
+    assert.deepEqual(new Set(await chosenIds()), new Set([m1, d1, d0]), "first by sortOrder; Answered ones aren't counted");
+    assert.ok(m2 && d2 && d3);
+    const users = await sql<{ id: string; include_limit: number }>(`SELECT id, include_limit FROM "user" ORDER BY id`);
+    assert.deepEqual(users, [{ id: "old", include_limit: 0 }, { id: "paid", include_limit: paid[0].include_limit }]);
+
+    const again = (await run(deps, "migrate-q32")) as { unchosenIntentions: number; freeIncludeLimitsReset: number };
+    assert.deepEqual([again.unchosenIntentions, again.freeIncludeLimitsReset], [0, 0]);
   });
 
   it("errors come back as JSON a skill can read", async () => {

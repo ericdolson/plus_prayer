@@ -31,6 +31,13 @@ account). The deployed admin callables stay available too and check the
   `/config`, read by the server's grant and by the app (2026-11-06; the
   `BASE_PREMIUM_POOL` param is gone). Production `/config` was seeded
   2026-11-06.
+- `intentionsPerPerson` (Q32, 2026-11-08; default 1) lives only in RTDB
+  `/config`: how many chosen intentions each carried person prints with.
+  Read by addSubject / setCarriedItems / restoreSubject, mergeAccounts and
+  assembly (compiled-in default when the key is missing). Not yet in
+  production `/config`: `seed-config` adds it (missing keys only).
+- `freeLimit` (server default, `src/config.ts`) is in people since Q32: 0
+  (you, with your intention).
 - Contact info / links: blocked at input and excluded at social ingest
   (`src/contact.ts`), always on.
 - Word blocklist (off for the beta): RTDB `/moderation/blocklist`
@@ -53,6 +60,7 @@ npm --prefix backend/functions run admin -- assemble --social harvest.json
 npm --prefix backend/functions run admin -- moderate --decisions decisions.json
 npm --prefix backend/functions run admin -- held                   # Eric's short list
 npm --prefix backend/functions run admin -- backfill --dry-run     # lists 1..N from publishing/*.json
+npm --prefix backend/functions run admin -- migrate-q32 --dry-run  # Q32 beta data (counts only); without --dry-run applies it
 ```
 
 Credentials: your gcloud login (Application Default Credentials), set up once:

@@ -8,6 +8,7 @@
 
 import { randomUUID } from "node:crypto";
 import { HttpsError } from "firebase-functions/v2/https";
+import { getClientConfig } from "./clientConfig";
 import { localDateIn, MINUTE_MS, weekday } from "./dates";
 import { hasCheck, mutate, query } from "./db";
 import { Deps } from "./deps";
@@ -146,6 +147,7 @@ export async function assembleNextList(deps: Deps, input: { social?: unknown; fo
     gateHours: deps.cfg.gateHours,
     freeLimit: deps.cfg.freeLimit,
     softLandingDays: deps.cfg.softLandingDays,
+    intentionsPerPerson: (await getClientConfig(deps.live)).intentionsPerPerson,
     blockWords: terms.words,
     blockSubstrings: terms.substrings,
     social,

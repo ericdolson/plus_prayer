@@ -108,15 +108,19 @@ mutation CloseList(
 # the $gateHours before closesAt. A prayer after the cutoff belongs to N+1
 # only, so one prayer never earns two lists.
 #
-# PER USER: the self name always; then effectively carried items (an
-# intention only if its name is carried or is the self), ACTIVE, unresolved,
-# in the user's order (self's intentions first, then each name followed by
-# its intentions), up to the effective limit:
+# PER USER (Q32, 2026-11-08: the pool counts people): the self name always;
+# then carried names beyond the self (ACTIVE), in the user's order, up to the
+# effective limit (people):
 #   active entitlement                         → includeLimit
-#   no active entitlement, carry fits free     → $freeLimit (intentions under Me)
+#   no active entitlement, names fit free      → $freeLimit (0: you, with your intention)
 #   no active entitlement, over free, ended
 #     within $softLandingDays                  → includeLimit (soft landing)
-#   otherwise                                  → 0 (self name only)
+#   otherwise                                  → self name only (no names,
+#                                                no intentions) until they choose
+# Each printed person (the self included) prints with their CHOSEN
+# intentions: open (ACTIVE, unresolved), flagged isCarried, at most
+# $intentionsPerPerson each, first by sortOrder. Intentions never use the
+# pool, and nothing else is printed for them (no "and N more").
 #
 # Review is exception-based: everything not EXCLUDED prints. HELD is an
 # internal "flagged for Eric" mark and still prints unless he excludes it.
@@ -136,6 +140,7 @@ mutation AssembleList(
   $gateHours: Int!
   $freeLimit: Int!
   $softLandingDays: Int!
+  $intentionsPerPerson: Int!
   $blockWords: Any!
   $blockSubstrings: Any!
   $social: Any!
@@ -217,31 +222,44 @@ mutation AssembleList(
         END AS flag
       FROM prayer_subject s JOIN u ON u.id = s.owner_id
       WHERE s.is_self
-    ), cand AS (
-      SELECT s.id, s.owner_id, s.kind, s.parent_id, s.public_name,
-        COALESCE(par.is_self, false) AS under_self,
-        CASE WHEN par.is_self THEN -2147483648 ELSE COALESCE(par.sort_order, s.sort_order) END AS o1,
-        COALESCE(s.parent_id, s.id) AS o2,
-        CASE WHEN s.parent_id IS NULL THEN -2147483648 ELSE s.sort_order END AS o3,
-        s.created_at AS o4
+    ), names AS (
+      SELECT s.id, s.owner_id, s.public_name, s.sort_order, s.created_at
       FROM prayer_subject s
       JOIN u ON u.id = s.owner_id
-      LEFT JOIN prayer_subject par ON par.id = s.parent_id
-      WHERE NOT s.is_self AND s.status = 'ACTIVE' AND s.resolved_at IS NULL AND s.is_carried
-        AND (s.parent_id IS NULL OR (par.status = 'ACTIVE' AND (par.is_self OR par.is_carried)))
+      WHERE s.kind = 'SOUL' AND NOT s.is_self AND s.status = 'ACTIVE' AND s.resolved_at IS NULL AND s.is_carried
     ), st AS (
-      SELECT owner_id, count(*) AS n, bool_and(kind = 'INTENTION' AND under_self) AS fits_free
-      FROM cand GROUP BY owner_id
+      SELECT owner_id, count(*) AS n FROM names GROUP BY owner_id
     ), lim AS (
       SELECT u.id AS owner_id,
         CASE
           WHEN u.active THEN u.include_limit
-          WHEN st.n IS NULL OR (st.n <= $5::int AND st.fits_free) THEN $5::int
+          WHEN st.n IS NULL OR st.n <= $5::int THEN $5::int
           WHEN u.entitlement_expires_at > $3::timestamptz - make_interval(days => $6::int)
             THEN u.include_limit
           ELSE 0
-        END AS n
+        END AS n,
+        (u.active OR st.n IS NULL OR st.n <= $5::int
+          OR u.entitlement_expires_at > $3::timestamptz - make_interval(days => $6::int)) AS with_intentions
       FROM u LEFT JOIN st ON st.owner_id = u.id
+    ), picked_names AS (
+      SELECT r.id, r.owner_id, r.public_name
+      FROM (
+        SELECT nm.*, row_number() OVER (PARTITION BY nm.owner_id ORDER BY nm.sort_order, nm.created_at, nm.id) AS rn
+        FROM names nm
+      ) r JOIN lim ON lim.owner_id = r.owner_id
+      WHERE r.rn <= lim.n
+    ), persons AS (
+      SELECT id, owner_id FROM picked_names
+      UNION ALL
+      SELECT id, owner_id FROM selfs
+    ), chosen AS (
+      SELECT s.id, s.owner_id, s.parent_id, s.public_name,
+        row_number() OVER (PARTITION BY s.parent_id ORDER BY s.sort_order, s.created_at, s.id) AS rn
+      FROM prayer_subject s
+      JOIN persons pr ON pr.id = s.parent_id
+      JOIN lim ON lim.owner_id = s.owner_id
+      WHERE s.kind = 'INTENTION' AND s.status = 'ACTIVE' AND s.resolved_at IS NULL AND s.is_carried
+        AND lim.with_intentions
     ), picked AS (
       SELECT r.*,
         CASE
@@ -250,10 +268,11 @@ mutation AssembleList(
             THEN 'LANGUAGE'
         END AS flag
       FROM (
-        SELECT c.*, row_number() OVER (PARTITION BY c.owner_id ORDER BY c.o1, c.o2, c.o3, c.o4) AS rn
-        FROM cand c
-      ) r JOIN lim ON lim.owner_id = r.owner_id
-      WHERE r.rn <= lim.n
+        SELECT id, owner_id, 'SOUL'::text AS kind, NULL::uuid AS parent_id, public_name FROM picked_names
+        UNION ALL
+        SELECT id, owner_id, 'INTENTION'::text AS kind, parent_id, public_name FROM chosen
+        WHERE rn <= GREATEST($11::int, 0)
+      ) r
     ), self_ins AS (
       INSERT INTO prayer_list_entry
         (list_id, subject_id, owner_id, kind, public_name, source, moderation_status, reason_category)
@@ -265,7 +284,7 @@ mutation AssembleList(
     ), name_ins AS (
       INSERT INTO prayer_list_entry
         (list_id, subject_id, owner_id, kind, public_name, source, moderation_status, reason_category)
-      SELECT n.id, p.id, p.owner_id, p.kind, p.public_name, 'APP',
+      SELECT n.id, p.id, p.owner_id, p.kind::subject_kind, p.public_name, 'APP',
         (CASE WHEN p.flag IS NULL THEN 'APPROVED' ELSE 'HELD' END)::moderation_status,
         p.flag::reason_category
       FROM new_list n, picked p WHERE p.parent_id IS NULL
@@ -274,7 +293,7 @@ mutation AssembleList(
     INSERT INTO prayer_list_entry
       (list_id, subject_id, owner_id, parent_entry_id, kind, public_name, source,
        moderation_status, reason_category)
-    SELECT n.id, p.id, p.owner_id, COALESCE(ni.id, si.id), p.kind, p.public_name, 'APP',
+    SELECT n.id, p.id, p.owner_id, COALESCE(ni.id, si.id), p.kind::subject_kind, p.public_name, 'APP',
       (CASE WHEN p.flag IS NULL THEN 'APPROVED' ELSE 'HELD' END)::moderation_status,
       p.flag::reason_category
     FROM new_list n
@@ -293,6 +312,7 @@ mutation AssembleList(
       { _expr: "vars.blockWords" }
       { _expr: "vars.blockSubstrings" }
       { _expr: "vars.social" }
+      { _expr: "vars.intentionsPerPerson" }
     ]
   )
 }

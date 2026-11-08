@@ -119,7 +119,8 @@ query GetPoolState($uid: String!) @auth(level: NO_ACCESS) {
 # intention whose name is still archived can't be restored on its own.
 # Restoring a Released intention reopens it (resolution cleared); an Answered
 # one stays Answered. `isCarried` is the item's own flag after the restore:
-# unchanged, or false when carrying it would go over the pool (2026-11-07).
+# unchanged, or false when a name would go over the pool (2026-11-07) or an
+# intention's person already has the cap chosen (Q32, 2026-11-08).
 mutation RestoreSubjectFor($uid: String!, $id: UUID!, $isCarried: Boolean!) @auth(level: NO_ACCESS) @transaction {
   query @redact {
     prayerSubjects(
@@ -187,10 +188,47 @@ mutation InsertSubject(
   )
 }
 
-# addSubject with carryParent: a carried intention and its (uncarried) name
-# carried with it, in one transaction. Carrying the name also brings back its
-# intentions still flagged isCarried; the callable's pool check counted them.
-# The name must still be my ACTIVE, non-self name, or nothing is written.
+# addSubject, an intention chosen to print (Q32, 2026-11-08): inserted chosen,
+# and — when its person is already at the intentionsPerPerson cap — the
+# callable's `unchooseIds` (that person's other chosen intentions) turned off
+# in the same transaction: a swap. An empty list unchooses nothing.
+mutation InsertChosenIntention(
+  $uid: String!
+  $parentId: UUID!
+  $publicName: String!
+  $personalLabel: String
+  $note: String
+  $sortOrder: Int!
+  $unchooseIds: [UUID!]!
+) @auth(level: NO_ACCESS) @transaction {
+  unchosen: prayerSubject_updateMany(
+    where: {
+      id: { in: $unchooseIds }
+      owner: { id: { eq: $uid } }
+      parent: { id: { eq: $parentId } }
+      kind: { eq: INTENTION }
+    }
+    data: { isCarried: false }
+  )
+  prayerSubject_insert(
+    data: {
+      owner: { id: $uid }
+      kind: INTENTION
+      parentId: $parentId
+      publicName: $publicName
+      personalLabel: $personalLabel
+      note: $note
+      isCarried: true
+      sortOrder: $sortOrder
+    }
+  )
+}
+
+# addSubject with carryParent: a chosen intention and its (uncarried) name
+# carried with it, in one transaction. Carrying the name costs one place (the
+# callable pool-checked it); its chosen intention comes back with it at no
+# cost. `unchooseIds` as in InsertChosenIntention (a swap at the cap). The
+# name must still be my ACTIVE, non-self name, or nothing is written.
 mutation InsertSubjectCarryingParent(
   $uid: String!
   $parentId: UUID!
@@ -198,6 +236,7 @@ mutation InsertSubjectCarryingParent(
   $personalLabel: String
   $note: String
   $sortOrder: Int!
+  $unchooseIds: [UUID!]!
 ) @auth(level: NO_ACCESS) @transaction {
   prayerSubject_updateMany(
     where: {
@@ -209,6 +248,15 @@ mutation InsertSubjectCarryingParent(
     }
     data: { isCarried: true }
   ) @check(expr: "this == 1", message: "That name was not found")
+  unchosen: prayerSubject_updateMany(
+    where: {
+      id: { in: $unchooseIds }
+      owner: { id: { eq: $uid } }
+      parent: { id: { eq: $parentId } }
+      kind: { eq: INTENTION }
+    }
+    data: { isCarried: false }
+  )
   prayerSubject_insert(
     data: {
       owner: { id: $uid }
@@ -244,7 +292,8 @@ mutation UpdateSubjectText(
 }
 
 # Save the "your portion" selection: exactly these ACTIVE, unresolved,
-# non-self items are carried; the rest of them are not.
+# non-self items are carried (names) or chosen (intentions); the rest of them
+# are not. The callable checked the pool and the per-person cap.
 mutation SetCarried($uid: String!, $carriedIds: [UUID!]!) @auth(level: NO_ACCESS) {
   _execute(
     sql: """
@@ -256,6 +305,70 @@ mutation SetCarried($uid: String!, $carriedIds: [UUID!]!) @auth(level: NO_ACCESS
   )
 }
 
+
+# The per-person intention cap (Q32, 2026-11-08), applied to stored data:
+# for every person (Me included) with more chosen intentions (open: ACTIVE,
+# unresolved, isCarried) than $cap, the first $cap by sortOrder stay chosen
+# and the rest are unchosen. $uid limits it to one owner (account merge);
+# null = every owner (the one-time beta-data migration, admin CLI
+# `migrate-q32`). Idempotent. Returns the rows unchosen.
+mutation EnforceIntentionCap($cap: Int!, $uid: String) @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    WITH ranked AS (
+      SELECT s.id,
+        row_number() OVER (PARTITION BY s.parent_id ORDER BY s.sort_order, s.created_at, s.id) AS rn
+      FROM prayer_subject s
+      WHERE s.kind = 'INTENTION' AND s.is_carried AND s.status = 'ACTIVE' AND s.resolved_at IS NULL
+        AND s.parent_id IS NOT NULL
+        AND ($2::text IS NULL OR s.owner_id = $2::text)
+    )
+    UPDATE prayer_subject t SET is_carried = false
+    FROM ranked r
+    WHERE t.id = r.id AND r.rn > GREATEST($1::int, 0)
+    """
+    params: [{ _expr: "vars.cap" }, { _expr: "vars.uid" }]
+  )
+}
+
+# What EnforceIntentionCap would change (the migration's dry run): counts
+# only, no names or intention text.
+query GetIntentionCapOverflow($cap: Int!) @auth(level: NO_ACCESS) {
+  overflow: _select(
+    sql: """
+    WITH ranked AS (
+      SELECT s.owner_id, s.parent_id,
+        row_number() OVER (PARTITION BY s.parent_id ORDER BY s.sort_order, s.created_at, s.id) AS rn
+      FROM prayer_subject s
+      WHERE s.kind = 'INTENTION' AND s.is_carried AND s.status = 'ACTIVE' AND s.resolved_at IS NULL
+        AND s.parent_id IS NOT NULL
+    )
+    SELECT count(DISTINCT owner_id)::int AS "owners", count(DISTINCT parent_id)::int AS "people",
+      count(*)::int AS "intentions"
+    FROM ranked WHERE rn > GREATEST($1::int, 0)
+    """
+    params: [{ _expr: "vars.cap" }]
+  )
+  freeDefaults: _select(
+    sql: """
+    SELECT count(*)::int AS "users" FROM "user"
+    WHERE plan_tier = 'free' AND entitlement_expires_at IS NULL AND include_limit = 1
+    """
+  )
+}
+
+# Q32 migration: free users who never had an entitlement still hold the old
+# free default (includeLimit 1, "one intention under Me"); the pool now counts
+# people, and free = 0. Users with a trial or a grant keep theirs (the soft
+# landing reads it). Idempotent. Returns the rows changed.
+mutation MigrateFreeIncludeLimit @auth(level: NO_ACCESS) {
+  _execute(
+    sql: """
+    UPDATE "user" SET include_limit = 0
+    WHERE plan_tier = 'free' AND entitlement_expires_at IS NULL AND include_limit = 1
+    """
+  )
+}
 
 # ----------------------------------------------------------------------------
 # Entitlement / deletion

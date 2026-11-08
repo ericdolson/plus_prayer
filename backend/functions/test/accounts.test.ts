@@ -70,7 +70,16 @@ describe("mergeAccounts", () => {
     deps.clock.now = new Date(Date.now() + 1000);
     const list2 = await assembleNextList(deps, {});
 
+    // Q32: the target already has a chosen intention under Me (added after
+    // the list was assembled, so the list itself is unchanged).
+    const tMine = await addSubjectRow("t", { parentId: target.selfId, name: "Me: peace", sortOrder: 1 });
+
     await mergeAccounts(deps, "t", "a:anonymous");
+
+    const chosen = await sql<{ id: string }>(
+      "SELECT id FROM prayer_subject WHERE parent_id = $1::uuid AND is_carried", [target.selfId],
+    );
+    assert.deepEqual(chosen.map((r) => r.id), [tMine], "Me keeps the target's chosen intention; the anon's is unchosen (cap 1)");
 
     const subjects = await sql<{ id: string; public_name: string; owner_id: string; parent_id: string | null; sort_order: number }>(
       "SELECT id, public_name, owner_id, parent_id, sort_order FROM prayer_subject ORDER BY public_name",

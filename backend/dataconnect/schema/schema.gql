@@ -211,15 +211,15 @@ type User @table {
 
   # --- Entitlement (server-written ONLY: billing events, trial start) ---
   planTier: String! @default(value: "free")   # "free" | "plan_a" | "plan_b" | ...
-  # Size of the carried pool BEYOND the always-free self name. Each
-  # effectively carried name or intention counts as one. Free = 1, and that
-  # one is restricted to an intention under the self name ("Me"); premium =
-  # basePremiumPool (server config, 10) for both the trial and the base tier.
+  # Size of the carried pool BEYOND the always-free self name, in PEOPLE
+  # (Q32, 2026-11-08): each carried name counts one; intentions never count.
+  # Free = 0 (you, with your intention); premium = basePremiumPool (RTDB
+  # /config, 10) for both the trial and the base tier.
   # Stored as a concrete number (not derived from planTier) so one-off grants
   # (promos, beta thank-yous) are possible without inventing fake plans.
   # EFFECTIVE limit is computed, never swept by a job: entitlementExpiresAt in
   # the past (and no active subscription) ⇒ the free limit.
-  includeLimit: Int! @default(value: 1)
+  includeLimit: Int! @default(value: 0)
   # Reverse trial: 14 days of premium, no card, no auto-renew. Starts at the
   # user's FIRST PRAYER (set by onPrayerLogged), not at install.
   trialStartedAt: Timestamp
@@ -304,10 +304,12 @@ type ReminderPreference @table {
 #   - Self-subject: forced ACTIVE, always carried (isCarried not toggleable),
 #     not resolvable.
 #   - Resolved items are never list-eligible.
-#   - EFFECTIVE CARRY: an intention is carried only if
+#   - EFFECTIVE CARRY: an intention prints only if
 #     `isCarried && parent.isCarried`. Uncarrying a name leaves its
-#     intentions' own flags intact; re-carrying the name brings them back
-#     (over-limit flow if needed). The pool counts only effective items.
+#     intentions' own flags intact; re-carrying the name brings them back.
+#     The pool counts carried PEOPLE (names beyond the self) only; an
+#     intention's flag means "chosen to print with its person", at most
+#     /config intentionsPerPerson per person, Me included (Q32, 2026-11-08).
 #   - Archive / purge on a name cascade to its intentions. Restore on a name
 #     brings back ONLY intentions with archivedByCascade = true — never
 #     Released ones or ones the user archived on their own.
@@ -340,11 +342,13 @@ type PrayerSubject @table {
   isSelf: Boolean! @default(value: false)
 
   # The user's choice to print this item on the next list (the "your portion"
-  # screen). Auto-set true on create while the pool has room; when the pool is
-  # full a new item is saved for private prayer, clearly marked as not on the
-  # list. Setting it beyond the entitlement is blocked (paywall), never silently
-  # trimmed. Ignored for the self-subject, which is always carried. For an
-  # intention this is its OWN flag; see EFFECTIVE CARRY above.
+  # screen). On a name: carried (one place; auto-set on create while the pool
+  # has room, else saved for private prayer). On an intention: chosen to print
+  # with its person (no place; auto-set while the person is under the
+  # intentionsPerPerson cap; Q32, 2026-11-08). Setting it beyond the
+  # entitlement or the cap is blocked, never silently trimmed. Ignored for the
+  # self-subject, which is always carried. For an intention this is its OWN
+  # flag; see EFFECTIVE CARRY above.
   isCarried: Boolean! @default(value: false)
 
   # Lifecycle (see SubjectStatus enum). Only ACTIVE subjects are list-eligible.

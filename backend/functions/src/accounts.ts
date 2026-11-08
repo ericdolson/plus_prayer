@@ -128,6 +128,10 @@ export async function mergeAccounts(deps: Deps, targetUid: string, anonIdToken: 
     graceDays: Math.min(rules.graceCap, Math.max(a.graceDays, t.graceDays)),
     graceOfferPending: a.graceOfferPending || t.graceOfferPending,
   });
+  // Q32: the anon self's intentions moved under the target self, which may
+  // now have more chosen than the cap; the target's own (first by
+  // sortOrder) stay chosen.
+  await mutate(deps.db, "EnforceIntentionCap", { cap: rules.intentionsPerPerson, uid: t.id });
   await deps.live.movePresence(a.id, t.id);
   await deps.auth.deleteUser(a.id);
   return { merged: true };

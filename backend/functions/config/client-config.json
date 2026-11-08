@@ -1,5 +1,5 @@
 {
-  "//": "Defaults for RTDB /config (public-read, server-write). The app compiles the same defaults in; the server reads /config for the values it enforces (grace cap / interval, basePremiumPool for the trial and base grant). Seed with `npm run seed:config` (backend/functions) (writes only missing keys).",
+  "//": "Defaults for RTDB /config (public-read, server-write). The app compiles the same defaults in; the server reads /config for the values it enforces (grace cap / interval, basePremiumPool for the trial and base grant, intentionsPerPerson for the per-person cap). Seed with `npm run seed:config` (backend/functions) (writes only missing keys).",
   "graceCap": 2,
   "graceIntervalDays": 7,
   "presenceDisplayThreshold": 10,
@@ -8,5 +8,6 @@
   "draftResumeMinutes": 30,
   "autoSaveHours": 6,
   "durationCapHours": 4,
-  "basePremiumPool": 10
+  "basePremiumPool": 10,
+  "intentionsPerPerson": 1
 }

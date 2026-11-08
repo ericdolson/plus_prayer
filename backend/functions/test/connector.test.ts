@@ -110,15 +110,15 @@ describe("subject lifecycle", () => {
     const kid = await addSubjectRow("me", { parentId: name, name: "Cy: work" });
     await clientDb.executeMutation("ArchiveSubject", { id: name }, impersonate("me"));
     await addSubjectRow("me", { name: "Di" });
-    await addSubjectRow("me", { name: "Ed" }); // 2 of 2 carried: Cy + work would make 4
+    await addSubjectRow("me", { name: "Ed" }); // 2 of 2 people carried: Cy would make 3
     assert.deepEqual(await restoreSubject(makeDeps(), "me", name), { id: name, isCarried: false, uncarried: true });
     assert.deepEqual(await status(name), { status: "ACTIVE", cascade: false });
     assert.deepEqual(await status(kid), { status: "ACTIVE", cascade: false });
     assert.deepEqual(await carried(name, kid), { [name]: false, [kid]: true });
   });
 
-  it("restore over the pool brings an intention back uncarried (a lapsed trial; a Released one too)", async () => {
-    const { selfId } = await createUser("me", { includeLimit: 5, expiresInMs: -DAY }); // free pool: 1 under Me
+  it("Q32: an intention restored to a person already at the cap comes back unchosen (a Released one too)", async () => {
+    const { selfId } = await createUser("me", { includeLimit: 5, expiresInMs: -DAY }); // lapsed: free pool
     const mine = await addSubjectRow("me", { parentId: selfId, name: "Me: patience" });
     const other = await addSubjectRow("me", { parentId: selfId, name: "Me: sleep" });
     const as = impersonate("me");
@@ -129,7 +129,7 @@ describe("subject lifecycle", () => {
     assert.deepEqual(await restoreSubject(deps, "me", other), { id: other, isCarried: false, uncarried: true });
     assert.deepEqual(await restoreSubject(deps, "me", released), { id: released, isCarried: false, uncarried: true });
     assert.deepEqual(await carried(mine, other, released), { [mine]: true, [other]: false, [released]: false });
-    // Freeing the place lets the next restore carry.
+    // Freeing the choice lets the next restore keep it.
     await clientDb.executeMutation("ArchiveSubject", { id: mine }, as);
     assert.deepEqual(await restoreSubject(deps, "me", mine), { id: mine, isCarried: true, uncarried: false });
   });
@@ -142,6 +142,26 @@ describe("subject lifecycle", () => {
     await clientDb.executeMutation("MarkIntentionAnswered", { id: answered }, as);
     await clientDb.executeMutation("ArchiveSubject", { id: answered }, as);
     assert.deepEqual(await restoreSubject(makeDeps(), "me", answered), { id: answered, isCarried: true, uncarried: false });
+  });
+
+  it("Q32: restoring an intention never touches the pool; restoring a name over it keeps its intentions' choices", async () => {
+    await createUser("me", { includeLimit: 1, expiresInMs: 30 * DAY });
+    const dad = await addSubjectRow("me", { name: "Dad" }); // the one place
+    const knee = await addSubjectRow("me", { parentId: dad, name: "Dad: knee", sortOrder: 1 });
+    const mom = await addSubjectRow("me", { name: "Mom", carried: false });
+    const momNote = await addSubjectRow("me", { parentId: mom, name: "Mom: rest" });
+    const as = impersonate("me");
+    await clientDb.executeMutation("ArchiveSubject", { id: knee }, as);
+    await clientDb.executeMutation("ArchiveSubject", { id: momNote }, as);
+    const deps = makeDeps();
+    assert.deepEqual(await restoreSubject(deps, "me", knee), { id: knee, isCarried: true, uncarried: false }, "full pool, still chosen");
+    assert.deepEqual(await restoreSubject(deps, "me", momNote), { id: momNote, isCarried: true, uncarried: false });
+
+    const ed = await addSubjectRow("me", { name: "Ed" });
+    const edNote = await addSubjectRow("me", { parentId: ed, name: "Ed: work" });
+    await clientDb.executeMutation("ArchiveSubject", { id: ed }, as);
+    assert.deepEqual(await restoreSubject(deps, "me", ed), { id: ed, isCarried: false, uncarried: true });
+    assert.deepEqual(await carried(ed, edNote), { [ed]: false, [edNote]: true });
   });
 
   it("purge cascades; the self subject can't be archived or purged; others' items are untouchable", async () => {

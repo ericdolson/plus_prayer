@@ -7,7 +7,7 @@ import clientDefaults from "../config/client-config.json";
 export interface ServerConfig {
   /** List gate (b): a list prayer that ENDED in this many hours before closesAt qualifies. */
   gateHours: number;
-  /** Free tier: one intention under "Me". */
+  /** Free tier: carried people beyond the self name (Q32, 2026-11-08: 0 — you, with your intention). */
   freeLimit: number;
   trialDays: number;
   /** Soft landing after any entitlement end (trial or lapsed subscription). */
@@ -39,7 +39,7 @@ export interface ServerConfig {
 
 export const DEFAULT_SERVER_CONFIG: ServerConfig = {
   gateHours: 30,
-  freeLimit: 1,
+  freeLimit: 0,
   trialDays: 14,
   softLandingDays: 7,
   subjectCap: 500,
@@ -72,6 +72,10 @@ export interface ClientConfig {
    *  (monetization.md). One source: the server's grant reads it from /config,
    *  and the add sheet shows it ("Membership carries up to {premiumPool}…"). */
   basePremiumPool: number;
+  /** Q32 (2026-11-08): how many intentions each carried person (Me included)
+   *  prints with — the most an owner may choose per person. The server
+   *  enforces it on every carry write and at assembly; the app shows it. */
+  intentionsPerPerson: number;
 }
 
 export const CLIENT_CONFIG_DEFAULTS: ClientConfig = (() => {

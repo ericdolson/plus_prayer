@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
 import { mutate } from "../src/db";
 import { assembleNextList, closeList, getListForPrint, getReviewDiff, moderateEntries } from "../src/lists";
+import { setCarriedItems } from "../src/subjects";
 import { addList, addSubjectRow, adminDb, createUser, DAY, logPrayer, makeDeps, resetDb, sql, TestDeps } from "./helpers";
 
 /** Everyone prays for the current list, then close + assemble. */
@@ -23,7 +24,7 @@ describe("review diff", () => {
   it("lists new and changed names and intentions only — not repeats or the base set", async () => {
     const deps = makeDeps();
     const { selfId } = await createUser("ann", { name: "Ann", includeLimit: 10, expiresInMs: 30 * DAY });
-    await addSubjectRow("ann", { parentId: selfId, name: "Ann: steady work" });
+    const steady = await addSubjectRow("ann", { parentId: selfId, name: "Ann: steady work" });
     await mutate(adminDb, "UpsertBaseSetPerson", { externalId: "MP1", displayName: "Missing Child One", activeFrom: null, activeUntil: null });
     const list1 = await addList(1, { currentFrom: Date.now() - DAY });
 
@@ -36,7 +37,9 @@ describe("review diff", () => {
 
     // Overnight: Ann renames herself and adds an intention; a new 🙏 arrives.
     await mutate(adminDb, "RenameSelf", { uid: "ann", name: "Ann Lee" });
-    await addSubjectRow("ann", { parentId: selfId, name: "Ann: Mom's surgery", sortOrder: 2 });
+    const surgery = await addSubjectRow("ann", { parentId: selfId, name: "Ann: Mom's surgery", sortOrder: 2 });
+    await setCarriedItems(deps, "ann", [surgery]); // Q32: she chooses it to print instead (one per person)
+    assert.ok(steady);
     const second = await nextList(
       deps, ["ann"],
       [{ platform: "youtube", externalId: "j1", displayName: "Jane" }, { platform: "youtube", externalId: "b1", displayName: "Bob" }],
