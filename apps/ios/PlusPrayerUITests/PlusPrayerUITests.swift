@@ -212,7 +212,9 @@ final class PlusPrayerUITests: XCTestCase {
         dad.firstMatch.tap()
         let tile = app.buttons["page.history.tile.held"]
         XCTAssertTrue(app.buttons["page.history.seeAll"].waitForExistence(timeout: 3) || tile.exists)
-        for _ in 0..<4 where !tile.isHittable { app.swipeUp() }
+        // Clear of the pray capsule's bar at the bottom (it takes taps across its width).
+        let bar = app.buttons["Pray for Dad"]
+        for _ in 0..<4 where !tile.isHittable || tile.frame.maxY > bar.frame.minY { app.swipeUp() }
         XCTAssertTrue(tile.isHittable, "the tile, on Dad's page")
         tile.tap()
 
@@ -231,7 +233,7 @@ final class PlusPrayerUITests: XCTestCase {
         // Back on Dad's page, today's node opens History on today's sheet.
         app.navigationBars.buttons.element(boundBy: 0).tap()
         let node = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'history.node.'")).firstMatch
-        for _ in 0..<4 where !node.isHittable { app.swipeUp() }
+        for _ in 0..<4 where !node.isHittable || node.frame.maxY > bar.frame.minY { app.swipeUp() }
         node.tap()
         let onList = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'On List'")).firstMatch
         XCTAssertTrue(onList.waitForExistence(timeout: 3), "the day sheet: Dad is on today's list")
@@ -307,6 +309,116 @@ final class PlusPrayerUITests: XCTestCase {
         app.buttons["Close search"].tap()
         XCTAssertFalse(field.waitForExistence(timeout: 1))
         XCTAssertTrue(app.buttons["History"].exists)
+    }
+
+    /// Dad's page → Pray for Dad (the page strips to him, Dad checked) →
+    /// Amen → the invitation, finished without the list → the closing sheet
+    /// → Done → the History preview fades back: today's node held, the
+    /// "your prayers" tile one higher.
+    @MainActor
+    func testPrayingOnDadsPage() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-PPEnvironment", "mock"]
+        app.launch()
+
+        let dad = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Dad,'"))
+        XCTAssertTrue(dad.firstMatch.waitForExistence(timeout: 3))
+        dad.firstMatch.tap()
+        let tile = app.buttons["page.history.tile.held"]
+        XCTAssertTrue(tile.waitForExistence(timeout: 3), "the tiles, browsing")
+        let before = try XCTUnwrap(leadingNumber(tile.label), "the tile's count: \(tile.label)")
+
+        app.buttons["Pray for Dad"].tap()
+        let gone = NSPredicate(format: "exists == false")
+        wait(for: [expectation(for: gone, evaluatedWith: tile)], timeout: 3)
+        XCTAssertFalse(app.switches["Carry onto the list"].firstMatch.exists, "the carry card fades out")
+        XCTAssertFalse(app.buttons["Add intention for Dad"].exists, "so does the Intentions ＋")
+        XCTAssertTrue(app.buttons["Cancel"].exists, "Cancel in ‹'s place")
+        XCTAssertTrue(app.buttons["page.prayForOthers"].exists, "Pray for others")
+        XCTAssertEqual(app.descendants(matching: .any)["page.person"].value as? String, "Held", "Dad, pre-checked")
+
+        sleep(6)
+        enabledAmen(app).tap()
+        let hold = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Hold the'")).firstMatch
+        XCTAssertTrue(hold.waitForExistence(timeout: 3), "the invitation, on the page")
+        enabledAmen(app).tap()
+
+        let done = app.buttons["Done"]
+        XCTAssertTrue(done.waitForExistence(timeout: 3), "the closing sheet")
+        XCTAssertTrue(app.buttons["Add to journal"].exists)
+        done.tap()
+
+        XCTAssertTrue(tile.waitForExistence(timeout: 3), "the History preview fades back")
+        let after = NSPredicate(format: "label BEGINSWITH %@", "\(before + 1)")
+        wait(for: [expectation(for: after, evaluatedWith: tile)], timeout: 3)
+        let today = app.buttons.matching(NSPredicate(
+            format: "identifier BEGINSWITH 'history.node.' AND label BEGINSWITH 'Today.' AND label CONTAINS 'You prayed.'"))
+        XCTAssertTrue(today.firstMatch.exists, "today's node, held")
+        XCTAssertFalse(app.buttons["Cancel"].exists, "out of prayer")
+        XCTAssertTrue(app.buttons["Pray for Dad"].exists, "the capsule is back")
+    }
+
+    /// An intention's page → Pray (the intention checked, Dad plain text) →
+    /// Pray for others → Home, still praying, the checks kept → Cancel.
+    @MainActor
+    func testPrayForOthersFromAnIntentionsPage() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-PPEnvironment", "mock"]
+        app.launch()
+
+        let row = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Healing after his surgery'"))
+        XCTAssertTrue(row.firstMatch.waitForExistence(timeout: 3))
+        row.firstMatch.tap()
+        XCTAssertTrue(app.buttons["Dad"].waitForExistence(timeout: 3), "browsing, Dad's name is a link")
+
+        let pray = app.buttons.matching(NSPredicate(format: "label == 'Pray'")).allElementsBoundByIndex
+        try XCTUnwrap(pray.first { $0.isHittable }, "the page's capsule").tap()
+        let intention = app.descendants(matching: .any)["page.intention"]
+        XCTAssertTrue(app.buttons["page.prayForOthers"].waitForExistence(timeout: 3))
+        XCTAssertEqual(intention.value as? String, "Held", "pre-checked")
+        XCTAssertFalse(app.buttons["Dad"].exists, "Dad is plain text in prayer")
+        XCTAssertFalse(app.switches["Print with Dad"].firstMatch.exists, "the carry card fades out")
+
+        app.buttons["page.prayForOthers"].tap()
+        let homeRow = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Healing after his surgery'"))
+        XCTAssertTrue(homeRow.firstMatch.waitForExistence(timeout: 3), "back on Home")
+        XCTAssertFalse(app.buttons["page.prayForOthers"].waitForExistence(timeout: 1))
+        XCTAssertEqual(homeRow.firstMatch.value as? String, "Held", "the check kept")
+        let dad = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Dad,'"))
+        XCTAssertEqual(dad.firstMatch.value as? String, "Partly held", "his name, held with one of two")
+        XCTAssertTrue(app.buttons["Cancel"].exists, "still praying")
+
+        app.buttons["Cancel"].tap()
+        XCTAssertEqual(homeRow.firstMatch.value as? String ?? "", "", "browsing again")
+    }
+
+    /// Dad's page → Pray for Dad → swipe back from the edge → Home, still
+    /// praying, Dad checked.
+    @MainActor
+    func testSwipeBackWhilePrayingOnAPage() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-PPEnvironment", "mock"]
+        app.launch()
+
+        let dad = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Dad,'"))
+        XCTAssertTrue(dad.firstMatch.waitForExistence(timeout: 3))
+        dad.firstMatch.tap()
+        let pray = app.buttons["Pray for Dad"]
+        XCTAssertTrue(pray.waitForExistence(timeout: 3))
+        pray.tap()
+        XCTAssertTrue(app.buttons["page.prayForOthers"].waitForExistence(timeout: 3))
+
+        let edge = app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
+        edge.press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)))
+        XCTAssertFalse(app.buttons["page.prayForOthers"].waitForExistence(timeout: 2), "off the page")
+        XCTAssertTrue(dad.firstMatch.waitForExistence(timeout: 3), "on Home")
+        XCTAssertEqual(dad.firstMatch.value as? String, "Held", "Dad still checked")
+        XCTAssertTrue(app.buttons["Cancel"].exists, "still praying")
+    }
+
+    /// "14, your prayers" → 14.
+    private func leadingNumber(_ label: String) -> Int? {
+        Int(label.prefix { $0.isNumber })
     }
 
     private func enabledAmen(_ app: XCUIApplication) -> XCUIElement {

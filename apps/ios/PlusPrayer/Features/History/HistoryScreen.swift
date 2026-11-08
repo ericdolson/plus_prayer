@@ -210,7 +210,16 @@ private struct HistoryPeopleList: View {
 
 private struct HistoryPreview: View {
     let request: HistoryRequest
-    @State private var home = HomeModel(environment: .mock(MockBackend(latency: .zero, liveDrift: false)))
+    @State private var home: HomeModel
+    @State private var session: PrayerSession
+
+    init(request: HistoryRequest) {
+        self.request = request
+        let home = HomeModel(environment: .mock(MockBackend(latency: .zero, liveDrift: false)))
+        _home = State(initialValue: home)
+        // Answered rows push an intention's page, which reads the session.
+        _session = State(initialValue: PrayerSession(graph: { home.graph }))
+    }
 
     var body: some View {
         NavigationStack {
@@ -218,6 +227,7 @@ private struct HistoryPreview: View {
                 .routes()
         }
         .environment(home)
+        .environment(session)
         .task { await home.run() }
     }
 }

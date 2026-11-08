@@ -20,6 +20,9 @@ struct CountdownButton<Idle: View>: View {
     let idleLabel: String
     let onStart: () -> Void
     let onComplete: () -> Void
+    /// Morphs with another glass shape of this id in the same container
+    /// (a page's "Pray for Dad" capsule becomes this button).
+    var glassID: GlassID? = nil
     @ViewBuilder let idle: () -> Idle
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -61,6 +64,7 @@ struct CountdownButton<Idle: View>: View {
                             .tint(counting ? PP.color.primary.opacity(PP.number.prayButtonDim) : PP.color.primary)
                             .interactive(!counting),
                          in: .circle)
+            .glassID(glassID)
             .disabled(counting)
             .accessibilityLabel(startedAt == nil ? idleLabel : L10n.Prayer.amen)
         }
@@ -70,6 +74,20 @@ struct CountdownButton<Idle: View>: View {
         guard startedAt != nil else { return 1 }
         let steps = reduceMotion ? elapsed.rounded(.down) : elapsed
         return min(1, max(0, steps / minimum))
+    }
+}
+
+/// A glass shape's identity for morphing between shapes
+/// (`glassEffectID`) inside one `GlassEffectContainer`.
+struct GlassID {
+    let id: String
+    let namespace: Namespace.ID
+}
+
+extension View {
+    /// `glassEffectID` when there is one.
+    @ViewBuilder func glassID(_ glass: GlassID?) -> some View {
+        if let glass { glassEffectID(glass.id, in: glass.namespace) } else { self }
     }
 }
 

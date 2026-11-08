@@ -144,22 +144,7 @@ struct HomeBar<SearchField: View>: View {
 
     private func prayerBar(startedAt: Date) -> some View {
         HStack(spacing: PP.space.sm) {
-            TimelineView(.periodic(from: startedAt, by: 1)) { context in
-                let elapsed = Duration.seconds(max(0, context.date.timeIntervalSince(startedAt)))
-                    .formatted(.time(pattern: .minuteSecond))
-                Text(verbatim: elapsed)
-                    .font(PP.type.count)
-                    .foregroundStyle(PP.color.ink)
-                    .accessibilityLabel(L10n.Prayer.time(elapsed))
-            }
-            if let prayingWith {
-                Text(verbatim: "·").foregroundStyle(PP.color.inkMuted).accessibilityHidden(true)
-                Text(L10n.Prayer.with(prayingWith))
-                    .font(PP.type.bodySmall)
-                    .foregroundStyle(PP.color.inkMuted)
-                    .monospacedDigit()
-                    .accessibilityLabel(L10n.Prayer.withSpoken(prayingWith))
-            }
+            PrayerTimerLine(startedAt: startedAt, prayingWith: prayingWith)
             Spacer(minLength: 0)
             Button(action: onSearch) {
                 PPIcon.search
@@ -176,6 +161,35 @@ struct HomeBar<SearchField: View>: View {
     }
 }
 
+/// The prayer bar's words: the elapsed time · "with N" (Home's pill, with
+/// 🔎 after them; a page's, alone).
+struct PrayerTimerLine: View {
+    let startedAt: Date
+    /// Others praying now; nil below the display threshold.
+    let prayingWith: Int?
+
+    var body: some View {
+        HStack(spacing: PP.space.sm) {
+            TimelineView(.periodic(from: startedAt, by: 1)) { context in
+                let elapsed = Duration.seconds(max(0, context.date.timeIntervalSince(startedAt)))
+                    .formatted(.time(pattern: .minuteSecond))
+                Text(verbatim: elapsed)
+                    .font(PP.type.count)
+                    .foregroundStyle(PP.color.ink)
+                    .accessibilityLabel(L10n.Prayer.time(elapsed))
+            }
+            if let prayingWith {
+                Text(verbatim: "·").foregroundStyle(PP.color.inkMuted).accessibilityHidden(true)
+                Text(L10n.Prayer.with(prayingWith))
+                    .font(PP.type.bodySmall)
+                    .foregroundStyle(PP.color.inkMuted)
+                    .monospacedDigit()
+                    .accessibilityLabel(L10n.Prayer.withSpoken(prayingWith))
+            }
+        }
+    }
+}
+
 /// The round pray button on Home's bar: a `CountdownButton` with the
 /// praying hands. On start a small pie inside runs down over the minimum
 /// (~5 s), then it becomes Amen. Before that, taps do nothing (Cancel is
@@ -185,10 +199,11 @@ struct PrayButton: View {
     var diameter: CGFloat = PP.size.prayButton.diameter
     let onPray: () -> Void
     var onAmen: () -> Void = {}
+    var glassID: GlassID? = nil
 
     var body: some View {
         CountdownButton(startedAt: startedAt, diameter: diameter, minimum: PrayerSession.minimum,
-                        idleLabel: L10n.Home.pray, onStart: onPray, onComplete: onAmen) {
+                        idleLabel: L10n.Home.pray, onStart: onPray, onComplete: onAmen, glassID: glassID) {
             PPIcon.pray
                 .font(.system(size: PP.size.bar.icon, weight: .regular))
                 .foregroundStyle(PP.color.onPrimary)

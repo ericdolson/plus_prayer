@@ -24,8 +24,8 @@ above the keyboard; a name's page as a dashboard (the person, the carry
 card with "Prints with", intentions with the ＋, the History preview), where
 adding a name lands, and a minimal intention page; the pool counts people
 (Q32); the History screen (filter, All · Held · Lists · Journal · Answered,
-the strand, the day sheet). Next: the rest of the pages (⋯, the pray button
-and praying in place), Prayer detail and past lists' pages (their History
+the strand, the day sheet); praying in place on both pages. Next: the rest
+of the pages (⋯), Prayer detail and past lists' pages (their History
 rows are inert until then), then build order step 3 (onboarding, auth,
 setSelfName).
 Still open in prayer mode: backgrounding and the welcome-back question, the
@@ -180,7 +180,9 @@ Theme/        tokens + semantic access; no logic
   are native sheets with detents; Tier A components (ring button, cluster,
   seal) sit inside them.
 - **Prayer mode is not a route**: it's Home in a different state
-  (`prayer-flow.md`).
+  (`prayer-flow.md`), or a page's (praying in place, below). The halo, the
+  check haptic and the `PrayerSheet` sit on Home's `NavigationStack`, not
+  on Home's content, so they show over a pushed page too.
 - Onboarding is derived from data (no self name → onboarding), never a stored
   step counter.
 
@@ -448,8 +450,13 @@ compose queries; if an operation is missing, ask for a backend change.
   `historyChip(_:)`.
 - `PrayerSession`: phases idle → praying → (invitation) → closing → idle.
   The committing Amen (`amen(prayedWithListToday:)` or
-  `amenFromInvitation()`) returns the `NewPrayer` for Home to log; the
-  selection stays through closing so held rings don't blink.
+  `amenFromInvitation()`) returns the `NewPrayer` for Home to log
+  (`amen(logTo:)` does both, for Home and the pages); the selection stays
+  through closing so held rings don't blink. `start(list:on:)` with a
+  page's subject id sets `page` (in memory only; a restored draft would
+  resume on Home) and pre-checks it (an intention's name with it; no
+  haptic); `leavePage()` keeps praying and the checks; cancel and close
+  clear it.
 - `Features/AddSheet/AddSheet` + `State/AddSheetModel` (screens.md, Add
   sheet, revised 2026-11-07): **native `Form`s** (inset grouped, Tier B:
   no hand-set padding, type size or alignment), background hidden, rows
@@ -537,6 +544,37 @@ compose queries; if an operation is missing, ask for a backend change.
   "N prayers" (the world, live-stitched) → Lists, "N · in your journal" →
   Journal, "N · answered" (gold number) → Answered. "See all" → All; a node
   → All with that day's sheet. All push `Route.history`.
+- **Praying in place** (detail-page.md "Praying on the page";
+  `Features/Prayer/PrayInPlace.swift`, both pages): `PagePrayBar` in a
+  `safeAreaBar` is the pray-button slot: a blue interactive-glass capsule
+  "🙏 Pray for {alias}" ("Pray" on the self page and intention pages;
+  answered intentions too) that morphs (`glassEffectID`, `GlassID` passed
+  into `CountdownButton`; Reduce Motion: `materialize`) into the round
+  pray button, with the pill (`PrayerTimerLine`: timer · "with N", no 🔎)
+  fading in beside it. The page is stripped while `session.page == id`
+  (start through the closing sheet): the carry card, the History preview,
+  the Intentions ＋ (and the first-intention button: the section goes when
+  there are no intentions) and ‹ fade out (`duration.strip`; Reduce
+  Motion: `quick`), and fade back as the closing sheet goes, with the new
+  counts. Kept: the Intentions title. Cancel is a native toolbar button
+  in ‹'s place (`navigationBarBackButtonHidden`), with the shared
+  `discardPrayerDialog` past ~30 s. The name's check sits in the header's
+  trailing slot (`CheckSlot`, balanced by a clear frame so the avatar
+  stays centered), the whole header a toggle; the ring is held today or
+  held now, as on Home. Intention rows check instead of pushing. On an
+  intention's page the person's name is plain text and the title row is
+  the toggle; there its name follows it (`releasingWithItsName` in
+  PlusPrayerDomain: unchecking the intention lets the name go too, since
+  it can't be unchecked there). "Pray for others" (`PrayForOthersLink`,
+  under the intentions, under the name with none, under the intention on
+  its page) calls `leavePage()`; HomeView pops to Home when `page` clears
+  mid-prayer, and calls `leavePage()` when the path shrinks (back), so a
+  swipe from a deeper page lands on Home too. **Swipe-back with the back
+  button hidden**: `swipeBackWhileBackHidden(_:)` (a zero-size
+  `UIViewControllerRepresentable`) takes the navigation controller's
+  `interactivePopGestureRecognizer` delegate while praying (begins when
+  there's a page to pop) and hands the original back after; check it after
+  an iOS update. Mid-prayer a Home row checks, so no page opens.
 - **History** (`Features/History`, history.md): `HistoryScreen` (pushed as
   `Route.history(HistoryRequest)`: scope, tab, day; Home's footer opens it
   unfiltered). The filter sits in the toolbar: the glyph opens
@@ -562,8 +600,8 @@ compose queries; if an operation is missing, ask for a backend change.
   with the gold dot when held, the counts, the carry card ("Print with
   {alias} ✱", "Instead of …", "Also carries …", footer incl. "Private while
   {alias} isn't carried"; none when Answered: gold "Answered · {date}"),
-  the History preview filtered to it (no Answered tile). Not yet: ⋯, the
-  pray button, praying in place. Home's intention rows push it in browse mode (in
+  the History preview filtered to it (no Answered tile). Not yet: ⋯
+  (praying in place: above). Home's intention rows push it in browse mode (in
   prayer a tap checks the row).
 - Search (`Features/Home/HomeSearch.swift`): 🔎 turns the pill into the
   search field (see Theming above); with text it stays a field until ×,
@@ -578,7 +616,11 @@ compose queries; if an operation is missing, ask for a backend change.
   preview node → its day sheet; ＋ → name
   (no carry row; tabs keep the keyboard; the For push drops it, a pick or
   back refocuses) → alias → Add → on Home;
-  long-press Dad → Add intention ("Print with Dad") → on Home; Aunt Bea's
+  long-press Dad → Add intention ("Print with Dad") → on Home; Dad's page
+  → Pray for Dad (stripped, Dad held) → Amen → invitation → Amen → closing
+  → Done → the tile one higher, today's node held; an intention's page →
+  Pray → Pray for others → Home with the checks kept → Cancel; Dad's page
+  in prayer → edge swipe → Home, still praying; Aunt Bea's
   page ("Private · in your prayers only") → carry her → her first
   intention → the ＋; search → results → no matches →
   the match hint → ×. Screenshots are attached to

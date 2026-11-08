@@ -204,6 +204,13 @@ nonisolated enum L10n {
             case (.prayToCarry, false): "\(prefix).prayToCarry"
             }
         }
+        /// The pray capsule (detail-page.md "Pray button label"): "Pray for
+        /// Dad" on a name's page; "Pray" on the self page and an intention's.
+        static func pray(for name: String?) -> String {
+            name.map { String(format: t("page.pray.for"), $0) } ?? t("page.pray")
+        }
+        /// Praying in place: the quiet link back to Home, still praying.
+        static var prayForOthers: String { t("page.prayForOthers") }
         static var intentions: String { t("page.intentions") }
         static var history: String { t("page.history") }
         static func addIntention(for name: String, isSelf: Bool) -> String {

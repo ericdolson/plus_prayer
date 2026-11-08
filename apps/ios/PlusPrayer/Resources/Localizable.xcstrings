@@ -1206,6 +1206,42 @@
         }
       }
     },
+    "page.pray" : {
+      "comment" : "The self page's and an intention page's blue pray capsule (detail-page.md \"Pray button label\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pray"
+          }
+        }
+      }
+    },
+    "page.pray.for" : {
+      "comment" : "A name's page: the blue pray capsule in the pray-button slot (detail-page.md \"Pray button label\"). %@ = the alias, else the name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pray for %@"
+          }
+        }
+      }
+    },
+    "page.prayForOthers" : {
+      "comment" : "Praying on a page: a quiet text link under the intentions; goes to Home still in prayer, the checks kept (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pray for others"
+          }
+        }
+      }
+    },
     "page.status.covered" : {
       "comment" : "A person's page: the carry card's footer when your prayer with the list covers the next list. 1: the alias, else the name; 2: the list number (detail-page.md).",
       "extractionState" : "manual",

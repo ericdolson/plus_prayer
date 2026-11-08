@@ -9,6 +9,10 @@ import SwiftUI
 /// closing sheet). Search docks above the keyboard (`HomeSearch.swift`).
 /// Home is the root of a navigation stack (its own bar hidden): a name row
 /// pushes the name's page, and adding a name lands there.
+/// The halo and the PrayerSheet sit on the stack, not on Home's content, so
+/// a prayer said on a page (in place, detail-page.md) gets them there too.
+/// A page's "Pray for others", back or swipe-back leaves the page with the
+/// session still praying (`leavePage`): the stack pops to Home.
 struct HomeView: View {
     @Environment(HomeModel.self) private var home
     @Environment(PrayerSession.self) private var session
@@ -24,6 +28,18 @@ struct HomeView: View {
             homeContent
                 .toolbar(.hidden, for: .navigationBar)
                 .routes()
+        }
+        .overlay { Halo(active: session.isPraying, flare: session.amenCount) }
+        .sensoryFeedback(.impact(weight: .light), trigger: session.checkCount)
+        .sheet(isPresented: prayerSheetShown) { PrayerSheet() }
+        // Back or swipe-back off a page praying in place: Home, still praying.
+        .onChange(of: path) { old, new in
+            if new.count < old.count && session.page != nil && session.isPraying { session.leavePage() }
+        }
+        // Left the page ("Pray for others", or back from a page with others
+        // under it): straight to Home.
+        .onChange(of: session.page) { old, new in
+            if old != nil && new == nil && session.isPraying && !path.isEmpty { path = [] }
         }
         // Here, not on Home's content: a pushed page takes that off screen,
         // which would cancel the streams the page needs too.
@@ -77,11 +93,7 @@ struct HomeView: View {
         .safeAreaBar(edge: .top) { header }
         .safeAreaBar(edge: .bottom) { bar }
         .background(PP.color.ground)
-        .overlay { Halo(active: session.isPraying, flare: session.amenCount) }
-        .sensoryFeedback(.impact(weight: .light), trigger: session.checkCount)
-        .confirmationDialog(L10n.Prayer.discardQuestion, isPresented: $confirmingDiscard,
-                            titleVisibility: .visible) { discardActions }
-        .sheet(isPresented: prayerSheetShown) { PrayerSheet() }
+        .discardPrayerDialog(isPresented: $confirmingDiscard, session: session)
         .sheet(item: $adding) { model in
             AddSheet(model: model)
                 // A name just added: its page, as Contacts opens what you
@@ -121,17 +133,8 @@ struct HomeView: View {
                  onAdd: { adding = AddSheetModel(home: home) }, onAmen: amen)
     }
 
-    @ViewBuilder private var discardActions: some View {
-        // Not .destructive: the system would paint it red, and +Prayer has no red.
-        Button(L10n.Prayer.discard) { session.cancel() }
-        Button(L10n.Prayer.keepPraying, role: .cancel) {}
-    }
-
     /// The pray button's Amen: commits, or opens the invitation first.
-    private func amen() {
-        guard let prayer = session.amen(prayedWithListToday: home.prayedWithListToday) else { return }
-        Task { await home.log(prayer) }
-    }
+    private func amen() { session.amen(logTo: home) }
 
     /// The invitation, then the closing sheet; dismissing the closing sheet
     /// ends the session (the invitation can't be dismissed).
@@ -140,13 +143,7 @@ struct HomeView: View {
                 set: { shown in if !shown { session.close() } })
     }
 
-    private func cancel() {
-        if session.needsDiscardConfirmation(at: .now) {
-            confirmingDiscard = true
-        } else {
-            session.cancel()
-        }
-    }
+    private func cancel() { session.cancel(confirming: &confirmingDiscard) }
 
     private func quietLines(_ lines: [String]) -> some View {
         VStack(spacing: PP.space.xs) {
