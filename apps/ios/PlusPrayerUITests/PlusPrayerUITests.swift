@@ -199,6 +199,23 @@ final class PlusPrayerUITests: XCTestCase {
         attach(app, "page 3 intention")
     }
 
+    /// A Home intention row (browse mode) → its page: the person's name
+    /// above, "Print with Dad", back to Home.
+    @MainActor
+    func testAnIntentionsPageFromHome() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-PPEnvironment", "mock"]
+        app.launch()
+
+        let row = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Healing after his surgery'"))
+        XCTAssertTrue(row.firstMatch.waitForExistence(timeout: 3))
+        row.firstMatch.tap()
+        XCTAssertTrue(app.switches["Print with Dad"].firstMatch.waitForExistence(timeout: 3), "its carry card")
+        XCTAssertEqual(app.switches["Print with Dad"].firstMatch.value as? String, "1", "Dad prints with it")
+        XCTAssertTrue(app.buttons["Dad"].exists, "the person's name above the title")
+        attach(app, "intention page")
+    }
+
     /// 🔎 → the row docks above the keyboard with the compact pray button →
     /// results → no matches → under Still to hold, "Show →" widens to All →
     /// × closes it.

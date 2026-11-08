@@ -16,7 +16,7 @@ struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var confirmingDiscard = false
     @State private var adding: AddSheetModel?
-    /// The pages pushed over Home: name ids.
+    /// The pages pushed over Home: subject ids (names and intentions).
     @State private var path: [String] = []
 
     var body: some View {
@@ -168,7 +168,7 @@ struct HomeView: View {
                     held: held(name), secondary: secondary(name), hasIntentions: !group.intentions.isEmpty,
                     accessibilityLabel: name.accessibilityLabel(heldOutsidePrayer: !session.isPraying && name.heldToday),
                     check: session.isPraying ? session.check(name.id) : nil,
-                    onTap: { tap(name.id, isName: true) })
+                    onTap: { tap(name.id) })
                 // A name shown only for an intention the filter keeps: dimmed;
                 // the intention stays at full strength.
                 .opacity(name.isContext ? PP.number.contextRow : 1)
@@ -187,7 +187,7 @@ struct HomeView: View {
                              accessibilityLabel: intention.accessibilityLabel(
                                 heldOutsidePrayer: !session.isPraying && intention.heldToday),
                              check: session.isPraying ? session.check(intention.id) : nil,
-                             onTap: { tap(intention.id, isName: false) })
+                             onTap: { tap(intention.id) })
                     .transition(.opacity)
             }
         }
@@ -200,12 +200,12 @@ struct HomeView: View {
         row.secondary.map { SecondaryLine(text: $0.text, kind: $0.answered ? .answered : .notice) }
     }
 
-    /// In prayer a tap checks; in nav mode a name opens its page (an
-    /// intention's page is a later slice).
-    private func tap(_ id: String, isName: Bool) {
+    /// In prayer a tap checks; in browse mode a row opens its page (a
+    /// name's or an intention's: `SubjectPage` picks by kind).
+    private func tap(_ id: String) {
         if session.isPraying {
             session.toggle(id)
-        } else if isName {
+        } else {
             path.append(id)
         }
     }

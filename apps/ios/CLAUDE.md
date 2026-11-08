@@ -524,7 +524,8 @@ compose queries; if an operation is missing, ask for a backend change.
   {alias} ✱", "Instead of …", "Also carries …", footer incl. "Private while
   {alias} isn't carried"; none when Answered: gold "Answered · {date}"),
   History with the Answered hint. Not yet: ⋯, the pray button, praying in
-  place, tapping a day; Home's intention rows still don't push it.
+  place, tapping a day. Home's intention rows push it in browse mode (in
+  prayer a tap checks the row).
 - Search (`Features/Home/HomeSearch.swift`): 🔎 turns the pill into the
   search field (see Theming above); with text it stays a field until ×,
   even with the keyboard down. The query feeds Home's domain rules
