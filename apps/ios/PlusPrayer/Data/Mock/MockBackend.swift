@@ -153,6 +153,29 @@ final class MockBackend {
         subjects.send(proposed)
     }
 
+    /// The restoreSubject callable, for an item the mock holds outside Home
+    /// (it has no archive yet): `item` and, for a name, its cascade-archived
+    /// `intentions` come back. Pool-aware like the server: an item that
+    /// would go over the pool comes back with its own flag off (a name's
+    /// intentions keep theirs). A Released intention reopens. Returns the
+    /// item's flag after.
+    @discardableResult
+    func restoreSubject(_ item: Subject, intentions: [Subject] = []) async throws(SetCarriedError) -> Bool {
+        try? await Task.sleep(for: latency)
+        guard online else { throw .offline }
+        var restored = item
+        if restored.resolution == .released {
+            restored.resolution = nil
+            restored.resolvedAt = nil
+        }
+        if let header = header.value {
+            restored.isCarried = restoredCarryFlag(restored, intentions: intentions, into: SubjectTree(subjects.value),
+                                                   user: header, now: now())
+        }
+        subjects.send(subjects.value + [restored] + (item.isName ? intentions : []))
+        return restored.isCarried
+    }
+
     // MARK: Scenario controls
 
     /// addSubject fails as the server would for anything unexpected (or the

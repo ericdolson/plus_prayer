@@ -183,8 +183,10 @@ Theme/        tokens + semantic access; no logic
 ## Repositories (SQL Connect + RTDB behind one seam)
 Screens never touch the SDK or RTDB. Same surfaces as the Flutter build:
 - `SubjectRepository`: getMySubjects / searchMySubjects; addSubject /
-  updateSubject / setCarriedItems (callables); reorder / resolve / archive /
-  restore / purge.
+  updateSubject / setCarriedItems / restoreSubject (callables; restore is
+  pool-aware since 2026-11-07, no connector mutation: an item that would go
+  over comes back uncarried, `restoredCarryFlag` in PlusPrayerDomain, the
+  mock mirrors it); reorder / resolve / archive / purge.
 - `ListRepository`: getCurrentListMeta / getMyListStatus (SQL Connect)
   merged with RTDB `/lists/current` (live count, `closesAt`).
 - `UserRepository`: getMyHeader, reminders, updateMySettings. Settings writes
@@ -484,7 +486,9 @@ compose queries; if an operation is missing, ask for a backend change.
   change this. Try again." (ink; stays until the next tap or leaving the
   page). Off without enough room (full, or "Would use 2 places · 1
   left"): disabled, "Make room for {alias}" (inert). On with none free or
-  over the pool: "Uses 2 places · none left" (never negative); turning
+  over any pool, a lapsed trial on the free pool included: "Uses 2 places
+  · none left" (never negative; the free-pool line only within the free
+  pool, an uncarried name over it gets "Your one place is in use"); turning
   off is never blocked online (setCarriedItems accepts any save that only
   reduces carrying; the mock mirrors it). "Uses" never counts Answered
   intentions. The page's intention rows sit flush with the section title

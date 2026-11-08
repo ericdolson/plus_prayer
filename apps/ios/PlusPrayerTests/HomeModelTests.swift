@@ -372,6 +372,35 @@ struct HomeModelTests {
         await #expect(throws: SetCarriedError.overLimit) { try await home.setCarried("dad", true) }
     }
 
+    @Test func aLapsedTrialSeesWhatACarriedNameUses() async {
+        defer { running.cancel() }
+        backend.header.update { $0?.entitlementExpiresAt = .now.addingTimeInterval(-60) }
+        await waitUntil { home.nameCarryOffer("dad").pool == 1 }
+        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("dad"))) == "Uses 2 places · none left",
+                "over the free pool: not the free line")
+        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("bea"))) == "Your one place is in use")
+    }
+
+    @Test func restoreComesBackUncarriedOverThePool() async throws {
+        defer { running.cancel() }
+        let now = Date.now
+        let ann = Subject(id: "ann", kind: .soul, publicName: "Ann", isCarried: true, sortOrder: 99, createdAt: now)
+        let work = Subject(id: "ann-1", kind: .intention, parentId: "ann", publicName: "Work", isCarried: true,
+                           sortOrder: 1, createdAt: now)
+        // 7 of 10 carried: Ann and her intention fit.
+        #expect(try await backend.restoreSubject(ann, intentions: [work]))
+        await waitUntil { home.nameCarryOffer("ann").startsOn }
+        // Now 9 of 10: Bo and his intention would make 11.
+        let bo = Subject(id: "bo", kind: .soul, publicName: "Bo", isCarried: true, sortOrder: 100, createdAt: now)
+        let boWork = Subject(id: "bo-1", kind: .intention, parentId: "bo", publicName: "Rest", isCarried: true,
+                             sortOrder: 1, createdAt: now)
+        #expect(try await backend.restoreSubject(bo, intentions: [boWork]) == false)
+        await waitUntil { home.page("bo") != nil }
+        #expect(backend.subjects.value.first { $0.id == "bo" }?.isCarried == false)
+        #expect(backend.subjects.value.first { $0.id == "bo-1" }?.isCarried == true, "its intention keeps its flag")
+        #expect(home.page("bo")?.status == .notOnList)
+    }
+
     @Test func carriedWithNoneFreeTheMeterSaysNoneLeft() async {
         defer { running.cancel() }
         // 7 carried: a pool of 7 is exactly full; a pool of 3 is over.

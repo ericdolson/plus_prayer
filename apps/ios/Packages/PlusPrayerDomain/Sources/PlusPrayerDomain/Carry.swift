@@ -114,9 +114,12 @@ public struct CarryOffer: Sendable, Equatable {
     public let cost: Int
     /// No active entitlement: the free pool (one intention under Me).
     public let isFree: Bool
+    /// What's carried now doesn't fit the pool (a lapsed trial still
+    /// carrying names, or a lowered limit). Set by `nameCarryOffer`.
+    public let isOverPool: Bool
 
     public init(hasRoom: Bool, startsOn: Bool, alsoCarriesParent: Bool, used: Int, pool: Int, cost: Int = 1,
-                isFree: Bool = false) {
+                isFree: Bool = false, isOverPool: Bool = false) {
         self.hasRoom = hasRoom
         self.startsOn = startsOn
         self.alsoCarriesParent = alsoCarriesParent
@@ -124,6 +127,7 @@ public struct CarryOffer: Sendable, Equatable {
         self.pool = pool
         self.cost = cost
         self.isFree = isFree
+        self.isOverPool = isOverPool
     }
 }
 
@@ -170,13 +174,29 @@ public func nameCarryOffer(nameId: String, in tree: SubjectTree, user: UserHeade
                           used: effectiveCarried(tree).count, pool: pool, isFree: isFree)
     }
     let isCarried = subjects[index].isCarried
+    let isOverPool = !checkPool(tree, user: user, now: now).fits
     subjects[index].isCarried = false
     let used = effectiveCarried(SubjectTree(subjects)).count
     subjects[index].isCarried = true
     let carried = SubjectTree(subjects)
     return CarryOffer(hasRoom: isCarried || checkPool(carried, user: user, now: now).fits, startsOn: isCarried,
                       alsoCarriesParent: false, used: used, pool: pool,
-                      cost: effectiveCarried(carried).count - used, isFree: isFree)
+                      cost: effectiveCarried(carried).count - used, isFree: isFree, isOverPool: isOverPool)
+}
+
+/// Restore is pool-aware (subjects.md, 2026-11-07; mirrors the server's
+/// restoreSubject): `item` (as restored: Released reopened) and, for a name,
+/// its cascade-archived `intentions` come back into `tree`. Returns the
+/// item's own flag after: kept, or false when bringing it back carried
+/// would add to what prints and go over the pool. A name's intentions keep
+/// their flags. Never blocks the restore.
+public func restoredCarryFlag(_ item: Subject, intentions: [Subject] = [], into tree: SubjectTree,
+                              user: UserHeader, now: Date) -> Bool {
+    guard item.isCarried else { return false }
+    let before = Set(effectiveCarried(tree).map(\.id))
+    let after = SubjectTree(Array(tree.all) + [item] + intentions)
+    let adds = effectiveCarried(after).contains { !before.contains($0.id) }
+    return !adds || checkPool(after, user: user, now: now).fits
 }
 
 /// A name's carry row subtitle on its page (detail-page.md, 2026-11-07):
@@ -200,17 +220,27 @@ public enum NameCarryMeter: Sendable, Equatable {
     /// Not carried, and it would take everything left: "This uses your last
     /// 2 places".
     case usesLast(Int)
-    /// Not carried and nothing left: "All 10 places in use".
+    /// Not carried and nothing left: "All 10 places in use" (over the free
+    /// pool: "Your one place is in use").
     case allInUse(pool: Int)
-    /// The free pool: "Free carries you and one intention of your own".
+    /// Within the free pool: "Free carries you and one intention of your
+    /// own". Never over it (2026-11-07): there the carried case wins.
     case freeYouAndOneIntention
 }
 
 /// The page's meter for `nameCarryOffer`. "Left" is what's free overall
 /// now (never below 0, a lapsed trial included); "uses" counts only what
 /// prints (`effectiveCarried`: no Answered intentions).
+///
+/// The free pool never fits a name, so a carried name there is always over
+/// it: "Uses 2 places · none left", so a lapsed trial sees why names can't
+/// go back on. The free line shows only within the free pool; an uncarried
+/// name while over it gets the full line.
 public func nameCarryMeter(_ offer: CarryOffer) -> NameCarryMeter {
-    if offer.isFree { return .freeYouAndOneIntention }
+    if offer.isFree {
+        if offer.startsOn { return .usesNoneLeft(cost: offer.cost) }
+        return offer.isOverPool ? .allInUse(pool: offer.pool) : .freeYouAndOneIntention
+    }
     let used = offer.used + (offer.startsOn ? offer.cost : 0)
     let left = max(0, offer.pool - used)
     if offer.startsOn { return left == 0 ? .usesNoneLeft(cost: offer.cost) : .uses(cost: offer.cost, left: left) }

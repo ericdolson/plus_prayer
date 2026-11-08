@@ -183,7 +183,28 @@ struct NameCarryOfferTests {
     @Test func theFreePoolNeverFitsAName() {
         let offer = nameCarryOffer(nameId: "bea", in: tree, user: free, now: now)
         #expect(!offer.hasRoom)
+        #expect(offer.isOverPool, "Dad and Mom are still carried")
+        #expect(nameCarryMeter(offer) == .allInUse(pool: 1), "over the free pool: never the free line")
+    }
+
+    @Test func withinTheFreePoolTheFreeLineShows() {
+        // Me, Me's one carried intention, and Bea (off): within the free pool.
+        let me = Fixture.subjects.first { $0.isSelf }!
+        let mine = Fixture.subjects.first { $0.parentId == me.id && $0.isCarried && !$0.isResolved }!
+        let bea = Fixture.name("bea", "Bea", order: 5, carried: false)
+        let small = SubjectTree([me, mine, bea])
+        let offer = nameCarryOffer(nameId: "bea", in: small, user: free, now: now)
+        #expect(!offer.isOverPool && !offer.hasRoom)
         #expect(nameCarryMeter(offer) == .freeYouAndOneIntention)
+    }
+
+    @Test func aLapsedTrialOverTheFreePoolSeesWhatACarriedNameUses() {
+        // Trial ended with Dad (and dad-1) and Mom still carried.
+        let dad = nameCarryOffer(nameId: "dad", in: tree, user: free, now: now)
+        #expect(dad.isFree && dad.isOverPool && dad.startsOn && dad.hasRoom, "on, and free to turn off")
+        #expect(nameCarryMeter(dad) == .usesNoneLeft(cost: 2))
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "mom", in: tree, user: free, now: now))
+                == .usesNoneLeft(cost: 1), "an answered intention doesn't count")
     }
 
     @Test func carriedTheMeterSaysWhatItUsesAndWhatsFreeOverall() {
@@ -240,5 +261,44 @@ struct NameCarryOfferTests {
         let withRuth = SubjectTree(Fixture.subjects + [ruth])
         #expect(nameCarryMeter(nameCarryOffer(nameId: "ruth", in: withRuth, user: member(10), now: now)) == .left(6))
         #expect(nameCarryMeter(nameCarryOffer(nameId: "ruth", in: withRuth, user: member(5), now: now)) == .usesLast(1))
+    }
+}
+
+/// Restore is pool-aware (mirrors the server's restoreSubject).
+struct RestoreCarryTests {
+    let now = Fixture.epoch
+    let tree = Fixture.tree // 4 carried beyond Me
+    func member(_ limit: Int) -> UserHeader {
+        UserHeader(id: "u", includeLimit: limit, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(86_400))
+    }
+    let free = UserHeader(id: "u", includeLimit: 10, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(-1))
+    let ann = Fixture.name("ann", "Ann", order: 9)
+    let annWork = Fixture.intention("ann-1", "ann", "Work", order: 1)
+
+    @Test func underThePoolRestoreKeepsCarrying() {
+        #expect(restoredCarryFlag(ann, intentions: [annWork], into: tree, user: member(6), now: now))
+    }
+
+    @Test func overThePoolANameComesBackUncarried() {
+        // 4 + Ann + her intention = 6 > 5.
+        #expect(!restoredCarryFlag(ann, intentions: [annWork], into: tree, user: member(5), now: now))
+        #expect(!restoredCarryFlag(ann, into: tree, user: free, now: now), "a lapsed trial")
+    }
+
+    @Test func overThePoolAnIntentionComesBackUncarried() {
+        let dad3 = Fixture.intention("dad-3", "dad", "Sleep", order: 3)
+        #expect(!restoredCarryFlag(dad3, into: tree, user: member(4), now: now))
+        #expect(restoredCarryFlag(dad3, into: tree, user: member(5), now: now))
+    }
+
+    @Test func aRestoreThatAddsNothingKeepsItsFlag() {
+        // Under Bea (not carried): doesn't print, so nothing to fit.
+        let bea2 = Fixture.intention("bea-2", "bea", "Peace", order: 2)
+        #expect(restoredCarryFlag(bea2, into: tree, user: free, now: now))
+        let answered = Fixture.intention("dad-4", "dad", "Results", order: 4, answered: true)
+        #expect(restoredCarryFlag(answered, into: tree, user: member(1), now: now))
+        var off = ann
+        off.isCarried = false
+        #expect(!restoredCarryFlag(off, into: tree, user: member(10), now: now), "an uncarried item stays off")
     }
 }
