@@ -28,9 +28,12 @@ protocol SubjectRepository {
     /// `SetCarriedError`.
     func setCarriedItems(_ ids: [String]) async throws
 
-    /// GetSubjectDetail for a page: the lists it printed on and your
-    /// prayers that held it (History and the counts). Re-read after writes.
-    func detail(_ id: String) -> AsyncStream<SubjectDetail>
+    /// History (history.md): your prayers, newest first, each with what it
+    /// held (getMyPrayerHistory), and every list entry of your subjects
+    /// (the entries getSubjectDetail returns per subject; an account-wide
+    /// read is a backend ask). History and a page's preview scope it in
+    /// PlusPrayerDomain. Re-read after writes.
+    func history() -> AsyncStream<HistoryLog>
 }
 
 struct NewSubject: Equatable {

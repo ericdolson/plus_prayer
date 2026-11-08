@@ -16,14 +16,14 @@ struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var confirmingDiscard = false
     @State private var adding: AddSheetModel?
-    /// The pages pushed over Home: subject ids (names and intentions).
-    @State private var path: [String] = []
+    /// What's pushed over Home: pages (names and intentions) and History.
+    @State private var path: [Route] = []
 
     var body: some View {
         NavigationStack(path: $path) {
             homeContent
                 .toolbar(.hidden, for: .navigationBar)
-                .navigationDestination(for: String.self) { id in SubjectPage(id: id) }
+                .routes()
         }
         // Here, not on Home's content: a pushed page takes that off screen,
         // which would cancel the streams the page needs too.
@@ -86,7 +86,7 @@ struct HomeView: View {
             AddSheet(model: model)
                 // A name just added: its page, as Contacts opens what you
                 // just created.
-                .onDisappear { if let id = model.addedNameId { path.append(id) } }
+                .onDisappear { if let id = model.addedNameId { path.append(.subject(id)) } }
         }
     }
 
@@ -117,7 +117,8 @@ struct HomeView: View {
     }
 
     private var bar: some View {
-        HomeDock(onAdd: { adding = AddSheetModel(home: home) }, onAmen: amen)
+        HomeDock(onHistory: { path.append(.history(HistoryRequest())) },
+                 onAdd: { adding = AddSheetModel(home: home) }, onAmen: amen)
     }
 
     @ViewBuilder private var discardActions: some View {
@@ -206,7 +207,7 @@ struct HomeView: View {
         if session.isPraying {
             session.toggle(id)
         } else {
-            path.append(id)
+            path.append(.subject(id))
         }
     }
 }
@@ -268,6 +269,7 @@ private struct HomePreview: View {
 /// bar takes focus when asked, but its `@FocusState` doesn't read back true
 /// there (iOS 26), so the dock follows the keyboard's own notifications.
 private struct HomeDock: View {
+    let onHistory: () -> Void
     let onAdd: () -> Void
     let onAmen: () -> Void
 
@@ -280,7 +282,7 @@ private struct HomeDock: View {
         @Bindable var home = home
         HomeBar(prayerStartedAt: session.startedAt, prayingWith: home.prayingWith,
                 searching: home.isSearching, compact: home.isSearching && keyboardUp,
-                onSearch: { home.openSearch() }, onAdd: onAdd,
+                onHistory: onHistory, onSearch: { home.openSearch() }, onAdd: onAdd,
                 onPray: { session.start(list: home.listContext) },
                 onAmen: onAmen) {
             SearchField(query: $home.query, focused: $searchFocused, onClose: closeSearch)

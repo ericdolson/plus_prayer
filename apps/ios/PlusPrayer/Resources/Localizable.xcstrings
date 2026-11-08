@@ -588,18 +588,6 @@
         }
       }
     },
-    "closing.addNote" : {
-      "comment" : "Closing sheet: opens the private note field.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add a note"
-          }
-        }
-      }
-    },
     "closing.carried" : {
       "comment" : "Closing sheet after a prayer with the list (auth-onboarding.md: the first Amen's line). The number is the next list.",
       "extractionState" : "manual",
@@ -1432,6 +1420,30 @@
         }
       }
     },
+    "closing.addToJournal" : {
+      "comment" : "Closing sheet: opens the private journal entry field (history.md \"Words\"; the schema keeps `note`).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to journal"
+          }
+        }
+      }
+    },
+    "history.answered.on" : {
+      "comment" : "History's Answered tab, in gold: the day it was answered (\"Answered Nov 3\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Answered %@"
+          }
+        }
+      }
+    },
     "page.carry.left" : {
       "comment" : "A person's page: the carry toggle's subtitle, the places free now (one place = one person; Q32; detail-page.md).",
       "extractionState" : "manual",
@@ -1682,96 +1694,8 @@
         }
       }
     },
-    "page.counts.heldByYou" : {
-      "comment" : "A page's counts: your prayers that held them (detail-page.md).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Held by you · %#@prayers@"
-          },
-          "substitutions" : {
-            "prayers" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg prayer"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg prayers"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "page.counts.world" : {
-      "comment" : "A page's counts, once ever carried: prayers offered for the lists they were on, and how many lists (detail-page.md).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carried by the world · %1$#@prayers@ · %2$#@lists@"
-          },
-          "substitutions" : {
-            "prayers" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg prayer"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg prayers"
-                    }
-                  }
-                }
-              }
-            },
-            "lists" : {
-              "argNum" : 2,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg list"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg lists"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "history.prayed" : {
-      "comment" : "History: a period's prayers (detail-page.md \"Wording\").",
+      "comment" : "History's Answered tab: how often you prayed for it (\"You prayed 12 times · On 30 lists\").",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1795,7 +1719,7 @@
       }
     },
     "history.lists" : {
-      "comment" : "History: how many printed lists in the period (detail-page.md).",
+      "comment" : "History's Answered tab: how many printed lists it was on.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1819,7 +1743,7 @@
       }
     },
     "history.summary" : {
-      "comment" : "Not copy: joins \"You prayed N times\" and \"On N lists\".",
+      "comment" : "Not copy: joins two parts of a History line with a middle dot.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1831,7 +1755,7 @@
       }
     },
     "history.notes" : {
-      "comment" : "History: notes written in the period, right-aligned on its label line (detail-page.md).",
+      "comment" : "History: journal entries in an older period, in its right column (\"✎ 1\").",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1843,7 +1767,7 @@
       }
     },
     "history.notes.spoken" : {
-      "comment" : "History: VoiceOver for \"✎ N\".",
+      "comment" : "History: VoiceOver for \"✎ N\" in an older period's row.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1852,13 +1776,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld note"
+                  "value" : "%lld journal entry"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld notes"
+                  "value" : "%lld journal entries"
                 }
               }
             }
@@ -1866,20 +1790,8 @@
         }
       }
     },
-    "history.answered" : {
-      "comment" : "History, on an intention's own page: the hint on the period it was answered (detail-page.md).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Answered"
-          }
-        }
-      }
-    },
     "history.begun" : {
-      "comment" : "History: the last row; the argument is the day it was added (\"Sep 12\", with the year before this year) (detail-page.md).",
+      "comment" : "History: the last line; the argument is the day it began (\"Sep 12\", with the year before this year): the subject's creation, or your first prayer when unfiltered (history.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1890,14 +1802,420 @@
         }
       }
     },
+    "history.day.answered" : {
+      "comment" : "History's day sheet, in gold: the intention answered that day (history.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Answered · %@"
+          }
+        }
+      }
+    },
+    "history.day.onList" : {
+      "comment" : "History's day sheet: the list that day and what the world prayed it (\"On List 46 · 3,475 prayers\"; history.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On List %1$lld · %2$#@prayers@"
+          },
+          "substitutions" : {
+            "prayers" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg prayer"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg prayers"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "history.gap.spoken" : {
+      "comment" : "VoiceOver: a folded run of empty days (`··`) in the History strand (history.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No activity"
+          }
+        }
+      }
+    },
+    "history.journalEntry" : {
+      "comment" : "VoiceOver: the ✎ on a prayer with a journal entry (History's Held tab).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journal entry"
+          }
+        }
+      }
+    },
+    "history.node.answered" : {
+      "comment" : "VoiceOver, one sentence of a History node's label: an intention was answered that day.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Answered."
+          }
+        }
+      }
+    },
+    "history.node.journal" : {
+      "comment" : "VoiceOver, one sentence of a History node's label: a journal entry that day.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journal entry."
+          }
+        }
+      }
+    },
+    "history.node.onList" : {
+      "comment" : "VoiceOver, one sentence of a History node's label: on that day's printed list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On List %lld."
+          }
+        }
+      }
+    },
+    "history.node.prayed" : {
+      "comment" : "VoiceOver, one sentence of a History node's label: you prayed that day.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You prayed."
+          }
+        }
+      }
+    },
+    "history.people.title" : {
+      "comment" : "History: the title of the filter's searchable people list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People"
+          }
+        }
+      }
+    },
+    "history.prayer.length" : {
+      "comment" : "History: a prayer's length, after its time (\"7:42 AM · 12 min\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
+          }
+        }
+      }
+    },
+    "history.prayer.lengthAuto" : {
+      "comment" : "History: an auto-saved prayer's length (stats-history.md: \"~38 min\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "~%lld min"
+          }
+        }
+      }
+    },
+    "history.row.lists" : {
+      "comment" : "History: an older period's lists, in its right column.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld list"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld lists"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "history.row.prayers" : {
+      "comment" : "History: an older period's prayers, in its right column (\"2 prayers · 6 lists · ✎ 1\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld prayer"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld prayers"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "history.seeAll" : {
+      "comment" : "A page's History preview: opens History filtered to this person (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See all"
+          }
+        }
+      }
+    },
     "history.spoken.sentence" : {
-      "comment" : "Not copy: one sentence of a History grid's VoiceOver label (\"November. On 9 lists. You prayed 6 times.\").",
+      "comment" : "Not copy: one sentence of a History node's VoiceOver label (\"Thursday, November 5.\").",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@."
+          }
+        }
+      }
+    },
+    "history.tab.all" : {
+      "comment" : "History tab: the strand, everything (history.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        }
+      }
+    },
+    "history.tab.answered" : {
+      "comment" : "History tab: answered intentions (history.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Answered"
+          }
+        }
+      }
+    },
+    "history.tab.held" : {
+      "comment" : "History tab: your prayers, by day (history.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Held"
+          }
+        }
+      }
+    },
+    "history.tab.journal" : {
+      "comment" : "History tab: your journal entries, in full (history.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journal"
+          }
+        }
+      }
+    },
+    "history.tab.lists" : {
+      "comment" : "History tab: the lists they were on (history.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lists"
+          }
+        }
+      }
+    },
+    "history.tabs.label" : {
+      "comment" : "VoiceOver: the label of History's tab control (All · Held · Lists · Journal · Answered).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show"
+          }
+        }
+      }
+    },
+    "history.tile.answered" : {
+      "comment" : "A page's History tile under its gold number: their answered intentions (\"1 · answered\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "answered"
+          }
+        }
+      }
+    },
+    "history.tile.journal" : {
+      "comment" : "A page's History tile under its number: journal entries from prayers that held them (\"3 · in your journal\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "in your journal"
+          }
+        }
+      }
+    },
+    "history.tile.lists.one" : {
+      "comment" : "A page's History tile under the number 1: the lists they were on.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "list"
+          }
+        }
+      }
+    },
+    "history.tile.lists.other" : {
+      "comment" : "A page's History tile under its number (not 1): the lists they were on (\"40 · lists\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lists"
+          }
+        }
+      }
+    },
+    "history.tile.prayers.one" : {
+      "comment" : "A page's History tile under the number 1: your prayers that held them (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "your prayer"
+          }
+        }
+      }
+    },
+    "history.tile.prayers.other" : {
+      "comment" : "A page's History tile under its number (not 1): your prayers that held them (\"14 · your prayers\"; detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "your prayers"
+          }
+        }
+      }
+    },
+    "history.time" : {
+      "comment" : "History, unfiltered, above the strand: your prayer time this week and all time (app-brief.md; stats-history.md). Arguments are durations (\"2h 14m\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time in prayer · %1$@ this week · %2$@ all time"
+          }
+        }
+      }
+    },
+    "history.title" : {
+      "comment" : "The History screen's navigation title (history.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History"
+          }
+        }
+      }
+    },
+    "history.today" : {
+      "comment" : "History: \"Today ▾\" above the first node, and the day heading for today.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today"
+          }
+        }
+      }
+    },
+    "history.yesterday" : {
+      "comment" : "History: the day heading for yesterday (Held, Journal).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yesterday"
           }
         }
       }

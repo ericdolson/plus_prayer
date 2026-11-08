@@ -105,7 +105,8 @@ nonisolated enum L10n {
         static func carried(_ next: Int) -> String {
             String(format: NSLocalizedString("closing.carried", comment: ""), locale: .current, next)
         }
-        static var addNote: String { NSLocalizedString("closing.addNote", comment: "") }
+        /// "Add to journal" (history.md "Words"; schema keeps `note`).
+        static var addToJournal: String { NSLocalizedString("closing.addToJournal", comment: "") }
         static var noteHint: String { NSLocalizedString("closing.noteHint", comment: "") }
     }
 
@@ -238,63 +239,146 @@ nonisolated enum L10n {
             chosen.isEmpty ? nameOnly : chosen.formatted(.list(type: .and))
         }
 
-        /// "Held by you · 47 prayers".
-        static func heldByYou(_ prayers: Int) -> String {
-            String.localizedStringWithFormat(t("page.counts.heldByYou"), prayers)
-        }
-        /// "Carried by the world · 61,204 prayers · 19 lists".
-        static func carriedByWorld(prayers: Int, lists: Int) -> String {
-            String.localizedStringWithFormat(t("page.counts.world"), prayers, lists)
-        }
     }
 
-    /// The History section (detail-page.md "History (calendar)").
+    /// History (history.md) and a page's preview (detail-page.md).
     enum History {
         private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
+        private static func plural(_ key: String, _ n: Int) -> String { String.localizedStringWithFormat(t(key), n) }
+        private static func join(_ parts: [String]) -> String {
+            parts.dropFirst().reduce(parts.first ?? "") { String(format: t("history.summary"), $0, $1) }
+        }
+
+        static var title: String { t("history.title") }
+        static var tabsLabel: String { t("history.tabs.label") }
+        static var tabAll: String { t("history.tab.all") }
+        static var tabHeld: String { t("history.tab.held") }
+        static var tabLists: String { t("history.tab.lists") }
+        static var tabJournal: String { t("history.tab.journal") }
+        static var tabAnswered: String { t("history.tab.answered") }
+        static var people: String { t("history.people.title") }
+        static var seeAll: String { t("history.seeAll") }
+        static var today: String { t("history.today") }
+        static var yesterday: String { t("history.yesterday") }
+        static var noActivity: String { t("history.gap.spoken") }
+        static var journalEntry: String { t("history.journalEntry") }
 
         /// "You prayed once" / "You prayed 6 times".
-        static func prayed(_ n: Int) -> String { String.localizedStringWithFormat(t("history.prayed"), n) }
+        static func prayed(_ n: Int) -> String { plural("history.prayed", n) }
         /// "On 9 lists".
-        static func lists(_ n: Int) -> String { String.localizedStringWithFormat(t("history.lists"), n) }
-        /// "You prayed 6 times · On 9 lists"; either half left out at 0; nil when both are.
-        static func summary(_ s: PeriodSummary) -> String? {
-            switch (s.prayers, s.lists) {
-            case (0, 0): nil
-            case (let p, 0): prayed(p)
-            case (0, let l): lists(l)
-            case (let p, let l): String(format: t("history.summary"), prayed(p), lists(l))
-            }
+        static func lists(_ n: Int) -> String { plural("history.lists", n) }
+        /// "You prayed 12 times · On 30 lists"; either half left out at 0.
+        static func prayedAndLists(prayers: Int, lists: Int) -> String? {
+            let parts = [prayers > 0 ? prayed(prayers) : nil, lists > 0 ? self.lists(lists) : nil].compactMap { $0 }
+            return parts.isEmpty ? nil : join(parts)
         }
-        /// "✎ 2".
-        static func notes(_ n: Int) -> String { String(format: t("history.notes"), locale: .current, n) }
-        static func notesSpoken(_ n: Int) -> String { String.localizedStringWithFormat(t("history.notes.spoken"), n) }
-        static var answered: String { t("history.answered") }
+        /// An older period's right column: "2 prayers · 6 lists · ✎ 1".
+        static func periodSummary(_ s: PeriodSummary) -> String {
+            join([s.prayers > 0 ? plural("history.row.prayers", s.prayers) : nil,
+                  s.lists > 0 ? plural("history.row.lists", s.lists) : nil,
+                  s.notes > 0 ? String(format: t("history.notes"), locale: .current, s.notes) : nil].compactMap { $0 })
+        }
+        static func periodSummarySpoken(_ s: PeriodSummary) -> String {
+            join([s.prayers > 0 ? plural("history.row.prayers", s.prayers) : nil,
+                  s.lists > 0 ? plural("history.row.lists", s.lists) : nil,
+                  s.notes > 0 ? plural("history.notes.spoken", s.notes) : nil].compactMap { $0 })
+        }
+        /// "6 days with the world" (the badge's own words).
+        static func streak(_ days: Int) -> String { L10n.Home.streak(days) }
+        /// "Time in prayer · 2h 14m this week · 61h 5m all time".
+        static func time(_ time: PrayerTime) -> String {
+            String(format: t("history.time"), duration(time.thisWeek), duration(time.allTime))
+        }
+        private static func duration(_ seconds: Int) -> String {
+            Duration.seconds(seconds).formatted(.units(allowed: [.hours, .minutes], width: .narrow))
+        }
         /// "Begun · Sep 12" this year; "Begun · Sep 12, 2025" before.
         static func begun(_ date: LocalDate, today: LocalDate) -> String {
+            String(format: t("history.begun"), shortDate(date, today: today))
+        }
+        /// "Nov 3"; with the year before this year.
+        static func shortDate(_ date: LocalDate, today: LocalDate) -> String {
             let day = date.start()
-            let text = date.year == today.year
+            return date.year == today.year
                 ? day.formatted(.dateTime.month(.abbreviated).day())
                 : day.formatted(.dateTime.month(.abbreviated).day().year())
-            return String(format: t("history.begun"), text)
         }
         /// "November" this year; "December 2025" otherwise; a year row "2025".
         static func period(_ period: HistoryPeriod, today: LocalDate) -> String {
             switch period {
             case .year(let year): String(year)
-            case .month(let year, let month):
-                monthName(year: year, month: month, withYear: year != today.year)
+            case .month(let year, let month): monthName(year: year, month: month, withYear: year != today.year)
             }
         }
         static func monthName(year: Int, month: Int, withYear: Bool) -> String {
             let day = LocalDate(year: year, month: month, day: 1).start()
             return withYear ? day.formatted(.dateTime.month(.wide).year()) : day.formatted(.dateTime.month(.wide))
         }
-        /// A grid as one VoiceOver element: "November. On 9 lists. You
-        /// prayed 6 times."
-        static func gridSpoken(month: String, _ s: PeriodSummary) -> String {
-            let parts = [s.lists > 0 ? lists(s.lists) : nil, s.prayers > 0 ? prayed(s.prayers) : nil].compactMap { $0 }
-            return ([month] + parts).map { String(format: t("history.spoken.sentence"), $0) }.joined(separator: " ")
+        /// The month tab: "Nov".
+        static func monthTab(year: Int, month: Int) -> String {
+            LocalDate(year: year, month: month, day: 1).start().formatted(.dateTime.month(.abbreviated))
         }
+        /// Day headings: "Today", "Yesterday", "Thursday, Nov 5" (with the
+        /// year before this year).
+        static func dayHeading(_ date: LocalDate, today: LocalDate) -> String {
+            if date == today { return self.today }
+            if date == today.adding(days: -1) { return yesterday }
+            let day = date.start()
+            return date.year == today.year
+                ? day.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())
+                : day.formatted(.dateTime.weekday(.wide).month(.abbreviated).day().year())
+        }
+        /// The day sheet's title: "Thursday, November 5".
+        static func longDate(_ date: LocalDate, today: LocalDate) -> String {
+            let day = date.start()
+            return date.year == today.year
+                ? day.formatted(.dateTime.weekday(.wide).month(.wide).day())
+                : day.formatted(.dateTime.weekday(.wide).month(.wide).day().year())
+        }
+        /// A node, for VoiceOver: "Thursday, November 5. On List 49. You
+        /// prayed. Journal entry."
+        static func node(_ node: StrandNode, lists: [Int], today: LocalDate) -> String {
+            var parts = [String(format: t("history.spoken.sentence"), longDate(node.date, today: today))]
+            if node.isToday { parts.insert(String(format: t("history.spoken.sentence"), self.today), at: 0) }
+            parts += lists.map { String(format: t("history.node.onList"), locale: .current, $0) }
+            if node.prayed { parts.append(t("history.node.prayed")) }
+            if node.journal { parts.append(t("history.node.journal")) }
+            if node.answered { parts.append(t("history.node.answered")) }
+            return parts.joined(separator: " ")
+        }
+        /// "On List 46 · 3,475 prayers".
+        static func onList(_ list: Int, prayers: Int) -> String {
+            String.localizedStringWithFormat(t("history.day.onList"), list, prayers)
+        }
+        /// "Answered · Healing after his surgery".
+        static func answered(_ text: String) -> String { String(format: t("history.day.answered"), text) }
+        /// "Answered Nov 3".
+        static func answeredOn(_ date: LocalDate, today: LocalDate) -> String {
+            String(format: t("history.answered.on"), shortDate(date, today: today))
+        }
+        /// "7:42 AM · 12 min"; auto-saved "~38 min".
+        static func prayerLine(startedAt: Date, seconds: Int, autoSaved: Bool) -> String {
+            let minutes = max(1, Int((Double(seconds) / 60).rounded()))
+            let length = String(format: t(autoSaved ? "history.prayer.lengthAuto" : "history.prayer.length"),
+                                locale: .current, minutes)
+            return join([startedAt.formatted(date: .omitted, time: .shortened), length])
+        }
+        /// The Lists tab: "Sat, Nov 7".
+        static func listDate(_ date: LocalDate, today: LocalDate) -> String {
+            let day = date.start()
+            return date.year == today.year
+                ? day.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
+                : day.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day().year())
+        }
+        static func listTitle(_ number: Int) -> String { L10n.Card.title(number) }
+        static func listPrayers(_ n: Int) -> String { L10n.Card.prayers(n) }
+
+        // Tiles: the number, then its words.
+        // (Separate keys for one and other: the words don't hold the number.)
+        static func tilePrayers(_ n: Int) -> String { t(n == 1 ? "history.tile.prayers.one" : "history.tile.prayers.other") }
+        static func tileLists(_ n: Int) -> String { t(n == 1 ? "history.tile.lists.one" : "history.tile.lists.other") }
+        static var tileJournal: String { t("history.tile.journal") }
+        static var tileAnswered: String { t("history.tile.answered") }
     }
 
     enum Common {

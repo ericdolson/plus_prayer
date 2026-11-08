@@ -4,9 +4,10 @@ import SwiftUI
 /// An intention's page (detail-page.md "Intention page"; minimal slice):
 /// no avatar; the person's name above the title (tappable → their page);
 /// the intention as the title in the system sans (Title 2 semibold, wraps)
-/// with a gold dot before it when held today; the counts; the carry card
-/// ("Print with {alias} ✱" and the status line); History. Answered: gold
-/// "Answered · {date}" under the title and no carry card.
+/// with a gold dot before it when held today; the carry card ("Print with
+/// {alias} ✱" and the status line); the History preview filtered to it
+/// (no Answered tile). Answered: gold "Answered · {date}" under the title
+/// and no carry card.
 ///
 /// Not yet: the ⋯ menu (Answered / Release / Edit), the pray button.
 struct IntentionPage: View {
@@ -22,16 +23,13 @@ struct IntentionPage: View {
         ScrollView {
             if let page = home.intentionPage(id) {
                 VStack(alignment: .leading, spacing: PP.space.xl) {
-                    VStack(alignment: .leading, spacing: PP.space.lg) {
-                        header(page)
-                        counts(page.counts)
-                    }
+                    header(page)
                     if page.answered == nil {
                         carryCard(page)
                             .padding(.horizontal, PP.space.gutter)
                     }
-                    if let history = home.history(id) {
-                        HistorySection(history: history, today: home.today, showsAnswered: true)
+                    if let preview = home.historyPreview(id) {
+                        HistoryPreviewSection(subjectId: id, values: preview, today: home.today)
                     }
                 }
                 .padding(.vertical, PP.space.lg)
@@ -41,13 +39,12 @@ struct IntentionPage: View {
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: home.intentionCarryOffer(personId: home.intentionPage(id)?.personId ?? "",
                                                intentionId: id).startsOn) { pending = nil }
-        .task(id: id) { await home.watchDetail(id) }
         .onDisappear { carryError = nil }
     }
 
     private func header(_ page: IntentionPageValues) -> some View {
         VStack(alignment: .leading, spacing: PP.space.xs) {
-            NavigationLink(value: page.personId) {
+            NavigationLink(value: Route.subject(page.personId)) {
                 Text(verbatim: page.personLabel)
                     .font(PP.type.bodySmall)
                     .foregroundStyle(PP.color.inkMuted)
@@ -72,20 +69,6 @@ struct IntentionPage: View {
             }
         }
         .padding(.horizontal, PP.space.gutter)
-    }
-
-    @ViewBuilder private func counts(_ counts: DetailCounts?) -> some View {
-        if let counts {
-            VStack(alignment: .leading, spacing: PP.space.xxs) {
-                Text(L10n.Page.heldByYou(counts.heldByYou))
-                if let world = counts.world {
-                    Text(L10n.Page.carriedByWorld(prayers: world.prayers, lists: world.lists))
-                }
-            }
-            .font(PP.type.bodySmall)
-            .foregroundStyle(PP.color.inkMuted)
-            .padding(.horizontal, PP.space.gutter)
-        }
     }
 
     /// "Print with {alias} ✱" (on Me's intentions: "Print with your name ✱").
@@ -156,7 +139,7 @@ private struct IntentionPagePreview: View {
     var body: some View {
         NavigationStack {
             IntentionPage(id: id)
-                .navigationDestination(for: String.self) { SubjectPage(id: $0) }
+                .routes()
         }
         .environment(home)
         .task { await home.run() }

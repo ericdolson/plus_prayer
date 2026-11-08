@@ -6,14 +6,17 @@ import PlusPrayerDomain
 /// reverse trial, a 6-day streak that last counted yesterday, List 52 sealed
 /// and current, not yet prayed with today. Dates are relative to `now`, so
 /// "held today" and "Answered · Oct 19" read naturally whenever it runs.
-/// Names are illustrative.
+/// Names and journal entries are illustrative. History (`MockHistory`) has
+/// every state: Dad carried with near-daily lists, prayers and entries; Aunt
+/// Bea private, with prayer days and gaps; Mom's answered intention; Lena
+/// added today.
 struct MockSeed {
     var subjects: [Subject]
     var header: UserHeader
     var list: CurrentList
     var myStatus: MyListStatus
     var stats: LiveStats
-    var history: MockHistory
+    var history: HistoryLog
 
     static func standard(now: Date, calendar: Calendar = .current) -> MockSeed {
         let today = LocalDate(now, calendar: calendar)
@@ -47,6 +50,8 @@ struct MockSeed {
             name("parish", "Our parish", order: 4, tone: 13, createdAgo: 15),
             name("ukraine", "Ukraine", order: 5, tone: 14, prayed: 0, createdAgo: 2),
             name("bea", "Beatrice Moreno", alias: "Aunt Bea", order: 6, tone: 6, carried: false, prayed: 1, createdAgo: 25),
+            // Added today: nothing yet but today.
+            name("lena", "Lena Park", order: 7, tone: 3, carried: false, createdAgo: 0),
         ]
 
         let header = UserHeader(id: "mock-user", displayName: "Eric Olson", selfSubjectId: "self",
@@ -70,73 +75,114 @@ struct MockSeed {
 
         return MockSeed(subjects: subjects, header: header, list: list, myStatus: myStatus,
                         stats: LiveStats(prayingNow: 213, prayedLastHour: 640, prayedToday: 4113),
-                        history: .seeded(subjects, today: today, currentList: list, calendar: calendar))
+                        history: MockHistory.seeded(subjects, today: today, now: now, currentList: list, calendar: calendar))
     }
 }
 
-/// GetSubjectDetail's data in the mock: which lists each subject printed on
-/// and the prayers that held it. Seeded with a believable past (list N's
-/// date is N days before today's List 52; some days missed), then grows
-/// with every prayer the backend takes and every flip.
-struct MockHistory: Sendable, Equatable {
-    struct Entry: Sendable, Equatable {
-        let subjectId: String
-        var entry: DetailListEntry
-    }
+/// The History log in the mock (getMyPrayerHistory + your subjects' list
+/// entries), seeded with a believable past, then grown by every prayer the
+/// backend takes and every flip. List N's date is N days before today's
+/// List 52. Deterministic: a small hash of a key and the day decides.
+enum MockHistory {
+    /// Illustrative journal entries (user content, not product copy).
+    static let journal = [
+        "Dad sounded stronger on the phone tonight.",
+        "A quiet morning. Thought of Mom most of the time.",
+        "Hard to focus today. Stayed anyway.",
+        "Daniel starts treatment next week.",
+        "Prayed on the walk to work.",
+    ]
+    /// The day Mom's intention was answered gets its own entry.
+    static let answeredEntry = "Ruth's baby is here. Both well."
 
-    struct Prayer: Sendable, Equatable {
-        let id: String
-        /// Held items and their names (the server links a held intention's name).
-        let subjectIds: Set<String>
-        let localDate: LocalDate
-        var hasNote: Bool
-    }
-
-    var entries: [Entry] = []
-    var prayers: [Prayer] = []
-
-    static func seeded(_ subjects: [Subject], today: LocalDate, currentList: CurrentList,
-                       calendar: Calendar = .current) -> MockHistory {
+    static func seeded(_ subjects: [Subject], today: LocalDate, now: Date, currentList: CurrentList,
+                       calendar: Calendar = .current) -> HistoryLog {
         let tree = SubjectTree(subjects)
-        var history = MockHistory()
-        // Deterministic "random": a small hash of the id and the day.
-        func roll(_ id: String, _ day: Int) -> Int {
-            (id.unicodeScalars.reduce(day &* 31) { ($0 &* 33 &+ Int($1.value)) & 0x7fff_ffff }) % 7
+        func roll(_ key: String, _ day: Int, _ mod: Int = 7) -> Int {
+            (key.unicodeScalars.reduce(day &* 31) { ($0 &* 33 &+ Int($1.value)) & 0x7fff_ffff }) % mod
         }
-        for subject in subjects {
-            let begun = LocalDate(subject.createdAt, calendar: calendar)
-            let age = today.days(since: begun)
-            guard age > 0 else { continue }
-            let printed = subject.isSelf || isEffectivelyCarried(subject, in: tree)
-            for back in stride(from: age, through: 1, by: -1) {
-                let date = today.adding(days: -back)
-                let r = roll(subject.id, back)
-                // On the list most days you prayed with it (a few missed).
-                if printed && r != 0 {
-                    let number = currentList.listNumber - back
-                    history.entries.append(Entry(subjectId: subject.id, entry: DetailListEntry(
-                        listId: "list-\(number)", listNumber: number, listDate: date,
-                        prayerCount: 3000 + (number * 37) % 900)))
-                }
-                // You held them on some days; a few prayers have notes.
-                if r == 2 || r == 5 || subject.lastPrayed == date {
-                    history.prayers.append(Prayer(id: "seed-\(subject.id)-\(back)", subjectIds: [subject.id],
-                                                  localDate: date, hasNote: r == 5))
-                }
+        func age(_ s: Subject) -> Int { today.days(since: LocalDate(s.createdAt, calendar: calendar)) }
+        func prayedAgo(_ s: Subject) -> Int? { s.lastPrayed.map { today.days(since: $0) } }
+        func answeredAgo(_ s: Subject) -> Int? {
+            s.resolution == .answered ? s.resolvedAt.map { today.days(since: LocalDate($0, calendar: calendar)) } : nil
+        }
+        let span = tree.me.map(age) ?? 0
+        var log = HistoryLog()
+
+        // Lists: you were on most (a few missed; the last week unbroken, as
+        // the streak says), and so was everything you carried then. An
+        // answered intention printed until it was answered.
+        func printed(_ s: Subject, back: Int) -> Bool {
+            guard age(s) > back else { return false }
+            if s.isSelf { return true }
+            if s.isName { return s.isCarried }
+            guard s.isCarried, let parent = tree.parent(of: s.id), parent.isSelf || parent.isCarried else { return false }
+            return answeredAgo(s).map { back > $0 } ?? (s.resolution == nil)
+        }
+        for back in stride(from: span - 1, through: 0, by: -1) where back <= 7 || roll("list", back) != 0 {
+            let date = today.adding(days: -back)
+            let number = currentList.listNumber - back
+            let record = back == 0
+                ? ListRecord(listId: currentList.id, listNumber: number, listDate: currentList.listDate,
+                             prayerCount: currentList.prayerCount, sealVariant: currentList.sealVariant)
+                : ListRecord(listId: "list-\(number)", listNumber: number, listDate: date,
+                             prayerCount: 3000 + (number * 37) % 900, sealVariant: date.weekdayFromSunday)
+            for subject in subjects where printed(subject, back: back) {
+                log.entries.append(LoggedEntry(subjectId: subject.id, list: record))
             }
         }
-        // Today's list (52): what printed on it.
-        let onToday = carriedNames(tree).flatMap { [$0] + tree.intentions(of: $0.id).filter { isEffectivelyCarried($0, in: tree) } }
-        history.entries += onToday.map {
-            Entry(subjectId: $0.id, entry: DetailListEntry(listId: currentList.id, listNumber: currentList.listNumber,
-                                                          listDate: currentList.listDate,
-                                                          prayerCount: currentList.prayerCount))
+
+        // Prayers: most days one (some days two) holding several people.
+        // Nobody is held after their `lastPrayed` and everyone is held on it,
+        // so Home's gold matches. Dad nearly every day; Aunt Bea now and then.
+        func rolled(_ s: Subject, _ back: Int) -> Bool {
+            let r = roll(s.id, back)
+            switch s.id {
+            case "dad": return r != 0
+            case "bea": return r == 2 || r == 5
+            default: return s.isName ? [1, 2, 4].contains(r) : [1, 4].contains(r)
+            }
         }
-        // Held today (the seed's `lastPrayed` today).
-        for subject in subjects where subject.lastPrayed == today {
-            history.prayers.append(Prayer(id: "seed-\(subject.id)-0", subjectIds: [subject.id], localDate: today,
-                                          hasNote: false))
+        for back in stride(from: span, through: 0, by: -1) {
+            let date = today.adding(days: -back)
+            let eligible = subjects.filter { s in
+                guard let last = prayedAgo(s), age(s) >= back else { return false }
+                return back >= last
+            }
+            let must = eligible.filter { prayedAgo($0) == back }
+            if must.isEmpty && roll("you", back) == 3 { continue } // a day off
+            var held = Set(must.map(\.id) + eligible.filter { rolled($0, back) }.map(\.id))
+            let answeredThatDay = subjects.first { answeredAgo($0) == back }
+            if let answeredThatDay { held.insert(answeredThatDay.id) }
+            held.formUnion(held.compactMap { tree.parent(of: $0)?.id })
+            guard !held.isEmpty else { continue }
+
+            // Some days split into a morning and an evening prayer, by person.
+            let people = tree.names.filter { held.contains($0.id) }
+            let parts: [[Subject]] = people.count >= 4 && roll("split", back, 3) == 1
+                ? [Array(people.prefix(people.count / 2)), Array(people.dropFirst(people.count / 2))]
+                : [people]
+            for (index, part) in parts.enumerated() {
+                let ids = Set(part.flatMap { [$0.id] + tree.intentions(of: $0.id).map(\.id) }).intersection(held)
+                let hour = index == 0 && parts.count == 1 ? (roll("am", back, 2) == 0 ? 7 : 21) : (index == 0 ? 7 : 21)
+                let minute = (roll("min", back, 12) * 5)
+                var start = date.start(in: calendar).addingTimeInterval(Double(hour * 3600 + minute * 60))
+                // Today's prayer was earlier today, not later.
+                if back == 0 { start = max(date.start(in: calendar), min(start, now.addingTimeInterval(-3600))) }
+                let autoSaved = back == 9 && index == 0
+                let note: String? = if answeredThatDay != nil && index == parts.count - 1 {
+                    answeredEntry
+                } else if roll("note", back * 2 + index, 5) == 2 {
+                    journal[(back + index) % journal.count]
+                } else {
+                    nil
+                }
+                log.prayers.append(LoggedPrayer(
+                    id: "seed-\(back)-\(index)", startedAt: start, localDate: date,
+                    durationSeconds: autoSaved ? 38 * 60 : (4 + roll("len", back + index, 20)) * 60,
+                    autoSaved: autoSaved, note: note, held: ids))
+            }
         }
-        return history
+        return log
     }
 }

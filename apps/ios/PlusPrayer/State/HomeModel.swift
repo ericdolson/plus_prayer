@@ -65,6 +65,7 @@ final class HomeModel {
             group.addTask { await self.watchConfig() }
             group.addTask { await self.watchLocalPrayers() }
             group.addTask { await self.watchNetwork() }
+            group.addTask { await self.watchHistory() }
             group.addTask { await self.followTheDay() }
         }
     }
@@ -89,6 +90,9 @@ final class HomeModel {
     }
     private func watchNetwork() async {
         for await value in repositories.network.online() { isOnline = value }
+    }
+    private func watchHistory() async {
+        for await value in repositories.subjects.history() { historyLog = value }
     }
     private func watchLocalPrayers() async {
         for await value in repositories.prayers.localPrayers() { localPrayers = value }
@@ -294,7 +298,7 @@ final class HomeModel {
             id: id, initials: monogram(subject), tone: subject.tone, isSelf: subject.isSelf,
             label: subject.label, printedName: subject.label != subject.publicName ? subject.publicName : nil,
             heldToday: isHeldToday(subject, today: today), status: status(of: subject, tree: tree),
-            counts: counts(id), printsWith: printsWith, intentions: intentions)
+            printsWith: printsWith, intentions: intentions)
     }
 
     /// The carry card's footer (detail-page.md "Status line").
@@ -364,46 +368,13 @@ final class HomeModel {
             id: id, text: subject.publicName, personId: person.id, personLabel: person.label,
             personIsSelf: person.isSelf, heldToday: isHeldToday(subject, today: today),
             answered: subject.resolvedAt.map { L10n.Row.answered($0) },
-            status: subject.isResolved ? nil : status(of: subject, tree: tree), counts: counts(id))
+            status: subject.isResolved ? nil : status(of: subject, tree: tree))
     }
 
-    // MARK: History and counts (GetSubjectDetail)
+    // MARK: History (history.md; HomeModel+History.swift)
 
-    /// Each page's detail as it streams in (`watchDetail`, the page's `.task`).
-    private(set) var details: [String: SubjectDetail] = [:]
-
-    /// Watches one page's detail until the page goes.
-    func watchDetail(_ id: String) async {
-        for await value in repositories.subjects.detail(id) { details[id] = value }
-    }
-
-    /// The detail with this device's unsent prayers folded in (the server
-    /// links a held intention's name too).
-    private func detail(_ id: String) -> SubjectDetail? {
-        guard var detail = details[id] else { return nil }
-        let tree = tree
-        let known = Set(detail.prayers.map(\.id))
-        for prayer in localPrayers where !known.contains(prayer.id) {
-            let held = prayer.subjectIds.contains(id)
-                || prayer.subjectIds.contains { tree.parent(of: $0)?.id == id }
-            if held { detail.prayers.append(DetailPrayer(id: prayer.id, localDate: prayer.localDate)) }
-        }
-        return detail
-    }
-
-    /// "Held by you · N prayers" / "Carried by the world · …"; nil until loaded.
-    func counts(_ id: String) -> DetailCounts? {
-        detail(id).map { detailCounts($0, currentListId: list?.id, livePrayerCount: list?.prayerCount) }
-    }
-
-    /// The History section; nil until loaded.
-    func history(_ id: String, calendar: Calendar = .current) -> History? {
-        guard let subject = tree[id], let detail = detail(id) else { return nil }
-        let answeredOn = subject.isIntention && subject.resolution == .answered
-            ? subject.resolvedAt.map { LocalDate($0, calendar: calendar) } : nil
-        return PlusPrayerDomain.history(detail, begun: LocalDate(subject.createdAt, calendar: calendar), today: today,
-                                        answeredOn: answeredOn, firstWeekday: calendar.firstWeekday)
-    }
+    /// The History log as it streams in; nil until it arrives.
+    private(set) var historyLog: HistoryLog?
 
     /// Active names and intentions; at the ~500 cap the add sheet says so.
     var subjectCount: Int { subjects?.count ?? 0 }
@@ -479,8 +450,8 @@ struct NameGroup: Identifiable, Equatable {
     var id: String { name.id }
 }
 
-/// A name's page: the person, their counts, the carry card and their
-/// intentions.
+/// A name's page: the person, the carry card and their intentions (the
+/// History preview comes from `historyPreview`).
 struct PersonPageValues: Equatable {
     let id: String
     let initials: String
@@ -493,8 +464,6 @@ struct PersonPageValues: Equatable {
     let heldToday: Bool
     /// The carry card's footer; nil until the current list has arrived.
     let status: CarryStatus?
-    /// nil until the detail has loaded.
-    let counts: DetailCounts?
     /// "Prints with": the chosen intentions' text (empty = "Name only");
     /// nil hides the row (not carried, no open intentions, or the self).
     let printsWith: [String]?
@@ -530,7 +499,6 @@ struct IntentionPageValues: Equatable {
     let answered: String?
     /// The carry card's footer; nil when answered or before the list loads.
     let status: CarryStatus?
-    let counts: DetailCounts?
 }
 
 /// One name in the add sheet's For row and "Who is this for?".

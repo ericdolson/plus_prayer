@@ -21,8 +21,9 @@ struct AvatarCluster: View {
     }
 
     let people: [Person]
-    /// What follows the names: "will be on List 53".
-    let trailing: String
+    /// What follows the names: "will be on List 53". nil: the avatars
+    /// alone (History's "who it held"), VoiceOver reading every name.
+    let trailing: String?
     var avatarSize: CGFloat = PP.size.cluster.avatar
     /// What the cluster sits on, for the separator rings.
     var surface: Color = PP.color.ground
@@ -45,10 +46,25 @@ struct AvatarCluster: View {
                 L10n.Cluster.two(named[0], named[1])
             }
         }
-        return L10n.Cluster.sentence(names, trailing)
+        return L10n.Cluster.sentence(names, trailing ?? "")
+    }
+
+    private var spoken: String {
+        let names = people.map(\.name).formatted(.list(type: .and))
+        return trailing.map { L10n.Cluster.sentence(names, $0) } ?? names
     }
 
     var body: some View {
+        if trailing == nil {
+            discs
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(spoken)
+        } else {
+            withText
+        }
+    }
+
+    private var withText: some View {
         ViewThatFits(in: .horizontal) {
             HStack(spacing: PP.space.sm) {
                 discs
@@ -60,7 +76,7 @@ struct AvatarCluster: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(L10n.Cluster.sentence(people.map(\.name).formatted(.list(type: .and)), trailing))
+        .accessibilityLabel(spoken)
     }
 
     private var label: some View { Text(text) }
@@ -106,6 +122,7 @@ struct AvatarCluster: View {
     ]
     VStack(spacing: PP.space.xl) {
         AvatarCluster(people: Array(people.prefix(1)), trailing: "will be on List 53")
+        AvatarCluster(people: Array(people.prefix(3)), trailing: nil)
         AvatarCluster(people: Array(people.prefix(4)), trailing: "will be on List 53")
         AvatarCluster(people: people, trailing: "will be on List 53",
                       avatarSize: PP.size.cluster.avatarLarge, centered: true)

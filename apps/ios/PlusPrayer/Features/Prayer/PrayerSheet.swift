@@ -159,7 +159,7 @@ private struct ClosingView: View {
                     Button {
                         writing = true
                     } label: {
-                        Label { Text(L10n.Closing.addNote) } icon: { PPIcon.note }
+                        Label { Text(L10n.Closing.addToJournal) } icon: { PPIcon.note }
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.glass)

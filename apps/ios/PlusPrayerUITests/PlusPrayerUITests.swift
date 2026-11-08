@@ -38,7 +38,7 @@ final class PlusPrayerUITests: XCTestCase {
         sleep(1)
         attach(app, "3 closing")
 
-        app.buttons["Add a note"].tap()
+        app.buttons["Add to journal"].tap()
         sleep(1)
         attach(app, "4 note")
         app.typeText("A quiet morning.")
@@ -197,6 +197,44 @@ final class PlusPrayerUITests: XCTestCase {
         XCTAssertTrue(added.firstMatch.waitForExistence(timeout: 3), "on her page")
         XCTAssertTrue(app.buttons["Add intention for Aunt Bea"].exists, "the ＋ on the title, once there's one")
         attach(app, "page 3 intention")
+    }
+
+    /// Dad's page → the "your prayers" tile → History filtered to Dad (the
+    /// chip) on the Held tab → × widens to everyone, still on Held.
+    @MainActor
+    func testHistoryFromAPersonsTile() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-PPEnvironment", "mock"]
+        app.launch()
+
+        let dad = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Dad,'"))
+        XCTAssertTrue(dad.firstMatch.waitForExistence(timeout: 3))
+        dad.firstMatch.tap()
+        let tile = app.buttons["page.history.tile.held"]
+        XCTAssertTrue(app.buttons["page.history.seeAll"].waitForExistence(timeout: 3) || tile.exists)
+        for _ in 0..<4 where !tile.isHittable { app.swipeUp() }
+        XCTAssertTrue(tile.isHittable, "the tile, on Dad's page")
+        tile.tap()
+
+        let chip = app.buttons["history.filter.chip"]
+        XCTAssertTrue(chip.waitForExistence(timeout: 3), "History opens filtered")
+        XCTAssertEqual(chip.label, "Dad")
+        let held = app.segmentedControls.buttons["Held"]
+        XCTAssertTrue(held.exists)
+        XCTAssertTrue(held.isSelected, "on the Held tab")
+        XCTAssertTrue(app.staticTexts["Today"].exists, "today's prayers under their heading")
+
+        app.buttons["history.filter.clear"].tap()
+        XCTAssertTrue(app.buttons["history.filter"].waitForExistence(timeout: 3), "everyone: the filter glyph")
+        XCTAssertTrue(app.segmentedControls.buttons["Held"].isSelected)
+
+        // Back on Dad's page, today's node opens History on today's sheet.
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        let node = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'history.node.'")).firstMatch
+        for _ in 0..<4 where !node.isHittable { app.swipeUp() }
+        node.tap()
+        let onList = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'On List'")).firstMatch
+        XCTAssertTrue(onList.waitForExistence(timeout: 3), "the day sheet: Dad is on today's list")
     }
 
     /// A Home intention row (browse mode) → its page: the person's name

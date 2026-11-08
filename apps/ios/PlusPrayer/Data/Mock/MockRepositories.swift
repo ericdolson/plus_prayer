@@ -29,17 +29,7 @@ final class MockSubjectRepository: SubjectRepository {
         try await backend.setCarriedItems(ids)
     }
 
-    func detail(_ id: String) -> AsyncStream<SubjectDetail> {
-        let backend = backend
-        let source = backend.history.stream()
-        return AsyncStream { continuation in
-            let task = Task { @MainActor in
-                for await history in source { continuation.yield(backend.detail(id, in: history)) }
-                continuation.finish()
-            }
-            continuation.onTermination = { _ in task.cancel() }
-        }
-    }
+    func history() -> AsyncStream<HistoryLog> { backend.history.stream() }
 }
 
 final class MockListRepository: ListRepository {

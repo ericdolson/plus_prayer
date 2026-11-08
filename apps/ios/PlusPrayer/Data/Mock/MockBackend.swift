@@ -16,8 +16,9 @@ final class MockBackend {
     let myStatus: Watched<MyListStatus?>
     let stats: Watched<LiveStats>
     let config = Watched(AppConfig.defaults)
-    /// GetSubjectDetail's lists and prayers, for every subject.
-    let history: Watched<MockHistory>
+    /// History: your prayers (with what each held) and your subjects' list
+    /// entries (getMyPrayerHistory + the entries).
+    let history: Watched<HistoryLog>
 
     /// Simulated network latency for writes.
     let latency: Duration
@@ -36,7 +37,7 @@ final class MockBackend {
     let connected = Watched(true)
     private var reconnectHandlers: [() -> Void] = []
 
-    /// Prayer notes by prayer id (`updatePrayerNote`).
+    /// Journal entries by prayer id (`updatePrayerNote`).
     private(set) var notes: [String: String] = [:]
 
     /// The mock's "now": real time plus whatever the clock was advanced by.
@@ -72,9 +73,10 @@ final class MockBackend {
         // The server links each held intention's name too.
         let tree = SubjectTree(subjects.value)
         let held = Set(prayer.subjectIds + prayer.subjectIds.compactMap { tree.parent(of: $0)?.id })
-        history.update { $0.prayers.append(MockHistory.Prayer(id: prayer.id, subjectIds: held,
-                                                                localDate: prayer.localDate,
-                                                                hasNote: prayer.note != nil)) }
+        history.update { $0.prayers.append(LoggedPrayer(id: prayer.id, startedAt: prayer.startedAt,
+                                                       localDate: prayer.localDate,
+                                                       durationSeconds: prayer.durationSeconds, note: prayer.note,
+                                                       held: held)) }
 
         guard prayer.includesList else { return }
         header.update { $0 = $0.map { afterListPrayer($0, on: prayer.localDate) } }
@@ -91,7 +93,7 @@ final class MockBackend {
         guard loggedPrayerIds.contains(prayerId) else { return }
         notes[prayerId] = note
         history.update { h in
-            for i in h.prayers.indices where h.prayers[i].id == prayerId { h.prayers[i].hasNote = note != nil }
+            for i in h.prayers.indices where h.prayers[i].id == prayerId { h.prayers[i].note = note }
         }
     }
 
@@ -207,15 +209,6 @@ final class MockBackend {
         return restored.isCarried
     }
 
-    /// GetSubjectDetail: the lists `id` printed on and your prayers that held it.
-    func detail(_ id: String, in history: MockHistory) -> SubjectDetail {
-        SubjectDetail(subjectId: id,
-                      entries: history.entries.filter { $0.subjectId == id }.map(\.entry),
-                      prayers: history.prayers.filter { $0.subjectIds.contains(id) }.map {
-                          DetailPrayer(id: $0.id, localDate: $0.localDate, hasNote: $0.hasNote)
-                      })
-    }
-
     // MARK: Scenario controls
 
     /// addSubject fails as the server would for anything unexpected (or the
@@ -236,6 +229,14 @@ final class MockBackend {
             current.sealVariant = sealed ? current.listDate.weekdayFromSunday : nil
             $0 = current
         }
+        guard let current = list.value else { return }
+        history.update { h in
+            for i in h.entries.indices where h.entries[i].list.listId == current.id {
+                let l = h.entries[i].list
+                h.entries[i].list = ListRecord(listId: l.listId, listNumber: l.listNumber, listDate: l.listDate,
+                                               prayerCount: l.prayerCount, sealVariant: current.sealVariant)
+            }
+        }
     }
 
     /// The morning routine, compressed: the current list closes, the next one
@@ -255,15 +256,14 @@ final class MockBackend {
         list.send(next)
         history.update { h in
             // The closing list settles at its last count.
-            for i in h.entries.indices where h.entries[i].entry.listId == current.id {
-                let e = h.entries[i].entry
-                h.entries[i].entry = DetailListEntry(listId: e.listId, listNumber: e.listNumber, listDate: e.listDate,
-                                                     prayerCount: current.prayerCount)
+            for i in h.entries.indices where h.entries[i].list.listId == current.id {
+                let l = h.entries[i].list
+                h.entries[i].list = ListRecord(listId: l.listId, listNumber: l.listNumber, listDate: l.listDate,
+                                               prayerCount: current.prayerCount, sealVariant: current.sealVariant)
             }
-            h.entries += printed.map {
-                MockHistory.Entry(subjectId: $0.id, entry: DetailListEntry(listId: next.id, listNumber: next.listNumber,
-                                                                          listDate: next.listDate, prayerCount: 0))
-            }
+            let record = ListRecord(listId: next.id, listNumber: next.listNumber, listDate: next.listDate,
+                                    prayerCount: 0)
+            h.entries += printed.map { LoggedEntry(subjectId: $0.id, list: record) }
         }
         myStatus.send(MyListStatus(listId: next.id, entries: printed.map {
             ListEntry(subjectId: $0.id, publicName: $0.publicName, isName: $0.isName, isSelf: $0.isSelf)

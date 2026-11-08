@@ -1,15 +1,15 @@
 import PlusPrayerDomain
 import SwiftUI
 
-/// A name's page (detail-page.md, 2026-11-03 + 2026-11-07/08 + Q32): the
-/// person (a 96 pt avatar, the alias with the printed name under it), the
-/// counts, the carry card (the toggle, "Prints with", the status line;
+/// A name's page, a dashboard (detail-page.md, 2026-11-03 + 2026-11-07/08
+/// + Q32): the person (a 96 pt avatar, the alias with the printed name
+/// under it), the carry card (the toggle, "Prints with", the status line;
 /// the self page's card holds only the status), their intentions with the
-/// ＋ on the section title, and History. Pushed from a Home row, and where
-/// adding a name lands; an intention row pushes its page.
+/// ＋ on the section title, and the History preview (its doors open
+/// History filtered to them). Pushed from a Home row, and where adding a
+/// name lands; an intention row pushes its page.
 ///
-/// Not yet: the ⋯ menu, the pray button and praying in place, tapping a
-/// day or period.
+/// Not yet: the ⋯ menu, the pray button and praying in place.
 struct PersonPage: View {
     let id: String
 
@@ -29,15 +29,12 @@ struct PersonPage: View {
         ScrollView {
             if let page = home.page(id) {
                 VStack(alignment: .leading, spacing: PP.space.xl) {
-                    VStack(alignment: .leading, spacing: PP.space.lg) {
-                        header(page)
-                        counts(page.counts)
-                    }
+                    header(page)
                     carryCard(page)
                         .padding(.horizontal, PP.space.gutter)
                     intentions(page)
-                    if let history = home.history(id) {
-                        HistorySection(history: history, today: home.today, showsAnswered: false)
+                    if let preview = home.historyPreview(id) {
+                        HistoryPreviewSection(subjectId: id, values: preview, today: home.today)
                     }
                 }
                 .padding(.vertical, PP.space.lg)
@@ -48,7 +45,6 @@ struct PersonPage: View {
         .sheet(item: $adding) { model in AddSheet(model: model) }
         .navigationDestination(isPresented: $choosingPrintsWith) { PrintsWithList(personId: id) }
         .onChange(of: home.nameCarryOffer(id).startsOn) { pendingCarry = nil }
-        .task(id: id) { await home.watchDetail(id) }
         // Leaving the page (back, or another page pushed over it) clears
         // the failure line.
         .onDisappear { carryError = nil }
@@ -74,21 +70,6 @@ struct PersonPage: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, PP.space.gutter)
         .accessibilityElement(children: .combine)
-    }
-
-    /// "Held by you · 47 prayers"; "Carried by the world · …" once ever carried.
-    @ViewBuilder private func counts(_ counts: DetailCounts?) -> some View {
-        if let counts {
-            VStack(alignment: .leading, spacing: PP.space.xxs) {
-                Text(L10n.Page.heldByYou(counts.heldByYou))
-                if let world = counts.world {
-                    Text(L10n.Page.carriedByWorld(prayers: world.prayers, lists: world.lists))
-                }
-            }
-            .font(PP.type.bodySmall)
-            .foregroundStyle(PP.color.inkMuted)
-            .padding(.horizontal, PP.space.gutter)
-        }
     }
 
     // MARK: The carry card
@@ -226,7 +207,7 @@ struct PersonPage: View {
             } else {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(page.intentions) { intention in
-                        NavigationLink(value: intention.id) {
+                        NavigationLink(value: Route.subject(intention.id)) {
                             IntentionRow(text: intention.label, carried: intention.carried, held: intention.heldToday,
                                          secondary: intention.secondary.map {
                                              SecondaryLine(text: $0.text, kind: $0.answered ? .answered : .notice)
@@ -278,7 +259,7 @@ private struct PersonPagePreview: View {
     var body: some View {
         NavigationStack {
             PersonPage(id: id)
-                .navigationDestination(for: String.self) { SubjectPage(id: $0) }
+                .routes()
         }
         .environment(home)
         .task { await home.run() }

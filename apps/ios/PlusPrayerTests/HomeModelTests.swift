@@ -49,7 +49,7 @@ struct HomeModelTests {
     @Test func showsTheSeedAsTheScreenshotsDo() {
         defer { running.cancel() }
         #expect(home.groups.map(\.name.label)
-                == ["Me", "Dad", "Mom", "Daniel Kim", "Our parish", "Ukraine", "Aunt Bea"])
+                == ["Me", "Dad", "Mom", "Daniel Kim", "Our parish", "Ukraine", "Aunt Bea", "Lena Park"])
         #expect(home.groups[0].name.initials == "EO")
         #expect(home.groups[1].name.heldToday)
         let card = home.card!
@@ -63,7 +63,7 @@ struct HomeModelTests {
 
     @Test func filterCounts() {
         defer { running.cancel() }
-        #expect(home.counts == HomeFilterCounts(all: 11, stillToHold: 8, carried: 8))
+        #expect(home.counts == HomeFilterCounts(all: 12, stillToHold: 9, carried: 8))
     }
 
     @Test func stillToHoldDimsAHeldNameKeptForItsIntention() {
@@ -198,7 +198,7 @@ struct HomeModelTests {
         home.closeSearch()
         #expect(!home.isSearching)
         #expect(home.query.isEmpty)
-        #expect(home.groups.count == 7)
+        #expect(home.groups.count == 8)
     }
 
     @Test func noMatchesPrefillsTheAddSheet() {
@@ -268,7 +268,8 @@ struct HomeModelTests {
 
     @Test func thePickerIsHomeOrderMeFirst() {
         defer { running.cancel() }
-        #expect(home.pickerNames().map(\.label) == ["Me", "Dad", "Mom", "Daniel Kim", "Our parish", "Ukraine", "Aunt Bea"])
+        #expect(home.pickerNames().map(\.label)
+                == ["Me", "Dad", "Mom", "Daniel Kim", "Our parish", "Ukraine", "Aunt Bea", "Lena Park"])
         #expect(home.pickerNames().first?.initials == "EO")
     }
 
@@ -374,8 +375,6 @@ struct HomeModelTests {
         #expect(L10n.Page.carryOffline == "Needs a connection.")
         #expect(L10n.Page.printsWithValue([]) == "Name only")
         #expect(L10n.Page.printsWithValue(["Rest"]) == "Rest")
-        #expect(L10n.Page.heldByYou(1) == "Held by you · 1 prayer")
-        #expect(L10n.Page.carriedByWorld(prayers: 61_204, lists: 19) == "Carried by the world · 61,204 prayers · 19 lists")
     }
 
     @Test func theLastPlaceAndAFullPool() async {
@@ -500,25 +499,140 @@ struct HomeModelTests {
         #expect(try await backend.restoreSubject(dad3) == false)
     }
 
-    @Test func historyAndCountsComeFromTheDetail() async {
+    // MARK: History (history.md) and the pages' preview
+
+    private func waitForHistory() async {
+        await waitUntil { home.historyLog != nil }
+    }
+
+    private func node(_ item: StrandItem?) -> StrandNode? {
+        if case .node(let node) = item { node } else { nil }
+    }
+
+    @Test func dadIsCarriedWithNearDailyListsPrayersAndEntries() async throws {
         defer { running.cancel() }
-        let watching = Task { await home.watchDetail("dad") }
-        defer { watching.cancel() }
-        await waitUntil { home.history("dad") != nil }
-        let history = home.history("dad")
-        #expect(history?.grids.first?.month == home.today.month)
-        #expect(history?.grids.count == 2, "Dad was added 45 days ago")
-        let counts = home.counts("dad")
-        #expect((counts?.heldByYou ?? 0) > 0)
-        #expect((counts?.world?.lists ?? 0) > 0)
-        // A prayer held now shows at once, folded in from the device.
-        let before = counts?.heldByYou ?? 0
+        await waitForHistory()
+        let preview = try #require(home.historyPreview("dad"))
+        let today = try #require(node(preview.recent.first))
+        #expect(today.isToday && today.prayed && today.listNumbers == [52], "held today, on List 52")
+        #expect(preview.totals.prayers > 20 && preview.totals.lists > 20 && preview.totals.journal > 0)
+        #expect(preview.totals.worldPrayers > 0)
+        #expect(preview.totals.answered == 0)
+        #expect(preview.recent.count > 7, "enough for a full row")
+    }
+
+    @Test func beaIsPrivateWithPrayerDaysAndGaps() async throws {
+        defer { running.cancel() }
+        await waitForHistory()
+        let preview = try #require(home.historyPreview("bea"))
+        #expect(preview.totals.lists == 0, "never carried, never on a list")
+        #expect(preview.totals.prayers > 0)
+        let strand = try #require(home.historyScreen(.subject("bea"))).strand
+        #expect(strand.items.contains { if case .gap = $0 { true } else { false } })
+        #expect(strand.items.compactMap(node).allSatisfy { !$0.onList })
+    }
+
+    @Test func lenaWasAddedTodayAndHasOnlyToday() async throws {
+        defer { running.cancel() }
+        await waitForHistory()
+        let preview = try #require(home.historyPreview("lena"))
+        #expect(preview.recent == [.node(StrandNode(date: home.today, isToday: true))])
+        #expect(preview.totals == HistoryTotals(prayers: 0, lists: 0, worldPrayers: 0, journal: 0, answered: 0),
+                "every tile hidden")
+        let strand = try #require(home.historyScreen(.subject("lena"))).strand
+        #expect(strand.begun == home.today)
+        #expect(strand.older.isEmpty)
+    }
+
+    @Test func momsAnsweredIntentionHasATileATabAndAMark() async throws {
+        defer { running.cancel() }
+        await waitForHistory()
+        let mom = try #require(home.historyPreview("mom"))
+        #expect(mom.totals.answered == 1 && mom.showsAnswered)
+        #expect(home.historyPreview("mom-1")?.showsAnswered == false, "an intention's page has no Answered tile")
+        let screen = try #require(home.historyScreen(.everyone))
+        let row = try #require(screen.answered.first)
+        #expect(row.text == "A safe delivery for Ruth" && row.personLabel == "Mom")
+        #expect(row.prayers > 0 && row.lists > 0)
+        let answered = try #require(screen.strand.items.compactMap(node).first { $0.answered })
+        let sheet = try #require(home.historyDaySheet(answered.date, scope: .everyone))
+        #expect(sheet.answered == ["A safe delivery for Ruth"])
+        #expect(sheet.prayers.contains { $0.note == MockHistory.answeredEntry })
+    }
+
+    @Test func everyoneIsYourDaysWithPrayersThatHoldSeveralPeople() async throws {
+        defer { running.cancel() }
+        await waitForHistory()
+        let screen = try #require(home.historyScreen(.everyone))
+        #expect(screen.streakDays == 6)
+        #expect((screen.time?.allTime ?? 0) > 0)
+        #expect(screen.lists.first?.listNumber == 52)
+        #expect(screen.lists.first?.prayerCount == backend.list.value?.prayerCount, "the live count")
+        #expect(screen.held.flatMap(\.items).contains { ($0.people?.count ?? 0) >= 3 })
+        #expect(!screen.journal.isEmpty)
+        #expect(screen.held.flatMap(\.items).contains { $0.autoSaved })
+        let nodes = screen.strand.items.compactMap(node)
+        #expect(nodes.contains { $0.onList && $0.prayed && $0.journal })
+        #expect(nodes.contains { $0.onList && !$0.prayed }, "a list day without a prayer")
+        #expect(screen.strand.items.contains { if case .month = $0 { true } else { false } })
+        // Filtered: nothing about you, no clusters.
+        let dad = try #require(home.historyScreen(.subject("dad")))
+        #expect(dad.streakDays == nil && dad.time == nil)
+        #expect(dad.held.flatMap(\.items).allSatisfy { $0.people == nil })
+        #expect(home.historyChip(.subject("dad")) == "Dad")
+        #expect(home.historyChip(.subject("dad-1")) == "Healing after his surgery")
+        #expect(home.historyChip(.everyone) == nil)
+    }
+
+    @Test func aDayWithNoPrayerShowsOnlyWhatHappened() async throws {
+        defer { running.cancel() }
+        await waitForHistory()
+        let screen = try #require(home.historyScreen(.everyone))
+        let listOnly = try #require(screen.strand.items.compactMap(node).first { $0.onList && !$0.prayed })
+        let sheet = try #require(home.historyDaySheet(listOnly.date, scope: .everyone))
+        #expect(sheet.prayers.isEmpty && sheet.lists.count == 1)
+    }
+
+    @Test func aPrayerShowsAtOnceFoldedInFromTheDevice() async throws {
+        defer { running.cancel() }
+        await waitForHistory()
+        let before = try #require(home.historyPreview("mom")).totals.prayers
+        backend.online = false
         let prayer = NewPrayer(id: "p-new", startedAt: .now.addingTimeInterval(-60), prayedAt: .now,
                                localDate: home.today, timezone: "UTC", communityListId: nil, listContextNumber: 52,
-                               subjectIds: ["dad-1"])
+                               subjectIds: ["mom-1"])
         await home.log(prayer)
-        await waitUntil { (home.counts("dad")?.heldByYou ?? 0) == before + 1 }
-        #expect(home.counts("dad")?.heldByYou == before + 1, "an intention's prayer holds its name too")
+        await waitUntil { home.historyPreview("mom")?.totals.prayers == before + 1 }
+        #expect(home.historyPreview("mom")?.totals.prayers == before + 1, "an intention's prayer holds its name too")
+        #expect(node(home.historyPreview("mom")?.recent.first)?.prayed == true)
+        backend.online = true
+    }
+
+    @Test func theHistoryCopy() {
+        defer { running.cancel() }
+        let start = Date.now
+        #expect(L10n.History.prayerLine(startedAt: start, seconds: 38 * 60, autoSaved: true)
+                .hasSuffix(" · ~38 min"))
+        #expect(L10n.History.prayerLine(startedAt: start, seconds: 12 * 60 + 10, autoSaved: false)
+                .hasSuffix(" · 12 min"))
+        #expect(L10n.History.onList(46, prayers: 3475) == "On List\u{00A0}46 · 3,475 prayers")
+        #expect(L10n.History.answered("Rest") == "Answered · Rest")
+        #expect(L10n.History.tilePrayers(1) == "your prayer" && L10n.History.tilePrayers(14) == "your prayers")
+        #expect(L10n.History.tileLists(40) == "lists")
+        #expect(L10n.History.tileJournal == "in your journal" && L10n.History.tileAnswered == "answered")
+        #expect(L10n.History.periodSummary(PeriodSummary(prayers: 2, lists: 6, notes: 1)) == "2 prayers · 6 lists · ✎ 1")
+        #expect(L10n.History.periodSummary(PeriodSummary(prayers: 0, lists: 1, notes: 0)) == "1 list")
+        #expect(L10n.History.prayedAndLists(prayers: 12, lists: 30) == "You prayed 12 times · On 30 lists")
+        #expect(L10n.History.prayedAndLists(prayers: 1, lists: 0) == "You prayed once")
+        let day = LocalDate(year: 2026, month: 11, day: 5)
+        let spoken = L10n.History.node(StrandNode(date: day, listNumbers: [49], prayed: true, journal: true),
+                                       lists: [49], today: LocalDate(year: 2026, month: 11, day: 8))
+        #expect(spoken == "Thursday, November 5. On List\u{00A0}49. You prayed. Journal entry.")
+        #expect(L10n.History.dayHeading(day, today: day) == "Today")
+        #expect(L10n.History.dayHeading(day, today: day.adding(days: 1)) == "Yesterday")
+        #expect(L10n.History.dayHeading(day, today: day.adding(days: 3)) == "Thursday, Nov 5")
+        #expect(L10n.History.noActivity == "No activity")
+        #expect(L10n.Closing.addToJournal == "Add to journal")
     }
 }
 

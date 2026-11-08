@@ -22,6 +22,8 @@ nonisolated enum PP {
         static let raisedHigh = Color(light: 0xFFFFFF, dark: 0x2E333A)
         /// The avatar cluster's "+N" disc.
         static let clusterOverflow = Color(light: 0xD3DAE8, dark: 0x2E333A)
+        /// A History strand node: a full neutral disc (history.md), never an avatar color.
+        static let historyNode = Color(light: 0xD3DAE8, dark: 0x2E333A)
         /// Hairline edges (glass rims).
         static let hairline = Color(light: 0xD3DAE8, dark: 0x2A2E35)
         /// The intention thread. Neutral always; never changes color or weight.
@@ -189,7 +191,7 @@ nonisolated enum PP {
         enum held {
             /// Held ring stroke on 40–44 pt avatars and the community card. Crisp, solid, no glow. The ring scales in steps, not proportionally (design-direction §5, 2026-11-08): ringSmall / ring / ringLarge.
             static let ring: CGFloat = 2
-            /// Held ring stroke up to ~32 pt (the History calendar's ~24 pt day ring).
+            /// Held ring stroke up to ~32 pt (a History strand node).
             static let ringSmall: CGFloat = 1.5
             /// Gap to the held ring up to ~32 pt.
             static let ringGapSmall: CGFloat = 1.5
@@ -205,14 +207,28 @@ nonisolated enum PP {
         /// The smallest tap target for a bare glyph button in the content (the ＋ on a page's Intentions title; HIG 44 pt).
         static let hitTarget: CGFloat = 44
         enum history {
-            /// History calendar (detail-page.md, 2026-11-08): the height of a week row; seven columns share the content width.
-            static let row: CGFloat = 32
-            /// A day with nothing on it: a dot in `thread`, the calendar's shape, not a mark of absence.
-            static let dayDot: CGFloat = 4
-            /// A day on a printed list: the carried-mark glyph in inkMuted, this tall.
-            static let bloom: CGFloat = 14
-            /// A day you held them: the gold ring's outer size (stroke and gap: held.ringSmall / ringGapSmall).
-            static let ring: CGFloat = 24
+            /// History strand (history.md, 2026-11-08): a node, a full neutral disc in color.historyNode. Its held ring is held.ringSmall / ringGapSmall outside it.
+            static let node: CGFloat = 30
+            /// A node's tap area (and its slot in the strand and the preview row): the disc plus the spacing around it.
+            static let nodePitch: CGFloat = 44
+            /// The carried-mark glyph pressed into a node on a list day, this tall, in ink at number.historyBloom.
+            static let bloom: CGFloat = 19
+            /// A day with a journal entry: a neutral (inkMuted) dot on the node's upper trailing corner.
+            static let journalDot: CGFloat = 6
+            /// A day an intention was answered: a small gold ✦ (heldGold) on the node's lower leading corner.
+            static let answeredMark: CGFloat = 10
+            /// The slot of a folded run of empty days (`··`), whatever its length.
+            static let gap: CGFloat = 28
+            /// The month tab's minimum width: a tiny calendar page with the short month ("Nov").
+            static let monthTab: CGFloat = 30
+            /// The month tab's top band (the calendar page's binding), inkMuted.
+            static let monthTabBand: CGFloat = 3
+            /// The month tab's corner radius.
+            static let monthTabRadius: CGFloat = 4
+            /// The Lists tab: a list's wax seal at the start of its row.
+            static let listSeal: CGFloat = 28
+            /// History's filter chip: the alias or intention text truncates past this width.
+            static let chipMaxWidth: CGFloat = 200
         }
         enum thread {
             static let stroke: CGFloat = 1
@@ -357,6 +373,8 @@ nonisolated enum PP {
         static let checkSpringFrom: Double = 0.4
         /// During the countdown the pray button's disc is the action blue at this opacity (over raised); solid once Amen is available.
         static let prayButtonDim: Double = 0.3
+        /// The bloom pressed into a History node on a list day: ink at this opacity, like initials on an avatar (history.md).
+        static let historyBloom: Double = 0.55
         /// A name shown only as the parent of an intention the filter keeps (design-direction §4: a held name with an unheld intention under Still to hold) is dimmed to this opacity; the intention stays full strength. Flutter's tuned value.
         static let contextRow: Double = 0.55
         /// The countdown before Amen: a small pie inside the button, this share of its diameter, running down to nothing (no ring outside, no change in size).
