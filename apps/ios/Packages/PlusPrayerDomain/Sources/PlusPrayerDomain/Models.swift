@@ -157,7 +157,8 @@ public struct UserHeader: Sendable, Hashable {
     /// The last local day the user prayed WITH THE LIST.
     public var lastListLocalDate: LocalDate?
     public var graceDays: Int
-    /// Pool size beyond the self name while an entitlement is active.
+    /// Pool size beyond the self name, in people (Q32), while an
+    /// entitlement is active.
     public var includeLimit: Int
     public var trialStartedAt: Date?
     public var entitlementExpiresAt: Date?
@@ -209,9 +210,11 @@ public struct AppConfig: Sendable, Hashable {
     public var draftResumeMinutes = 30
     public var autoSaveHours = 6
     public var durationCapHours = 4
-    /// The base subscription's pool (monetization.md; server config). Not in
-    /// the client's `/config` yet: compiled in until the backend adds it.
+    /// The base subscription's pool, in people (monetization.md; Q32).
     public var basePremiumPool = 10
+    /// How many chosen intentions each carried person (Me included) prints
+    /// with (Q32, 2026-11-08). The server enforces it; the app follows it.
+    public var intentionsPerPerson = 1
 
     public static let defaults = AppConfig()
 

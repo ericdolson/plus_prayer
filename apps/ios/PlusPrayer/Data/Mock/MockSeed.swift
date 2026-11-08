@@ -13,6 +13,7 @@ struct MockSeed {
     var list: CurrentList
     var myStatus: MyListStatus
     var stats: LiveStats
+    var history: MockHistory
 
     static func standard(now: Date, calendar: Calendar = .current) -> MockSeed {
         let today = LocalDate(now, calendar: calendar)
@@ -68,6 +69,74 @@ struct MockSeed {
         })
 
         return MockSeed(subjects: subjects, header: header, list: list, myStatus: myStatus,
-                        stats: LiveStats(prayingNow: 213, prayedLastHour: 640, prayedToday: 4113))
+                        stats: LiveStats(prayingNow: 213, prayedLastHour: 640, prayedToday: 4113),
+                        history: .seeded(subjects, today: today, currentList: list, calendar: calendar))
+    }
+}
+
+/// GetSubjectDetail's data in the mock: which lists each subject printed on
+/// and the prayers that held it. Seeded with a believable past (list N's
+/// date is N days before today's List 52; some days missed), then grows
+/// with every prayer the backend takes and every flip.
+struct MockHistory: Sendable, Equatable {
+    struct Entry: Sendable, Equatable {
+        let subjectId: String
+        var entry: DetailListEntry
+    }
+
+    struct Prayer: Sendable, Equatable {
+        let id: String
+        /// Held items and their names (the server links a held intention's name).
+        let subjectIds: Set<String>
+        let localDate: LocalDate
+        var hasNote: Bool
+    }
+
+    var entries: [Entry] = []
+    var prayers: [Prayer] = []
+
+    static func seeded(_ subjects: [Subject], today: LocalDate, currentList: CurrentList,
+                       calendar: Calendar = .current) -> MockHistory {
+        let tree = SubjectTree(subjects)
+        var history = MockHistory()
+        // Deterministic "random": a small hash of the id and the day.
+        func roll(_ id: String, _ day: Int) -> Int {
+            (id.unicodeScalars.reduce(day &* 31) { ($0 &* 33 &+ Int($1.value)) & 0x7fff_ffff }) % 7
+        }
+        for subject in subjects {
+            let begun = LocalDate(subject.createdAt, calendar: calendar)
+            let age = today.days(since: begun)
+            guard age > 0 else { continue }
+            let printed = subject.isSelf || isEffectivelyCarried(subject, in: tree)
+            for back in stride(from: age, through: 1, by: -1) {
+                let date = today.adding(days: -back)
+                let r = roll(subject.id, back)
+                // On the list most days you prayed with it (a few missed).
+                if printed && r != 0 {
+                    let number = currentList.listNumber - back
+                    history.entries.append(Entry(subjectId: subject.id, entry: DetailListEntry(
+                        listId: "list-\(number)", listNumber: number, listDate: date,
+                        prayerCount: 3000 + (number * 37) % 900)))
+                }
+                // You held them on some days; a few prayers have notes.
+                if r == 2 || r == 5 || subject.lastPrayed == date {
+                    history.prayers.append(Prayer(id: "seed-\(subject.id)-\(back)", subjectIds: [subject.id],
+                                                  localDate: date, hasNote: r == 5))
+                }
+            }
+        }
+        // Today's list (52): what printed on it.
+        let onToday = carriedNames(tree).flatMap { [$0] + tree.intentions(of: $0.id).filter { isEffectivelyCarried($0, in: tree) } }
+        history.entries += onToday.map {
+            Entry(subjectId: $0.id, entry: DetailListEntry(listId: currentList.id, listNumber: currentList.listNumber,
+                                                          listDate: currentList.listDate,
+                                                          prayerCount: currentList.prayerCount))
+        }
+        // Held today (the seed's `lastPrayed` today).
+        for subject in subjects where subject.lastPrayed == today {
+            history.prayers.append(Prayer(id: "seed-\(subject.id)-0", subjectIds: [subject.id], localDate: today,
+                                          hasNote: false))
+        }
+        return history
     }
 }

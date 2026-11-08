@@ -8,21 +8,46 @@ import SwiftUI
 // into the crisp mark. Reduce Motion: a plain quick fade, no bloom.
 // Decorative: rows say "held" in words.
 
+/// The held ring scales in steps, not proportionally (design-direction §5,
+/// 2026-11-08): ring / gap 1.5 / 1.5 up to ~32 pt, 2 / 2 at 40–44 pt and on
+/// the community card, 3 / 3 at ~96 pt.
+enum HeldRingStep {
+    case small, medium, large
+
+    var ring: CGFloat {
+        switch self {
+        case .small: PP.size.held.ringSmall
+        case .medium: PP.size.held.ring
+        case .large: PP.size.held.ringLarge
+        }
+    }
+
+    var gap: CGFloat {
+        switch self {
+        case .small: PP.size.held.ringGapSmall
+        case .medium: PP.size.held.ringGap
+        case .large: PP.size.held.ringGapLarge
+        }
+    }
+}
+
 extension View {
     /// The held ring around an avatar (round) or the community card
-    /// (`cornerRadius` = the card's): 2 pt crisp gold, 2 pt gap, always solid.
-    /// Drawn outside the view's bounds, so it never shifts layout.
-    func heldRing(_ held: Bool, cornerRadius: CGFloat? = nil) -> some View {
-        modifier(HeldRing(held: held, cornerRadius: cornerRadius))
+    /// (`cornerRadius` = the card's): crisp gold at `step`'s stroke and gap,
+    /// always solid. Drawn outside the view's bounds, so it never shifts
+    /// layout.
+    func heldRing(_ held: Bool, cornerRadius: CGFloat? = nil, step: HeldRingStep = .medium) -> some View {
+        modifier(HeldRing(held: held, cornerRadius: cornerRadius, step: step))
     }
 }
 
 private struct HeldRing: ViewModifier {
     let held: Bool
     let cornerRadius: CGFloat?
+    let step: HeldRingStep
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var outset: CGFloat { PP.size.held.ring + PP.size.held.ringGap }
+    private var outset: CGFloat { step.ring + step.gap }
 
     func body(content: Content) -> some View {
         content.background {
@@ -40,9 +65,9 @@ private struct HeldRing: ViewModifier {
         if let cornerRadius {
             // Concentric with the card's corners.
             RoundedRectangle(cornerRadius: cornerRadius + outset, style: .continuous)
-                .strokeBorder(PP.color.heldGold, lineWidth: PP.size.held.ring)
+                .strokeBorder(PP.color.heldGold, lineWidth: step.ring)
         } else {
-            Circle().strokeBorder(PP.color.heldGold, lineWidth: PP.size.held.ring)
+            Circle().strokeBorder(PP.color.heldGold, lineWidth: step.ring)
         }
     }
 }

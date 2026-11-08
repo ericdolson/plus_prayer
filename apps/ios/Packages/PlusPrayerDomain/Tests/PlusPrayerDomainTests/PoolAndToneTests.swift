@@ -2,33 +2,56 @@ import Foundation
 import Testing
 @testable import PlusPrayerDomain
 
+/// Q32 (2026-11-08): the pool counts people; each person prints with up to
+/// `intentionsPerPerson` chosen intentions.
 struct PoolTests {
     let now = Fixture.epoch
-    let tree = Fixture.tree // carried beyond Me: self-1, dad, dad-1, mom → 4
+    let tree = Fixture.tree // carried people beyond Me: Dad, Mom → 2 (Bea off)
 
     func user(limit: Int, active: Bool) -> UserHeader {
         UserHeader(id: "u", includeLimit: limit,
                    entitlementExpiresAt: now.addingTimeInterval(active ? 86_400 : -86_400))
     }
 
-    @Test func activeEntitlementMeasuresAgainstTheLimit() {
-        #expect(checkPool(tree, user: user(limit: 4, active: true), now: now).fits)
-        #expect(!checkPool(tree, user: user(limit: 3, active: true), now: now).fits)
+    @Test func thePoolCountsPeopleOnly() {
+        #expect(carriedPeople(tree).map(\.id) == ["dad", "mom"])
+        #expect(checkPool(tree, user: user(limit: 2, active: true), now: now).fits)
+        #expect(!checkPool(tree, user: user(limit: 1, active: true), now: now).fits)
+        #expect(checkPool(tree, user: user(limit: 2, active: true), now: now).carried == 2,
+                "intentions never cost a place")
     }
 
-    @Test func freeIsOneIntentionUnderMe() {
+    @Test func freeIsZeroPeople() {
         let free = checkPool(tree, user: user(limit: 10, active: false), now: now)
         #expect(!free.fits)
-        #expect(free.isFree)
-        #expect(free.limit == 1)
+        #expect(free.isFree && free.limit == 0)
+        // You, with your intention: fits.
         let onlyMine = SubjectTree([Fixture.subjects[3], Fixture.subjects[4]])
         #expect(checkPool(onlyMine, user: user(limit: 10, active: false), now: now).fits)
+        #expect(effectivePoolLimit(user(limit: 10, active: false), now: now) == 0)
     }
 
-    @Test func aNewSubjectIsCarriedWhileThereIsRoom() {
+    @Test func aNewNameIsCarriedWhileThereIsRoom() {
         let new = Fixture.name("new", "Ruth", order: 9)
-        #expect(carriesNewSubject(new, in: tree, user: user(limit: 5, active: true), now: now))
-        #expect(!carriesNewSubject(new, in: tree, user: user(limit: 4, active: true), now: now))
+        #expect(carriesNewSubject(new, in: tree, user: user(limit: 3, active: true), now: now))
+        #expect(!carriesNewSubject(new, in: tree, user: user(limit: 2, active: true), now: now))
+    }
+
+    @Test func aNewIntentionIsChosenWhileItsPersonIsUnderTheCap() {
+        let underDad = Fixture.intention("new", "dad", "Sleep", order: 9)
+        #expect(!carriesNewSubject(underDad, in: tree, user: user(limit: 0, active: false), now: now),
+                "Dad has one chosen: at the cap")
+        #expect(carriesNewSubject(underDad, in: tree, user: user(limit: 0, active: false), now: now, cap: 2))
+        let underMom = Fixture.intention("new", "mom", "Rest", order: 9)
+        #expect(carriesNewSubject(underMom, in: tree, user: user(limit: 0, active: false), now: now),
+                "Mom's only intention is Answered: it frees the choice")
+    }
+
+    @Test func chosenIntentionsAreOpenAndInOrder() {
+        #expect(chosenIntentions(of: "dad", in: tree).map(\.id) == ["dad-1"])
+        #expect(chosenIntentions(of: "mom", in: tree).isEmpty)
+        #expect(openIntentions(of: "dad", in: tree).map(\.id) == ["dad-1", "dad-2"])
+        #expect(openIntentions(of: "mom", in: tree).isEmpty, "Answered isn't offered")
     }
 }
 
@@ -52,222 +75,126 @@ struct ToneTests {
     }
 }
 
-struct CarryOfferTests {
-    let now = Fixture.epoch
-    let tree = Fixture.tree // carried beyond Me: self-1, dad, dad-1, mom → 4
-    let free = UserHeader(id: "u", includeLimit: 10, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(-1))
-
-    func member(_ limit: Int) -> UserHeader {
-        UserHeader(id: "u", includeLimit: limit, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(86_400))
-    }
-
-    @Test func onByDefaultWhileThereIsRoom() {
-        let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(5), now: now)
-        #expect(offer == CarryOffer(hasRoom: true, startsOn: true, alsoCarriesParent: false, used: 4, pool: 5,
-                                    cost: 1, isFree: false))
-        let intention = carryOffer(kind: .intention, parentId: "dad", in: tree, user: member(5), now: now)
-        #expect(intention.hasRoom && intention.startsOn && !intention.alsoCarriesParent)
-    }
-
-    @Test func aFullPoolIsOffAndDisabled() {
-        let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(4), now: now)
-        #expect(!offer.hasRoom && !offer.startsOn)
-        #expect(offer.used == 4 && offer.pool == 4)
-    }
-
-    @Test func underMeAnIntentionNeverCarriesItsName() {
-        let offer = carryOffer(kind: .intention, parentId: "self", in: tree, user: member(5), now: now)
-        #expect(offer.hasRoom && offer.startsOn && !offer.alsoCarriesParent)
-    }
-
-    @Test func underAnUncarriedNameItStartsOffAndCarriesTheNameToo() {
-        // Bea isn't carried; her intention bea-1 still is, so carrying her
-        // costs Bea + bea-1 + the new one: 4 + 3 = 7.
-        let roomy = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(7), now: now)
-        #expect(roomy == CarryOffer(hasRoom: true, startsOn: false, alsoCarriesParent: true, used: 4, pool: 7,
-                                    cost: 3, isFree: false))
-        let tight = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(6), now: now)
-        #expect(!tight.hasRoom && tight.alsoCarriesParent)
-    }
-
-    @Test func theFreePoolCarriesOneIntentionUnderMeOnly() {
-        let mine = SubjectTree([Fixture.subjects[3]])
-        #expect(carryOffer(kind: .intention, parentId: "self", in: mine, user: free, now: now).hasRoom)
-        #expect(!carryOffer(kind: .soul, parentId: nil, in: mine, user: free, now: now).hasRoom)
-        let offer = carryOffer(kind: .soul, parentId: nil, in: mine, user: free, now: now)
-        #expect(offer.used == 0 && offer.pool == 1)
-    }
-
-    @Test func thePoolIsTheEffectiveEntitlement() {
-        #expect(effectivePoolLimit(free, now: now) == 1)
-        #expect(effectivePoolLimit(member(10), now: now) == 10)
-    }
-
-    @Test func theMeterSaysWhatsLeftWhicheverWayTheToggleIs() {
-        let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(10), now: now)
-        #expect(carryMeter(offer, kind: .soul, isOn: true) == .left(6))
-        #expect(carryMeter(offer, kind: .soul, isOn: false) == .left(6))
-        let bea = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(10), now: now)
-        #expect(carryMeter(bea, kind: .intention, isOn: true) == .left(6), "the cost is the Also line's job")
-    }
-
-    @Test func onWithOneLeftItTakesTheLastPlace() {
-        let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(5), now: now)
-        #expect(carryMeter(offer, kind: .soul, isOn: true) == .usesLast(1))
-        #expect(carryMeter(offer, kind: .soul, isOn: false) == .left(1))
-    }
-
-    @Test func onAndTakingEverythingLeftSaysTheLastPlaces() {
-        // Bea costs 3 (her, her flagged intention, the new one): 3 left of 7.
-        let all = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(7), now: now)
-        #expect(carryMeter(all, kind: .intention, isOn: true) == .usesLast(3))
-        #expect(carryMeter(all, kind: .intention, isOn: false) == .left(3))
-        let some = carryOffer(kind: .intention, parentId: "bea", in: tree, user: member(8), now: now)
-        #expect(carryMeter(some, kind: .intention, isOn: true) == .left(4))
-    }
-
-    @Test func fullSaysAllInUse() {
-        let offer = carryOffer(kind: .soul, parentId: nil, in: tree, user: member(4), now: now)
-        #expect(carryMeter(offer, kind: .soul, isOn: false) == .allInUse(pool: 4))
-    }
-
-    @Test func overThePoolSaysAllInUse() {
-        // A lapsed trial: 4 carried against the free pool of 1.
-        let intention = carryOffer(kind: .intention, parentId: "self", in: tree, user: free, now: now)
-        #expect(carryMeter(intention, kind: .intention, isOn: false) == .allInUse(pool: 1))
-    }
-
-    @Test func theFreePoolsNameTabExplainsInstead() {
-        let offer = carryOffer(kind: .soul, parentId: nil, in: SubjectTree([Fixture.subjects[3]]), user: free, now: now)
-        #expect(offer.isFree && !offer.hasRoom)
-        #expect(carryMeter(offer, kind: .soul, isOn: false) == .freeYouAndOneIntention)
-        // Over the pool too: still the explanation on the Name tab.
-        let lapsed = carryOffer(kind: .soul, parentId: nil, in: tree, user: free, now: now)
-        #expect(carryMeter(lapsed, kind: .soul, isOn: false) == .freeYouAndOneIntention)
-    }
-}
-
-/// A name's carry row on its page.
+/// A person's carry toggle and its meter (detail-page.md, Q32).
 struct NameCarryOfferTests {
     let now = Fixture.epoch
-    let tree = Fixture.tree // carried beyond Me: self-1, dad, dad-1, mom → 4; Bea off, bea-1 flagged
+    let tree = Fixture.tree // Dad, Mom carried; Bea off
     let free = UserHeader(id: "u", includeLimit: 10, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(-1))
 
     func member(_ limit: Int) -> UserHeader {
         UserHeader(id: "u", includeLimit: limit, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(86_400))
     }
 
-    @Test func aCarriedNameIsOnAndLeftOutOfWhatsUsed() {
-        // Dad and dad-1 are his: 2 of the 4.
-        let offer = nameCarryOffer(nameId: "dad", in: tree, user: member(10), now: now)
-        #expect(offer.startsOn && offer.hasRoom)
-        #expect(offer.used == 2 && offer.cost == 2)
-        #expect(carryMeter(offer, kind: .soul, isOn: true) == .left(8))
+    @Test func carriedSaysWhatsLeft() {
+        let dad = nameCarryOffer(nameId: "dad", in: tree, user: member(5), now: now)
+        #expect(dad.startsOn && dad.hasRoom && dad.left == 3)
+        #expect(nameCarryMeter(dad) == .left(3))
     }
 
-    @Test func reCarryingANameCountsItsFlaggedIntentions() {
-        let roomy = nameCarryOffer(nameId: "bea", in: tree, user: member(6), now: now)
-        #expect(!roomy.startsOn && roomy.hasRoom)
-        #expect(roomy.cost == 2, "Bea and bea-1")
-        #expect(carryMeter(roomy, kind: .soul, isOn: false) == .left(2))
-        let tight = nameCarryOffer(nameId: "bea", in: tree, user: member(5), now: now)
-        #expect(!tight.hasRoom, "1 left, Bea costs 2")
+    @Test func carriedWithNoneFreeOrOverThePoolSaysAllInUse() {
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "dad", in: tree, user: member(2), now: now)) == .allInUse(pool: 2))
+        let over = nameCarryOffer(nameId: "dad", in: tree, user: member(1), now: now)
+        #expect(nameCarryMeter(over) == .allInUse(pool: 1), "never negative")
+        #expect(over.hasRoom, "turning off is never blocked")
     }
 
-    @Test func aCarriedNameCanStayOnOverThePoolAndTurnOff() {
-        let offer = nameCarryOffer(nameId: "dad", in: tree, user: free, now: now)
-        #expect(offer.hasRoom, "on already: nothing to fit")
-        #expect(carryMeter(offer, kind: .soul, isOn: true) == .freeYouAndOneIntention)
+    @Test func notCarriedSaysWhatsLeftOrTheLastPlace() {
+        #expect(nameCarryMeter(nameCarryOffer(nameId: "bea", in: tree, user: member(5), now: now)) == .left(3))
+        let last = nameCarryOffer(nameId: "bea", in: tree, user: member(3), now: now)
+        #expect(last.hasRoom && nameCarryMeter(last) == .usesLast)
+        let full = nameCarryOffer(nameId: "bea", in: tree, user: member(2), now: now)
+        #expect(!full.hasRoom && nameCarryMeter(full) == .allInUse(pool: 2))
     }
 
-    @Test func theFreePoolNeverFitsAName() {
-        let offer = nameCarryOffer(nameId: "bea", in: tree, user: free, now: now)
-        #expect(!offer.hasRoom)
-        #expect(offer.isOverPool, "Dad and Mom are still carried")
-        #expect(nameCarryMeter(offer) == .allInUse(pool: 1), "over the free pool: never the free line")
+    @Test func reCarryingCostsOnePlaceWhateverIsChosen() {
+        // Bea has a chosen intention (bea-1): it comes back with her at no cost.
+        #expect(nameCarryOffer(nameId: "bea", in: tree, user: member(3), now: now).hasRoom)
     }
 
-    @Test func withinTheFreePoolTheFreeLineShows() {
-        // Me, Me's one carried intention, and Bea (off): within the free pool.
-        let me = Fixture.subjects.first { $0.isSelf }!
-        let mine = Fixture.subjects.first { $0.parentId == me.id && $0.isCarried && !$0.isResolved }!
-        let bea = Fixture.name("bea", "Bea", order: 5, carried: false)
-        let small = SubjectTree([me, mine, bea])
-        let offer = nameCarryOffer(nameId: "bea", in: small, user: free, now: now)
-        #expect(!offer.isOverPool && !offer.hasRoom)
-        #expect(nameCarryMeter(offer) == .freeYouAndOneIntention)
-    }
-
-    @Test func aLapsedTrialOverTheFreePoolSeesWhatACarriedNameUses() {
-        // Trial ended with Dad (and dad-1) and Mom still carried.
+    @Test func theFreeTierExplains() {
+        let bea = nameCarryOffer(nameId: "bea", in: tree, user: free, now: now)
+        #expect(!bea.hasRoom && nameCarryMeter(bea) == .free)
         let dad = nameCarryOffer(nameId: "dad", in: tree, user: free, now: now)
-        #expect(dad.isFree && dad.isOverPool && dad.startsOn && dad.hasRoom, "on, and free to turn off")
-        #expect(nameCarryMeter(dad) == .usesNoneLeft(cost: 2))
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "mom", in: tree, user: free, now: now))
-                == .usesNoneLeft(cost: 1), "an answered intention doesn't count")
+        #expect(dad.hasRoom && nameCarryMeter(dad) == .free, "a lapsed trial can still turn Dad off")
     }
 
-    @Test func carriedTheMeterSaysWhatItUsesAndWhatsFreeOverall() {
-        // 4 carried of 10: Dad uses 2 (him and dad-1), 6 left.
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "dad", in: tree, user: member(10), now: now))
-                == .uses(cost: 2, left: 6))
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "mom", in: tree, user: member(10), now: now))
-                == .uses(cost: 1, left: 6), "an answered intention doesn't count")
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "dad", in: tree, user: member(3), now: now))
-                == .usesNoneLeft(cost: 2), "over the pool (a lapsed trial): never below 0")
-    }
-
-    @Test func carriedWithNoneFreeSaysNoneLeft() {
-        // Exactly full: 4 of 4.
-        let full = nameCarryOffer(nameId: "dad", in: tree, user: member(4), now: now)
-        #expect(nameCarryMeter(full) == .usesNoneLeft(cost: 2))
-        #expect(full.hasRoom, "turning it off is never blocked")
-        // Over the pool: 4 of 1, still none (not -3) and still free to turn off.
-        let over = nameCarryOffer(nameId: "mom", in: tree, user: member(1), now: now)
-        #expect(nameCarryMeter(over) == .usesNoneLeft(cost: 1))
-        #expect(over.hasRoom)
-    }
-
-    @Test func someRoomButNotEnoughWouldUseAndIsDisabled() {
-        // 4 of 5: 1 left, Bea would use 2 (her and bea-1).
-        let offer = nameCarryOffer(nameId: "bea", in: tree, user: member(5), now: now)
-        #expect(nameCarryMeter(offer) == .wouldUse(cost: 2, left: 1))
-        #expect(!offer.hasRoom && !offer.startsOn)
-    }
-
-    @Test func usesAndWouldUseNeverCountAnsweredIntentions() {
-        // Ruth (off) with one open intention flagged and one Answered flagged.
-        let ruth = Fixture.name("ruth", "Ruth", order: 9, carried: false)
-        let open = Fixture.intention("ruth-1", "ruth", "Work", order: 1)
-        let answered = Fixture.intention("ruth-2", "ruth", "A job", order: 2, answered: true)
-        let withRuth = SubjectTree(Fixture.subjects + [ruth, open, answered])
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "ruth", in: withRuth, user: member(10), now: now))
-                == .wouldUse(cost: 2, left: 6))
-        var carried = ruth
-        carried.isCarried = true
-        let on = SubjectTree(Fixture.subjects + [carried, open, answered])
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "ruth", in: on, user: member(10), now: now))
-                == .uses(cost: 2, left: 4))
-    }
-
-    @Test func notCarriedTheMeterSaysWhatCarryingWouldCost() {
-        // Bea would bring back bea-1: 2 places.
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "bea", in: tree, user: member(10), now: now))
-                == .wouldUse(cost: 2, left: 6))
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "bea", in: tree, user: member(6), now: now)) == .usesLast(2))
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "bea", in: tree, user: member(4), now: now))
-                == .allInUse(pool: 4))
-        let ruth = Fixture.name("ruth", "Ruth", order: 9, carried: false)
-        let withRuth = SubjectTree(Fixture.subjects + [ruth])
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "ruth", in: withRuth, user: member(10), now: now)) == .left(6))
-        #expect(nameCarryMeter(nameCarryOffer(nameId: "ruth", in: withRuth, user: member(5), now: now)) == .usesLast(1))
+    @Test func theSelfHasNoToggle() {
+        #expect(!nameCarryOffer(nameId: "self", in: tree, user: member(5), now: now).hasRoom)
     }
 }
 
-/// Restore is pool-aware (mirrors the server's restoreSubject).
+/// "Print with {alias} ✱": the add sheet's carry row and an intention's page.
+struct IntentionCarryOfferTests {
+    let now = Fixture.epoch
+    let tree = Fixture.tree
+    let free = UserHeader(id: "u", includeLimit: 10, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(-1))
+
+    func member(_ limit: Int) -> UserHeader {
+        UserHeader(id: "u", includeLimit: limit, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(86_400))
+    }
+
+    @Test func onByDefaultWhenThePersonHasNoChosenIntention() {
+        let mom = intentionCarryOffer(personId: "mom", in: tree, user: member(5), now: now)
+        #expect(mom.startsOn && mom.hasRoom && mom.replaces.isEmpty && !mom.alsoCarriesPerson)
+        let mine = intentionCarryOffer(personId: "daniel", in: SubjectTree(Fixture.subjects + [Fixture.name("daniel", "Daniel", order: 9)]),
+                                       user: free, now: now)
+        #expect(mine.startsOn, "intentions cost nothing: free too")
+    }
+
+    @Test func atTheCapItStartsOffAndOnIsASwap() {
+        let dad = intentionCarryOffer(personId: "dad", in: tree, user: member(5), now: now)
+        #expect(!dad.startsOn && dad.hasRoom)
+        #expect(dad.replaces.map(\.id) == ["dad-1"], "Instead of “Healing after his surgery”")
+        let me = intentionCarryOffer(personId: "self", in: tree, user: free, now: now)
+        #expect(me.isSelf && !me.startsOn && me.replaces.map(\.id) == ["self-1"])
+    }
+
+    @Test func aPersonNotCarriedIsCarriedTooAndNeedsAPlace() {
+        let bea = intentionCarryOffer(personId: "bea", in: tree, user: member(5), now: now)
+        #expect(bea.alsoCarriesPerson && bea.hasRoom && bea.left == 3)
+        #expect(!bea.startsOn, "never spends a place by default")
+        let full = intentionCarryOffer(personId: "bea", in: tree, user: member(2), now: now)
+        #expect(!full.hasRoom, "Make room for Aunt Bea")
+        #expect(!intentionCarryOffer(personId: "bea", in: tree, user: free, now: now).hasRoom)
+    }
+
+    @Test func onItsPageTheToggleIsItsOwnChoice() {
+        let chosen = intentionCarryOffer(personId: "dad", intentionId: "dad-1", in: tree, user: member(5), now: now)
+        #expect(chosen.startsOn && chosen.hasRoom && chosen.replaces.isEmpty)
+        let other = intentionCarryOffer(personId: "dad", intentionId: "dad-2", in: tree, user: member(5), now: now)
+        #expect(!other.startsOn && other.replaces.map(\.id) == ["dad-1"])
+        // On, under a person who isn't carried (and the pool is full): still on, can turn off.
+        let bea = intentionCarryOffer(personId: "bea", intentionId: "bea-1", in: tree, user: member(2), now: now)
+        #expect(bea.startsOn && bea.hasRoom)
+    }
+
+    @Test func choosingAtTheCapSwaps() {
+        let ids = choosing("dad-2", true, in: tree)
+        #expect(ids.contains("dad-2") && !ids.contains("dad-1"))
+        #expect(ids.contains("dad") && ids.contains("bea-1"), "nothing else changes")
+        #expect(choosing("dad-2", true, in: tree, cap: 2).isSuperset(of: ["dad-1", "dad-2"]))
+        #expect(!choosing("dad-1", false, in: tree).contains("dad-1"))
+        let withBea = choosing("bea-1", true, in: tree, carryPerson: true)
+        #expect(withBea.contains("bea"))
+    }
+
+    @Test func printsWithMovesTheCheckAtCapOne() {
+        #expect(printsWith("dad-2", for: "dad", in: tree).intersection(["dad-1", "dad-2"]) == ["dad-2"])
+        #expect(printsWith(nil, for: "dad", in: tree).intersection(["dad-1", "dad-2"]).isEmpty, "Name only")
+        // A higher cap: taps toggle, up to the cap.
+        #expect(printsWith("dad-2", for: "dad", in: tree, cap: 2).isSuperset(of: ["dad-1", "dad-2"]))
+        #expect(!printsWith("dad-1", for: "dad", in: tree, cap: 2).contains("dad-1"))
+    }
+
+    @Test func carriedIdsLeaveOutTheSelfAndResolved() {
+        #expect(carriedIds(tree) == ["dad", "dad-1", "self-1", "mom", "bea-1"])
+    }
+}
+
+/// Restore never exceeds the pool or the cap (mirrors the server's restoreSubject).
 struct RestoreCarryTests {
     let now = Fixture.epoch
-    let tree = Fixture.tree // 4 carried beyond Me
+    let tree = Fixture.tree // 2 people carried
     func member(_ limit: Int) -> UserHeader {
         UserHeader(id: "u", includeLimit: limit, entitlementExpiresAt: Fixture.epoch.addingTimeInterval(86_400))
     }
@@ -275,26 +202,24 @@ struct RestoreCarryTests {
     let ann = Fixture.name("ann", "Ann", order: 9)
     let annWork = Fixture.intention("ann-1", "ann", "Work", order: 1)
 
-    @Test func underThePoolRestoreKeepsCarrying() {
-        #expect(restoredCarryFlag(ann, intentions: [annWork], into: tree, user: member(6), now: now))
+    @Test func underThePoolANameKeepsCarrying() {
+        #expect(restoredCarryFlag(ann, intentions: [annWork], into: tree, user: member(3), now: now))
     }
 
     @Test func overThePoolANameComesBackUncarried() {
-        // 4 + Ann + her intention = 6 > 5.
-        #expect(!restoredCarryFlag(ann, intentions: [annWork], into: tree, user: member(5), now: now))
+        #expect(!restoredCarryFlag(ann, intentions: [annWork], into: tree, user: member(2), now: now))
         #expect(!restoredCarryFlag(ann, into: tree, user: free, now: now), "a lapsed trial")
     }
 
-    @Test func overThePoolAnIntentionComesBackUncarried() {
+    @Test func anIntentionToAPersonAtTheCapComesBackUnchosen() {
         let dad3 = Fixture.intention("dad-3", "dad", "Sleep", order: 3)
-        #expect(!restoredCarryFlag(dad3, into: tree, user: member(4), now: now))
-        #expect(restoredCarryFlag(dad3, into: tree, user: member(5), now: now))
+        #expect(!restoredCarryFlag(dad3, into: tree, user: member(10), now: now))
+        #expect(restoredCarryFlag(dad3, into: tree, user: member(10), now: now, cap: 2))
+        let mom2 = Fixture.intention("mom-2", "mom", "Rest", order: 2)
+        #expect(restoredCarryFlag(mom2, into: tree, user: free, now: now), "intentions never touch the pool")
     }
 
-    @Test func aRestoreThatAddsNothingKeepsItsFlag() {
-        // Under Bea (not carried): doesn't print, so nothing to fit.
-        let bea2 = Fixture.intention("bea-2", "bea", "Peace", order: 2)
-        #expect(restoredCarryFlag(bea2, into: tree, user: free, now: now))
+    @Test func anAnsweredOrUnchosenItemKeepsItsFlag() {
         let answered = Fixture.intention("dad-4", "dad", "Results", order: 4, answered: true)
         #expect(restoredCarryFlag(answered, into: tree, user: member(1), now: now))
         var off = ann

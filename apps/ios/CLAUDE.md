@@ -20,11 +20,11 @@ and the domain models + mock data source: Home runs on `HomeModel` over the
 mock repositories, the filter works (counts, context rows, linger then fold,
 empty states); Amen ends in the list invitation and the closing sheet with
 the note; the add sheet (footer ＋) adds names and intentions; search docks
-above the keyboard; a name's page (first slice: the person, the status
-line, the carry row, intentions and adding one), where adding a name lands.
-Next: the rest of the page (counts, History, ⋯, the pray button and praying
-in place, intention pages), then build order step 3 (onboarding, auth,
-setSelfName).
+above the keyboard; a name's page (the person, counts, the carry card with
+"Prints with", intentions with the ＋, History calendar), where adding a
+name lands, and a minimal intention page; the pool counts people (Q32).
+Next: the rest of the pages (⋯, the pray button and praying in place,
+tapping a day), then build order step 3 (onboarding, auth, setSelfName).
 Still open in prayer mode: backgrounding and the welcome-back question, the
 presence draft, the first Amen's onboarding steps. Also pending: the offline
 queue (Data/Queue, replacing the mock's in-memory hold), a debug menu for the
@@ -184,9 +184,12 @@ Theme/        tokens + semantic access; no logic
 Screens never touch the SDK or RTDB. Same surfaces as the Flutter build:
 - `SubjectRepository`: getMySubjects / searchMySubjects; addSubject /
   updateSubject / setCarriedItems / restoreSubject (callables; restore is
-  pool-aware since 2026-11-07, no connector mutation: an item that would go
-  over comes back uncarried, `restoredCarryFlag` in PlusPrayerDomain, the
-  mock mirrors it); reorder / resolve / archive / purge.
+  pool- and cap-aware, no connector mutation: a name over the pool or an
+  intention to a person at the cap comes back off, `restoredCarryFlag` in
+  PlusPrayerDomain, the mock mirrors it); `detail(id)` (GetSubjectDetail:
+  the lists it printed on and the prayers that held it, mapped to
+  `SubjectDetail`; History and the counts); reorder / resolve / archive /
+  purge.
 - `ListRepository`: getCurrentListMeta / getMyListStatus (SQL Connect)
   merged with RTDB `/lists/current` (live count, `closesAt`).
 - `UserRepository`: getMyHeader, reminders, updateMySettings. Settings writes
@@ -352,7 +355,12 @@ compose queries; if an operation is missing, ask for a backend change.
 
 ## Components so far (build step 1)
 - `MonogramAvatar` — initials on a tone; one letter or color only when small.
-- `.heldRing(_:cornerRadius:)`, `HeldDot` — gold held marks with the check bloom.
+- `.heldRing(_:cornerRadius:step:)`, `HeldDot` — gold held marks with the
+  check bloom. The ring scales in steps (`HeldRingStep`: small 1.5/1.5 up to
+  ~32 pt, medium 2/2 at 40–44 pt and the card, large 3/3 at ~96 pt; tokens
+  `size.held.ring*`).
+- `CarryCard` — a page's flat `cardSurface` card: its controls, a hairline,
+  the status line as footer (the self page: the status only).
 - `CarriedLabel` (single-line rows: the mark follows the ellipsis) and
   `CarriedMark.after` (inline, for text that wraps).
 - `NameRow`, `IntentionRow`, `SecondaryLine`: Home rows on plain values; each
@@ -390,8 +398,17 @@ compose queries; if an operation is missing, ask for a backend change.
 
 ## Data and state so far (build step 2)
 - PlusPrayerDomain: models (`Subject`, `CurrentList`, `MyListStatus`,
-  `UserHeader`, `LiveStats`, `AppConfig`, `NewPrayer`, `LocalDate`) and
-  rules: `SubjectTree`, carry (`isEffectivelyCarried`, `carriedNames`),
+  `UserHeader`, `LiveStats`, `AppConfig`, `NewPrayer`, `LocalDate`,
+  `SubjectDetail`) and rules: `SubjectTree`, carry (`Carry.swift`, Q32
+  2026-11-08: the pool counts people, `carriedPeople`, `checkPool`; an
+  intention's `isCarried` = chosen to print with its person, at most
+  `AppConfig.intentionsPerPerson` (/config, default 1) per person;
+  `isEffectivelyCarried` = chosen ∧ person carried, Home's mark;
+  `nameCarryOffer` / `nameCarryMeter` for a person's toggle,
+  `intentionCarryOffer` for "Print with {alias}", `choosing` /
+  `printsWith` build setCarriedItems' set, `restoredCarryFlag`), the
+  carry card's footer (`carryStatus`), History (`history`: grids, older
+  rows, Begun; `detailCounts`),
   Home's filter (`visibleGroups`, `filterCount`, `communityCardShown`),
   streak (`effectiveStreak`, `afterListPrayer`, `streakBadgeState`), the
   local-prayer fold, the gate (`tomorrowStatus(list:…)`), row status,
@@ -430,8 +447,8 @@ compose queries; if an operation is missing, ask for a backend change.
   then Name and "What you call them · optional" (footer "Only you see
   this"); **no carry row**: Add saves the name auto-carried while there's
   room and closes onto the person's page (`addedNameId`; HomeView pushes
-  it as the sheet goes), whose "Not on the list" says when it isn't
-  carried. (Tried and dropped 2026-11-06/07: the avatar inside or beside the
+  it as the sheet goes), whose card footer says "Private · in your
+  prayers only" when it isn't carried. (Tried and dropped 2026-11-06/07: the avatar inside or beside the
   fields, a preview row, a toolbar avatar with Add splitting off the X, a
   Contacts-style name block, a second "Added" step with a "Not now · Name ·
   Name + intention" control. A view can't move between `Form` rows, and an
@@ -455,47 +472,59 @@ compose queries; if an operation is missing, ask for a backend change.
   person's page later) is untitled with X / Add: the person's row (44 pt
   avatar + serif name), "Intention" and its field, the same carry toggle as
   the Intention tab. The intention fields grow 1 → 3
-  lines; Return submits, pasted breaks become spaces. The carry
-  row's rules are `carryOffer` and `carryMeter` in PlusPrayerDomain (room,
-  default, true cost; the meter says what's left, not counting this item:
-  "3 places left"; on, taking everything left, "This uses your last place"
-  / "… last N places" (then "Also carries" drops its cost); "All N in use";
-  the free pool's line); every `{unit}` string goes through `L10n.Add` keyed by
-  `poolUnit` (Q32). "Make room …" is a button with no
-  action and the hint "Not available yet" (Q31). If the server's carried
-  result differs from an intention's toggle (`AddedSubject.differs(from:)`,
-  on `effectivelyCarried`; carry is all or nothing), the sheet says "Saved,
-  but not carried…" and waits for Done.
+  lines; Return submits, pasted breaks become spaces. The carry row (Q32,
+  screens.md) is "Print with {alias} ✱" ("Print with your name ✱" under
+  Me), from `intentionCarryOffer`: on by default when the person is carried
+  and has no chosen intention; at the cap it starts off with "Instead of
+  “{chosen}”" (on = a swap, sent as an explicit `carry: true`); under a
+  person who isn't carried it starts off (never spends a place by default)
+  with "Also carries {alias} · N places left" (on sends `carryParent`);
+  with no place for them: disabled, their full line ("All N places in use"
+  / the free line) and "Make room for {alias}" (inert, hint "Not available
+  yet", Q31). If the server's result differs from the toggle
+  (`AddedSubject.differs(from:)`, on `effectivelyCarried`; all or nothing),
+  the sheet says "Saved, but not carried…" and waits for Done.
   `NewSubject.carry` / `carryParent` follow schema-brief.md ("addSubject
   carry inputs"); the mock has them, the callable gets them next.
-- `Features/Detail/PersonPage` (detail-page.md; first slice): a name's
-  page, pushed from a Home row (Home is a `NavigationStack` root with its
-  bar hidden; `home.run()` is a `.task` on the stack, not Home's content,
-  or a push would cancel the streams). `HomeModel.page(_:)` gives the
-  values: the 96 pt avatar (held ring), the alias in `displayTitle` with
-  the printed name under it, the status line (the card's rules; "Not on
-  the list" when not carried, the page's exception to never marking
-  absence), Home's intention rows without the thread (the page is the
-  name). The carry row (not on the self page) is a native Toggle titled
-  by `CarryTitle`; its subtitle is `nameCarryMeter` (PlusPrayerDomain):
-  what it costs and what's free overall ("Uses 2 places · 3 left",
-  "Would use 2 places · 3 left"). It calls `setCarriedItems` through
-  `HomeModel.setCarried`, showing the new state until the flag catches
-  up; never silent: offline it's disabled with "Needs a connection.", a
-  failure flips back with "All {pool} places filled up." / "Couldn't
-  change this. Try again." (ink; stays until the next tap or leaving the
-  page). Off without enough room (full, or "Would use 2 places · 1
-  left"): disabled, "Make room for {alias}" (inert). On with none free or
-  over any pool, a lapsed trial on the free pool included: "Uses 2 places
-  · none left" (never negative; the free-pool line only within the free
-  pool, an uncarried name over it gets "Your one place is in use"); turning
-  off is never blocked online (setCarriedItems accepts any save that only
-  reduces carrying; the mock mirrors it). "Uses" never counts Answered
-  intentions. The page's intention rows sit flush with the section title
-  (`IntentionRow` with `thread: nil`: no Home indent). No intentions: "＋ Add a first intention for {alias}"
-  (glass prominent; no possessive built from the alias); else the "＋ Add
-  intention for {alias}" link; both open the add-intention form. Not yet: counts, History, ⋯,
-  the pray button and praying in place, intention pages.
+- `Features/Detail/PersonPage` (detail-page.md; slice 2, 2026-11-08): a
+  name's page, pushed from a Home row (Home is a `NavigationStack` root with
+  its bar hidden; `home.run()` is a `.task` on the stack, not Home's
+  content, or a push would cancel the streams; the path's ids go through
+  `SubjectPage`, which shows a person's or an intention's page).
+  `HomeModel.page(_:)` gives the values: the 96 pt avatar (held ring, large
+  step), the alias in Roca `displayTitle` with the printed name under it and
+  nothing else (the status moved into the card); the counts ("Held by you
+  · N prayers", "Carried by the world · N prayers · N lists" once ever
+  carried; `detailCounts`, the live count stitched for the current list);
+  the **carry card** (`CarryCard`): the native Toggle "Carry onto the list
+  ✱" with `nameCarryMeter` as subtitle ("3 places left", "This uses your
+  last place", "All 10 places in use" never negative, free "Free carries
+  you and your intention"; off and full: disabled + "Make room for {alias}",
+  inert); "Prints with  {chosen} ›" (only while carried with open
+  intentions; "Name only" when none) pushing `PrintsWithList` (native
+  checkmark list, Name only + open intentions; cap 1 moves the check; a
+  swap, never pool-checked); a hairline; the status footer (`carryStatus`:
+  "Pray with today's list to carry {alias} onto List 53", "Private · in your
+  prayers only", the closing notice; self: the card holds the status only).
+  Turning off asks nothing. Never silent: offline disabled with "Needs a
+  connection."; a failure flips back with "All {pool} places filled up." /
+  "Couldn't change this. Try again." (ink; until the next tap or leaving
+  the page). Section titles in the system sans (`type.sectionTitle`, Title 3
+  semibold); a plain blue ＋ (`size.hitTarget`, label "Add intention for
+  {alias}") on the Intentions title; none yet: only the prominent "＋ Add a
+  first intention for {alias}". Intention rows (Home's, no thread) push the
+  intention's page. **History** (`HistorySection`): `HomeModel.history(_:)`
+  over `watchDetail` (the page's `.task`; unsent prayers folded in): grids
+  for the current and previous month (week start from the locale; thread
+  dot, ink bloom, gold ring `size.history.*`; one accessibility element
+  each), older rows, "Begun · {date}", ✎ counts.
+- `Features/Detail/IntentionPage` (minimal): the person's name above
+  (pushes their page), the title in `type.intentionTitle` (Title 2 semibold)
+  with the gold dot when held, the counts, the carry card ("Print with
+  {alias} ✱", "Instead of …", "Also carries …", footer incl. "Private while
+  {alias} isn't carried"; none when Answered: gold "Answered · {date}"),
+  History with the Answered hint. Not yet: ⋯, the pray button, praying in
+  place, tapping a day; Home's intention rows still don't push it.
 - Search (`Features/Home/HomeSearch.swift`): 🔎 turns the pill into the
   search field (see Theming above); with text it stays a field until ×,
   even with the keyboard down. The query feeds Home's domain rules
@@ -507,8 +536,9 @@ compose queries; if an operation is missing, ask for a backend change.
   invitation → hold → Amen → closing → note → the card's status; ＋ → name
   (no carry row; tabs keep the keyboard; the For push drops it, a pick or
   back refocuses) → alias → Add → on Home;
-  long-press Dad → Add intention → on Home; Aunt Bea's page → carry her →
-  her first intention; search → results → no matches →
+  long-press Dad → Add intention ("Print with Dad") → on Home; Aunt Bea's
+  page ("Private · in your prayers only") → carry her → her first
+  intention → the ＋; search → results → no matches →
   the match hint → ×. Screenshots are attached to
   the result bundle (`xcrun xcresulttool export attachments`). To check
   motion (the keyboard with the sheet), record the simulator during the

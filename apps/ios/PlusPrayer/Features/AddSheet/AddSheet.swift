@@ -367,37 +367,37 @@ struct AddSheet: View {
 
     // MARK: The carry section
 
-    /// A native toggle (the Intention tab and the add-intention form): the
-    /// title "Carry onto the list ✱" (the bloom trailing it, inkMuted in
-    /// every state) and the meter as its subtitle. With no room the footer
-    /// holds "Make room for this intention", inert until Membership / Your
-    /// portion exist.
+    /// A native toggle (the Intention tab and the add-intention form):
+    /// "Print with {alias} ✱" (under Me: "Print with your name ✱"; the bloom
+    /// trailing it, inkMuted in every state). Subtitle: "Instead of “…”"
+    /// when the person already has their chosen intention, "Also carries
+    /// {alias} · N places left" when they aren't carried (Q32). With no
+    /// place for them, the footer holds "Make room for {alias}", inert until
+    /// Membership / Your portion exist.
     private func carrySection(_ row: AddSheetModel.CarryRow) -> some View {
         let offer = model.carryOffer(row)
         let isOn = Binding(get: { model.isCarrying(row) }, set: { model.setCarrying(row, $0) })
-        var subtitle = L10n.Add.carryMeter(model.meter(row))
-        if let also = model.alsoCarries(row) {
-            subtitle += "\n" + L10n.Add.alsoCarries(also.name, cost: also.cost)
-        }
+        let subtitle = model.carrySubtitle(row).joined(separator: "\n")
+        let title = model.carryTitle(row)
         return Section {
             Toggle(isOn: isOn) {
-                CarryTitle.text(bloomHeight: bloomHeight, dynamicTypeSize: dynamicTypeSize)
-                Text(subtitle)
+                CarryTitle.text(title, bloomHeight: bloomHeight, dynamicTypeSize: dynamicTypeSize)
+                if !subtitle.isEmpty { Text(subtitle) }
             }
             .ppSwitch()
             .disabled(!offer.hasRoom)
-            .accessibilityLabel(L10n.Add.carryTitle)
+            .accessibilityLabel(title)
             .accessibilityHint(subtitle)
             .listRowBackground(PP.color.raised)
         } footer: {
-            if !offer.hasRoom { makeRoom }
+            if !offer.hasRoom { makeRoom(for: model.personLabel(row)) }
         }
     }
 
     /// Visible but inert for now: what its menu offers is part of the
-    /// monetization decision (open-questions Q31/Q32).
-    private var makeRoom: some View {
-        Button(L10n.Add.makeRoomForIntention) {}
+    /// monetization decision (open-questions Q31).
+    private func makeRoom(for name: String) -> some View {
+        Button(L10n.Page.makeRoom(for: name)) {}
             .tint(PP.color.primary)
             .accessibilityHint(L10n.Add.makeRoomHint)
     }

@@ -254,8 +254,8 @@ struct HomeModelTests {
 
     @Test func whenThePoolIsFullItsSavedPrivatelyAndHomeShowsNoMark() async throws {
         defer { running.cancel() }
-        // 7 of 10 places carried: three more fit, the fourth doesn't.
-        for name in ["A", "B", "C"] {
+        // 5 of 10 people carried: five more fit, the sixth doesn't.
+        for name in ["A", "B", "C", "E", "F"] {
             #expect(try await home.addSubject(NewSubject(kind: .soul, publicName: name)).isCarried)
         }
         let fourth = try await home.addSubject(NewSubject(kind: .soul, publicName: "D"))
@@ -286,7 +286,7 @@ struct HomeModelTests {
         #expect(home.card?.heldToday == true, "the border stays until local midnight")
     }
 
-    // MARK: A name's page
+    // MARK: A name's page (detail-page.md; Q32: 5 people carried of 10)
 
     @Test func aNamePageHasTheAliasThePrintedNameAndHomesIntentions() {
         defer { running.cancel() }
@@ -297,63 +297,108 @@ struct HomeModelTests {
         #expect(page?.intentions.map(\.id) == home.groups.first { $0.id == "dad" }?.intentions.map(\.id),
                 "Home's rows, in Home's order")
         if case .list = page?.status {} else { Issue.record("a carried name has the list status") }
-        #expect(L10n.Page.status(.list(.covered, next: 53), name: "Dad", isSelf: false) == "Dad will be on List\u{00A0}53")
-        #expect(L10n.Page.status(.list(.prayToCarry, next: 53), name: "Dad", isSelf: false)
-                == "Pray to carry Dad onto List\u{00A0}53")
+        #expect(page?.printsWith == ["Healing after his surgery"])
+    }
+
+    @Test func theStatusLineReadsAsTheSpecSays() {
+        defer { running.cancel() }
+        let nb = "\u{00A0}"
+        #expect(L10n.Page.status(.list(.covered, next: 53), about: .person("Dad")) == "Dad will be on List\(nb)53")
+        #expect(L10n.Page.status(.list(.nextPrayerCarries, next: 54), about: .person("Dad"))
+                == "Your next prayer with the list carries Dad onto List\(nb)54")
+        #expect(L10n.Page.status(.list(.prayToCarry, next: 53), about: .person("Dad"))
+                == "Pray with today's list to carry Dad onto List\(nb)53")
+        #expect(L10n.Page.status(.list(.covered, next: 53), about: .me) == "You'll be on List\(nb)53")
+        #expect(L10n.Page.status(.list(.nextPrayerCarries, next: 54), about: .me)
+                == "Your next prayer with the list puts you on List\(nb)54")
+        #expect(L10n.Page.status(.list(.prayToCarry, next: 53), about: .me) == "Pray with today's list to be on List\(nb)53")
+        #expect(L10n.Page.status(.list(.covered, next: 53), about: .intention) == "It'll be on List\(nb)53")
+        #expect(L10n.Page.status(.list(.nextPrayerCarries, next: 54), about: .intention)
+                == "Your next prayer with the list carries it onto List\(nb)54")
+        #expect(L10n.Page.status(.list(.prayToCarry, next: 53), about: .intention)
+                == "Pray with today's list to carry it onto List\(nb)53")
+        #expect(L10n.Page.status(.privateOnly, about: .person("Aunt Bea")) == "Private · in your prayers only")
+        #expect(L10n.Page.status(.privateWhilePersonOff, about: .intention, person: "Aunt Bea")
+                == "Private while Aunt Bea isn't carried")
+        #expect(L10n.Page.status(.closing(list: 52, minutes: 5, next: 53), about: .person("Dad"))
+                == "List\(nb)52 closes in 5 min · pray with the list to carry Dad")
+        #expect(L10n.Page.status(.closing(list: 52, minutes: 5, next: 53), about: .me)
+                == "List\(nb)52 closes in 5 min · pray with the list to be on List\(nb)53")
+        #expect(L10n.Page.status(.closing(list: 52, minutes: 5, next: 53), about: .intention)
+                == "List\(nb)52 closes in 5 min · pray with the list to carry this")
     }
 
     @Test func withoutAnAliasNothingRepeatsAndTheSelfIsMe() {
         defer { running.cancel() }
         #expect(home.page("daniel")?.label == "Daniel Kim")
         #expect(home.page("daniel")?.printedName == nil)
+        #expect(home.page("daniel")?.printsWith == nil, "no open intentions: no row")
         let me = home.page("self")
         #expect(me?.label == "Me")
         #expect(me?.printedName == "Eric Olson")
-        #expect(L10n.Page.status(.list(.covered, next: 53), name: "Me", isSelf: true) == "You'll be on List\u{00A0}53")
+        #expect(me?.printsWith == nil, "the self page's card holds only the status")
         #expect(L10n.Page.addIntention(for: "Me", isSelf: true) == "Add intention")
+        #expect(L10n.Page.addIntention(for: "Dad", isSelf: false) == "Add intention for Dad")
         #expect(L10n.Page.firstIntention(for: "Dad", isSelf: false) == "Add a first intention for Dad",
                 "no possessive built from the alias")
         #expect(L10n.Page.firstIntention(for: "Me", isSelf: true) == "Add your first intention")
     }
 
-    @Test func anUncarriedNameIsNotOnTheListAndCanBeCarriedFromItsPage() async throws {
+    @Test func anUncarriedNameIsPrivateAndCanBeCarriedFromItsPage() async throws {
         defer { running.cancel() }
-        #expect(home.page("bea")?.status == .notOnList)
-        #expect(L10n.Page.status(.notOnList, name: "Aunt Bea", isSelf: false) == "Not on the list")
+        #expect(home.page("bea")?.status == .privateOnly)
+        #expect(home.page("bea")?.printsWith == nil, "hidden while not carried")
         let offer = home.nameCarryOffer("bea")
         #expect(!offer.startsOn && offer.hasRoom)
-        #expect(L10n.Page.carryMeter(nameCarryMeter(offer)) == "3 places left", "7 of 10 carried; Bea costs 1")
-        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("dad"))) == "Uses 2 places · 3 left")
+        #expect(L10n.Page.carryMeter(nameCarryMeter(offer)) == "5 places left", "5 of 10 people carried")
+        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("dad"))) == "5 places left")
         try await home.setCarried("bea", true)
         await waitUntil { home.nameCarryOffer("bea").startsOn }
-        #expect(home.page("bea")?.status != .notOnList)
+        if case .list = home.page("bea")?.status {} else { Issue.record("carried: the list status") }
         try await home.setCarried("bea", false)
         await waitUntil { !home.nameCarryOffer("bea").startsOn }
-        #expect(home.page("bea")?.status == .notOnList)
+        #expect(home.page("bea")?.status == .privateOnly)
         #expect(backend.subjects.value.first { $0.id == "dad" }?.isCarried == true, "the others are kept")
     }
 
-    @Test func theCarryRowSaysWhatItCostsAndWhatsFree() {
+    @Test func theMeterCopy() {
         defer { running.cancel() }
-        #expect(L10n.Page.carryMeter(.uses(cost: 1, left: 3)) == "Uses 1 place · 3 left")
-        #expect(L10n.Page.carryMeter(.wouldUse(cost: 2, left: 3)) == "Would use 2 places · 3 left")
-        #expect(L10n.Page.carryMeter(.wouldUse(cost: 2, left: 1)) == "Would use 2 places · 1 left",
-                "some room but not enough")
-        #expect(L10n.Page.carryMeter(.usesNoneLeft(cost: 2)) == "Uses 2 places · none left")
-        #expect(L10n.Page.carryMeter(.usesNoneLeft(cost: 1)) == "Uses 1 place · none left")
-        #expect(L10n.Page.carryMeter(.usesLast(2)) == "This uses your last 2 places")
+        #expect(L10n.Page.carryMeter(.left(3)) == "3 places left")
+        #expect(L10n.Page.carryMeter(.left(1)) == "1 place left")
+        #expect(L10n.Page.carryMeter(.usesLast) == "This uses your last place")
         #expect(L10n.Page.carryMeter(.allInUse(pool: 10)) == "All 10 places in use")
-        #expect(L10n.Page.carryMeter(.freeYouAndOneIntention) == "Free carries you and one intention of your own")
+        #expect(L10n.Page.carryMeter(.allInUse(pool: 1)) == "Your one place is in use")
+        #expect(L10n.Page.carryMeter(.free) == "Free carries you and your intention")
         #expect(L10n.Page.filledUp(pool: 10) == "All 10 places filled up.")
         #expect(L10n.Page.carryFailed == "Couldn't change this. Try again.")
         #expect(L10n.Page.carryOffline == "Needs a connection.")
+        #expect(L10n.Page.printsWithValue([]) == "Name only")
+        #expect(L10n.Page.printsWithValue(["Rest"]) == "Rest")
+        #expect(L10n.Page.heldByYou(1) == "Held by you · 1 prayer")
+        #expect(L10n.Page.carriedByWorld(prayers: 61_204, lists: 19) == "Carried by the world · 61,204 prayers · 19 lists")
+    }
+
+    @Test func theLastPlaceAndAFullPool() async {
+        defer { running.cancel() }
+        backend.header.update { $0?.includeLimit = 6 }
+        await waitUntil { home.nameCarryOffer("bea").pool == 6 }
+        #expect(nameCarryMeter(home.nameCarryOffer("bea")) == .usesLast)
+        backend.header.update { $0?.includeLimit = 5 }
+        await waitUntil { home.nameCarryOffer("bea").pool == 5 }
+        #expect(!home.nameCarryOffer("bea").hasRoom)
+        #expect(nameCarryMeter(home.nameCarryOffer("bea")) == .allInUse(pool: 5))
+        #expect(nameCarryMeter(home.nameCarryOffer("dad")) == .allInUse(pool: 5), "carried, none left")
+        backend.header.update { $0?.includeLimit = 3 }
+        await waitUntil { home.nameCarryOffer("dad").pool == 3 }
+        #expect(nameCarryMeter(home.nameCarryOffer("dad")) == .allInUse(pool: 3), "over the pool: never negative")
     }
 
     @Test func carryingANameThatDoesntFitIsRefused() async {
         defer { running.cancel() }
         backend.header.update { $0?.entitlementExpiresAt = .now.addingTimeInterval(-60) }
-        await waitUntil { home.nameCarryOffer("bea").pool == 1 }
+        await waitUntil { home.nameCarryOffer("bea").isFree }
         #expect(!home.nameCarryOffer("bea").hasRoom)
+        #expect(nameCarryMeter(home.nameCarryOffer("bea")) == .free)
         await #expect(throws: SetCarriedError.overLimit) { try await home.setCarried("bea", true) }
     }
 
@@ -361,56 +406,119 @@ struct HomeModelTests {
         defer { running.cancel() }
         // A lapsed trial: the free pool, with names still carried.
         backend.header.update { $0?.entitlementExpiresAt = .now.addingTimeInterval(-60) }
-        await waitUntil { home.nameCarryOffer("dad").pool == 1 }
+        await waitUntil { home.nameCarryOffer("dad").isFree }
         let dad = home.nameCarryOffer("dad")
         #expect(dad.startsOn && dad.hasRoom, "on, and free to turn off")
         try await home.setCarried("dad", false)
         await waitUntil { !home.nameCarryOffer("dad").startsOn }
         #expect(backend.subjects.value.first { $0.id == "dad" }?.isCarried == false)
+        #expect(backend.subjects.value.first { $0.id == "dad-1" }?.isCarried == true, "his choice is kept")
         #expect(backend.subjects.value.first { $0.id == "mom" }?.isCarried == true, "the others are kept")
         // Still over the pool: adding back is still refused.
         await #expect(throws: SetCarriedError.overLimit) { try await home.setCarried("dad", true) }
     }
 
-    @Test func aLapsedTrialSeesWhatACarriedNameUses() async {
+    @Test func printsWithMovesTheCheckEvenOverThePool() async throws {
         defer { running.cancel() }
+        // A swap is never pool-checked: a lapsed trial can still choose.
         backend.header.update { $0?.entitlementExpiresAt = .now.addingTimeInterval(-60) }
-        await waitUntil { home.nameCarryOffer("dad").pool == 1 }
-        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("dad"))) == "Uses 2 places · none left",
-                "over the free pool: not the free line")
-        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("bea"))) == "Your one place is in use")
+        await waitUntil { home.nameCarryOffer("dad").isFree }
+        let options = home.printsWithOptions("dad")
+        #expect(options.options.map(\.id) == ["dad-1", "dad-2"])
+        #expect(options.options.map(\.checked) == [true, false])
+        try await home.setPrintsWith("dad", "dad-2")
+        await waitUntil { home.page("dad")?.printsWith == ["Rest for his heart"] }
+        #expect(backend.subjects.value.first { $0.id == "dad-1" }?.isCarried == false)
+        try await home.setPrintsWith("dad", nil)
+        await waitUntil { home.page("dad")?.printsWith == [] }
+        #expect(home.printsWithOptions("dad").nameOnly)
     }
 
-    @Test func restoreComesBackUncarriedOverThePool() async throws {
+    @Test func theCapIsEnforcedByTheServer() async {
+        defer { running.cancel() }
+        var ids = carriedIds(home.tree)
+        ids.insert("dad-2")
+        await #expect(throws: SetCarriedError.overCap) { try await backend.setCarriedItems(Array(ids)) }
+    }
+
+    @Test func homesCarriedMarkIsChosenAndPersonCarried() async throws {
+        defer { running.cancel() }
+        let dadRow = { home.groups.first { $0.id == "dad" }?.intentions.first { $0.id == "dad-1" } }
+        #expect(dadRow()?.carried == true)
+        try await home.setCarried("dad", false)
+        await waitUntil { !home.nameCarryOffer("dad").startsOn }
+        #expect(dadRow()?.carried == false, "chosen, but Dad isn't carried")
+    }
+
+    @Test func anIntentionPageChoosesAndCarriesItsPerson() async throws {
+        defer { running.cancel() }
+        backend.subjects.update {
+            $0.append(Subject(id: "bea-1", kind: .intention, parentId: "bea", publicName: "Her new home",
+                              isCarried: false, sortOrder: 1, createdAt: .now))
+        }
+        await waitUntil { home.intentionPage("bea-1") != nil }
+        #expect(home.intentionPage("bea-1")?.status == .privateOnly)
+        let offer = home.intentionCarryOffer(personId: "bea", intentionId: "bea-1")
+        #expect(!offer.startsOn && offer.alsoCarriesPerson && offer.hasRoom)
+        try await home.choose("bea-1", true)
+        await waitUntil { home.nameCarryOffer("bea").startsOn }
+        if case .list = home.intentionPage("bea-1")?.status {} else { Issue.record("prints now") }
+        // Bea off again: the choice stays, and the page says why it doesn't print.
+        try await home.setCarried("bea", false)
+        await waitUntil { !home.nameCarryOffer("bea").startsOn }
+        #expect(home.intentionPage("bea-1")?.status == .privateWhilePersonOff)
+        #expect(home.intentionCarryOffer(personId: "bea", intentionId: "bea-1").startsOn)
+        // Swapping on Dad's page.
+        try await home.choose("dad-2", true)
+        await waitUntil { home.page("dad")?.printsWith == ["Rest for his heart"] }
+        #expect(home.intentionPage("mom-1")?.answered != nil, "Answered: no carry card")
+        #expect(home.intentionPage("mom-1")?.status == nil)
+    }
+
+    @Test func restoreComesBackUncarriedOverThePoolAndUnchosenAtTheCap() async throws {
         defer { running.cancel() }
         let now = Date.now
         let ann = Subject(id: "ann", kind: .soul, publicName: "Ann", isCarried: true, sortOrder: 99, createdAt: now)
         let work = Subject(id: "ann-1", kind: .intention, parentId: "ann", publicName: "Work", isCarried: true,
                            sortOrder: 1, createdAt: now)
-        // 7 of 10 carried: Ann and her intention fit.
+        backend.header.update { $0?.includeLimit = 6 }
+        await waitUntil { home.nameCarryOffer("dad").pool == 6 }
+        // 5 of 6 carried: Ann fits.
         #expect(try await backend.restoreSubject(ann, intentions: [work]))
         await waitUntil { home.nameCarryOffer("ann").startsOn }
-        // Now 9 of 10: Bo and his intention would make 11.
+        // 6 of 6: Bo comes back off; his intention keeps its choice.
         let bo = Subject(id: "bo", kind: .soul, publicName: "Bo", isCarried: true, sortOrder: 100, createdAt: now)
         let boWork = Subject(id: "bo-1", kind: .intention, parentId: "bo", publicName: "Rest", isCarried: true,
                              sortOrder: 1, createdAt: now)
         #expect(try await backend.restoreSubject(bo, intentions: [boWork]) == false)
         await waitUntil { home.page("bo") != nil }
-        #expect(backend.subjects.value.first { $0.id == "bo" }?.isCarried == false)
-        #expect(backend.subjects.value.first { $0.id == "bo-1" }?.isCarried == true, "its intention keeps its flag")
-        #expect(home.page("bo")?.status == .notOnList)
+        #expect(backend.subjects.value.first { $0.id == "bo-1" }?.isCarried == true)
+        #expect(home.page("bo")?.status == .privateOnly)
+        // An intention restored to Dad (at the cap) comes back unchosen.
+        let dad3 = Subject(id: "dad-3", kind: .intention, parentId: "dad", publicName: "Sleep", isCarried: true,
+                           sortOrder: 3, createdAt: now)
+        #expect(try await backend.restoreSubject(dad3) == false)
     }
 
-    @Test func carriedWithNoneFreeTheMeterSaysNoneLeft() async {
+    @Test func historyAndCountsComeFromTheDetail() async {
         defer { running.cancel() }
-        // 7 carried: a pool of 7 is exactly full; a pool of 3 is over.
-        backend.header.update { $0?.includeLimit = 7 }
-        await waitUntil { home.nameCarryOffer("dad").pool == 7 }
-        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("dad"))) == "Uses 2 places · none left")
-        backend.header.update { $0?.includeLimit = 3 }
-        await waitUntil { home.nameCarryOffer("dad").pool == 3 }
-        #expect(L10n.Page.carryMeter(nameCarryMeter(home.nameCarryOffer("dad"))) == "Uses 2 places · none left",
-                "over the pool: never a negative number")
+        let watching = Task { await home.watchDetail("dad") }
+        defer { watching.cancel() }
+        await waitUntil { home.history("dad") != nil }
+        let history = home.history("dad")
+        #expect(history?.grids.first?.month == home.today.month)
+        #expect(history?.grids.count == 2, "Dad was added 45 days ago")
+        let counts = home.counts("dad")
+        #expect((counts?.heldByYou ?? 0) > 0)
+        #expect((counts?.world?.lists ?? 0) > 0)
+        // A prayer held now shows at once, folded in from the device.
+        let before = counts?.heldByYou ?? 0
+        let prayer = NewPrayer(id: "p-new", startedAt: .now.addingTimeInterval(-60), prayedAt: .now,
+                               localDate: home.today, timezone: "UTC", communityListId: nil, listContextNumber: 52,
+                               subjectIds: ["dad-1"])
+        await home.log(prayer)
+        await waitUntil { (home.counts("dad")?.heldByYou ?? 0) == before + 1 }
+        #expect(home.counts("dad")?.heldByYou == before + 1, "an intention's prayer holds its name too")
     }
 }
 

@@ -12,7 +12,8 @@ import PlusPrayerDomain
 ///     a Home row's long-press ──▶ person (the add-intention form) ──Add──▶ close
 ///
 /// A new name is auto-carried while there's room; its carrying is managed
-/// on its page (whose "Not on the list" says when it isn't). Intentions have a carry toggle, so nothing is reported
+/// on its page (whose footer says "Private · in your prayers only" when it
+/// isn't). Intentions have "Print with {alias} ✱" (Q32), so nothing is reported
 /// after the fact, except when the server disagrees (the pool filled from
 /// another device): "Saved, but not carried…", then Done instead of
 /// closing. The model holds the text, the step, the carry choices and what
@@ -191,18 +192,31 @@ final class AddSheetModel: Identifiable {
         }
     }
 
-    // MARK: The carry row
+    // MARK: The carry row (screens.md "Carry row", Q32)
 
-    /// What the pool allows for this row, now.
-    func carryOffer(_ row: CarryRow) -> CarryOffer {
+    /// The person the row's intention is for.
+    private func personId(_ row: CarryRow) -> String {
         switch row {
-        case .intention: home.carryOffer(kind: .intention, parentId: parentId)
-        case .person: home.carryOffer(kind: .intention, parentId: personId)
+        case .intention: parentId
+        case .person: personId ?? ""
         }
     }
 
-    /// The toggle: the user's choice while there's room, else its default;
-    /// always off with no room.
+    /// The person's alias, else their name.
+    func personLabel(_ row: CarryRow) -> String {
+        switch row {
+        case .intention: parent?.label ?? ""
+        case .person: personName
+        }
+    }
+
+    /// "Print with {alias} ✱": what choosing this intention means now.
+    func carryOffer(_ row: CarryRow) -> IntentionCarryOffer {
+        home.intentionCarryOffer(personId: personId(row))
+    }
+
+    /// The toggle: the user's choice while it can turn on, else its default;
+    /// always off when it can't.
     func isCarrying(_ row: CarryRow) -> Bool {
         let offer = carryOffer(row)
         return offer.hasRoom && (carryChoice[row] ?? offer.startsOn)
@@ -213,22 +227,24 @@ final class AddSheetModel: Identifiable {
         carryChoice[row] = on
     }
 
-    /// The meter, previewing the toggle's result.
-    func meter(_ row: CarryRow) -> CarryMeter {
-        carryMeter(carryOffer(row), kind: .intention, isOn: isCarrying(row))
+    /// The toggle's title: "Print with Dad" / "Print with your name".
+    func carryTitle(_ row: CarryRow) -> String {
+        L10n.Add.printWith(personLabel(row), isSelf: carryOffer(row).isSelf)
     }
 
-    /// "Also carries Dad · uses 2 places": the toggle is on and it carries
-    /// the intention's name too, at this true cost. The cost is nil when the
-    /// meter already says it takes the last places (no repeating it).
-    func alsoCarries(_ row: CarryRow) -> (name: String, cost: Int?)? {
+    /// The subtitle's lines: "Instead of “…”" when the person already has
+    /// their chosen intention (on = swap); "Also carries {alias} · N places
+    /// left" when they aren't carried (on carries them too); with no place
+    /// for them, the meter's full line instead.
+    func carrySubtitle(_ row: CarryRow) -> [String] {
         let offer = carryOffer(row)
-        guard isCarrying(row), offer.alsoCarriesParent else { return nil }
-        let cost: Int? = if case .usesLast = meter(row) { nil } else { offer.cost }
-        switch row {
-        case .intention: return parent.map { ($0.label, cost) }
-        case .person: return (personName, cost)
+        var lines: [String] = []
+        if let replaced = offer.replaces.first { lines.append(L10n.Add.insteadOf(replaced.publicName)) }
+        if offer.alsoCarriesPerson {
+            lines.append(offer.hasRoom ? L10n.Add.alsoCarries(personLabel(row), left: offer.left)
+                         : L10n.Page.carryMeter(offer.isFree ? .free : .allInUse(pool: offer.pool)))
         }
+        return lines
     }
 
     // MARK: Commands
@@ -313,7 +329,7 @@ final class AddSheetModel: Identifiable {
     private func addIntention(_ text: String, parentId: String, row: CarryRow) async throws {
         let carry = isCarrying(row)
         let input = NewSubject(kind: .intention, publicName: text, parentId: parentId, carry: carry,
-                               carryParent: carry && carryOffer(row).alsoCarriesParent)
+                               carryParent: carry && carryOffer(row).alsoCarriesPerson)
         let added = try await home.addSubject(input)
         if added.differs(from: input) {
             notCarried = true

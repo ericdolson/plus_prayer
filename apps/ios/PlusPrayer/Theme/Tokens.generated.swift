@@ -187,12 +187,32 @@ nonisolated enum PP {
             static let intention: CGFloat = 40
         }
         enum held {
-            /// Held ring stroke. Crisp, solid, no glow.
+            /// Held ring stroke on 40–44 pt avatars and the community card. Crisp, solid, no glow. The ring scales in steps, not proportionally (design-direction §5, 2026-11-08): ringSmall / ring / ringLarge.
             static let ring: CGFloat = 2
+            /// Held ring stroke up to ~32 pt (the History calendar's ~24 pt day ring).
+            static let ringSmall: CGFloat = 1.5
+            /// Gap to the held ring up to ~32 pt.
+            static let ringGapSmall: CGFloat = 1.5
+            /// Held ring stroke at ~96 pt (a person's page, the add sheet's Name tab).
+            static let ringLarge: CGFloat = 3
+            /// Gap to the held ring at ~96 pt.
+            static let ringGapLarge: CGFloat = 3
             /// Gap between the avatar (or card) and its held ring.
             static let ringGap: CGFloat = 2
             /// The gold dot where the thread meets a held intention.
             static let dot: CGFloat = 5
+        }
+        /// The smallest tap target for a bare glyph button in the content (the ＋ on a page's Intentions title; HIG 44 pt).
+        static let hitTarget: CGFloat = 44
+        enum history {
+            /// History calendar (detail-page.md, 2026-11-08): the height of a week row; seven columns share the content width.
+            static let row: CGFloat = 32
+            /// A day with nothing on it: a dot in `thread`, the calendar's shape, not a mark of absence.
+            static let dayDot: CGFloat = 4
+            /// A day on a printed list: the carried-mark glyph in inkMuted, this tall.
+            static let bloom: CGFloat = 14
+            /// A day you held them: the gold ring's outer size (stroke and gap: held.ringSmall / ringGapSmall).
+            static let ring: CGFloat = 24
         }
         enum thread {
             static let stroke: CGFloat = 1
@@ -368,6 +388,12 @@ nonisolated enum PP {
         static let labelSmall = Font.system(.footnote, weight: .medium)
         /// Timer and counts: tabular figures. When a count rises live, crossfade only the changed digits.
         static let count = Font.system(.subheadline, weight: .medium).monospacedDigit()
+        /// Section titles on a page ("Intentions", "History"): system sans, Title 3 semibold (detail-page.md, 2026-11-08; Roca is for proper names).
+        static let sectionTitle = Font.system(.title3, weight: .semibold)
+        /// An intention as a page title: system sans, Title 2 semibold; wraps (detail-page.md, 2026-11-08).
+        static let intentionTitle = Font.system(.title2, weight: .semibold)
+        /// A History period's label ("November"): system sans, Headline (detail-page.md).
+        static let periodLabel = Font.system(.headline, weight: .semibold)
         /// Avatar initials: body sans, not the serif. Size = number.initialsScale × the disc (17.6 at 44); tracking number.initialsTracking on two letters; optically centered. Does not scale with Dynamic Type (it tracks the disc).
         static func initials(size: CGFloat) -> Font { .system(size: size, weight: .semibold) }
     }

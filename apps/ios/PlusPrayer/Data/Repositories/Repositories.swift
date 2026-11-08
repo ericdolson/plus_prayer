@@ -23,9 +23,14 @@ protocol SubjectRepository {
     func addSubject(_ input: NewSubject) async throws -> AddedSubject
 
     /// The setCarriedItems callable ("your portion" save): exactly `ids`
-    /// carried, or nothing changes (blocked, never trimmed, over the pool).
-    /// Throws `SetCarriedError`.
+    /// carried (names) or chosen (intentions), or nothing changes (blocked,
+    /// never trimmed, over the pool or a person's cap). Throws
+    /// `SetCarriedError`.
     func setCarriedItems(_ ids: [String]) async throws
+
+    /// GetSubjectDetail for a page: the lists it printed on and your
+    /// prayers that held it (History and the counts). Re-read after writes.
+    func detail(_ id: String) -> AsyncStream<SubjectDetail>
 }
 
 struct NewSubject: Equatable {
@@ -37,13 +42,13 @@ struct NewSubject: Equatable {
     var alias: String? = nil
     /// Names only: picked when the add sheet opened.
     var avatarTone: Int? = nil
-    /// The add sheet's carry row. false = kept for your own prayers. (The
-    /// server still saves it privately if the pool has no room.)
-    /// schema-brief.md, "addSubject carry inputs": coming to the callable;
-    /// the mock has it now.
+    /// The add sheet's carry row, always sent. A name: carry it while the
+    /// pool has room. An intention: choose it to print with its person; at
+    /// the person's cap this swaps it in (Q32). false = kept for your own
+    /// prayers. schema-brief.md, "addSubject carry inputs".
     var carry = true
-    /// Intentions only: also carry the name it's under ("Also carries Dad"),
-    /// which re-carries its intentions still flagged.
+    /// Intentions only: also carry the person it's under ("Also carries
+    /// Dad"; one place, pool-checked; their chosen intention comes back).
     var carryParent = false
 }
 
@@ -68,10 +73,12 @@ struct AddedSubject: Equatable {
 }
 
 /// From the setCarriedItems callable's codes: failed-precondition with
-/// `OVER_LIMIT` → `.overLimit`, no connection → `.offline`, anything else →
+/// `OVER_LIMIT` → `.overLimit`, with `OVER_CAP` → `.overCap` (a person's
+/// intentions per person, Q32), no connection → `.offline`, anything else →
 /// `.failed`.
 enum SetCarriedError: Error, Equatable {
     case overLimit
+    case overCap
     case offline
     case failed
 }

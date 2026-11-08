@@ -98,75 +98,17 @@
         }
       }
     },
-    "add.carry.allInUse.one" : {
-      "comment" : "Add sheet: the carry row's meter when a pool of 1 is full or over (screens.md). Unit may become people (Q32).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your one place is in use"
-          }
-        }
-      }
-    },
-    "add.carry.allInUse.places" : {
-      "comment" : "Add sheet: the carry row's meter when the pool is full or over (a lapsed trial), never \"7 of 1\" (screens.md). The number is the pool (2 or more; a pool of 1 has its own line). Unit may become people (Q32).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All %#@pool@ in use"
-          },
-          "substitutions" : {
-            "pool" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg place"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg places"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "add.carry.alsoCarries" : {
-      "comment" : "Add sheet: under the carry row when an intention's toggle is on and its name isn't carried, while the meter already says it takes the last places (no repeating the cost; screens.md). The argument is the name's alias, else its name.",
+      "comment" : "Add sheet and an intention's page: the toggle's subtitle when the person isn't carried; turning it on carries them too (one place). 1: the person's alias, else their name; 2: places free now (Q32; screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Also carries %@"
-          }
-        }
-      }
-    },
-    "add.carry.alsoCarries.places" : {
-      "comment" : "Add sheet: under the carry row when an intention's toggle is on and its name isn't carried: the true cost (the intention, the name, and the name's intentions still marked carried). First argument: the name's alias, else its name. Unit may become people (Q32).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Also carries %1$@ · uses %#@cost@"
+            "value" : "Also carries %1$@ · %2$#@left@"
           },
           "substitutions" : {
-            "cost" : {
+            "left" : {
               "argNum" : 2,
               "formatSpecifier" : "lld",
               "variations" : {
@@ -174,51 +116,15 @@
                   "one" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg place"
+                      "value" : "%arg place left"
                     }
                   },
                   "other" : {
                     "stringUnit" : {
                       "state" : "translated",
-                      "value" : "%arg places"
+                      "value" : "%arg places left"
                     }
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "add.carry.freeNote" : {
-      "comment" : "Add sheet, Name tab, free pool: the carry row's meter (toggle disabled). PLACEHOLDER pending open-questions Q32 copy (screens.md).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Free carries you and one intention of your own"
-          }
-        }
-      }
-    },
-    "add.carry.left.places" : {
-      "comment" : "Add sheet: the carry row's muted meter, what's left before this item (it doesn't change when the toggle flips): \"3 places left\" (screens.md). Unit may become people (Q32).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld place left"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld places left"
                 }
               }
             }
@@ -238,20 +144,8 @@
         }
       }
     },
-    "add.carry.makeRoom.intention" : {
-      "comment" : "Add sheet, Intention tab and offer step, pool full: the small blue link beside the disabled toggle (inert for now; Q31).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Make room for this intention"
-          }
-        }
-      }
-    },
     "add.carry.notCarried" : {
-      "comment" : "Add sheet: the line when the server saved an intention uncarried although its toggle was on (the pool filled from another device). Intention tab: the notice row, with Done; the add-intention form: under the person's row (screens.md).",
+      "comment" : "Add sheet: the line when the server saved an intention not printing although its toggle was on (the places filled from another device). Intention tab: the notice row, with Done; the add-intention form: under the person's row (screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -263,37 +157,13 @@
       }
     },
     "add.carry.title" : {
-      "comment" : "Add sheet: the carry row's toggle label, on both tabs and the offer step (screens.md). \"The list\" is the printed list.",
+      "comment" : "A person's page: the carry toggle's label (detail-page.md \"Carry card\"). \"The list\" is the printed list.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Carry onto the list"
-          }
-        }
-      }
-    },
-    "add.carry.usesLast.places" : {
-      "comment" : "Add sheet: the carry row's meter when the toggle is on and turning it on takes every place left (screens.md). The number is how many. Unit may become people (Q32).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "This uses your last place"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "This uses your last %lld places"
-                }
-              }
-            }
           }
         }
       }
@@ -1349,7 +1219,7 @@
       }
     },
     "page.status.covered" : {
-      "comment" : "A name's page: the status line when your prayer covers the next list. 1: the alias, else the name; 2: the list number (detail-page.md).",
+      "comment" : "A person's page: the carry card's footer when your prayer with the list covers the next list. 1: the alias, else the name; 2: the list number (detail-page.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1361,55 +1231,43 @@
       }
     },
     "page.status.nextPrayer" : {
-      "comment" : "A name's page: the status line after you prayed with today's list, before the next is covered. 1: the alias, else the name; 2: the list number (detail-page.md).",
+      "comment" : "A person's page: the carry card's footer after you prayed with today's list, before the next is covered. 1: the alias, else the name; 2: the list number (detail-page.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your next prayer carries %1$@ onto List %2$lld"
+            "value" : "Your next prayer with the list carries %1$@ onto List %2$lld"
           }
         }
       }
     },
     "page.status.prayToCarry" : {
-      "comment" : "A name's page: the status line when you haven't prayed with the list. 1: the alias, else the name; 2: the list number (detail-page.md).",
+      "comment" : "A person's page: the carry card's footer when you haven't prayed with the list. 1: the alias, else the name; 2: the list number (detail-page.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pray to carry %1$@ onto List %2$lld"
-          }
-        }
-      }
-    },
-    "page.status.notOnList" : {
-      "comment" : "A name's page: the status line when the name isn't carried. The page may state absence; Home never does (detail-page.md, 2026-11-07).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not on the list"
+            "value" : "Pray with today's list to carry %1$@ onto List %2$lld"
           }
         }
       }
     },
     "page.closesSoon" : {
-      "comment" : "A name's page: replaces the status line near the cutoff, if you haven't prayed with the list today. 1: the list number; 2: minutes left; 3: the alias, else the name (detail-page.md).",
+      "comment" : "A person's page: replaces the footer near the cutoff while carried, if you haven't prayed with the list today. 1: the list number; 2: minutes left; 3: the alias, else the name (detail-page.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "List %1$lld closes in %2$lld min · pray to carry %3$@"
+            "value" : "List %1$lld closes in %2$lld min · pray with the list to carry %3$@"
           }
         }
       }
     },
     "page.intentions" : {
-      "comment" : "A name's page: the Intentions section title (detail-page.md).",
+      "comment" : "A name's page: the Intentions section title (system sans, Title 3; detail-page.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1421,7 +1279,7 @@
       }
     },
     "page.addIntention.for" : {
-      "comment" : "A name's page: the link under its intentions that opens the add-intention form. The argument is the alias, else the name (detail-page.md).",
+      "comment" : "A name's page: the ＋ on the Intentions title, as VoiceOver reads it. The argument is the alias, else the name (detail-page.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1433,7 +1291,7 @@
       }
     },
     "page.addIntention.self" : {
-      "comment" : "Your own page (Me): the link under your intentions that opens the add-intention form (detail-page.md).",
+      "comment" : "Your own page (Me): the ＋ on the Intentions title, as VoiceOver reads it (detail-page.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1469,155 +1327,13 @@
       }
     },
     "page.carry.makeRoom" : {
-      "comment" : "A name's page: under the carry row when the name is off and doesn't fit; inert until Membership / Your portion exist. The argument is the alias, else the name (detail-page.md).",
+      "comment" : "A person's page and the add sheet's carry row: under the toggle when the person is off and no place is free; inert until Membership / Your portion exist. The argument is the alias, else the name (detail-page.md, screens.md).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Make room for %@"
-          }
-        }
-      }
-    },
-    "page.carry.uses" : {
-      "comment" : "A name's page: the carry row's subtitle while carried. 1: what it uses (the name and its carried intentions); 2: what's free overall, as on Home and Your portion (detail-page.md). Unit may become people (Q32).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uses %1$#@cost@ · %2$#@left@"
-          },
-          "substitutions" : {
-            "cost" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg place"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg places"
-                    }
-                  }
-                }
-              }
-            },
-            "left" : {
-              "argNum" : 2,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg left"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg left"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "page.carry.usesNoneLeft" : {
-      "comment" : "A name's page: the carry row's subtitle while carried and nothing is free overall (none left, or over the pool, e.g. a lapsed trial; never a negative number). 1: what it uses (the name and its carried intentions; Answered intentions never count) (detail-page.md). Unit may become people (Q32).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uses %#@cost@ · none left"
-          },
-          "substitutions" : {
-            "cost" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg place"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg places"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "page.carry.wouldUse" : {
-      "comment" : "A name's page: the carry row's subtitle while not carried, when carrying it brings back intentions still marked carried. 1: what it would use; 2: what's free overall (detail-page.md). Unit may become people (Q32).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Would use %1$#@cost@ · %2$#@left@"
-          },
-          "substitutions" : {
-            "cost" : {
-              "argNum" : 1,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg place"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg places"
-                    }
-                  }
-                }
-              }
-            },
-            "left" : {
-              "argNum" : 2,
-              "formatSpecifier" : "lld",
-              "variations" : {
-                "plural" : {
-                  "one" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg left"
-                    }
-                  },
-                  "other" : {
-                    "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "%arg left"
-                    }
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -1676,6 +1392,512 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Needs a connection."
+          }
+        }
+      }
+    },
+    "add.carry.printWith" : {
+      "comment" : "Add sheet and an intention's page: the carry toggle's title (the bloom follows it). Turning it on chooses the intention to print with its person (Q32; screens.md). The argument is the person's alias, else their name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Print with %@"
+          }
+        }
+      }
+    },
+    "add.carry.printWith.self" : {
+      "comment" : "Add sheet and an intention's page, under Me: the carry toggle's title (Q32; screens.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Print with your name"
+          }
+        }
+      }
+    },
+    "add.carry.insteadOf" : {
+      "comment" : "Add sheet and an intention's page: the toggle's subtitle when the person already has their chosen intention; on is a swap (Q32; screens.md). The argument is the chosen intention's text.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instead of “%@”"
+          }
+        }
+      }
+    },
+    "page.carry.left" : {
+      "comment" : "A person's page: the carry toggle's subtitle, the places free now (one place = one person; Q32; detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld place left"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld places left"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "page.carry.usesLast" : {
+      "comment" : "A person's page: the carry toggle's subtitle when they're off and turning them on takes the last place (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This uses your last place"
+          }
+        }
+      }
+    },
+    "page.carry.allInUse" : {
+      "comment" : "A person's page: the carry toggle's subtitle when no place is free (full, or over the pool; never negative). The number is the pool, 2 or more (a pool of 1 has its own line) (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All %#@pool@ in use"
+          },
+          "substitutions" : {
+            "pool" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg place"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg places"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "page.carry.allInUse.one" : {
+      "comment" : "A person's page: the carry toggle's subtitle when a pool of 1 is full or over (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your one place is in use"
+          }
+        }
+      }
+    },
+    "page.carry.free" : {
+      "comment" : "A person's page, free tier: the carry toggle's subtitle (disabled while off, with \"Make room for {alias}\") (Q32; detail-page.md, screens.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free carries you and your intention"
+          }
+        }
+      }
+    },
+    "page.status.self.covered" : {
+      "comment" : "Your own page (Me): the carry card's footer when the next list is covered (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You'll be on List %lld"
+          }
+        }
+      }
+    },
+    "page.status.self.nextPrayer" : {
+      "comment" : "Your own page (Me): the footer after you prayed with today's list (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your next prayer with the list puts you on List %lld"
+          }
+        }
+      }
+    },
+    "page.status.self.prayToBe" : {
+      "comment" : "Your own page (Me): the footer when you haven't prayed with the list (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pray with today's list to be on List %lld"
+          }
+        }
+      }
+    },
+    "page.status.intention.covered" : {
+      "comment" : "An intention's page: the carry card's footer when the next list is covered (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It'll be on List %lld"
+          }
+        }
+      }
+    },
+    "page.status.intention.nextPrayer" : {
+      "comment" : "An intention's page: the footer after you prayed with today's list (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your next prayer with the list carries it onto List %lld"
+          }
+        }
+      }
+    },
+    "page.status.intention.prayToCarry" : {
+      "comment" : "An intention's page: the footer when you haven't prayed with the list (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pray with today's list to carry it onto List %lld"
+          }
+        }
+      }
+    },
+    "page.status.private" : {
+      "comment" : "A page's carry card footer when not carried (a person) or not chosen (an intention): states what is, not what's missing (detail-page.md, 2026-11-08).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private · in your prayers only"
+          }
+        }
+      }
+    },
+    "page.status.privateWhileOff" : {
+      "comment" : "An intention's page: the footer when it's chosen but its person isn't carried. The argument is the person's alias, else their name (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private while %@ isn't carried"
+          }
+        }
+      }
+    },
+    "page.closesSoon.self" : {
+      "comment" : "Your own page (Me): replaces the footer near the cutoff. 1: the list number; 2: minutes left; 3: the next list (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List %1$lld closes in %2$lld min · pray with the list to be on List %3$lld"
+          }
+        }
+      }
+    },
+    "page.closesSoon.intention" : {
+      "comment" : "An intention's page: replaces the footer near the cutoff. 1: the list number; 2: minutes left (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List %1$lld closes in %2$lld min · pray with the list to carry this"
+          }
+        }
+      }
+    },
+    "page.history" : {
+      "comment" : "A page's History section title (system sans, Title 3; detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "History"
+          }
+        }
+      }
+    },
+    "page.printsWith" : {
+      "comment" : "A person's page: the carry card row naming the intention they print with, and the title of the list it opens (Q32; detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prints with"
+          }
+        }
+      }
+    },
+    "page.printsWith.nameOnly" : {
+      "comment" : "A person's page: \"Prints with\" when no intention is chosen, and the first row of the list (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name only"
+          }
+        }
+      }
+    },
+    "page.counts.heldByYou" : {
+      "comment" : "A page's counts: your prayers that held them (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Held by you · %#@prayers@"
+          },
+          "substitutions" : {
+            "prayers" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg prayer"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg prayers"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "page.counts.world" : {
+      "comment" : "A page's counts, once ever carried: prayers offered for the lists they were on, and how many lists (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carried by the world · %1$#@prayers@ · %2$#@lists@"
+          },
+          "substitutions" : {
+            "prayers" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg prayer"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg prayers"
+                    }
+                  }
+                }
+              }
+            },
+            "lists" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg list"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg lists"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "history.prayed" : {
+      "comment" : "History: a period's prayers (detail-page.md \"Wording\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "You prayed once"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "You prayed %lld times"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "history.lists" : {
+      "comment" : "History: how many printed lists in the period (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "On %lld list"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "On %lld lists"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "history.summary" : {
+      "comment" : "Not copy: joins \"You prayed N times\" and \"On N lists\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "history.notes" : {
+      "comment" : "History: notes written in the period, right-aligned on its label line (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✎ %lld"
+          }
+        }
+      }
+    },
+    "history.notes.spoken" : {
+      "comment" : "History: VoiceOver for \"✎ N\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld note"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld notes"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "history.answered" : {
+      "comment" : "History, on an intention's own page: the hint on the period it was answered (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Answered"
+          }
+        }
+      }
+    },
+    "history.begun" : {
+      "comment" : "History: the last row; the argument is the day it was added (\"Sep 12\", with the year before this year) (detail-page.md).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Begun · %@"
+          }
+        }
+      }
+    },
+    "history.spoken.sentence" : {
+      "comment" : "Not copy: one sentence of a History grid's VoiceOver label (\"November. On 9 lists. You prayed 6 times.\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@."
           }
         }
       }

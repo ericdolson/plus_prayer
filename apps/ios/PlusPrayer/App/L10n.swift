@@ -147,38 +147,19 @@ nonisolated enum L10n {
         static var offline: String { t("add.offline") }
         static var failed: String { t("add.failed") }
         static var carryTitle: String { t("add.carry.title") }
-        static var makeRoomForIntention: String { t("add.carry.makeRoom.intention") }
         static var makeRoomHint: String { t("add.carry.makeRoom.hint") }
         static var notCarried: String { t("add.carry.notCarried") }
-        // Everything with a `{unit}` goes through these, keyed by the unit
-        // (open-questions Q32): "places" today.
 
-        /// "Also carries Dad · uses 2 places"; "Also carries Dad" when the
-        /// meter already says it takes the last places (cost nil).
-        static func alsoCarries(_ name: String, cost: Int?, unit: PoolUnit = poolUnit) -> String {
-            guard let cost else { return String(format: t("add.carry.alsoCarries"), name) }
-            let key = switch unit {
-            case .places: "add.carry.alsoCarries.places"
-            }
-            return String.localizedStringWithFormat(t(key), name, cost)
+        /// "Print with Dad ✱" (Q32): an intention's carry toggle; under Me,
+        /// "Print with your name".
+        static func printWith(_ name: String, isSelf: Bool) -> String {
+            isSelf ? t("add.carry.printWith.self") : String(format: t("add.carry.printWith"), name)
         }
-
-        /// The carry row's meter: "3 places left", "This uses your last
-        /// place" / "… last 2 places", "All 10 places in use", or the free
-        /// pool's line.
-        static func carryMeter(_ meter: CarryMeter, unit: PoolUnit = poolUnit) -> String {
-            switch (meter, unit) {
-            case (.left(let left), .places):
-                String.localizedStringWithFormat(t("add.carry.left.places"), left)
-            case (.usesLast(let left), .places):
-                String.localizedStringWithFormat(t("add.carry.usesLast.places"), left)
-            case (.allInUse(1), .places):
-                t("add.carry.allInUse.one")
-            case (.allInUse(let pool), .places):
-                String.localizedStringWithFormat(t("add.carry.allInUse.places"), pool)
-            case (.freeYouAndOneIntention, _):
-                t("add.carry.freeNote")
-            }
+        /// "Instead of “Healing after his surgery”": on is a swap.
+        static func insteadOf(_ chosen: String) -> String { String(format: t("add.carry.insteadOf"), chosen) }
+        /// "Also carries Dad · 3 places left": on also carries the person.
+        static func alsoCarries(_ name: String, left: Int) -> String {
+            String.localizedStringWithFormat(t("add.carry.alsoCarries"), name, left)
         }
         static func counter(_ count: Int, _ cap: Int) -> String {
             String(format: t("add.counter"), locale: .current, count, cap)
@@ -188,58 +169,132 @@ nonisolated enum L10n {
         }
     }
 
-    /// A name's page (detail-page.md).
+    /// A name's or an intention's page (detail-page.md).
     enum Page {
         private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
+        private static func f(_ key: String, _ args: CVarArg...) -> String {
+            String(format: t(key), locale: .current, arguments: args)
+        }
+        enum Subject {
+            case person(String)
+            case me
+            case intention
+        }
 
-        /// The status line under the title; the self's reads as the card's
-        /// own ("You'll be on List 53").
-        static func status(_ status: PersonPageValues.Status, name: String, isSelf: Bool) -> String {
-            switch status {
-            case .notOnList:
-                return t("page.status.notOnList")
-            case .closing(let list, let minutes, let next):
-                return isSelf ? Card.closesSoon(list: list, minutes: minutes, next: next, aboutYouOnly: true)
-                    : String(format: t("page.closesSoon"), locale: .current, list, minutes, name)
-            case .list(let tomorrow, let next):
-                if isSelf { return Card.status(tomorrow, next: next, aboutYouOnly: true) }
-                let key = switch tomorrow {
-                case .covered: "page.status.covered"
-                case .nextPrayerCarries: "page.status.nextPrayer"
-                case .prayToCarry: "page.status.prayToCarry"
-                }
-                return String(format: t(key), locale: .current, name, next)
+        /// The carry card's footer (detail-page.md "Status line", 2026-11-08).
+        static func status(_ status: CarryStatus, about subject: Subject, person: String = "") -> String {
+            switch (status, subject) {
+            case (.privateOnly, _): t("page.status.private")
+            case (.privateWhilePersonOff, _): f("page.status.privateWhileOff", person)
+            case (.closing(let list, let minutes, _), .person(let name)): f("page.closesSoon", list, minutes, name)
+            case (.closing(let list, let minutes, let next), .me): f("page.closesSoon.self", list, minutes, next)
+            case (.closing(let list, let minutes, _), .intention): f("page.closesSoon.intention", list, minutes)
+            case (.list(let tomorrow, let next), .person(let name)): f(listKey(tomorrow, "page.status"), name, next)
+            case (.list(let tomorrow, let next), .me): f(listKey(tomorrow, "page.status.self"), next)
+            case (.list(let tomorrow, let next), .intention): f(listKey(tomorrow, "page.status.intention"), next)
+            }
+        }
+
+        private static func listKey(_ tomorrow: TomorrowStatus, _ prefix: String) -> String {
+            switch (tomorrow, prefix == "page.status.self") {
+            case (.covered, _): "\(prefix).covered"
+            case (.nextPrayerCarries, _): "\(prefix).nextPrayer"
+            case (.prayToCarry, true): "\(prefix).prayToBe"
+            case (.prayToCarry, false): "\(prefix).prayToCarry"
             }
         }
         static var intentions: String { t("page.intentions") }
+        static var history: String { t("page.history") }
         static func addIntention(for name: String, isSelf: Bool) -> String {
             isSelf ? t("page.addIntention.self") : String(format: t("page.addIntention.for"), name)
         }
         static func firstIntention(for name: String, isSelf: Bool) -> String {
             isSelf ? t("page.firstIntention.self") : String(format: t("page.firstIntention"), name)
         }
+        /// "Make room for Dad": the page's toggle and the add sheet's carry
+        /// row when full (inert until Membership / Your portion exist).
         static func makeRoom(for name: String) -> String { String(format: t("page.carry.makeRoom"), name) }
-        /// The carry row's subtitle: what this name costs and what's free
-        /// overall ("Uses 2 places · 3 left").
-        static func carryMeter(_ meter: NameCarryMeter, unit: PoolUnit = poolUnit) -> String {
-            switch (meter, unit) {
-            case (.uses(let cost, let left), .places):
-                String.localizedStringWithFormat(t("page.carry.uses"), cost, left)
-            case (.usesNoneLeft(let cost), .places):
-                String.localizedStringWithFormat(t("page.carry.usesNoneLeft"), cost)
-            case (.wouldUse(let cost, let left), .places):
-                String.localizedStringWithFormat(t("page.carry.wouldUse"), cost, left)
-            case (.left(let left), _): Add.carryMeter(.left(left), unit: unit)
-            case (.usesLast(let left), _): Add.carryMeter(.usesLast(left), unit: unit)
-            case (.allInUse(let pool), _): Add.carryMeter(.allInUse(pool: pool), unit: unit)
-            case (.freeYouAndOneIntention, _): Add.carryMeter(.freeYouAndOneIntention, unit: unit)
+        /// The person toggle's subtitle (one place = one person).
+        static func carryMeter(_ meter: NameCarryMeter) -> String {
+            switch meter {
+            case .left(let left): String.localizedStringWithFormat(t("page.carry.left"), left)
+            case .usesLast: t("page.carry.usesLast")
+            case .allInUse(1): t("page.carry.allInUse.one")
+            case .allInUse(let pool): String.localizedStringWithFormat(t("page.carry.allInUse"), pool)
+            case .free: t("page.carry.free")
             }
         }
-        /// Under the carry row after it flipped back: the pool filled from
+        /// Under the toggle after it flipped back: the pool filled from
         /// another device.
         static func filledUp(pool: Int) -> String { String.localizedStringWithFormat(t("page.carry.filledUp"), pool) }
         static var carryFailed: String { t("page.carry.failed") }
         static var carryOffline: String { t("page.carry.offline") }
+
+        /// "Prints with": the row's title and the pushed list's.
+        static var printsWith: String { t("page.printsWith") }
+        static var nameOnly: String { t("page.printsWith.nameOnly") }
+        /// The row's value: the chosen intention(s), else "Name only".
+        static func printsWithValue(_ chosen: [String]) -> String {
+            chosen.isEmpty ? nameOnly : chosen.formatted(.list(type: .and))
+        }
+
+        /// "Held by you · 47 prayers".
+        static func heldByYou(_ prayers: Int) -> String {
+            String.localizedStringWithFormat(t("page.counts.heldByYou"), prayers)
+        }
+        /// "Carried by the world · 61,204 prayers · 19 lists".
+        static func carriedByWorld(prayers: Int, lists: Int) -> String {
+            String.localizedStringWithFormat(t("page.counts.world"), prayers, lists)
+        }
+    }
+
+    /// The History section (detail-page.md "History (calendar)").
+    enum History {
+        private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
+
+        /// "You prayed once" / "You prayed 6 times".
+        static func prayed(_ n: Int) -> String { String.localizedStringWithFormat(t("history.prayed"), n) }
+        /// "On 9 lists".
+        static func lists(_ n: Int) -> String { String.localizedStringWithFormat(t("history.lists"), n) }
+        /// "You prayed 6 times · On 9 lists"; either half left out at 0; nil when both are.
+        static func summary(_ s: PeriodSummary) -> String? {
+            switch (s.prayers, s.lists) {
+            case (0, 0): nil
+            case (let p, 0): prayed(p)
+            case (0, let l): lists(l)
+            case (let p, let l): String(format: t("history.summary"), prayed(p), lists(l))
+            }
+        }
+        /// "✎ 2".
+        static func notes(_ n: Int) -> String { String(format: t("history.notes"), locale: .current, n) }
+        static func notesSpoken(_ n: Int) -> String { String.localizedStringWithFormat(t("history.notes.spoken"), n) }
+        static var answered: String { t("history.answered") }
+        /// "Begun · Sep 12" this year; "Begun · Sep 12, 2025" before.
+        static func begun(_ date: LocalDate, today: LocalDate) -> String {
+            let day = date.start()
+            let text = date.year == today.year
+                ? day.formatted(.dateTime.month(.abbreviated).day())
+                : day.formatted(.dateTime.month(.abbreviated).day().year())
+            return String(format: t("history.begun"), text)
+        }
+        /// "November" this year; "December 2025" otherwise; a year row "2025".
+        static func period(_ period: HistoryPeriod, today: LocalDate) -> String {
+            switch period {
+            case .year(let year): String(year)
+            case .month(let year, let month):
+                monthName(year: year, month: month, withYear: year != today.year)
+            }
+        }
+        static func monthName(year: Int, month: Int, withYear: Bool) -> String {
+            let day = LocalDate(year: year, month: month, day: 1).start()
+            return withYear ? day.formatted(.dateTime.month(.wide).year()) : day.formatted(.dateTime.month(.wide))
+        }
+        /// A grid as one VoiceOver element: "November. On 9 lists. You
+        /// prayed 6 times."
+        static func gridSpoken(month: String, _ s: PeriodSummary) -> String {
+            let parts = [s.lists > 0 ? lists(s.lists) : nil, s.prayers > 0 ? prayed(s.prayers) : nil].compactMap { $0 }
+            return ([month] + parts).map { String(format: t("history.spoken.sentence"), $0) }.joined(separator: " ")
+        }
     }
 
     enum Common {

@@ -269,18 +269,12 @@ final class HomeModel {
             .map { PickerName(id: $0.id, label: $0.label, initials: monogram($0), tone: $0.tone) }
     }
 
-    /// The add sheet's carry row for a new name (`parentId` nil) or an
-    /// intention under `parentId` (screens.md, "Carry row").
-    /// - Parameter justAdded: the name the sheet just saved, counted until
-    ///   Home's stream brings it.
-    func carryOffer(kind: SubjectKind, parentId: String?, justAdded: Subject? = nil) -> CarryOffer {
-        guard let header else {
-            return CarryOffer(hasRoom: false, startsOn: false, alsoCarriesParent: false, used: 0,
-                              pool: freeCarryLimit)
-        }
-        var tree = tree
-        if let justAdded, tree[justAdded.id] == nil { tree = SubjectTree(Array(tree.all) + [justAdded]) }
-        return PlusPrayerDomain.carryOffer(kind: kind, parentId: parentId, in: tree, user: header, now: clock())
+    /// "Print with {alias} ✱" (Q32): the add sheet's carry row for a new
+    /// intention under `personId` (`intentionId` nil), or an intention's page.
+    func intentionCarryOffer(personId: String, intentionId: String? = nil) -> IntentionCarryOffer {
+        let user = header ?? UserHeader(id: "")
+        return PlusPrayerDomain.intentionCarryOffer(personId: personId, intentionId: intentionId, in: tree, user: user,
+                                                    now: clock(), cap: config.intentionsPerPerson)
     }
 
     // MARK: A name's page (detail-page.md)
@@ -293,42 +287,122 @@ final class HomeModel {
         // Home's rows under All, in Home's order.
         let group = visibleGroups(tree, today: today).first { $0.id == id }
         let intentions = (group?.intentions ?? []).map { item($0, tree: tree) }
+        let open = openIntentions(of: id, in: tree)
+        let printsWith: [String]? = subject.isSelf || !subject.isCarried || open.isEmpty ? nil
+            : chosenIntentions(of: id, in: tree).map(\.publicName)
         return PersonPageValues(
             id: id, initials: monogram(subject), tone: subject.tone, isSelf: subject.isSelf,
             label: subject.label, printedName: subject.label != subject.publicName ? subject.publicName : nil,
-            heldToday: isHeldToday(subject, today: today), status: pageStatus(subject, tree: tree),
-            intentions: intentions)
+            heldToday: isHeldToday(subject, today: today), status: status(of: subject, tree: tree),
+            counts: counts(id), printsWith: printsWith, intentions: intentions)
     }
 
-    private func pageStatus(_ subject: Subject, tree: SubjectTree) -> PersonPageValues.Status? {
-        // The page may say what Home never does: absence (2026-11-07).
-        if !subject.isSelf && !isEffectivelyCarried(subject, in: tree) { return .notOnList }
-        guard let list else { return nil }
-        if let minutes = closingSoonMinutes(closesAt: list.closesAt, now: clock(),
-                                            prayedWithListToday: prayedWithListToday) {
-            return .closing(list: list.listNumber, minutes: minutes, next: list.listNumber + 1)
-        }
-        let status = tomorrowStatus(list: list, status: myStatus, local: localPrayers, header: effectiveHeader,
-                                    today: today)
-        return .list(status, next: list.listNumber + 1)
+    /// The carry card's footer (detail-page.md "Status line").
+    private func status(of subject: Subject, tree: SubjectTree) -> CarryStatus? {
+        carryStatus(subject, in: tree, list: list?.listNumber,
+                    tomorrow: list.map { tomorrowStatus(list: $0, status: myStatus, local: localPrayers,
+                                                        header: effectiveHeader, today: today) },
+                    closingMinutes: list.flatMap { closingSoonMinutes(closesAt: $0.closesAt, now: clock(),
+                                                                      prayedWithListToday: prayedWithListToday) })
     }
 
-    /// A name's carry row: its flag, and whether turning it on fits.
+    /// A name's carry toggle: its flag, and whether turning it on fits.
     func nameCarryOffer(_ id: String) -> CarryOffer {
         guard let header else {
-            return CarryOffer(hasRoom: false, startsOn: tree[id]?.isCarried ?? false, alsoCarriesParent: false,
-                              used: 0, pool: freeCarryLimit, isFree: true)
+            return CarryOffer(hasRoom: false, startsOn: tree[id]?.isCarried ?? false, used: 0, pool: freeCarryLimit,
+                              isFree: true)
         }
         return PlusPrayerDomain.nameCarryOffer(nameId: id, in: tree, user: header, now: clock())
     }
 
-    /// Carries the name `id` or stops carrying it (its intentions keep their
-    /// own flags) through setCarriedItems: what's carried now, with this one
-    /// changed. Throws `SetCarriedError`.
+    /// Carries the person `id` or stops carrying them (their chosen
+    /// intentions keep their choice) through setCarriedItems: what's carried
+    /// now, with this one changed. Throws `SetCarriedError`.
     func setCarried(_ id: String, _ carried: Bool) async throws {
-        var ids = Set(tree.all.filter { !$0.isSelf && !$0.isResolved && $0.isCarried }.map(\.id))
+        var ids = carriedIds(tree)
         if carried { ids.insert(id) } else { ids.remove(id) }
         try await repositories.subjects.setCarriedItems(Array(ids))
+    }
+
+    /// "Prints with": the person's open intentions with the check on the
+    /// chosen ones (Name only when none).
+    func printsWithOptions(_ personId: String) -> PrintsWithValues {
+        let tree = tree
+        let chosen = Set(chosenIntentions(of: personId, in: tree).map(\.id))
+        let cap = config.intentionsPerPerson
+        return PrintsWithValues(
+            cap: cap,
+            options: openIntentions(of: personId, in: tree).map {
+                PrintsWithValues.Option(id: $0.id, text: $0.publicName, checked: chosen.contains($0.id),
+                                        enabled: cap <= 1 || chosen.contains($0.id) || chosen.count < cap)
+            })
+    }
+
+    /// A tap in "Prints with" (`intentionId` nil = Name only): a swap,
+    /// never pool-checked. Throws `SetCarriedError`.
+    func setPrintsWith(_ personId: String, _ intentionId: String?) async throws {
+        let ids = printsWith(intentionId, for: personId, in: tree, cap: config.intentionsPerPerson)
+        try await repositories.subjects.setCarriedItems(Array(ids))
+    }
+
+    /// An intention's "Print with {alias} ✱": on chooses it (a swap at the
+    /// cap) and carries its person when they aren't; off unchooses it.
+    func choose(_ intentionId: String, _ on: Bool) async throws {
+        let tree = tree
+        let person = tree.parent(of: intentionId)
+        let ids = choosing(intentionId, on, in: tree, cap: config.intentionsPerPerson,
+                           carryPerson: on && !(person?.isSelf ?? true) && !(person?.isCarried ?? true))
+        try await repositories.subjects.setCarriedItems(Array(ids))
+    }
+
+    // MARK: An intention's page (detail-page.md "Intention page")
+
+    func intentionPage(_ id: String) -> IntentionPageValues? {
+        let tree = tree
+        guard let subject = tree[id], subject.isIntention, let person = tree.parent(of: id) else { return nil }
+        return IntentionPageValues(
+            id: id, text: subject.publicName, personId: person.id, personLabel: person.label,
+            personIsSelf: person.isSelf, heldToday: isHeldToday(subject, today: today),
+            answered: subject.resolvedAt.map { L10n.Row.answered($0) },
+            status: subject.isResolved ? nil : status(of: subject, tree: tree), counts: counts(id))
+    }
+
+    // MARK: History and counts (GetSubjectDetail)
+
+    /// Each page's detail as it streams in (`watchDetail`, the page's `.task`).
+    private(set) var details: [String: SubjectDetail] = [:]
+
+    /// Watches one page's detail until the page goes.
+    func watchDetail(_ id: String) async {
+        for await value in repositories.subjects.detail(id) { details[id] = value }
+    }
+
+    /// The detail with this device's unsent prayers folded in (the server
+    /// links a held intention's name too).
+    private func detail(_ id: String) -> SubjectDetail? {
+        guard var detail = details[id] else { return nil }
+        let tree = tree
+        let known = Set(detail.prayers.map(\.id))
+        for prayer in localPrayers where !known.contains(prayer.id) {
+            let held = prayer.subjectIds.contains(id)
+                || prayer.subjectIds.contains { tree.parent(of: $0)?.id == id }
+            if held { detail.prayers.append(DetailPrayer(id: prayer.id, localDate: prayer.localDate)) }
+        }
+        return detail
+    }
+
+    /// "Held by you · N prayers" / "Carried by the world · …"; nil until loaded.
+    func counts(_ id: String) -> DetailCounts? {
+        detail(id).map { detailCounts($0, currentListId: list?.id, livePrayerCount: list?.prayerCount) }
+    }
+
+    /// The History section; nil until loaded.
+    func history(_ id: String, calendar: Calendar = .current) -> History? {
+        guard let subject = tree[id], let detail = detail(id) else { return nil }
+        let answeredOn = subject.isIntention && subject.resolution == .answered
+            ? subject.resolvedAt.map { LocalDate($0, calendar: calendar) } : nil
+        return PlusPrayerDomain.history(detail, begun: LocalDate(subject.createdAt, calendar: calendar), today: today,
+                                        answeredOn: answeredOn, firstWeekday: calendar.firstWeekday)
     }
 
     /// Active names and intentions; at the ~500 cap the add sheet says so.
@@ -405,18 +479,9 @@ struct NameGroup: Identifiable, Equatable {
     var id: String { name.id }
 }
 
-/// A name's page: the person, their status line and their intentions.
+/// A name's page: the person, their counts, the carry card and their
+/// intentions.
 struct PersonPageValues: Equatable {
-    enum Status: Equatable {
-        /// "Dad will be on List 53" / "Your next prayer carries Dad onto
-        /// List 54" / "Pray to carry Dad onto List 53" (the self: "You'll be…").
-        case list(TomorrowStatus, next: Int)
-        /// Near the cutoff, if you haven't prayed with the list today.
-        case closing(list: Int, minutes: Int, next: Int)
-        /// Not carried: "Not on the list".
-        case notOnList
-    }
-
     let id: String
     let initials: String
     let tone: Int
@@ -426,10 +491,46 @@ struct PersonPageValues: Equatable {
     /// The printed name, under an alias; nil without one.
     let printedName: String?
     let heldToday: Bool
-    /// nil until the current list has arrived.
-    let status: Status?
+    /// The carry card's footer; nil until the current list has arrived.
+    let status: CarryStatus?
+    /// nil until the detail has loaded.
+    let counts: DetailCounts?
+    /// "Prints with": the chosen intentions' text (empty = "Name only");
+    /// nil hides the row (not carried, no open intentions, or the self).
+    let printsWith: [String]?
     /// As on Home, in Home's order.
     let intentions: [RowItem]
+}
+
+/// "Prints with": Name only, then the person's open intentions.
+struct PrintsWithValues: Equatable {
+    struct Option: Identifiable, Equatable {
+        let id: String
+        let text: String
+        let checked: Bool
+        /// With a cap above 1, an unchecked row is disabled at the cap.
+        let enabled: Bool
+    }
+
+    let cap: Int
+    let options: [Option]
+    var nameOnly: Bool { !options.contains(where: \.checked) }
+}
+
+/// An intention's page.
+struct IntentionPageValues: Equatable {
+    let id: String
+    let text: String
+    let personId: String
+    /// The person's alias, else their name (the link above the title).
+    let personLabel: String
+    let personIsSelf: Bool
+    let heldToday: Bool
+    /// "Answered · Oct 19": no carry card.
+    let answered: String?
+    /// The carry card's footer; nil when answered or before the list loads.
+    let status: CarryStatus?
+    let counts: DetailCounts?
 }
 
 /// One name in the add sheet's For row and "Who is this for?".

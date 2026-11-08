@@ -23,7 +23,7 @@ struct HomeView: View {
         NavigationStack(path: $path) {
             homeContent
                 .toolbar(.hidden, for: .navigationBar)
-                .navigationDestination(for: String.self) { id in PersonPage(id: id) }
+                .navigationDestination(for: String.self) { id in SubjectPage(id: id) }
         }
         // Here, not on Home's content: a pushed page takes that off screen,
         // which would cancel the streams the page needs too.

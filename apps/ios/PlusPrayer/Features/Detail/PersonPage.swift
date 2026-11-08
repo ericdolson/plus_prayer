@@ -1,26 +1,27 @@
 import PlusPrayerDomain
 import SwiftUI
 
-/// A name's page (detail-page.md, DECIDED 2026-11-03 + the 2026-11-07
-/// notes): the person (a 96 pt avatar, the alias with the printed name
-/// under it, the status line), their carry row (not on the self page), and
-/// their intentions with the way to add one. Pushed from a Home row, and
-/// where adding a name lands.
+/// A name's page (detail-page.md, 2026-11-03 + 2026-11-07/08 + Q32): the
+/// person (a 96 pt avatar, the alias with the printed name under it), the
+/// counts, the carry card (the toggle, "Prints with", the status line;
+/// the self page's card holds only the status), their intentions with the
+/// ＋ on the section title, and History. Pushed from a Home row, and where
+/// adding a name lands; an intention row pushes its page.
 ///
-/// Not yet: the counts, History, the ⋯ menu, the pray button and praying
-/// in place, and intention pages. Its intention rows have no thread (the
-/// page is the name).
+/// Not yet: the ⋯ menu, the pray button and praying in place, tapping a
+/// day or period.
 struct PersonPage: View {
     let id: String
 
     @Environment(HomeModel.self) private var home
     @State private var adding: AddSheetModel?
     /// The carry toggle while setCarriedItems is on its way: shown at once,
-    /// until the name's flag catches up (or the call fails).
+    /// until the person's flag catches up (or the call fails).
     @State private var pendingCarry: Bool?
     /// Why the toggle flipped back (ink, like other errors), under the row
     /// until the next tap on the toggle or leaving the page.
     @State private var carryError: String?
+    @State private var choosingPrintsWith = false
     @ScaledMetric(relativeTo: .body) private var bloomHeight = PP.size.carriedMark.carryRow
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -28,9 +29,16 @@ struct PersonPage: View {
         ScrollView {
             if let page = home.page(id) {
                 VStack(alignment: .leading, spacing: PP.space.xl) {
-                    header(page)
-                    if !page.isSelf { carryRow(page) }
+                    VStack(alignment: .leading, spacing: PP.space.lg) {
+                        header(page)
+                        counts(page.counts)
+                    }
+                    carryCard(page)
+                        .padding(.horizontal, PP.space.gutter)
                     intentions(page)
+                    if let history = home.history(id) {
+                        HistorySection(history: history, today: home.today, showsAnswered: false)
+                    }
                 }
                 .padding(.vertical, PP.space.lg)
             }
@@ -38,7 +46,9 @@ struct PersonPage: View {
         .background(PP.color.ground)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $adding) { model in AddSheet(model: model) }
+        .navigationDestination(isPresented: $choosingPrintsWith) { PrintsWithList(personId: id) }
         .onChange(of: home.nameCarryOffer(id).startsOn) { pendingCarry = nil }
+        .task(id: id) { await home.watchDetail(id) }
         // Leaving the page (back, or another page pushed over it) clears
         // the failure line.
         .onDisappear { carryError = nil }
@@ -49,7 +59,7 @@ struct PersonPage: View {
     private func header(_ page: PersonPageValues) -> some View {
         VStack(spacing: PP.space.xs) {
             MonogramAvatar(initials: page.initials, tone: page.tone, size: PP.size.avatar.person)
-                .heldRing(page.heldToday)
+                .heldRing(page.heldToday, step: .large)
                 .padding(.bottom, PP.space.sm)
             Text(verbatim: page.label)
                 .font(PP.type.displayTitle)
@@ -59,14 +69,6 @@ struct PersonPage: View {
                     .font(PP.type.body)
                     .foregroundStyle(PP.color.inkMuted)
             }
-            if let status = page.status {
-                Text(L10n.Page.status(status, name: page.label, isSelf: page.isSelf))
-                    .font(PP.type.bodySmall)
-                    // Weight follows state, as on the card: what's still to
-                    // do in ink, what's done (or absent) muted.
-                    .foregroundStyle(isActionable(status) ? PP.color.ink : PP.color.inkMuted)
-                    .padding(.top, PP.space.xs)
-            }
         }
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
@@ -74,40 +76,61 @@ struct PersonPage: View {
         .accessibilityElement(children: .combine)
     }
 
-    private func isActionable(_ status: PersonPageValues.Status) -> Bool {
-        switch status {
-        case .list(let tomorrow, _): tomorrow.isActionable
-        case .closing: true
-        case .notOnList: false
+    /// "Held by you · 47 prayers"; "Carried by the world · …" once ever carried.
+    @ViewBuilder private func counts(_ counts: DetailCounts?) -> some View {
+        if let counts {
+            VStack(alignment: .leading, spacing: PP.space.xxs) {
+                Text(L10n.Page.heldByYou(counts.heldByYou))
+                if let world = counts.world {
+                    Text(L10n.Page.carriedByWorld(prayers: world.prayers, lists: world.lists))
+                }
+            }
+            .font(PP.type.bodySmall)
+            .foregroundStyle(PP.color.inkMuted)
+            .padding(.horizontal, PP.space.gutter)
         }
     }
 
-    // MARK: The carry row
+    // MARK: The carry card
 
-    /// A native toggle; its subtitle says what this name costs and what's
-    /// free overall ("Uses 2 places · 3 left"). Off without enough room
-    /// (full, or "Would use 2 places · 1 left"): disabled, "Make room for
-    /// {alias}" under it (inert until Membership / Your portion exist). On,
-    /// it can always turn off while online, even over the pool. Never
-    /// silent: offline it's disabled with "Needs a connection."; a failed
-    /// change flips back and says why.
-    private func carryRow(_ page: PersonPageValues) -> some View {
+    private func statusText(_ page: PersonPageValues) -> String? {
+        page.status.map { L10n.Page.status($0, about: page.isSelf ? .me : .person(page.label)) }
+    }
+
+    @ViewBuilder private func carryCard(_ page: PersonPageValues) -> some View {
+        let actionable = page.status?.isActionable ?? false
+        if page.isSelf {
+            CarryCard(status: statusText(page), statusActionable: actionable)
+        } else {
+            CarryCard(status: statusText(page), statusActionable: actionable) {
+                carryToggle(page)
+                if let chosen = page.printsWith, (pendingCarry ?? true) {
+                    printsWithRow(chosen)
+                }
+            }
+        }
+    }
+
+    /// The native toggle; its subtitle is the meter (one place = one person).
+    /// Off and full (or on the free tier): disabled, "Make room for {alias}"
+    /// under it (inert). Turning off asks nothing and is never blocked
+    /// online. Never silent: offline it's disabled with "Needs a
+    /// connection."; a failed change flips back and says why.
+    @ViewBuilder private func carryToggle(_ page: PersonPageValues) -> some View {
         let offer = home.nameCarryOffer(id)
         let isOn = pendingCarry ?? offer.startsOn
         let meter = L10n.Page.carryMeter(nameCarryMeter(offer))
         let binding = Binding(get: { isOn }, set: { setCarried($0, pool: offer.pool) })
-        return VStack(alignment: .leading, spacing: PP.space.sm) {
+        VStack(alignment: .leading, spacing: PP.space.sm) {
             Toggle(isOn: binding) {
                 CarryTitle.text(bloomHeight: bloomHeight, dynamicTypeSize: dynamicTypeSize)
                 Text(meter)
             }
             .ppSwitch()
-            // Turning off is never blocked here (backend accepts any save
-            // that only reduces carrying); only turning on needs room.
             .disabled((!isOn && !offer.hasRoom) || !home.isOnline || pendingCarry != nil)
             .accessibilityLabel(L10n.Add.carryTitle)
             .accessibilityHint(meter)
-            if let line = carryFootnote(offer: offer) {
+            if let line = carryFootnote {
                 Text(line)
                     .font(PP.type.bodySmall)
                     .foregroundStyle(PP.color.ink)
@@ -119,12 +142,11 @@ struct PersonPage: View {
                     .accessibilityHint(L10n.Add.makeRoomHint)
             }
         }
-        .padding(.horizontal, PP.space.gutter)
-        .animation(.easeOut(duration: PP.duration.quick), value: carryFootnote(offer: offer))
+        .animation(.easeOut(duration: PP.duration.quick), value: carryFootnote)
     }
 
-    /// The line under the row: offline, else why the last change flipped back.
-    private func carryFootnote(offer: CarryOffer) -> String? {
+    /// The line under the toggle: offline, else why the last change flipped back.
+    private var carryFootnote: String? {
         home.isOnline ? carryError : L10n.Page.carryOffline
     }
 
@@ -135,7 +157,7 @@ struct PersonPage: View {
             do {
                 try await home.setCarried(id, on)
             } catch {
-                // Flips back to the name's flag, and says why.
+                // Flips back to the person's flag, and says why.
                 pendingCarry = nil
                 carryError = switch error {
                 case SetCarriedError.overLimit where on: L10n.Page.filledUp(pool: pool)
@@ -146,15 +168,53 @@ struct PersonPage: View {
         }
     }
 
+    /// "Prints with  Healing after his su… ›": pushes the native check list.
+    private func printsWithRow(_ chosen: [String]) -> some View {
+        let value = L10n.Page.printsWithValue(chosen)
+        return Button { choosingPrintsWith = true } label: {
+            HStack(spacing: PP.space.sm) {
+                Text(L10n.Page.printsWith)
+                    .foregroundStyle(PP.color.ink)
+                Spacer(minLength: PP.space.sm)
+                Text(verbatim: value)
+                    .foregroundStyle(PP.color.inkMuted)
+                    .lineLimit(1)
+                PPIcon.disclosure
+                    .font(PP.type.caption)
+                    .foregroundStyle(PP.color.inkMuted)
+            }
+            .font(PP.type.body)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(L10n.Page.printsWith)
+        .accessibilityValue(value)
+        .accessibilityAddTraits(.isButton)
+    }
+
     // MARK: Intentions
 
     private func intentions(_ page: PersonPageValues) -> some View {
         VStack(alignment: .leading, spacing: PP.space.sm) {
-            Text(L10n.Page.intentions)
-                .font(PP.type.name)
-                .foregroundStyle(PP.color.ink)
-                .padding(.horizontal, PP.space.gutter)
-                .accessibilityAddTraits(.isHeader)
+            HStack {
+                sectionTitle(L10n.Page.intentions)
+                Spacer(minLength: 0)
+                // A plain action-blue ＋ on the title (no glass: it's in the
+                // content); none while the prominent first-intention button shows.
+                if !page.intentions.isEmpty {
+                    Button { addIntention() } label: {
+                        PPIcon.add
+                            .font(PP.type.sectionTitle)
+                            .frame(minWidth: PP.size.hitTarget, minHeight: PP.size.hitTarget)
+                            .contentShape(Rectangle())
+                    }
+                    .tint(PP.color.primary)
+                    .accessibilityLabel(L10n.Page.addIntention(for: page.label, isSelf: page.isSelf))
+                }
+            }
+            .padding(.leading, PP.space.gutter)
+            .padding(.trailing, PP.space.sm)
             if page.intentions.isEmpty {
                 // None yet: the invitation, prominent.
                 Button { addIntention() } label: {
@@ -166,27 +226,46 @@ struct PersonPage: View {
             } else {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(page.intentions) { intention in
-                        IntentionRow(text: intention.label, carried: intention.carried, held: intention.heldToday,
-                                     secondary: intention.secondary.map {
-                                         SecondaryLine(text: $0.text, kind: $0.answered ? .answered : .notice)
-                                     },
-                                     // No thread: the page is the name.
-                                     thread: nil,
-                                     accessibilityLabel: intention.accessibilityLabel(
-                                        heldOutsidePrayer: intention.heldToday))
+                        NavigationLink(value: intention.id) {
+                            IntentionRow(text: intention.label, carried: intention.carried, held: intention.heldToday,
+                                         secondary: intention.secondary.map {
+                                             SecondaryLine(text: $0.text, kind: $0.answered ? .answered : .notice)
+                                         },
+                                         // No thread: the page is the name.
+                                         thread: nil,
+                                         accessibilityLabel: intention.accessibilityLabel(
+                                            heldOutsidePrayer: intention.heldToday))
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
-                Button { addIntention() } label: {
-                    Label { Text(L10n.Page.addIntention(for: page.label, isSelf: page.isSelf)) } icon: { PPIcon.add }
-                }
-                .tint(PP.color.primary)
-                .padding(.horizontal, PP.space.gutter)
             }
         }
     }
 
+    private func sectionTitle(_ text: String) -> some View {
+        Text(text)
+            .font(PP.type.sectionTitle)
+            .foregroundStyle(PP.color.ink)
+            .accessibilityAddTraits(.isHeader)
+    }
+
     private func addIntention() {
         adding = AddSheetModel(home: home, intentionFor: id)
+    }
+}
+
+/// Every pushed page: a name's or an intention's, by the subject's kind.
+struct SubjectPage: View {
+    let id: String
+    @Environment(HomeModel.self) private var home
+
+    var body: some View {
+        if home.intentionPage(id) != nil {
+            IntentionPage(id: id)
+        } else {
+            PersonPage(id: id)
+        }
     }
 }
 
@@ -199,6 +278,7 @@ private struct PersonPagePreview: View {
     var body: some View {
         NavigationStack {
             PersonPage(id: id)
+                .navigationDestination(for: String.self) { SubjectPage(id: $0) }
         }
         .environment(home)
         .task { await home.run() }
@@ -209,3 +289,4 @@ private struct PersonPagePreview: View {
 #Preview("Not carried") { PersonPagePreview(id: "bea").preferredColorScheme(.light) }
 #Preview("No intentions") { PersonPagePreview(id: "daniel").preferredColorScheme(.light) }
 #Preview("Me") { PersonPagePreview(id: "self").preferredColorScheme(.dark) }
+#Preview("Dad · large type") { PersonPagePreview(id: "dad").dynamicTypeSize(.accessibility2) }

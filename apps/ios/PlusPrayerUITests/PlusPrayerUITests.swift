@@ -75,7 +75,7 @@ final class PlusPrayerUITests: XCTestCase {
         // Switch tabs: the keyboard never goes down.
         app.segmentedControls.buttons["Intention"].tap()
         XCTAssertTrue(app.keyboards.firstMatch.exists, "keyboard stays up on Intention")
-        XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the intention's carry toggle")
+        XCTAssertTrue(app.switches["Print with your name"].firstMatch.exists, "the intention's carry toggle (Me)")
         XCTAssertFalse(app.textFields["Name"].exists, "the hidden Name tab is out of the accessibility tree")
         sleep(1)
         attach(app, "add 2 intention tab")
@@ -150,7 +150,7 @@ final class PlusPrayerUITests: XCTestCase {
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "the intention is focused")
         XCTAssertTrue(app.navigationBars.buttons["Cancel"].exists, "the glass X")
         XCTAssertFalse(app.buttons["For"].exists, "no For row: the person is given")
-        XCTAssertTrue(app.switches["Carry onto the list"].firstMatch.exists, "the same carry toggle")
+        XCTAssertTrue(app.switches["Print with Dad"].firstMatch.exists, "the same carry toggle")
         app.typeText("Strength for the week")
         sleep(1)
         attach(app, "row 2 intention form")
@@ -161,9 +161,10 @@ final class PlusPrayerUITests: XCTestCase {
         attach(app, "row 3 home")
     }
 
-    /// Aunt Bea's row → her page ("Not on the list", the carry row off, her
-    /// first-intention invitation) → carry her → the status changes → her
-    /// first intention → it's on the page.
+    /// Aunt Bea's row → her page (the carry card's "Private · in your prayers
+    /// only", the toggle off, her first-intention invitation) → carry her →
+    /// the footer changes → her first intention → it's on the page, with the
+    /// ＋ on the Intentions title.
     @MainActor
     func testANamesPage() throws {
         let app = XCUIApplication()
@@ -175,15 +176,16 @@ final class PlusPrayerUITests: XCTestCase {
         bea.firstMatch.tap()
         let header = app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Aunt Bea'"))
         XCTAssertTrue(header.firstMatch.waitForExistence(timeout: 3), "her page")
-        XCTAssertTrue(header.firstMatch.label.contains("Not on the list"), "the page states absence")
+        let privateLine = app.staticTexts["Private · in your prayers only"]
+        XCTAssertTrue(privateLine.waitForExistence(timeout: 3), "the card's footer while she isn't carried")
         let carry = app.switches["Carry onto the list"].firstMatch
         XCTAssertEqual(carry.value as? String, "0")
         sleep(1)
         attach(app, "page 1 not carried")
 
         carry.switches.firstMatch.tap()
-        let carried = NSPredicate(format: "NOT (label CONTAINS 'Not on the list')")
-        wait(for: [expectation(for: carried, evaluatedWith: header.firstMatch)], timeout: 3)
+        let gone = NSPredicate(format: "exists == false")
+        wait(for: [expectation(for: gone, evaluatedWith: privateLine)], timeout: 3)
         XCTAssertEqual(carry.value as? String, "1")
         attach(app, "page 2 carried")
 
@@ -193,7 +195,7 @@ final class PlusPrayerUITests: XCTestCase {
         app.navigationBars.buttons["Add"].tap()
         let added = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Her new home'"))
         XCTAssertTrue(added.firstMatch.waitForExistence(timeout: 3), "on her page")
-        XCTAssertTrue(app.buttons["Add intention for Aunt Bea"].exists, "the link, once there's one")
+        XCTAssertTrue(app.buttons["Add intention for Aunt Bea"].exists, "the ＋ on the title, once there's one")
         attach(app, "page 3 intention")
     }
 

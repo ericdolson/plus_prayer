@@ -1,15 +1,19 @@
 import Foundation
 
-// What goes on the printed list (monetization.md, subjects.md). Mirrors the
-// server's backend/functions/src/pool.ts so the app shows what the next list
-// will print.
+// What goes on the printed list (monetization.md, subjects.md; Q32,
+// 2026-11-08). Mirrors the server's backend/functions/src/pool.ts so the
+// app shows what the next list will print.
 //
-// - Effective carry: an intention is carried only if it and its name are
-//   (or its name is the self). The self name is always carried and isn't
-//   part of the pool.
-// - Resolved items are never list-eligible.
+// - A place = one carried PERSON (a name) beyond the self name. Intentions
+//   never cost a place.
+// - An intention's `isCarried` means "chosen to print with its person"; each
+//   person (Me included) has at most `AppConfig.intentionsPerPerson` chosen.
+//   It prints only when its person is carried (or is the self).
+// - Resolved items are never list-eligible (answering the chosen intention
+//   frees the choice).
 
-/// Is `subject` effectively carried (beyond the self name)?
+/// Does `subject` print (beyond the self name)? A name: carried. An
+/// intention: chosen, and its person carried or the self.
 public func isEffectivelyCarried(_ subject: Subject, in tree: SubjectTree) -> Bool {
     if subject.isSelf || !subject.isCarried || subject.isResolved { return false }
     if subject.isName { return true }
@@ -18,261 +22,266 @@ public func isEffectivelyCarried(_ subject: Subject, in tree: SubjectTree) -> Bo
 }
 
 /// Whether the row shows the carried mark (design-direction §5): the same
-/// set the Carried filter shows. The self is always carried.
+/// set the Carried filter shows. The self is always carried; an intention's
+/// mark = chosen ∧ its person carried.
 public func showsCarriedMark(_ subject: Subject, in tree: SubjectTree) -> Bool {
     subject.isSelf || isEffectivelyCarried(subject, in: tree)
 }
 
 /// The people on the community card's avatar row (and the invitation): you
-/// first, then your effectively carried names in your order. Intentions have
-/// no avatars.
+/// first, then your carried names in your order. Intentions have no avatars.
 public func carriedNames(_ tree: SubjectTree) -> [Subject] {
     (tree.me.map { [$0] } ?? []) + tree.names.filter { isEffectivelyCarried($0, in: tree) }
 }
 
-// MARK: The pool (monetization.md)
+// MARK: The pool (monetization.md, Q32)
 //
-// Effective entitlement: `includeLimit` while `entitlementExpiresAt` is in
-// the future; otherwise free = 1, which must be an intention under Me.
+// Effective entitlement: `includeLimit` people while `entitlementExpiresAt`
+// is in the future; otherwise free = 0 (you, with your intention).
 
-public let freeCarryLimit = 1
+public let freeCarryLimit = 0
 
 public func hasActiveEntitlement(_ user: UserHeader, now: Date) -> Bool {
     user.entitlementExpiresAt.map { $0 > now } ?? false
 }
 
-/// Everything effectively carried beyond the self name.
-public func effectiveCarried(_ tree: SubjectTree) -> [Subject] {
-    tree.all.filter { isEffectivelyCarried($0, in: tree) }
+/// The people the pool counts: carried names beyond the self.
+public func carriedPeople(_ tree: SubjectTree) -> [Subject] {
+    tree.names.filter { !$0.isSelf && $0.isCarried && !$0.isResolved }
+}
+
+/// A person's chosen intentions: open ones flagged to print with them, in
+/// their order. Answered ones don't count.
+public func chosenIntentions(of personId: String, in tree: SubjectTree) -> [Subject] {
+    tree.intentions(of: personId).filter { $0.isCarried && !$0.isResolved }
+}
+
+/// A person's open intentions: what "Prints with" offers (Answered and
+/// Released aren't listed).
+public func openIntentions(of personId: String, in tree: SubjectTree) -> [Subject] {
+    tree.intentions(of: personId).filter { !$0.isResolved }
 }
 
 public struct PoolCheck: Sendable, Equatable {
-    /// The carried set fits.
+    /// The carried people fit.
     public let fits: Bool
+    /// Carried people beyond you.
     public let carried: Int
-    /// What the carry is measured against (free → `freeCarryLimit`).
+    /// What they're measured against (free → `freeCarryLimit`).
     public let limit: Int
     public let isFree: Bool
 }
 
-/// Does the tree's carried set fit the user's effective entitlement now?
+/// Do the tree's carried people fit the user's effective entitlement now?
 public func checkPool(_ tree: SubjectTree, user: UserHeader, now: Date) -> PoolCheck {
-    let carried = effectiveCarried(tree)
-    if hasActiveEntitlement(user, now: now) {
-        return PoolCheck(fits: carried.count <= user.includeLimit, carried: carried.count,
-                         limit: user.includeLimit, isFree: false)
-    }
-    let me = tree.me?.id
-    let fitsFree = carried.count <= freeCarryLimit && carried.allSatisfy { $0.isIntention && $0.parentId == me }
-    return PoolCheck(fits: fitsFree, carried: carried.count, limit: freeCarryLimit, isFree: true)
-}
-
-/// Auto-carry (monetization.md): a new name or intention is carried while
-/// the pool has room; otherwise it's saved for private prayer.
-public func carriesNewSubject(_ new: Subject, in tree: SubjectTree, user: UserHeader, now: Date) -> Bool {
-    var carried = new
-    carried.isCarried = true
-    let all = Array(tree.all) + [carried]
-    return checkPool(SubjectTree(all), user: user, now: now).fits
+    let carried = carriedPeople(tree).count
+    let limit = effectivePoolLimit(user, now: now)
+    return PoolCheck(fits: carried <= limit, carried: carried, limit: limit,
+                     isFree: !hasActiveEntitlement(user, now: now))
 }
 
 /// The pool the carry is measured against now: `includeLimit` while the
-/// entitlement is active, else free (1). The add sheet's meter.
+/// entitlement is active, else free (0).
 public func effectivePoolLimit(_ user: UserHeader, now: Date) -> Int {
     hasActiveEntitlement(user, now: now) ? user.includeLimit : freeCarryLimit
 }
 
-// MARK: The add sheet's carry row (screens.md, "Carry row")
-//
-// "Carry onto the list", a toggle, and a meter saying what's left. On
-// by default while there's room; with no room it's off and disabled, with an
-// (inert for now) "Make room …" under the meter. An intention under a name
-// that isn't carried (for any reason) starts off; turning it on carries the
-// name too, and the line states the true cost.
-
-/// What the pool counts in, for every `{unit}`. One place to change if
-/// open-questions Q32 (people, not items) is adopted.
-public enum PoolUnit: Sendable, Equatable {
-    case places
+/// Places free now (never below 0).
+public func placesLeft(_ tree: SubjectTree, user: UserHeader, now: Date) -> Int {
+    max(0, effectivePoolLimit(user, now: now) - carriedPeople(tree).count)
 }
 
-public let poolUnit = PoolUnit.places
+/// Auto-carry (monetization.md): a new name is carried while the pool has
+/// room; a new intention is chosen while its person is under the cap.
+public func carriesNewSubject(_ new: Subject, in tree: SubjectTree, user: UserHeader, now: Date,
+                              cap: Int = AppConfig.defaults.intentionsPerPerson) -> Bool {
+    if new.isName { return placesLeft(tree, user: user, now: now) > 0 }
+    guard let parentId = new.parentId else { return false }
+    return chosenIntentions(of: parentId, in: tree).count < cap
+}
 
+// MARK: A person's carry toggle (detail-page.md "Carry card", Q32)
+
+/// A person's "Carry onto the list ✱" toggle on their page.
 public struct CarryOffer: Sendable, Equatable {
-    /// The toggle can turn on: the pool has room for it (and, for an
-    /// intention under an uncarried name, for the name too).
+    /// The toggle can turn on (or is on: turning off always works).
     public let hasRoom: Bool
-    /// Where the toggle starts.
+    /// Where the toggle stands: the person's flag.
     public let startsOn: Bool
-    /// Turning it on also carries the intention's name ("Also carries Dad").
-    public let alsoCarriesParent: Bool
-    /// What's carried now, beyond you.
+    /// Carried people now, beyond you, this person included when carried.
     public let used: Int
     public let pool: Int
-    /// How many units turning it on uses: 1, or more when it carries its
-    /// name (and the name's intentions still marked carried come back).
-    public let cost: Int
-    /// No active entitlement: the free pool (one intention under Me).
+    /// No active entitlement: the free pool (you, with your intention).
     public let isFree: Bool
-    /// What's carried now doesn't fit the pool (a lapsed trial still
-    /// carrying names, or a lowered limit). Set by `nameCarryOffer`.
-    public let isOverPool: Bool
 
-    public init(hasRoom: Bool, startsOn: Bool, alsoCarriesParent: Bool, used: Int, pool: Int, cost: Int = 1,
-                isFree: Bool = false, isOverPool: Bool = false) {
+    public init(hasRoom: Bool, startsOn: Bool, used: Int, pool: Int, isFree: Bool = false) {
         self.hasRoom = hasRoom
         self.startsOn = startsOn
-        self.alsoCarriesParent = alsoCarriesParent
         self.used = used
         self.pool = pool
-        self.cost = cost
         self.isFree = isFree
-        self.isOverPool = isOverPool
     }
+
+    /// Places free now (never below 0).
+    public var left: Int { max(0, pool - used) }
 }
 
-/// The carry row for a new name (`parentId` nil) or a new intention under
-/// `parentId`, against the tree as it is now.
-public func carryOffer(kind: SubjectKind, parentId: String?, in tree: SubjectTree, user: UserHeader,
-                       now: Date) -> CarryOffer {
-    let used = effectiveCarried(tree).count
-    let pool = effectivePoolLimit(user, now: now)
-    let isFree = !hasActiveEntitlement(user, now: now)
-    guard kind == .soul || parentId != nil else {
-        return CarryOffer(hasRoom: false, startsOn: false, alsoCarriesParent: false, used: used, pool: pool,
-                          isFree: isFree)
-    }
-    var subjects = Array(tree.all)
-    var alsoCarriesParent = false
-    if kind == .intention, let parentId, let index = subjects.firstIndex(where: { $0.id == parentId }),
-       !subjects[index].isSelf, !subjects[index].isCarried {
-        // Carrying it brings the name back, with any intentions still marked
-        // carried under it (setCarriedItems' rule).
-        subjects[index].isCarried = true
-        alsoCarriesParent = true
-    }
-    subjects.append(Subject(id: "\u{0}new", kind: kind, parentId: kind == .intention ? parentId : nil,
-                            publicName: "", isCarried: true, sortOrder: .max, createdAt: now))
-    let after = SubjectTree(subjects)
-    let hasRoom = checkPool(after, user: user, now: now).fits
-    return CarryOffer(hasRoom: hasRoom, startsOn: hasRoom && !alsoCarriesParent,
-                      alsoCarriesParent: alsoCarriesParent, used: used, pool: pool,
-                      cost: effectiveCarried(after).count - used, isFree: isFree)
-}
-
-/// A name's carry row on its own page (detail-page.md, "Carry row"): the
-/// toggle shows the name's flag (`startsOn`); turning it on needs room for
-/// the name and the intentions still flagged under it (`cost`); `used`
-/// leaves the name out, so the meter says what's left before it. Turning
-/// it off always works.
+/// The carry toggle for the person `nameId` (not the self).
 public func nameCarryOffer(nameId: String, in tree: SubjectTree, user: UserHeader, now: Date) -> CarryOffer {
     let pool = effectivePoolLimit(user, now: now)
     let isFree = !hasActiveEntitlement(user, now: now)
-    var subjects = Array(tree.all)
-    guard let index = subjects.firstIndex(where: { $0.id == nameId && $0.isName && !$0.isSelf }) else {
-        return CarryOffer(hasRoom: false, startsOn: false, alsoCarriesParent: false,
-                          used: effectiveCarried(tree).count, pool: pool, isFree: isFree)
+    let used = carriedPeople(tree).count
+    guard let name = tree[nameId], name.isName, !name.isSelf else {
+        return CarryOffer(hasRoom: false, startsOn: false, used: used, pool: pool, isFree: isFree)
     }
-    let isCarried = subjects[index].isCarried
-    let isOverPool = !checkPool(tree, user: user, now: now).fits
-    subjects[index].isCarried = false
-    let used = effectiveCarried(SubjectTree(subjects)).count
-    subjects[index].isCarried = true
-    let carried = SubjectTree(subjects)
-    return CarryOffer(hasRoom: isCarried || checkPool(carried, user: user, now: now).fits, startsOn: isCarried,
-                      alsoCarriesParent: false, used: used, pool: pool,
-                      cost: effectiveCarried(carried).count - used, isFree: isFree, isOverPool: isOverPool)
+    return CarryOffer(hasRoom: name.isCarried || used < pool, startsOn: name.isCarried, used: used, pool: pool,
+                      isFree: isFree)
 }
 
-/// Restore is pool-aware (subjects.md, 2026-11-07; mirrors the server's
-/// restoreSubject): `item` (as restored: Released reopened) and, for a name,
-/// its cascade-archived `intentions` come back into `tree`. Returns the
-/// item's own flag after: kept, or false when bringing it back carried
-/// would add to what prints and go over the pool. A name's intentions keep
-/// their flags. Never blocks the restore.
-public func restoredCarryFlag(_ item: Subject, intentions: [Subject] = [], into tree: SubjectTree,
-                              user: UserHeader, now: Date) -> Bool {
-    guard item.isCarried else { return false }
-    let before = Set(effectiveCarried(tree).map(\.id))
-    let after = SubjectTree(Array(tree.all) + [item] + intentions)
-    let adds = effectiveCarried(after).contains { !before.contains($0.id) }
-    return !adds || checkPool(after, user: user, now: now).fits
-}
-
-/// A name's carry row subtitle on its page (detail-page.md, 2026-11-07):
-/// what this name costs and what's free overall, so "3 left" matches Home
-/// and Your portion.
+/// The toggle's subtitle (one place = one person; never negative).
 public enum NameCarryMeter: Sendable, Equatable {
-    /// Carried: "Uses 2 places · 3 left" (the name and its carried
-    /// intentions; "Uses 1 place · 3 left" with none). Answered intentions
-    /// never count (they don't go on the list).
-    case uses(cost: Int, left: Int)
-    /// Carried with none free, or over the pool (a lapsed trial): "Uses 2
-    /// places · none left", never a negative number.
-    case usesNoneLeft(cost: Int)
-    /// Not carried, and turning it on brings back intentions still marked
-    /// carried: "Would use 2 places · 3 left". Also when there's some room
-    /// but not enough ("Would use 2 places · 1 left"): the toggle is then
-    /// disabled with "Make room" (`CarryOffer.hasRoom` is false).
-    case wouldUse(cost: Int, left: Int)
-    /// Not carried, costing one: "3 places left".
+    /// "3 places left" (carried or not).
     case left(Int)
-    /// Not carried, and it would take everything left: "This uses your last
-    /// 2 places".
-    case usesLast(Int)
-    /// Not carried and nothing left: "All 10 places in use" (over the free
-    /// pool: "Your one place is in use").
+    /// Not carried, and it would take the last place: "This uses your last
+    /// place".
+    case usesLast
+    /// Nothing free (carried with none left, over the pool, or full and
+    /// off): "All 10 places in use" (a pool of 1: "Your one place is in
+    /// use").
     case allInUse(pool: Int)
-    /// Within the free pool: "Free carries you and one intention of your
-    /// own". Never over it (2026-11-07): there the carried case wins.
-    case freeYouAndOneIntention
+    /// The free tier: "Free carries you and your intention" (off: disabled,
+    /// with "Make room for {alias}").
+    case free
 }
 
-/// The page's meter for `nameCarryOffer`. "Left" is what's free overall
-/// now (never below 0, a lapsed trial included); "uses" counts only what
-/// prints (`effectiveCarried`: no Answered intentions).
-///
-/// The free pool never fits a name, so a carried name there is always over
-/// it: "Uses 2 places · none left", so a lapsed trial sees why names can't
-/// go back on. The free line shows only within the free pool; an uncarried
-/// name while over it gets the full line.
 public func nameCarryMeter(_ offer: CarryOffer) -> NameCarryMeter {
-    if offer.isFree {
-        if offer.startsOn { return .usesNoneLeft(cost: offer.cost) }
-        return offer.isOverPool ? .allInUse(pool: offer.pool) : .freeYouAndOneIntention
-    }
-    let used = offer.used + (offer.startsOn ? offer.cost : 0)
-    let left = max(0, offer.pool - used)
-    if offer.startsOn { return left == 0 ? .usesNoneLeft(cost: offer.cost) : .uses(cost: offer.cost, left: left) }
+    if offer.isFree { return .free }
+    let left = offer.left
     if left == 0 { return .allInUse(pool: offer.pool) }
-    if offer.cost == left { return .usesLast(left) }
-    return offer.cost > 1 ? .wouldUse(cost: offer.cost, left: left) : .left(left)
-}
-
-/// The carry row's muted meter line.
-public enum CarryMeter: Sendable, Equatable {
-    /// "3 places left": what's left before this item.
-    case left(Int)
-    /// On, and it takes everything left: "This uses your last place" /
-    /// "This uses your last 2 places".
-    case usesLast(Int)
-    /// Full or over the pool (a lapsed trial): "All 10 places in use" (a
-    /// pool of 1: "Your one place is in use"), never "7 of 1".
-    case allInUse(pool: Int)
-    /// Free pool, Name tab: "Free carries you and one intention of your own".
-    case freeYouAndOneIntention
-}
-
-/// The meter counts what's left, not including this item, so the toggle
-/// doesn't change it, except that turning it on when its full cost is
-/// everything left says so (and the "Also carries" line then leaves out
-/// its cost).
-public func carryMeter(_ offer: CarryOffer, kind: SubjectKind, isOn: Bool) -> CarryMeter {
-    if kind == .soul && offer.isFree { return .freeYouAndOneIntention }
-    let left = offer.pool - offer.used
-    if left <= 0 { return .allInUse(pool: offer.pool) }
-    if isOn && offer.cost >= left { return .usesLast(left) }
+    if !offer.startsOn && left == 1 { return .usesLast }
     return .left(left)
+}
+
+// MARK: An intention's "Print with {alias} ✱" (screens.md, detail-page.md, Q32)
+
+/// The toggle that chooses an intention to print with its person: the add
+/// sheet's carry row (a new intention) and an intention's page.
+public struct IntentionCarryOffer: Sendable, Equatable {
+    /// The person is the self ("Print with your name ✱").
+    public let isSelf: Bool
+    /// The person is carried (the self always is).
+    public let personCarried: Bool
+    /// Where the toggle starts: the intention's own flag on its page; for a
+    /// new one, on while the person has room under the cap and is carried
+    /// (a new intention never spends a place by default).
+    public let startsOn: Bool
+    /// The toggle can turn on: the person is carried, or there's a place to
+    /// carry them. Turning off always works.
+    public let hasRoom: Bool
+    /// The person's chosen intentions it would replace when turned on (at
+    /// the cap): "Instead of “…”". Empty below the cap.
+    public let replaces: [Subject]
+    /// Turning it on also carries the person: "Also carries {alias} · N
+    /// places left".
+    public let alsoCarriesPerson: Bool
+    /// Places free now (never below 0).
+    public let left: Int
+    public let pool: Int
+    public let isFree: Bool
+}
+
+/// - Parameters:
+///   - intentionId: an existing intention (its page); nil for a new one
+///     (the add sheet).
+///   - cap: `AppConfig.intentionsPerPerson`.
+public func intentionCarryOffer(personId: String, intentionId: String? = nil, in tree: SubjectTree,
+                                user: UserHeader, now: Date,
+                                cap: Int = AppConfig.defaults.intentionsPerPerson) -> IntentionCarryOffer {
+    let person = tree[personId]
+    let isSelf = person?.isSelf ?? false
+    let personCarried = isSelf || (person?.isCarried ?? false)
+    let left = placesLeft(tree, user: user, now: now)
+    let others = chosenIntentions(of: personId, in: tree).filter { $0.id != intentionId }
+    let isOn = intentionId.flatMap { tree[$0] }.map { $0.isCarried && !$0.isResolved }
+    let replaces = others.count >= max(cap, 1) ? Array(others.suffix(others.count - max(cap, 1) + 1)) : []
+    let hasRoom = cap > 0 && (personCarried || left > 0)
+    let startsOn = isOn ?? (hasRoom && personCarried && replaces.isEmpty)
+    return IntentionCarryOffer(isSelf: isSelf, personCarried: personCarried, startsOn: startsOn,
+                               hasRoom: (isOn ?? false) || hasRoom, replaces: (isOn ?? false) ? [] : replaces,
+                               alsoCarriesPerson: !personCarried, left: left,
+                               pool: effectivePoolLimit(user, now: now),
+                               isFree: !hasActiveEntitlement(user, now: now))
+}
+
+// MARK: Choosing what prints (setCarriedItems' input)
+
+/// What's carried (names) and chosen (intentions) now: setCarriedItems'
+/// whole set, before a change. The self and resolved items aside.
+public func carriedIds(_ tree: SubjectTree) -> Set<String> {
+    Set(tree.all.filter { !$0.isSelf && !$0.isResolved && $0.isCarried }.map(\.id))
+}
+
+/// After choosing `intentionId` to print with its person (on), at `cap`:
+/// the person's last chosen intentions by order make room (a swap). Off
+/// just unchooses it. With `carryPerson`, the person is carried too.
+public func choosing(_ intentionId: String, _ on: Bool, in tree: SubjectTree,
+                     cap: Int = AppConfig.defaults.intentionsPerPerson, carryPerson: Bool = false) -> Set<String> {
+    var ids = carriedIds(tree)
+    guard let intention = tree[intentionId], let personId = intention.parentId else { return ids }
+    guard on else {
+        ids.remove(intentionId)
+        return ids
+    }
+    let others = chosenIntentions(of: personId, in: tree).filter { $0.id != intentionId }
+    let keep = max(cap - 1, 0)
+    for extra in others.dropFirst(keep) { ids.remove(extra.id) }
+    ids.insert(intentionId)
+    if carryPerson, let person = tree[personId], !person.isSelf { ids.insert(personId) }
+    return ids
+}
+
+/// "Prints with": the check list's result after a tap. `intentionId` nil =
+/// "Name only" (nothing chosen). At cap 1 a tap moves the check; with a
+/// higher cap a tap toggles, and at the cap an unchecked row changes
+/// nothing (the view disables it).
+public func printsWith(_ intentionId: String?, for personId: String, in tree: SubjectTree,
+                       cap: Int = AppConfig.defaults.intentionsPerPerson) -> Set<String> {
+    var ids = carriedIds(tree)
+    let chosen = chosenIntentions(of: personId, in: tree)
+    guard let intentionId else {
+        for c in chosen { ids.remove(c.id) }
+        return ids
+    }
+    if cap <= 1 {
+        for c in chosen { ids.remove(c.id) }
+        if cap == 1 { ids.insert(intentionId) }
+        return ids
+    }
+    if ids.contains(intentionId) {
+        ids.remove(intentionId)
+    } else if chosen.count < cap {
+        ids.insert(intentionId)
+    }
+    return ids
+}
+
+// MARK: Restore (subjects.md; mirrors the server's restoreSubject)
+
+/// `item` (as restored: Released reopened) and, for a name, its
+/// cascade-archived `intentions` come back into `tree`. Returns the item's
+/// own flag after: kept, or false when a name would go over the pool, or
+/// an intention's person already has `cap` chosen. A name's intentions keep
+/// their choices. Never blocks the restore.
+public func restoredCarryFlag(_ item: Subject, intentions: [Subject] = [], into tree: SubjectTree,
+                              user: UserHeader, now: Date,
+                              cap: Int = AppConfig.defaults.intentionsPerPerson) -> Bool {
+    guard item.isCarried else { return false }
+    if item.isName {
+        let after = SubjectTree(Array(tree.all) + [item] + intentions)
+        return checkPool(after, user: user, now: now).fits
+    }
+    guard !item.isResolved, let parentId = item.parentId else { return true }
+    return chosenIntentions(of: parentId, in: tree).filter { $0.id != item.id }.count < cap
 }
 
 /// The ~500-item abuse cap (server config `subjectCap`; not a paywall). It
