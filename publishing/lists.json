@@ -19,23 +19,48 @@
         "platforms": {
           "youtube": {
             "post_id": "6af0f0608d48d49ba89a25a1",
-            "status": "scheduled"
+            "status": "published",
+            "platform_post_id": "wGWMlsQXlxQ",
+            "platform_post_url": "https://www.youtube.com/watch?v=wGWMlsQXlxQ",
+            "published_at": "2026-11-08T22:00:00Z"
           },
           "facebook": {
             "post_id": "6af0f0633b38351b7fb253d1",
-            "status": "scheduled"
+            "status": "published",
+            "platform_post_id": "1436948021969880",
+            "platform_post_url": "https://www.facebook.com/watch/?v=1436948021969880",
+            "published_at": "2026-11-08T22:03:02Z"
           },
           "instagram": {
             "post_id": "6af0f0678d48d49ba89a25d3",
-            "status": "scheduled"
+            "status": "publishing"
           },
           "threads": {
             "post_id": "6af0f06a3b38351b7fb253f3",
-            "status": "scheduled"
+            "status": "publishing"
           },
           "tiktok": {
             "post_id": "6af0f06d8d48d49ba89a25e5",
-            "status": "scheduled"
+            "status": "unconfirmed",
+            "platform_publish_handle": "v_pub_url~v2-1.7705924450294417422"
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "UgzaHrxfQVUWIVatHCB4AaABAg",
+            "mechanic_at": "2026-11-08T22:04:13Z",
+            "prayer_id": "UgwZLqz80maxalnNjfN4AaABAg",
+            "prayer_at": "2026-11-08T22:04:13Z",
+            "closeout": "pending",
+            "retired_id": null
+          },
+          "facebook": {
+            "mechanic_id": "122142336938983291_1636824474656520",
+            "mechanic_at": "2026-11-08T22:04:13Z",
+            "prayer_id": "122142336938983291_1619679529398546",
+            "prayer_at": "2026-11-08T22:04:13Z",
+            "closeout": "pending",
+            "retired_id": null
           }
         }
       }
@@ -92,16 +117,16 @@
             "mechanic_at": "2026-11-07T23:29:31Z",
             "prayer_id": "UgwEnTk9MVftt5fKKi54AaABAg",
             "prayer_at": "2026-11-07T23:29:31Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "UgwaehNiSJW3QWha5wd4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122142253448983291_1499428942323363",
             "mechanic_at": "2026-11-07T23:29:31Z",
             "prayer_id": "122142253448983291_1304211905195669",
             "prayer_at": "2026-11-07T23:29:31Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122142253448983291_1921681865865745"
           },
           "instagram": {
             "mechanic_id": "18131068820494201",
