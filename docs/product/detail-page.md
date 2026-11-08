@@ -159,14 +159,14 @@ above "Pray for Dad".
 ### History preview (2026-11-08)
 Replaces the page's History calendar; the full history is `history.md`.
 - **Title "History"** with a trailing **"See all ›"** (opens History
-  filtered to this person, Days tab).
+  filtered to this person, All tab).
 - **One row of recent days**, never wrapping: the strand's nodes (history.md
-  "Days"), newest first, with **"Today ▾"** above the first node, as many
+  "All"), newest first, with **"Today ▾"** above the first node, as many
   as fit the width. Tapping a node opens History filtered to this person on
   that day's sheet.
 - **Tiles** (flat `cardSurface`, in-content radius, equal width), each
   opening History filtered to this person on the matching tab:
-  - **"14 · your prayers"** → Days;
+  - **"14 · your prayers"** → Held;
   - **"40 · lists"** with a second line **"138,994 prayers"** (the world
     prayed those lists) → Lists;
   - **"3 · in your journal"** → Journal;

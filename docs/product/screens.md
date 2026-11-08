@@ -154,7 +154,7 @@ _Last updated: 2026-10-18_
     (fallback 10).
 - **Screens:** Home · Today's list (seal, video, counts, who's carried →
   portion) · Past lists · Name/Intention detail · Your portion · History
-  (one screen: everyone or filtered to a person; Days · Journal · Lists;
+  (one screen: everyone or filtered to a person; All · Held · Lists · Journal · Answered;
   history.md) · Prayer detail (journal entry) ·
   You (settings) · Archived · Membership/paywall · Onboarding.
 - **You (settings) contents:** name (edit limit), sign-in/link, membership

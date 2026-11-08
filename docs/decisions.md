@@ -2151,3 +2151,15 @@ self page shows your name under "Me").
 - Also: the day sheet never says "No prayer this day"; it shows only what
   happened.
 
+### Decision: History tabs = All · Held · Lists · Journal · Answered
+**Timestamp:** 2026-11-08
+- Replaces Days · Journal · Lists · Answered. **All** is the strand (the
+  overview, default); each other tab is the full list behind one strand
+  mark: gold ring → **Held** (your prayers, by day, time · length), bloom →
+  **Lists**, corner dot → **Journal**, ✦ → **Answered**. The tabs teach the
+  marks, and your prayers get a home (they had survived only in the day
+  sheet). Tile "your prayers" → Held; "See all" and the preview row → All.
+- Five is the segmented-control cap: no sixth tab (Places would be a
+  toolbar button). At large accessibility text the control becomes a menu
+  button ("All ⌄").
+

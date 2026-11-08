@@ -25,11 +25,25 @@ differently, this file wins.
 - **Self ("Me")** is filterable like anyone.
 
 ### Tabs
-A native segmented control: **Days · Journal · Lists · Answered**
-(Answered added 2026-11-08). Days is the default. (A fourth, **Places**, a map of where you prayed, can come later
-with consent-gated location; not now.)
+A native segmented control: **All · Held · Lists · Journal · Answered**
+(2026-11-08). **All** is the default. **Each tab is the full list behind
+one mark in the strand**, so the tabs teach the marks:
 
-### Days — the strand
+| Mark in the strand | Tab | Lists |
+|---|---|---|
+| everything | **All** | the strand itself (the overview) |
+| gold ring | **Held** | your prayers |
+| bloom | **Lists** | the lists they were on |
+| corner dot | **Journal** | your entries, in full |
+| gold ✦ | **Answered** | answered intentions |
+
+- **Five is the cap** for a native segmented control: no sixth tab. Places
+  (a map of where you prayed, with consent-gated location) would be a
+  toolbar button opening a map, not a tab.
+- **Large accessibility text sizes:** the control becomes a native menu
+  button showing the current tab ("All ⌄").
+
+### All — the strand
 **Newest first.** One strand that wraps like a sentence: it starts at today,
 top left, and reads left to right, then down, back in time.
 ```
@@ -67,7 +81,7 @@ top left, and reads left to right, then down, back in time.
   **two-column rows** (month left; "N prayers · N lists · ✎ N" right in
   `inkMuted`, tabular figures), then older years, then **"Begun · {date}"**
   (scoped: the subject's creation; everyone: your first prayer).
-- **Everyone scope:** a node is *your* day: bloom = you were on that list,
+- **Everyone scope** (unfiltered): a node is *your* day: bloom = you were on that list,
   gold = you prayed. The streak line and "Time in prayer" sit above the
   strand (about you; hidden when filtered).
 - **Tapping a node** opens a native **half-height sheet** for that day: the
@@ -80,6 +94,13 @@ top left, and reads left to right, then down, back in time.
 - **Accessibility:** each node is a button labeled with its day and what
   happened ("Thursday, November 5. On List 49. You prayed. Journal
   entry."); `··` reads "No activity"; the month tab is a heading.
+
+### Held (2026-11-08)
+- Your prayers, **newest first, grouped by day** ("Today", "Yesterday",
+  "Thursday, Nov 5"). Row: time · length ("7:42 am · 12 min"; auto-saved
+  "~38 min"); unfiltered, a small avatar cluster of who it held; ✎ when it
+  has a journal entry. A row opens Prayer detail.
+- Filtered to a person: the prayers that held them.
 
 ### Journal
 - Your journal entries, **newest first, in full**, set for reading, with day
