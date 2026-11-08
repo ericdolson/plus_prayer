@@ -6,6 +6,8 @@ import Foundation
 // - unchecking a name unchecks its intentions;
 // - unchecking an intention leaves its name held;
 // - a name shows a partial state when only some of its intentions are held.
+// On an intention's own page in prayer the name isn't a check, so it follows
+// the intention there (`releasingWithItsName`; detail-page.md, in place).
 // The current list is a separate toggle (`listIncluded`).
 // Each held item keeps when it was checked (`checkedAt`, schema-brief §12): a
 // data seam sent per item with the prayer; no UI shows it.
@@ -79,6 +81,18 @@ public struct PrayerSelection: Sendable, Equatable {
         if graph.isName(id) {
             for intention in graph.intentions(of: id) { next.held.remove(intention) }
         }
+        return next
+    }
+
+    /// Lets go of an intention on its own page (praying in place,
+    /// detail-page.md): its name shows there as plain text, not as a check,
+    /// so it can't be let go of on its own. Here the name follows the
+    /// intention: it goes too unless another of its intentions is still
+    /// held. A name, or anything not held, goes through `toggling`.
+    public func releasingWithItsName(_ id: String, in graph: SubjectGraph) -> PrayerSelection {
+        guard isHeld(id), let parent = graph.parent(of: id) else { return toggling(id, in: graph) }
+        var next = releasing(id, in: graph)
+        if !graph.intentions(of: parent).contains(where: next.isHeld) { next.held.remove(parent) }
         return next
     }
 

@@ -19,6 +19,12 @@ import PlusPrayerDomain
 /// - Closing: the prayer is written (returned by the committing Amen, for
 ///   Home to log); the sheet offers a private note, then you leave.
 ///
+/// Praying in place (detail-page.md): a prayer started on a name's or an
+/// intention's page stays there (`page`). That subject is checked at the
+/// start and can be unchecked. "Pray for others" (or back) leaves the page
+/// for Home with the checks kept (`leavePage`); a draft restored at launch
+/// would resume on Home, since `page` isn't kept.
+///
 /// The session holds only this prayer. What's held today comes from the data
 /// (`HomeModel`). The selection stays through closing, so held rings don't
 /// blink before the logged prayer arrives from the repository.
@@ -44,6 +50,10 @@ final class PrayerSession {
 
     private(set) var phase: Phase = .idle
     private(set) var selection = PrayerSelection.empty
+    /// The subject whose page the prayer is being said on; nil on Home. Set
+    /// from the start through the closing sheet (the page stays stripped
+    /// until it goes). In memory only.
+    private(set) var page: String?
     /// Bumps on each committing Amen: the halo's flare.
     private(set) var amenCount = 0
     /// Bumps each time something is checked (not unchecked): the light haptic.
@@ -118,16 +128,33 @@ final class PrayerSession {
 
     // MARK: Commands
 
-    func start(list: ListContext?) {
+    /// Starts a prayer: on Home, or on a subject's page (`page`), which
+    /// starts checked (an intention's name with it, by the selection rules).
+    /// The pre-check is no tap: no haptic.
+    func start(list: ListContext?, on page: String? = nil) {
         guard phase == .idle else { return }
-        selection = .empty
-        phase = .praying(Prayer(id: makeID(), startedAt: clock(), list: list))
+        let now = clock()
+        selection = page.map { PrayerSelection.empty.holding($0, in: graph()).stamped(at: now) } ?? .empty
+        self.page = page
+        phase = .praying(Prayer(id: makeID(), startedAt: now, list: list))
+    }
+
+    /// Prayed in place, a page's way back to Home ("Pray for others", back,
+    /// swipe-back): still praying, the checks kept.
+    func leavePage() {
+        guard isPraying else { return }
+        page = nil
     }
 
     func toggle(_ id: String) {
         guard isPraying else { return }
+        let graph = graph()
         let willHold = !selection.isHeld(id)
-        selection = selection.toggling(id, in: graph()).stamped(at: clock())
+        // On an intention's own page its name is plain text: it follows the intention.
+        let next = page == id && graph.parent(of: id) != nil
+            ? selection.releasingWithItsName(id, in: graph)
+            : selection.toggling(id, in: graph)
+        selection = next.stamped(at: clock())
         if willHold { checkCount += 1 }
     }
 
@@ -171,6 +198,7 @@ final class PrayerSession {
     func cancel() {
         guard isPraying else { return }
         selection = .empty
+        page = nil
         phase = .idle
     }
 
@@ -178,6 +206,7 @@ final class PrayerSession {
     func close() {
         guard closing != nil else { return }
         selection = .empty
+        page = nil
         phase = .idle
     }
 

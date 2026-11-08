@@ -34,6 +34,23 @@ struct SelectionTests {
         #expect(s.held.isEmpty)
     }
 
+    // On an intention's own page (praying in place): the name follows it.
+    @Test func onItsPageAnIntentionTakesItsNameWithIt() {
+        let s = none.holding("dad.surgery", in: graph).releasingWithItsName("dad.surgery", in: graph)
+        #expect(s.held.isEmpty)
+    }
+
+    @Test func onItsPageTheNameStaysWhileAnotherIntentionIsHeld() {
+        let s = none.holding("dad.surgery", in: graph).holding("dad.sleep", in: graph)
+            .releasingWithItsName("dad.surgery", in: graph)
+        #expect(s.held == ["dad", "dad.sleep"])
+    }
+
+    @Test func onItsPageCheckingAgainHoldsBoth() {
+        let s = none.releasingWithItsName("dad.surgery", in: graph)
+        #expect(s.held == ["dad.surgery", "dad"])
+    }
+
     @Test func anIntentionLeavesItsNameHeld() {
         let s = none.toggling("dad.surgery", in: graph).toggling("dad.surgery", in: graph)
         #expect(s.held == ["dad"])
