@@ -52,3 +52,7 @@ decisions.md. **MVP** = blocks MVP build._
 | R4 | In-prayer UX = in-place mode (halo, check = holding, FAB → Amen after ~5s, list invitation at Amen) | 2026-10-17 |
 | R3 | A prayer may include the list, subjects, both, or neither; no ordering rule; main screen = personal list with today's list pinned on top (was Q6) | 2026-10-17 |
 | R2 | Streaks = calendar days in user's local TZ (supersedes list-number streaks) | 2026-10-17 |
+
+- **Archived screen: restored-uncarried copy** (2026-11-07). `restoreSubject`
+  returns `uncarried: true` when the pool turned the item off. Decide the
+  quiet line the Archived screen shows then, when that screen is built.

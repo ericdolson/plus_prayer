@@ -2023,3 +2023,9 @@ self page shows your name under "Me").
   uncarried (own flag off; a name's intentions keep theirs). Previously
   `restoreSubject` restored carried items with no pool check. Rejected:
   blocking the restore (loses the item for a carry problem).
+- Orchestrator calls on the build: an uncarried name over the free pool
+  shows the full line ("Your one place is in use"). Restore turns the flag
+  off only when it would add to what prints and not fit; a restore that
+  adds nothing keeps its flag. Restore is now the `restoreSubject` callable
+  (the pool check needs entitlement data a connector can't read). The
+  `uncarried` result has no copy yet; it gets some with the Archived screen.
