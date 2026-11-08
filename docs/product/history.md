@@ -126,6 +126,13 @@ top left, and reads left to right, then down, back in time.
 - **No celebration**: no animation, emoji or exclamation. "Answered", the
   date and the counts.
 
+### Empty tabs (2026-11-08)
+A tab with nothing in it (reachable through the tab control even though
+tiles at zero are hidden) shows one quiet `inkMuted` line: **Held** "No
+prayers yet" · **Lists** "Not on a list yet" · **Journal** "Add to journal
+after a prayer". **Answered stays blank** ("None answered yet" would read
+as waiting for something).
+
 ## Words: "journal" (2026-11-08)
 - The collection is the **Journal** (tab; tile "3 in your journal").
 - After Amen the action is **"Add to journal"**; on an existing one,
