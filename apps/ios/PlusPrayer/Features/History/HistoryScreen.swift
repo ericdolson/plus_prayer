@@ -121,6 +121,20 @@ struct HistoryScreen: View {
     @ViewBuilder private func content(_ values: HistoryScreenValues) -> some View {
         let today = home.today
         let withPeople = scope == .everyone
+        if let line = values.emptyLine(tab) {
+            // One quiet line (history.md "Empty tabs").
+            Text(line)
+                .font(PP.type.bodySmall)
+                .foregroundStyle(PP.color.inkMuted)
+                .padding(.horizontal, PP.space.gutter)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            tabContent(values, today: today, withPeople: withPeople)
+        }
+    }
+
+    @ViewBuilder private func tabContent(_ values: HistoryScreenValues, today: LocalDate,
+                                         withPeople: Bool) -> some View {
         switch tab {
         case .all:
             HistoryAllTab(values: values, today: today) { sheetDay = SheetDay(date: $0) }

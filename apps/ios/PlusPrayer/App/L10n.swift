@@ -262,6 +262,10 @@ nonisolated enum L10n {
         static var yesterday: String { t("history.yesterday") }
         static var noActivity: String { t("history.gap.spoken") }
         static var journalEntry: String { t("history.journalEntry") }
+        /// A tab with nothing in it (history.md "Empty tabs"); Answered has none.
+        static var emptyHeld: String { t("history.empty.held") }
+        static var emptyLists: String { t("history.empty.lists") }
+        static var emptyJournal: String { t("history.empty.journal") }
 
         /// "You prayed once" / "You prayed 6 times".
         static func prayed(_ n: Int) -> String { plural("history.prayed", n) }

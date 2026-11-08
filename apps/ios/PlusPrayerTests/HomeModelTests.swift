@@ -539,9 +539,17 @@ struct HomeModelTests {
         #expect(preview.recent == [.node(StrandNode(date: home.today, isToday: true))])
         #expect(preview.totals == HistoryTotals(prayers: 0, lists: 0, worldPrayers: 0, journal: 0, answered: 0),
                 "every tile hidden")
-        let strand = try #require(home.historyScreen(.subject("lena"))).strand
-        #expect(strand.begun == home.today)
-        #expect(strand.older.isEmpty)
+        let screen = try #require(home.historyScreen(.subject("lena")))
+        #expect(screen.strand.begun == home.today)
+        #expect(screen.strand.older.isEmpty)
+        // Her tabs (history.md "Empty tabs"): one quiet line, Answered blank.
+        #expect(screen.emptyLine(.held) == "No prayers yet")
+        #expect(screen.emptyLine(.lists) == "Not on a list yet")
+        #expect(screen.emptyLine(.journal) == "Add to journal after a prayer")
+        #expect(screen.emptyLine(.answered) == nil && screen.answered.isEmpty)
+        #expect(screen.emptyLine(.all) == nil, "All always has today")
+        let dad = try #require(home.historyScreen(.subject("dad")))
+        #expect([HistoryTab.held, .lists, .journal].allSatisfy { dad.emptyLine($0) == nil })
     }
 
     @Test func momsAnsweredIntentionHasATileATabAndAMark() async throws {

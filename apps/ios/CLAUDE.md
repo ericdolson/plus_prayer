@@ -551,7 +551,10 @@ compose queries; if an operation is missing, ask for a backend change.
   / large detents). Held and Journal: day headings, time · length, the
   cluster unfiltered (`AvatarCluster` with `trailing: nil`), ✎. Lists:
   `WaxSeal` at `size.history.listSeal` · "List 52" · date · prayers.
-  Answered: rows push the intention's page. Held, Journal, the day sheet's
+  Answered: rows push the intention's page. An empty tab shows one quiet
+  inkMuted line (`HistoryScreenValues.emptyLine`: "No prayers yet", "Not on
+  a list yet", "Add to journal after a prayer"); Answered stays blank.
+  Held, Journal, the day sheet's
   prayers and Lists rows are inert (Prayer detail and past lists' pages
   don't exist yet).
 - `Features/Detail/IntentionPage` (minimal): the person's name above

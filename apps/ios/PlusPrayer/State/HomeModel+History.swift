@@ -108,6 +108,18 @@ struct HistoryScreenValues: Equatable {
     let lists: [ListRecord]
     let journal: [DayGroup<PrayerRowValues>]
     let answered: [AnsweredRowValues]
+
+    /// The quiet line a tab shows when it has nothing for this scope
+    /// (history.md "Empty tabs"): Held, Lists and Journal; All always has
+    /// today, and Answered stays blank.
+    func emptyLine(_ tab: HistoryTab) -> String? {
+        switch tab {
+        case .held: held.isEmpty ? L10n.History.emptyHeld : nil
+        case .lists: lists.isEmpty ? L10n.History.emptyLists : nil
+        case .journal: journal.isEmpty ? L10n.History.emptyJournal : nil
+        case .all, .answered: nil
+        }
+    }
 }
 
 /// One prayer in the day sheet, Held or Journal.

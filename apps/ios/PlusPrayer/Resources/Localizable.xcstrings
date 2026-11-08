@@ -1848,6 +1848,42 @@
         }
       }
     },
+    "history.empty.held" : {
+      "comment" : "History's Held tab with nothing for this scope: one quiet line (history.md \"Empty tabs\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No prayers yet"
+          }
+        }
+      }
+    },
+    "history.empty.journal" : {
+      "comment" : "History's Journal tab with nothing for this scope: one quiet line (history.md \"Empty tabs\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to journal after a prayer"
+          }
+        }
+      }
+    },
+    "history.empty.lists" : {
+      "comment" : "History's Lists tab with nothing for this scope: one quiet line (history.md \"Empty tabs\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not on a list yet"
+          }
+        }
+      }
+    },
     "history.gap.spoken" : {
       "comment" : "VoiceOver: a folded run of empty days (`··`) in the History strand (history.md).",
       "extractionState" : "manual",
