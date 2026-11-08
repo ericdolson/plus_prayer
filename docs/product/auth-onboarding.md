@@ -19,6 +19,10 @@ _Last updated: 2026-10-17_
 - **Anonymous-first.** No sign-in wall. Anonymous auth is created silently.
 - **Launch screen** (2026-11-05): the wordmark centered on `ground`, in light
   and dark. It's the platform's static launch screen, not step 1 below.
+  Assets (2026-11-07): the wordmark is the Flutter app's splash image
+  (`app/assets/splash_image.png`; iOS uses it as `LaunchImage` 1x–3x at its
+  natural size); `ground` is #E9EEF9 light, #0E1012 dark. Android: see
+  open-questions D7.
 - **Flow:**
   1. Splash: "Your name, carried by the world." With a quiet link: **"Already
      have an account? Sign in"** (2026-11-05).

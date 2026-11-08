@@ -380,7 +380,10 @@ gold.
   it still reads as solid blue, never gold. Your **header avatar** (→ You) is
   the same interactive glass tinted with your avatar tone (2026-11-05), the
   initials on it as on any avatar. The header's glass matches the ~32 pt header
-  avatar. An active filter raises the glass's tint (neutral, never blue).
+  avatar. Avatar and streak badge sit **8 pt (`sm`) apart** (2026-11-07): two
+  separate controls, so they read as two pieces. On iOS they share one glass
+  container (spacing = the gap), so they blend only while one is pressed.
+  Android keeps the 8 pt gap; Material has no shared glass, so no blend. An active filter raises the glass's tint (neutral, never blue).
 - **Glass vs. surface (2026-10-29):** glass is only for **controls that float
   over content** (streak badge, filter, pill and its search field). Anything
   that **lives in the content** and scrolls or sits with it (community card,

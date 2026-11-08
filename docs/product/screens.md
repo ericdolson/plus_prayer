@@ -12,6 +12,7 @@ _Last updated: 2026-10-18_
 - Layouts on both platforms use leading/trailing, never hard-coded left/right, so RTL works later.
 
 ## DECIDED
+- **Orientation** (2026-11-07): phones are portrait only, on iOS and Android.
 - **Avatar cluster component** (2026-10-18), reused on the list row, Amen
   invitation, Today's list page, and Your portion: you first, then carried names
   in the user's order (intentions have no avatars). On the community card

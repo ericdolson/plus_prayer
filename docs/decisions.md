@@ -2029,3 +2029,14 @@ self page shows your name under "Me").
   adds nothing keeps its flag. Restore is now the `restoreSubject` callable
   (the pool check needs entitlement data a connector can't read). The
   `uncarried` result has no copy yet; it gets some with the Archived screen.
+
+### Decision: Portrait only; launch and icon assets; header gap
+**Timestamp:** 2026-11-07
+- Phones are portrait only (iOS and Android).
+- The iOS app icon and launch screen use the Flutter app's assets (1024
+  icon; splash wordmark on `ground`). Android's adaptive icon and 12+ splash
+  are open (D4, D7).
+- Home header avatar and streak badge sit 8 pt (`sm`) apart: at 4 pt they
+  crowded and, sharing glass, the avatar's tint bled onto the streak.
+- Parity notes for Android collected in apps/android/CLAUDE.md.
+
