@@ -2170,3 +2170,12 @@ self page shows your name under "Me").
   empty-tab copy (tabs show nothing today); tile words use one/other keys,
   which won't localize well (revisit with localization).
 
+### Decision: Praying in place, build calls (7aaf1f2, 8ca5758)
+**Timestamp:** 2026-11-08
+- Orchestrator calls (overrule freely): on an intention's page, unchecking
+  the intention releases its name too (the name isn't checkable there);
+  "Pray for others" also sits under the intention on its own page; the
+  "Intentions" title stays in prayer (only ＋ fades); the ring shows held
+  today or in this prayer, as on Home; Cancel on a page discards and stays
+  on the page; the subject stays uncheckable-allowed (OPEN unchanged).
+

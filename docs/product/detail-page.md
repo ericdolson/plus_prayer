@@ -200,7 +200,8 @@ Praying from a detail page **stays on the page**. It does not go to Home.
   capsule morphs into the round pray button (countdown → Amen) and the pill fades
   in beside it, holding **timer · "with N" only (no 🔎)**.
 - **Checks:** the name gets a checkbox in the trailing slot, like a Home row,
-  and its avatar's gold ring follows the check. Intentions use Home's
+  and its avatar's gold ring shows **held today or held in this prayer**, as
+  on Home (unchecking someone already held today keeps the ring). Intentions use Home's
   checkbox. Home's selection rules apply (`subjects.md`), including the
   partial state on the name.
 - **Crediting:** the subject is **pre-checked** at start, so Amen credits it
@@ -209,7 +210,11 @@ Praying from a detail page **stays on the page**. It does not go to Home.
   a prayer with no subjects (R3).
 - **Intention page in prayer:** the intention, pre-checked with its checkbox.
   The parent name shows as plain text above it, not checkable and not
-  tappable; by the selection rules it is credited whenever the intention is.
+  tappable; it is credited whenever the intention is, and **released with
+  it** when the intention is unchecked there (2026-11-08: the name can't be
+  unchecked on this page, so nothing invisible stays held). After "Pray for
+  others", Home's rules apply. "Pray for others" also sits under the
+  intention here.
 - **"Pray for others"** (under the intentions only) goes to Home, still in
   prayer mode with the checks kept. **System back / swipe-back does the
   same.**
