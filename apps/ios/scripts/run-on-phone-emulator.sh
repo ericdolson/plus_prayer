@@ -6,6 +6,7 @@
 #   DEVICE=<udid> HOST=192.168.1.20 apps/ios/scripts/run-on-phone-emulator.sh
 #   apps/ios/scripts/run-on-phone-emulator.sh --no-build      # relaunch only
 #   apps/ios/scripts/run-on-phone-emulator.sh --mock          # back to the mock
+#   apps/ios/scripts/run-on-phone-emulator.sh --fresh         # the mock as a brand-new user (onboarding)
 #
 # The app remembers `-PPEnvironment` and `-PPEmulatorHost`, so opening it
 # from the Home Screen afterwards stays on the emulators until launched once
@@ -21,7 +22,8 @@ for arg in "$@"; do
   case "$arg" in
     --no-build) BUILD=0 ;;
     --mock) ENVIRONMENT=mock ;;
-    *) echo "usage: run-on-phone-emulator.sh [--no-build] [--mock]" >&2; exit 64 ;;
+    --fresh) ENVIRONMENT=mock; FRESH=1 ;;
+    *) echo "usage: run-on-phone-emulator.sh [--no-build] [--mock | --fresh]" >&2; exit 64 ;;
   esac
 done
 
@@ -52,5 +54,5 @@ if [ "$ENVIRONMENT" = emulator ]; then
     dev.hammock.plusprayer -- -PPEnvironment emulator -PPEmulatorHost "$HOST"
 else
   xcrun devicectl device process launch --terminate-existing --device "$DEVICE" \
-    dev.hammock.plusprayer -- -PPEnvironment mock
+    dev.hammock.plusprayer -- -PPEnvironment mock ${FRESH:+-PPMockFresh}
 fi
