@@ -45,11 +45,12 @@ if [ "$BUILD" = 1 ]; then
     "$DD/Build/Products/Debug-iphoneos/PlusPrayer.app"
 fi
 
+# "--" ends devicectl's own options, so -PP… reach the app.
 if [ "$ENVIRONMENT" = emulator ]; then
   echo "Launching against the emulators at $HOST (same Wi-Fi as the phone)."
   xcrun devicectl device process launch --terminate-existing --device "$DEVICE" \
-    dev.hammock.plusprayer -PPEnvironment emulator -PPEmulatorHost "$HOST"
+    dev.hammock.plusprayer -- -PPEnvironment emulator -PPEmulatorHost "$HOST"
 else
   xcrun devicectl device process launch --terminate-existing --device "$DEVICE" \
-    dev.hammock.plusprayer -PPEnvironment mock
+    dev.hammock.plusprayer -- -PPEnvironment mock
 fi
