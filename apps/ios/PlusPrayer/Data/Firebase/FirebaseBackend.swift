@@ -105,6 +105,9 @@ final class FirebaseBackend {
     /// Calls a user callable (backend/functions/src/index.ts) after sign-in.
     /// Returns its JSON result. Throws `CallableError`.
     func call(_ name: String, _ data: sending [String: Any]) async throws(CallableError) -> [String: Any] {
+        if !Self.isLoopback(host) {
+            return try await callOverLAN(name, data)
+        }
         do {
             _ = try await uid()
             let result = try await functions.httpsCallable(name).call(data)
@@ -112,6 +115,64 @@ final class FirebaseBackend {
         } catch {
             throw CallableError(error as NSError) // not signed in (no connection) reads as unreachable
         }
+    }
+
+    private static func isLoopback(_ host: String) -> Bool {
+        ["127.0.0.1", "localhost", "::1"].contains(host)
+    }
+
+    /// The emulators on another machine (a phone reaching the Mac over
+    /// Wi-Fi). The Functions SDK refuses to send the Auth token over plain
+    /// HTTP to a non-loopback host, so this makes the callable request
+    /// itself: POST `{"data": …}` with the ID token, answer `{"result": …}`
+    /// or `{"error": {status, message, details}}` (the callable protocol).
+    /// Emulator only; production uses the SDK over HTTPS.
+    private func callOverLAN(_ name: String, _ data: sending [String: Any]) async throws(CallableError) -> [String: Any] {
+        let token: String
+        do {
+            _ = try await uid()
+            guard let user = auth.currentUser else { throw URLError(.userAuthenticationRequired) }
+            token = try await user.getIDToken()
+        } catch {
+            throw CallableError(error as NSError)
+        }
+        guard let url = URL(string: "http://\(host):5001/\(Self.emulatorProjectId)/\(Self.region)/\(name)") else {
+            throw CallableError(code: .internal, reason: nil, message: "Bad emulator URL")
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let body: Data
+        do {
+            body = try JSONSerialization.data(withJSONObject: ["data": data])
+        } catch {
+            throw CallableError(code: .invalidArgument, reason: nil, message: "Unencodable callable data")
+        }
+        request.httpBody = body
+        let responseData: Data
+        do {
+            (responseData, _) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw CallableError(error as NSError) // no answer: unreachable
+        }
+        let json = (try? JSONSerialization.jsonObject(with: responseData)) as? [String: Any] ?? [:]
+        if let failure = json["error"] as? [String: Any] {
+            let status = failure["status"] as? String ?? "INTERNAL"
+            let details = failure["details"] as? [String: Any]
+            throw CallableError(code: Self.functionsCode(status), reason: details?["reason"] as? String,
+                                message: failure["message"] as? String ?? status)
+        }
+        return json["result"] as? [String: Any] ?? [:]
+    }
+
+    /// A callable error status ("INVALID_ARGUMENT") as the SDK's code.
+    private static func functionsCode(_ status: String) -> FunctionsErrorCode {
+        let names = ["OK", "CANCELLED", "UNKNOWN", "INVALID_ARGUMENT", "DEADLINE_EXCEEDED", "NOT_FOUND",
+                     "ALREADY_EXISTS", "PERMISSION_DENIED", "RESOURCE_EXHAUSTED", "FAILED_PRECONDITION",
+                     "ABORTED", "OUT_OF_RANGE", "UNIMPLEMENTED", "INTERNAL", "UNAVAILABLE", "DATA_LOSS",
+                     "UNAUTHENTICATED"]
+        return names.firstIndex(of: status).flatMap { FunctionsErrorCode(rawValue: $0) } ?? .internal
     }
 }
 
@@ -121,6 +182,12 @@ struct CallableError: Error {
     let code: FunctionsErrorCode?
     let reason: String?
     let message: String
+
+    init(code: FunctionsErrorCode?, reason: String?, message: String) {
+        self.code = code
+        self.reason = reason
+        self.message = message
+    }
 
     init(_ error: NSError) {
         code = error.domain == FunctionsErrorDomain ? FunctionsErrorCode(rawValue: error.code) : nil

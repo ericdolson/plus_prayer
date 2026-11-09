@@ -313,6 +313,14 @@ root:
 - The snapshot keeps the day it was taken (List 70 is "today" then):
   re-seed and snapshot again to bring it up to date. Deleting the app makes
   a new anonymous account on next launch: seed and snapshot again.
+- **Callables over Wi-Fi:** the Functions SDK refuses to send the Auth
+  token over plain HTTP to a non-loopback host, so on a phone
+  `FirebaseBackend.call` makes the callable request itself (POST `{"data"}`
+  with the ID token to `http://<host>:5001/demo-plusprayer/us-central1/<name>`).
+  Loopback (the simulator) and production use the SDK.
+- **Local Network:** the first launch on a phone asks for Local Network
+  access; a request racing that prompt can fail once. Allow it (Settings →
+  Privacy & Security → Local Network).
 - What the emulators can't do: onPrayerLogged and the scheduled jobs don't
   run there (the sweeper applies prayers within ~3 s; presence reconcile and
   draft auto-save don't run). More in backend/CLAUDE.md, "Emulators".
