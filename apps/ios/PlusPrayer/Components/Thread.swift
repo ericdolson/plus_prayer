@@ -59,10 +59,13 @@ nonisolated struct ThreadShape: Shape {
 
 extension View {
     /// Draws this row's part of the thread behind it (mirrored in RTL).
-    func thread(_ part: ThreadPart?, branchY: CGFloat = 0) -> some View {
+    /// `trunkClearance`: for a `.trunk` under something other than a row
+    /// avatar (the person page's "Intentions" title), the height centered in
+    /// the row that the trunk starts below.
+    func thread(_ part: ThreadPart?, branchY: CGFloat = 0, trunkClearance: CGFloat = PP.size.avatar.row) -> some View {
         background(alignment: .topLeading) {
             if let part {
-                ThreadShape(part: part, branchY: branchY)
+                ThreadShape(part: part, avatarDiameter: trunkClearance, branchY: branchY)
                     .stroke(PP.color.thread, style: StrokeStyle(lineWidth: PP.size.thread.stroke, lineCap: .round))
                     .flipsForRightToLeftLayoutDirection(true)
                     .accessibilityHidden(true)

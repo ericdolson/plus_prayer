@@ -21,6 +21,8 @@ import SwiftUI
 ///
 /// Not yet: the ⋯ menu.
 struct PersonPage: View {
+    /// The "Intentions" title's line height (Title 3), for where the thread starts.
+    @ScaledMetric(relativeTo: .title3) private var titleLine = UIFont.preferredFont(forTextStyle: .title3, compatibleWith: .init(preferredContentSizeCategory: .large)).lineHeight
     let id: String
 
     @Environment(HomeModel.self) private var home
@@ -245,7 +247,9 @@ struct PersonPage: View {
     // MARK: Intentions
 
     private func intentions(_ page: PersonPageValues) -> some View {
-        VStack(alignment: .leading, spacing: PP.space.sm) {
+        // With intentions, the title row and the rows touch (spacing 0) so
+        // Home's thread runs from under the title into each row.
+        VStack(alignment: .leading, spacing: page.intentions.isEmpty ? PP.space.sm : 0) {
             HStack {
                 sectionTitle(L10n.Page.intentions)
                 Spacer(minLength: 0)
@@ -268,6 +272,9 @@ struct PersonPage: View {
             .frame(minHeight: page.intentions.isEmpty ? nil : PP.size.hitTarget)
             .padding(.leading, PP.space.gutter)
             .padding(.trailing, PP.space.sm)
+            // Home's thread (2026-11-08): a trunk from just under the title,
+            // at Home's x, down into the rows' branches.
+            .thread(page.intentions.isEmpty ? nil : .trunk, trunkClearance: titleLine)
             if page.intentions.isEmpty {
                 // None yet: the invitation, prominent.
                 Button { addIntention() } label: {
@@ -279,14 +286,15 @@ struct PersonPage: View {
             } else {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(page.intentions) { intention in
+                        let part: ThreadPart = intention.id == page.intentions.last?.id ? .lastBranch : .branch
                         if praying {
                             // In prayer a tap checks (Home's rules), as on Home.
-                            intentionRow(intention, check: session.check(intention.id)) {
+                            intentionRow(intention, thread: part, check: session.check(intention.id)) {
                                 session.toggle(intention.id)
                             }
                         } else {
                             NavigationLink(value: Route.subject(intention.id)) {
-                                intentionRow(intention, check: nil)
+                                intentionRow(intention, thread: part, check: nil)
                             }
                             .buttonStyle(.plain)
                         }
@@ -296,14 +304,13 @@ struct PersonPage: View {
         }
     }
 
-    private func intentionRow(_ intention: RowItem, check: HoldState?, onTap: @escaping () -> Void = {}) -> some View {
+    private func intentionRow(_ intention: RowItem, thread: ThreadPart, check: HoldState?, onTap: @escaping () -> Void = {}) -> some View {
         IntentionRow(text: intention.label, carried: intention.carried,
                      held: intention.heldToday || session.isHeld(intention.id),
                      secondary: intention.secondary.map {
                          SecondaryLine(text: $0.text, kind: $0.answered ? .answered : .notice)
                      },
-                     // No thread: the page is the name.
-                     thread: nil,
+                     thread: thread,
                      accessibilityLabel: intention.accessibilityLabel(
                         heldOutsidePrayer: check == nil && intention.heldToday),
                      check: check, onTap: onTap)

@@ -67,7 +67,7 @@ struct IntentionRow: View {
     let held: Bool
     var secondary: SecondaryLine? = nil
     /// `.branch` if more intentions follow under the same name; nil without
-    /// a thread (a name's page, where the page is the name): then there's no
+    /// a thread (no longer used on the person page, 2026-11-08): then there's no
     /// Home indent either, and the row sits flush with the section title
     /// (dot, then text).
     let thread: ThreadPart?
