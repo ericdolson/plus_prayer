@@ -83,7 +83,11 @@ final class FirebaseBackend {
     private func signInIfNeeded() async throws -> String {
         if let user = auth.currentUser {
             do {
-                _ = try await user.getIDToken()
+                // Ask the server, not the cached token (good for an hour):
+                // after the emulators restart empty, a cached token still
+                // "works" locally for a user they no longer know, and the
+                // app would wait forever on an account that never loads.
+                _ = try await user.getIDTokenResult(forcingRefresh: true)
                 return user.uid
             } catch let error as NSError where Self.isGoneUser(error) {
                 log.notice("Cached user is gone from the emulators; signing in again")
@@ -95,9 +99,13 @@ final class FirebaseBackend {
         return result.user.uid
     }
 
+    /// The server rejected the cached user: sign in again. The emulators
+    /// answer a restart's stale session with INVALID_REFRESH_TOKEN, which the
+    /// SDK reports as a generic internal error, so anything from Auth that
+    /// isn't a network problem counts as gone.
     private static func isGoneUser(_ error: NSError) -> Bool {
         guard error.domain == AuthErrorDomain, let code = AuthErrorCode(rawValue: error.code) else { return false }
-        return [.userNotFound, .userTokenExpired, .invalidUserToken, .userDisabled].contains(code)
+        return code != .networkError
     }
 
     // MARK: Callables
