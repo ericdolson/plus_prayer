@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>+Prayer onboarding · D · Merged</title>
+<style>
+@font-face { font-family: "Roca"; src: url("/app/assets/fonts/Roca_400.otf") format("opentype"); font-weight: 400; }
+@font-face { font-family: "Roca"; src: url("/app/assets/fonts/Roca_700.otf") format("opentype"); font-weight: 700; }
+
+/* ------------------------------------------------------------------ tokens */
+:root {
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", system-ui, sans-serif;
+  --serif: "Roca", Georgia, serif;
+  /* onboarding ink is Home's dark ink on every ground: warmth comes from light, not hue */
+  --ink: #E8EAED; --ink-muted: #9A9EA4; --ink-faint: #6C7076;
+  --hair: rgba(232,234,237,.18); --hair-focus: rgba(232,234,237,.5);
+  --primary: #0580F9; --on-primary: #FFFFFF;
+  --gold: #C8AE6E;
+  --paper: #E4DBC8; --paper-ink: #2A2019; --paper-muted: #6B5B4B;
+  --tone-self: #00876A; --tone-person: #8E24AA;
+  /* Home (dark) */
+  --h-ground: #0E1012; --h-card: #1A1D21; --h-ink: #E8EAED; --h-muted: #9A9EA4; --h-int: #A9ADB3; --h-hair: #2A2E35;
+  --h-mark: #53585E; --h-thread: #3A3F47; --h-glass: rgba(255,255,255,.08); --h-glass-edge: rgba(255,255,255,.06);
+  --h-primary: #0580F9; --h-pewter-a: #B8BCC2; --h-pewter-b: #7D8288;
+  --quick: 160ms; --settle: 320ms; --calm: 700ms;
+  --out: cubic-bezier(0,0,.58,1); --in: cubic-bezier(.42,0,1,1); --inout: cubic-bezier(.42,0,.58,1);
+}
+.phone.light {
+  --h-ground: #E9EEF9; --h-card: #F5F7FD; --h-ink: #05294A; --h-muted: #566D83; --h-int: #3A5169; --h-hair: #D3DAE8;
+  --h-mark: #A6B4C6; --h-thread: #C3CCDD; --h-glass: rgba(5,41,74,.06); --h-glass-edge: rgba(5,41,74,.08);
+  --h-primary: #0573E0; --h-pewter-a: #9AA6B4; --h-pewter-b: #6B7886;
+}
+
+/* ------------------------------------------------------------------ page */
+html, body { margin: 0; height: 100%; }
+body { background: #0B0B0C; color: #C9C9CC; font: 14px/1.4 var(--sans); display: flex; align-items: center; justify-content: center; gap: 36px;
+  min-height: 100vh; padding: 24px; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+.controls { width: 236px; display: flex; flex-direction: column; gap: 14px; font-size: 13px; color: #9a9a9f; }
+.controls h1 { font: 400 15px/1.3 var(--sans); color: #ddd; margin: 0; }
+.controls h1 small { display: block; color: #777; font-size: 12px; margin-top: 2px; }
+.controls .group { display: flex; flex-direction: column; gap: 6px; }
+.controls .hint { color: #666; font-size: 12px; line-height: 1.45; }
+.controls button { background: #1a1a1d; color: #d8d8dc; border: 1px solid #2a2a2e; border-radius: 8px; padding: 7px 10px; text-align: left; cursor: pointer; font: 13px var(--sans); }
+.controls button:hover { background: #222226; }
+.controls button.on { border-color: #4d7fc0; color: #fff; }
+.controls button small { color: #777; margin-left: 6px; }
+.controls label { display: flex; gap: 8px; align-items: center; cursor: pointer; font: 13px var(--sans); }
+.controls a { color: #8fb3e6; cursor: pointer; text-decoration: none; }
+
+/* ------------------------------------------------------------------ phone */
+.phone { position: relative; width: 402px; height: 874px; border-radius: 55px; overflow: hidden; background: #0E1012; color: var(--ink);
+  font-family: var(--sans); box-shadow: 0 0 0 1px #26282c, 0 30px 80px rgba(0,0,0,.6); flex: none; user-select: none; }
+.phone * { box-sizing: border-box; }
+
+/* grounds -------------------------------------------------------------- */
+.ground { position: absolute; inset: 0; transition: opacity var(--calm) var(--inout); }
+.ground.ob { opacity: 1; }
+.ground.home { background: var(--h-ground); opacity: 0; transition: opacity var(--calm) var(--inout), background var(--settle); }
+.phone.home .ground.ob { opacity: 0; }
+.phone.home .ground.home { opacity: 1; }
+/* 1 · Dawn: night blue rising to a faint amber glow low on the screen, the light of tomorrow */
+.phone[data-ground="dawn"] .ground.ob {
+  background:
+    radial-gradient(ellipse 90% 34% at 50% 104%, rgba(214,160,84,.22) 0%, rgba(214,160,84,.07) 45%, rgba(214,160,84,0) 72%),
+    linear-gradient(180deg, #0A0F1B 0%, #0F1524 55%, #161A26 100%);
+}
+/* 2 · Candlelight: Home's own ground with a living warm glow behind the stage */
+.phone[data-ground="candle"] .ground.ob { background: #0E1012; }
+.phone[data-ground="candle"] .ground.ob::after { content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 64% 40% at 50% 38%, rgba(226,196,140,.16) 0%, rgba(226,196,140,.05) 50%, rgba(226,196,140,0) 72%);
+  animation: candle 6400ms var(--inout) infinite; }
+@keyframes candle { 0% { opacity: .72; transform: translateY(0) } 50% { opacity: 1; transform: translateY(-6px) } 100% { opacity: .72; transform: translateY(0) } }
+.phone.rm [data-ground] .ground.ob::after, .phone.rm .ground.ob::after { animation: none !important; opacity: .85; }
+/* 3 · Blue hour: a flat deep ink blue */
+.phone[data-ground="bluehour"] .ground.ob { background: #10182A; }
+/* 4 · Lamp: Home's ground lit from above by a soft warm-white light (a lamp over the table where the list is made) */
+.phone[data-ground="lamp"] .ground.ob { background: #0E1012; }
+.phone[data-ground="lamp"] .ground.ob::after { content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 46% at 50% -6%, rgba(242,235,223,.13) 0%, rgba(242,235,223,.04) 55%, rgba(242,235,223,0) 75%),
+    radial-gradient(ellipse 100% 30% at 50% 108%, rgba(242,235,223,.035) 0%, rgba(242,235,223,0) 70%); }
+
+/* status bar / home indicator */
+.status { position: absolute; top: 18px; left: 0; right: 0; height: 22px; display: flex; justify-content: space-between; padding: 0 40px 0 44px;
+  font: 600 16px/22px var(--sans); color: var(--ink); transition: color var(--calm); z-index: 5; }
+.phone.home .status { color: var(--h-ink); }
+.status .right { display: flex; gap: 6px; align-items: center; }
+.status svg { display: block; }
+.home-indicator { position: absolute; bottom: 8px; left: 50%; width: 139px; height: 5px; margin-left: -70px; border-radius: 3px; background: var(--ink); opacity: .9; z-index: 40;
+  transition: background var(--calm); }
+.phone.home .home-indicator { background: var(--h-ink); }
+
+/* scenes ------------------------------------------------------------------ */
+.scene { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity var(--quick); z-index: 10; }
+.scene.in { opacity: 1; pointer-events: auto; }
+.l { opacity: 0; transform: translateY(12px); transition: opacity var(--settle) var(--out), transform var(--settle) var(--out); }
+.scene.in .l { opacity: 1; transform: none; transition-delay: calc(var(--i, 0) * 60ms + 140ms); }
+.scene.out .l { opacity: 0; transform: translateY(-8px); transition: opacity 240ms var(--in), transform 240ms var(--in); transition-delay: 0ms; }
+/* a scene can hold its lines back until an anchor has landed */
+.scene.in.wait .l { opacity: 0; transform: translateY(12px); transition: none; }
+.phone.rm .l { transform: none !important; transition-duration: var(--quick) !important; }
+.phone.rm .anchor, .phone.rm .cta, .phone.rm .ground, .phone.rm .nm, .phone.rm .nm span, .phone.rm .strip { transition-duration: var(--quick) !important; }
+
+/* type roles */
+.lead { font: 400 30px/38px var(--serif); color: var(--ink); text-wrap: balance; letter-spacing: -0.005em; }
+.lead.sm { font-size: 26px; line-height: 33px; }
+.q { font: 400 17px/24px var(--sans); color: var(--ink); }
+.mech { font: 400 20px/27px var(--sans); color: var(--ink); text-wrap: balance; }
+.body { font: 400 17px/24px var(--sans); color: var(--ink-muted); text-wrap: pretty; }
+.caption { font: 400 13px/18px var(--sans); color: var(--ink-muted); }
+.flabel { font: 500 15px/20px var(--sans); color: var(--ink-muted); }
+.flabel .opt { font-weight: 400; color: var(--ink-faint); }
+.center { text-align: center; }
+.col { position: absolute; left: 32px; right: 32px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+/* corners: Back left, the quiet action right, always the same slots */
+.corner { position: absolute; top: 56px; height: 44px; display: flex; align-items: center; gap: 2px; background: none; border: 0; color: var(--ink);
+  font: 400 17px/44px var(--sans); cursor: pointer; z-index: 12; padding: 0 12px; }
+.corner.left { left: 8px; padding-left: 6px; }
+.corner.right { right: 12px; color: var(--ink-muted); }
+.corner.right:hover { color: var(--ink); }
+.corner svg { display: block; }
+
+/* fields: a line of type over a hairline; label above, caption below */
+.field { width: 100%; position: relative; text-align: left; }
+.field input { width: 100%; background: none; border: 0; outline: 0; color: var(--ink); padding: 8px 0 9px; border-bottom: 1px solid var(--hair);
+  caret-color: var(--primary); font: 400 22px/28px var(--sans); text-align: center; }
+.field input::placeholder { color: var(--ink-faint); }
+.field input:focus { border-bottom-color: var(--hair-focus); }
+.field.lab input { text-align: left; font-size: 20px; line-height: 26px; }
+.field .cap { margin-top: 6px; }
+.field .flabel { margin-bottom: 2px; }
+
+/* persistent anchors --------------------------------------------------- */
+.anchor { position: absolute; z-index: 20; transition: transform 600ms var(--inout), width 600ms var(--inout), height 600ms var(--inout),
+  opacity var(--settle) var(--out), font-size 600ms var(--inout); will-change: transform; }
+.anchor.hidden { opacity: 0; pointer-events: none; }
+.avatar { border-radius: 50%; display: grid; place-items: center; color: rgba(255,255,255,.7); font-family: var(--sans); font-weight: 600; letter-spacing: .04em; }
+.ava { background: var(--tone-self); }
+.pava { background: var(--tone-person); }
+.ava.form, .pava.form { animation: form 480ms var(--out) both; }
+@keyframes form { 0% { opacity: 0; transform: scale(.72); filter: blur(4px); } 100% { opacity: 1; transform: none; filter: none; } }
+.phone.rm .form { animation: fadein var(--quick) both; }
+@keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
+.anchor .avatar { width: 100%; height: 100%; }
+
+/* the user's name: one element that changes face (sans → Roca) and travels onto the paper */
+.nm { position: absolute; left: 32px; right: 32px; top: 365px; height: 38px; z-index: 21; text-align: center; white-space: nowrap; pointer-events: none;
+  transition: top 600ms var(--inout), color 600ms var(--inout), opacity var(--settle); }
+.nm span { position: absolute; left: 0; right: 0; top: 0; transition: opacity var(--settle) var(--inout), font-size 600ms var(--inout), line-height 600ms var(--inout); }
+.nm .sans { font: 400 22px/38px var(--sans); color: var(--ink); opacity: 1; }
+.nm .roca { font: 700 28px/38px var(--serif); color: var(--ink); opacity: 0; }
+.nm.roca-face .sans { opacity: 0; }
+.nm.roca-face .roca { opacity: 1; }
+.nm.on-paper { top: 458px; }
+.nm.on-paper .roca { font-size: 22px; color: var(--paper-ink); }
+.nm.hidden { opacity: 0; }
+.pname { position: absolute; left: 32px; right: 32px; top: 172px; z-index: 21; text-align: center; font: 700 24px/30px var(--serif); color: var(--ink);
+  opacity: 0; transition: opacity var(--settle) var(--out), transform var(--settle) var(--out); transform: translateY(8px); pointer-events: none; }
+.pname.on { opacity: 1; transform: none; }
+
+/* the paper line (stand-in for a photographed line of the real list) */
+.strip { position: absolute; left: 32px; right: 32px; top: 440px; height: 74px; border-radius: 5px; background: var(--paper); z-index: 19;
+  box-shadow: 0 1px 0 rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.35); opacity: 0; transform: translateY(14px);
+  transition: opacity var(--settle) var(--out), transform var(--settle) var(--out); }
+.strip.on { opacity: 1; transform: none; }
+.strip::before { content: ""; position: absolute; left: 14px; top: 9px; bottom: 9px; border-left: 1.5px dashed rgba(42,32,25,.32); }
+.strip::after { content: ""; position: absolute; right: 14px; top: 9px; bottom: 9px; border-left: 1.5px dashed rgba(42,32,25,.32); }
+.strip .list { position: absolute; right: 28px; top: 9px; font: 500 11px/14px var(--sans); letter-spacing: .09em; color: var(--paper-muted); text-transform: uppercase; }
+.strip .guide { position: absolute; left: 34px; right: 34px; top: 51px; border-top: 1px solid rgba(42,32,25,.12); }
+
+/* the one blue button ---------------------------------------------------- */
+.cta { position: absolute; z-index: 25; left: 20px; width: 362px; height: 56px; border-radius: 28px; top: 680px; background: var(--primary); color: var(--on-primary);
+  border: 0; padding: 0; cursor: pointer; font: 600 17px/56px var(--sans); text-align: center; overflow: hidden; box-shadow: 0 8px 24px rgba(5,128,249,.22);
+  transition: left 420ms var(--inout), width 420ms var(--inout), height 420ms var(--inout), top 420ms var(--inout), border-radius 420ms var(--inout),
+    background-color var(--settle), opacity var(--settle), transform var(--settle), box-shadow var(--settle); }
+.cta:active { transform: scale(.985); }
+.cta .label { position: absolute; inset: 0; transition: opacity var(--quick); }
+.cta .label.hide { opacity: 0; }
+.cta.disabled { background: rgba(5,128,249,.28); box-shadow: none; pointer-events: none; }
+.cta.disabled .label { opacity: .55; }
+.cta.kb { top: 478px; }
+.cta.hidden { opacity: 0; pointer-events: none; }
+.cta.fab { left: 324px; width: 62px; height: 62px; border-radius: 31px; top: 762px; background: var(--h-primary); box-shadow: 0 6px 18px rgba(0,0,0,.3);
+  transition-delay: 700ms; /* the pray button arrives last, after the rows have landed */ }
+.cta.fab .hands { transition-delay: 1000ms; }
+.phone.rm .cta.fab, .phone.rm .cta.fab .hands { transition-delay: 0ms; }
+.cta .hands { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transition: opacity var(--settle); }
+.cta.fab .hands { opacity: 1; }
+.cta.fab .label { opacity: 0; }
+
+/* keyboard stand-in (system element) */
+.keyboard { position: absolute; left: 0; right: 0; bottom: 0; height: 300px; background: #1D1D1F; z-index: 15; transform: translateY(100%);
+  transition: transform var(--settle) var(--out); padding: 10px 3px 0; }
+.keyboard.up { transform: none; }
+.phone.light.home .keyboard { background: #D1D3D9; }
+.phone.rm .keyboard { transition: opacity var(--quick); opacity: 0; transform: none; }
+.phone.rm .keyboard.up { opacity: 1; }
+.krow { display: flex; justify-content: center; gap: 6px; margin-bottom: 11px; }
+.key { width: 33px; height: 42px; border-radius: 6px; background: #4A4A4D; color: #fff; font: 400 22px/42px var(--sans); text-align: center; box-shadow: 0 1px 0 #000; }
+.key.wide { width: 46px; background: #2E2E31; font-size: 15px; }
+.key.space { width: 187px; font-size: 16px; }
+.key.ret { width: 90px; background: #2E2E31; font-size: 16px; }
+.kbar { height: 38px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; color: #9a9a9f; font-size: 16px; margin-bottom: 6px; }
+
+/* sign-in sheet */
+.scrim { position: absolute; inset: 0; background: rgba(0,0,0,.45); opacity: 0; pointer-events: none; transition: opacity var(--settle); z-index: 50; }
+.scrim.on { opacity: 1; pointer-events: auto; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: #16191D; border-radius: 28px 28px 0 0; padding: 12px 24px 48px; transform: translateY(100%);
+  transition: transform var(--settle) var(--out); z-index: 51; }
+.sheet.on { transform: none; }
+.phone.rm .sheet { transition: opacity var(--quick); transform: none; opacity: 0; pointer-events: none; }
+.phone.rm .sheet.on { opacity: 1; pointer-events: auto; }
+.grab { width: 36px; height: 5px; border-radius: 3px; background: var(--ink-faint); margin: 0 auto 22px; }
+.sheet h2 { font: 400 22px/28px var(--serif); margin: 0 0 6px; color: var(--ink); text-align: center; }
+.sheet p { margin: 0 0 22px; text-align: center; color: var(--ink-muted); font-size: 15px; }
+.sbtn { width: 100%; height: 52px; border-radius: 26px; border: 1px solid var(--hair); background: #23272D; color: var(--ink); font: 600 17px var(--sans);
+  margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.sbtn.apple { background: #fff; color: #000; border-color: #fff; }
+.quiet { background: none; border: 0; color: var(--ink-muted); font: 400 17px/44px var(--sans); cursor: pointer; padding: 0 12px; }
+
+/* Home ------------------------------------------------------------------- */
+.home-scene { color: var(--h-ink); }
+.hdr { position: absolute; top: 62px; left: 20px; right: 20px; height: 32px; display: flex; align-items: center; justify-content: space-between; }
+.hdr .left { display: flex; align-items: center; gap: 8px; padding-left: 40px; }
+.streak { display: flex; align-items: center; gap: 4px; color: var(--h-muted); font: 500 14px var(--sans); }
+.streak .pewter { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, var(--h-pewter-a), var(--h-pewter-b) 70%); opacity: .75;
+  display: grid; place-items: center; font: 700 11px var(--sans); color: var(--h-card); }
+.hdr .filter { width: 32px; height: 32px; display: grid; place-items: center; color: var(--h-ink); }
+.card { position: absolute; left: 20px; right: 20px; top: 118px; background: var(--h-card); border-radius: 22px; padding: 20px; overflow: hidden; }
+.card .cseal { position: absolute; left: -23px; top: -15px; width: 110px; height: 110px; }
+.card .cseal img { width: 100%; height: 100%; display: block; }
+.card .world { padding-left: 99px; min-height: 86px; }
+.card .world .n { font: 700 19px/24px var(--serif); color: var(--h-ink); }
+.card .world .c { font: 400 15px/20px var(--sans); color: var(--h-muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.card .world .c b { color: var(--h-ink); font-weight: 400; }
+.card .world .p { font: 400 15px/20px var(--sans); color: var(--h-muted); margin-top: 3px; display: flex; align-items: center; gap: 7px; }
+.card .world .p i { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); display: inline-block; }
+.card .you { margin-top: 18px; display: flex; }
+.card .you .avatar { width: 28px; height: 28px; font-size: 11px; margin-right: -4px; box-shadow: 0 0 0 2px var(--h-card); }
+.card .statusline { margin-top: 8px; font: 400 15px/20px var(--sans); color: var(--h-ink); }
+.rows { position: absolute; left: 20px; right: 20px; top: 362px; }
+.row { display: flex; align-items: center; gap: 14px; height: 52px; }
+.row .avatar { width: 44px; height: 44px; font-size: 17px; }
+.row .avatar.ghost { opacity: 0; }
+.row .nm2 { font: 700 19px/24px var(--serif); color: var(--h-ink); display: flex; align-items: center; gap: 6px; }
+.row .nm2 svg { color: var(--h-mark); }
+.intent { display: flex; align-items: center; height: 40px; padding-left: 58px; font: 400 13px/18px var(--sans); color: var(--h-int); position: relative; margin-top: -6px; }
+.intent::before { content: ""; position: absolute; left: 21px; top: -10px; height: 30px; width: 14px; border-left: 1px solid var(--h-thread); border-bottom: 1px solid var(--h-thread); border-radius: 0 0 0 12px; }
+.intent i { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); display: inline-block; margin-left: 8px; }
+.group + .group { margin-top: 24px; }
+.empty { font: 400 17px/24px var(--sans); color: var(--h-muted); margin-top: 6px; }
+.bar { position: absolute; left: 16px; bottom: 50px; width: 296px; height: 62px; border-radius: 31px; background: var(--h-glass); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  box-shadow: inset 0 0 0 1px var(--h-glass-edge); display: flex; align-items: center; justify-content: space-around; padding: 0 10px; color: var(--h-ink); font: 400 17px var(--sans); }
+.bar svg { display: block; }
+.scene.home-scene.in .l { transition-delay: calc(var(--i, 0) * 90ms + 420ms); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ controls -->
+<div class="controls">
+  <h1>Onboarding D · Merged<small>iPhone 17 Pro · 402 × 874 pt</small></h1>
+  <div class="group">
+    <button id="restart">↺ Restart</button>
+    <label><input type="checkbox" id="rm"> Reduce Motion</label>
+    <label><input type="checkbox" id="light"> Light Home (end state)</label>
+  </div>
+  <div class="group" id="grounds">
+    <div class="hint">Ground</div>
+    <button data-ground="dawn">1 · Dawn <small>#0A0F1B → amber low</small></button>
+    <button data-ground="candle" class="on">2 · Candlelight <small>#0E1012 + glow</small></button>
+    <button data-ground="bluehour">3 · Blue hour <small>#10182A</small></button>
+    <button data-ground="lamp">4 · Lamp <small>#0E1012, lit from above</small></button>
+  </div>
+  <div class="group" id="jumper">
+    <div class="hint">Jump to a step</div>
+    <button data-step="name">1 · Your name</button>
+    <button data-step="moment">2 · The moment · the mechanic</button>
+    <button data-step="someone">3 · Someone you pray for</button>
+    <button data-step="intention">4 · Their intention</button>
+    <button data-step="home">5 · Home</button>
+  </div>
+  <div class="hint">Fields accept typing. <a id="fill">Fill sample</a> (“Eric Olson”, “Julie Olson” · “Mom” · “Healing after surgery”).</div>
+  <div class="hint">Serve from the repo root (<code>python3 -m http.server</code>) so <code>/app/assets/…</code> resolves. <code>?step=&amp;ground=&amp;fill=1&amp;rm=1&amp;light=1</code></div>
+</div>
+
+<!-- ============================================================ phone -->
+<div class="phone" id="phone" data-ground="candle">
+  <div class="ground ob"></div>
+  <div class="ground home"></div>
+
+  <div class="status">
+    <span>9:41</span>
+    <span class="right">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".6"/><rect x="5" y="5.5" width="3" height="6.5" rx=".6"/><rect x="10" y="3" width="3" height="9" rx=".6"/><rect x="15" y="0" width="3" height="12" rx=".6"/></svg>
+      <svg width="27" height="13" viewBox="0 0 27 13" fill="none" stroke="currentColor"><rect x=".5" y=".5" width="22" height="12" rx="3.5" opacity=".5"/><rect x="2" y="2" width="19" height="9" rx="2" fill="currentColor" stroke="none"/><path d="M24.5 4.5v4a2 2 0 0 0 0-4z" fill="currentColor" stroke="none" opacity=".5"/></svg>
+    </span>
+  </div>
+
+  <!-- persistent anchors -->
+  <div class="anchor hidden" id="ava"><div class="avatar ava" id="avaDisc">EO</div></div>
+  <div class="anchor hidden" id="pava"><div class="avatar pava" id="pavaDisc"></div></div>
+  <div class="nm hidden" id="nm"><span class="sans" id="nmSans"></span><span class="roca" id="nmRoca"></span></div>
+  <div class="pname" id="pname">Mom</div>
+  <div class="strip" id="strip"><span class="list">List 53</span><span class="guide"></span></div>
+
+  <button class="cta" id="cta"><span class="label" id="ctaLabel">Continue</span>
+    <span class="hands"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 3.5 C 11 8, 8.5 11.5, 8.5 16.5 C 8.5 20.5, 10.8 23.5, 14 25.5"/><path d="M14 3.5 C 17 8, 19.5 11.5, 19.5 16.5 C 19.5 20.5, 17.2 23.5, 14 25.5"/>
+      <path d="M8.5 16.5 L 5.5 13.5"/><path d="M19.5 16.5 L 22.5 13.5"/></svg></span>
+  </button>
+
+  <!-- 1 · name -->
+  <section class="scene" data-scene="name">
+    <button class="corner right l" style="--i:0" data-act="signin">Sign in</button>
+    <div class="col" style="top:232px;gap:12px">
+      <div class="l lead center" style="--i:0">Here, we pray for each other.</div>
+      <div class="l q center" style="--i:1;margin-top:40px">What’s your name?</div>
+      <div class="l field" style="--i:2;margin-top:4px">
+        <input id="nameInput" placeholder="Your name" autocomplete="off" spellcheck="false" maxlength="40" aria-label="Your name">
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · the moment + the mechanic -->
+  <section class="scene" data-scene="moment">
+    <button class="corner left l" style="--i:0" data-act="back">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>Back
+    </button>
+    <div class="col" style="top:540px;gap:12px">
+      <div class="l mech center" style="--i:0;max-width:320px" id="mech1">Pray with today’s list. Tomorrow your name is on it.</div>
+      <div class="l body center" style="--i:1;max-width:310px" id="mech2">The list is printed and sealed each day, and kept private.</div>
+    </div>
+  </section>
+
+  <!-- 3 · someone you pray for -->
+  <section class="scene" data-scene="someone">
+    <button class="corner left l" style="--i:0" data-act="back">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>Back
+    </button>
+    <button class="corner right l" style="--i:0" data-act="nothanks">Not now</button>
+    <div class="col" style="top:118px;gap:0">
+      <div class="l lead sm center" style="--i:0">Who do you pray for?</div>
+      <div class="l field lab" style="--i:1;margin-top:96px">
+        <div class="flabel">Name</div>
+        <input id="personInput" placeholder="e.g. Julie Olson" autocomplete="off" spellcheck="false" maxlength="40" aria-label="Name">
+        <div class="cap caption">Printed on the list</div>
+      </div>
+      <div class="l field lab" style="--i:2;margin-top:22px">
+        <div class="flabel">What you call them <span class="opt">· optional</span></div>
+        <input id="aliasInput" placeholder="e.g. Mom" autocomplete="off" spellcheck="false" maxlength="24" aria-label="What you call them, optional">
+        <div class="cap caption">Only you see this</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · their intention -->
+  <section class="scene" data-scene="intention">
+    <button class="corner left l" style="--i:0" data-act="back">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg>Back
+    </button>
+    <button class="corner right l" style="--i:0" data-act="skip">Skip</button>
+    <div class="col" style="top:226px;gap:10px">
+      <div class="l lead sm center" style="--i:0" id="intLead">What are you praying for, for Mom?</div>
+      <div class="l body center" style="--i:1;max-width:320px;font-size:15px;line-height:21px">A request: healing, a new job, peace. It can print with their name.</div>
+      <div class="l field" style="--i:2;margin-top:14px">
+        <input id="intentInput" placeholder="e.g. Healing after surgery" autocomplete="off" maxlength="80" aria-label="Intention">
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · Home -->
+  <section class="scene home-scene" data-scene="home">
+    <div class="hdr l" style="--i:0">
+      <div class="left"><div class="streak"><span class="pewter">✱</span></div></div>
+      <div class="filter"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></div>
+    </div>
+    <div class="card l" style="--i:1" id="card">
+      <div class="cseal"><img src="/app/assets/img/wax_stamps/wax-red.png" alt=""></div>
+      <div class="world">
+        <div class="n">List 52</div>
+        <div class="c"><b>4,345</b> people <span style="margin:0 5px">·</span> <b>3,881</b> prayers</div>
+        <div class="p"><i></i>239 praying now</div>
+      </div>
+      <div class="you" id="youRow"></div>
+      <div class="statusline" id="statusline">Pray to be on List 53</div>
+    </div>
+    <div class="rows l" style="--i:2" id="rows"></div>
+    <div class="bar l" style="--i:3">
+      <span>History</span>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+  </section>
+
+  <!-- keyboard -->
+  <div class="keyboard" id="keyboard" aria-hidden="true">
+    <div class="kbar"><span>“Eric”</span><span style="color:#fff">Eric Olson</span><span>Erica</span></div>
+    <div class="krow"><div class="key">Q</div><div class="key">W</div><div class="key">E</div><div class="key">R</div><div class="key">T</div><div class="key">Y</div><div class="key">U</div><div class="key">I</div><div class="key">O</div><div class="key">P</div></div>
+    <div class="krow"><div class="key">A</div><div class="key">S</div><div class="key">D</div><div class="key">F</div><div class="key">G</div><div class="key">H</div><div class="key">J</div><div class="key">K</div><div class="key">L</div></div>
+    <div class="krow"><div class="key wide">⇧</div><div class="key">Z</div><div class="key">X</div><div class="key">C</div><div class="key">V</div><div class="key">B</div><div class="key">N</div><div class="key">M</div><div class="key wide">⌫</div></div>
+    <div class="krow"><div class="key wide">123</div><div class="key space">space</div><div class="key ret">return</div></div>
+  </div>
+
+  <!-- sign-in sheet -->
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet">
+    <div class="grab"></div>
+    <h2>Sign in</h2>
+    <p>Your list and your history come back with your account.</p>
+    <button class="sbtn apple" data-act="signin-apple"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.3 1.2 9.7.8 1.2 1.8 2.5 3.1 2.4 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.7-3.8zM14 5.4c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>Continue with Apple</button>
+    <button class="sbtn" data-act="signin-google"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.6 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.8 6C12.3 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17.5z"/><path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l7.8-6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.7-4.1-13.6-9.9l-7.8 6C6.5 42.6 14.6 48 24 48z"/></svg>Continue with Google</button>
+    <button class="quiet" style="width:100%;margin-top:4px" data-act="sheet-close">Not now</button>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const phone = $('#phone'), cta = $('#cta'), ctaLabel = $('#ctaLabel'), keyboard = $('#keyboard');
+  const ava = $('#ava'), pava = $('#pava'), nm = $('#nm'), pname = $('#pname'), strip = $('#strip');
+  const scenes = Object.fromEntries($$('.scene').map(s => [s.dataset.scene, s]));
+  const S = { step: null, name: '', person: '', alias: '', intent: '', timers: [], kb: false };
+  const rm = () => phone.classList.contains('rm');
+  const T = (fn, ms) => { const id = setTimeout(fn, rm() ? Math.min(ms, 200) : ms); S.timers.push(id); return id; };
+  const clearTimers = () => { S.timers.forEach(clearTimeout); S.timers = []; };
+  const FALLBACK = 'Eric Olson';
+  const initials = (s) => { const p = s.trim().split(/\s+/).filter(Boolean); if (!p.length) return '';
+    return (p.length === 1 ? p[0].slice(0, 1) : p[0][0] + p[p.length - 1][0]).toUpperCase(); };
+  const personLabel = () => S.alias.trim() || S.person.trim();
+
+  // ---------- anchors: place(el, centerX, centerY, size)
+  function place(el, x, y, s) {
+    el.style.width = el.style.height = s + 'px'; el.style.transform = `translate(${x - s / 2}px, ${y - s / 2}px)`;
+    el.firstElementChild.style.fontSize = Math.round(s * 0.4) + 'px';
+  }
+  // place with no travel (for an anchor that isn't on screen yet)
+  function jump(el, x, y, s) { el.style.transition = 'none'; place(el, x, y, s); void el.offsetWidth; el.style.transition = ''; }
+  const visible = (el) => !el.classList.contains('hidden');
+  function hide(el) { el.classList.add('hidden'); }
+  function showEl(el) { el.classList.remove('hidden'); }
+
+  // ---------- CTA
+  const CTA = {
+    name:      { label: 'Continue', disabled: () => !S.name.trim() },
+    moment:    { label: 'Continue' },
+    someone:   { label: 'Continue', disabled: () => !S.person.trim() },
+    intention: { label: 'Add', disabled: () => !S.intent.trim() },
+    home:      { fab: true },
+  };
+  function placeCta(step) {
+    const c = CTA[step];
+    cta.classList.toggle('fab', !!c.fab);
+    if (c.fab) { ctaLabel.classList.add('hide'); cta.classList.remove('disabled', 'kb'); return; }
+    const swap = () => { ctaLabel.textContent = c.label; ctaLabel.classList.remove('hide'); };
+    if (ctaLabel.textContent !== c.label) { ctaLabel.classList.add('hide'); T(swap, 180); } else swap();
+    refreshDisabled();
+  }
+  function refreshDisabled() { const c = CTA[S.step]; if (!c || c.fab) return; cta.classList.toggle('disabled', c.disabled ? c.disabled() : false); }
+  function setKb(up) { S.kb = up; keyboard.classList.toggle('up', up); cta.classList.toggle('kb', up && S.step !== 'home'); }
+
+  // ---------- scenes
+  function show(step, opts = {}) {
+    clearTimers();
+    const prev = S.step; S.step = step;
+    for (const [k, el] of Object.entries(scenes)) {
+      if (k === step) { el.classList.remove('out'); el.classList.add('in'); }
+      else if (el.classList.contains('in')) { el.classList.remove('in'); el.classList.add('out'); T(() => el.classList.remove('out'), 300); }
+      else el.classList.remove('out');
+      if (k !== step) el.classList.remove('wait');
+    }
+    phone.classList.toggle('home', step === 'home');
+    placeCta(step);
+    $$('#jumper button').forEach(b => b.classList.toggle('on', b.dataset.step === step));
+    ({ name: stepName, moment: stepMoment, someone: stepSomeone, intention: stepIntention, home: stepHome })[step](prev, opts);
+  }
+
+  // 1 · name: no keyboard on arrival; the field raises it
+  function stepName() {
+    setKb(false);
+    hide(ava); hide(pava); nm.classList.add('hidden'); strip.classList.remove('on'); pname.classList.remove('on');
+    nm.classList.remove('roca-face', 'on-paper');
+    $('#nameInput').value = S.name;
+    T(() => $('#nameInput').blur(), 0);
+  }
+  // 2 · the moment: sans → Roca in place, the avatar forms, the name settles onto the paper, the mechanic arrives
+  function stepMoment(prev) {
+    setKb(false);
+    hide(pava); pname.classList.remove('on');
+    const name = S.name.trim() || FALLBACK; S.name = name;
+    $('#nmSans').textContent = name; $('#nmRoca').textContent = name;
+    $('#avaDisc').textContent = initials(name);
+    const fromName = prev === 'name';
+    // the field's text is taken over by the persistent name at the same spot
+    $('#nameInput').style.opacity = '0';
+    nm.style.top = ''; nm.classList.remove('on-paper'); nm.classList.remove('hidden');
+    if (fromName) {
+      nm.classList.remove('roca-face');
+      T(() => nm.classList.add('roca-face'), 60);
+    } else nm.classList.add('roca-face');
+    // avatar forms above the name
+    jump(ava, 201, 300, 72);
+    const disc = $('#avaDisc');
+    T(() => { showEl(ava); disc.classList.remove('form'); void disc.offsetWidth; disc.classList.add('form'); }, fromName ? 380 : 80);
+    // the paper rises; the name settles onto it
+    T(() => { strip.classList.add('on'); }, fromName ? 1000 : 300);
+    T(() => { nm.classList.add('on-paper'); }, fromName ? 1120 : 380);
+    // the lines wait for the name to land
+    scenes.moment.classList.add('wait');
+    T(() => scenes.moment.classList.remove('wait'), fromName ? 1650 : 700);
+  }
+  // 3 · someone: your avatar small at the top; the person's avatar forms as they type
+  function stepSomeone(prev) {
+    $('#nameInput').style.opacity = '';
+    nm.classList.add('hidden'); strip.classList.remove('on'); pname.classList.remove('on');
+    (visible(ava) ? place : jump)(ava, 201, 78, 32); showEl(ava); $('#avaDisc').classList.remove('form');
+    // the person's avatar sits above the fields; from step 4 it travels back, otherwise it forms there
+    (visible(pava) ? place : jump)(pava, 201, 196, 48);
+    renderPerson(prev === 'intention');
+    T(() => { setKb(true); $('#personInput').focus(); }, 300);
+  }
+  // 4 · their intention: only the person. Avatar + name as the anchor
+  function stepIntention() {
+    hide(ava); nm.classList.add('hidden'); strip.classList.remove('on');
+    if (!S.person.trim()) { S.person = 'Julie Olson'; S.alias = 'Mom'; $('#personInput').value = S.person; $('#aliasInput').value = S.alias; }
+    const label = personLabel();
+    $('#pavaDisc').textContent = initials(label);
+    (visible(pava) ? place : jump)(pava, 201, 140, 48); showEl(pava);
+    pname.textContent = label; T(() => pname.classList.add('on'), 300);
+    $('#intLead').textContent = `What are you praying for, for ${label}?`;
+    T(() => { setKb(true); $('#intentInput').focus(); }, 300);
+  }
+  // 5 · Home: the ground hands off; objects travel to their places; the pray button arrives last
+  function stepHome(prev) {
+    setKb(false); nm.classList.add('hidden'); strip.classList.remove('on'); pname.classList.remove('on');
+    const name = S.name.trim() || FALLBACK; S.name = name;
+    const hasPerson = !!S.person.trim(); const label = personLabel();
+    // header avatar: travels from wherever it is (fades in there if hidden)
+    $('#avaDisc').textContent = initials(name); $('#avaDisc').classList.remove('form');
+    (visible(ava) ? place : jump)(ava, 36, 78, 32); showEl(ava);
+    // rows
+    const rows = $('#rows'); rows.innerHTML = '';
+    const you = $('#youRow'); you.innerHTML = `<div class="avatar ava">${initials(name)}</div>`;
+    let html = `<div class="group"><div class="row"><div class="avatar ava">${initials(name)}</div><div class="nm2">Me ${mark()}</div></div></div>`;
+    if (hasPerson) {
+      you.innerHTML += `<div class="avatar pava">${initials(label)}</div>`;
+      html += `<div class="group"><div class="row"><div class="avatar pava ghost" id="rowPava">${initials(label)}</div><div class="nm2">${label} ${mark()}</div></div>`
+        + (S.intent.trim() ? `<div class="intent">${S.intent.trim()}<i></i></div>` : '') + `</div>`;
+      $('#statusline').textContent = `Pray to carry you and ${label} onto List 53`;
+    } else {
+      html += `<div class="empty">Add the people you pray for with ＋.</div>`;
+      $('#statusline').textContent = 'Pray to be on List 53';
+    }
+    rows.innerHTML = html;
+    // the person's avatar travels into its row, then hands over to the row's own
+    if (hasPerson && visible(pava)) {
+      $('#pavaDisc').textContent = initials(label);
+      // row 2 top = rows top (362) + Me group (52) + gap 24 + 4 → center y 464
+      T(() => place(pava, 42, 464, 44), 120);
+      T(() => { $('#rowPava')?.classList.remove('ghost'); hide(pava); }, 820);
+    } else { hide(pava); $('#rowPava')?.classList.remove('ghost'); }
+    $('#nameInput').style.opacity = '';
+  }
+  function mark() { return `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4 2.5 6 6 8-3.5 2-5 4-6 8-1-4-2.5-6-6-8 3.5-2 5-4 6-8z" opacity=".9"/></svg>`; }
+
+  function renderPerson(skipForm) {
+    const disc = $('#pavaDisc'); const label = personLabel();
+    if (S.person.trim()) {
+      const was = !pava.classList.contains('hidden');
+      disc.textContent = initials(label); showEl(pava);
+      if (!was && !skipForm) { disc.classList.remove('form'); void disc.offsetWidth; disc.classList.add('form'); }
+    } else { hide(pava); disc.classList.remove('form'); }
+  }
+
+  // ---------- events
+  cta.addEventListener('click', () => {
+    switch (S.step) {
+      case 'name': if (S.name.trim()) show('moment'); break;
+      case 'moment': show('someone'); break;
+      case 'someone': if (S.person.trim()) show('intention'); break;
+      case 'intention': show('home'); break;
+    }
+  });
+  phone.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act;
+    if (act === 'signin') { $('#scrim').classList.add('on'); $('#sheet').classList.add('on'); }
+    if (act === 'sheet-close' || act === 'signin-apple' || act === 'signin-google') {
+      $('#scrim').classList.remove('on'); $('#sheet').classList.remove('on');
+      if (act !== 'sheet-close') { S.name = S.name || FALLBACK; T(() => show('home'), 350); }
+    }
+    if (act === 'back') show({ moment: 'name', someone: 'moment', intention: 'someone' }[S.step]);
+    if (act === 'nothanks') { S.person = ''; S.alias = ''; S.intent = ''; show('home'); }
+    if (act === 'skip') { S.intent = ''; show('home'); }
+  });
+  $('#scrim').addEventListener('click', () => { $('#scrim').classList.remove('on'); $('#sheet').classList.remove('on'); });
+  const nameInput = $('#nameInput');
+  nameInput.addEventListener('focus', () => { if (S.step === 'name') setKb(true); });
+  nameInput.addEventListener('input', (e) => { S.name = e.target.value; refreshDisabled(); });
+  nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && S.name.trim()) show('moment'); });
+  $('#personInput').addEventListener('input', (e) => { S.person = e.target.value; renderPerson(); refreshDisabled(); });
+  $('#aliasInput').addEventListener('input', (e) => { S.alias = e.target.value; renderPerson(true); });
+  $('#personInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#aliasInput').focus(); });
+  $('#aliasInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && S.person.trim()) show('intention'); });
+  $('#intentInput').addEventListener('input', (e) => { S.intent = e.target.value; refreshDisabled(); });
+  $('#intentInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && S.intent.trim()) show('home'); });
+
+  // controls
+  $('#restart').addEventListener('click', reset);
+  $('#rm').addEventListener('change', (e) => phone.classList.toggle('rm', e.target.checked));
+  $('#light').addEventListener('change', (e) => phone.classList.toggle('light', e.target.checked));
+  $$('#grounds button').forEach(b => b.addEventListener('click', () => {
+    phone.dataset.ground = b.dataset.ground; $$('#grounds button').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  $$('#jumper button').forEach(b => b.addEventListener('click', () => {
+    const st = b.dataset.step;
+    if (st !== 'name' && !S.name.trim()) { S.name = FALLBACK; nameInput.value = S.name; }
+    if (st === 'intention' && !S.person.trim()) fill(false);
+    show(st);
+  }));
+  $('#fill').addEventListener('click', () => fill(true));
+  function fill(rerender) {
+    S.name = 'Eric Olson'; S.person = 'Julie Olson'; S.alias = 'Mom'; S.intent = 'Healing after surgery';
+    nameInput.value = S.name; $('#personInput').value = S.person; $('#aliasInput').value = S.alias; $('#intentInput').value = S.intent;
+    refreshDisabled();
+    if (rerender && S.step) show(S.step);
+  }
+  function reset() {
+    S.name = S.person = S.alias = S.intent = '';
+    ['#nameInput', '#personInput', '#aliasInput', '#intentInput'].forEach(s => $(s).value = '');
+    show('name');
+  }
+
+  // boot
+  const q = new URLSearchParams(location.search);
+  if (q.get('rm') === '1') { phone.classList.add('rm'); $('#rm').checked = true; }
+  if (q.get('light') === '1') { phone.classList.add('light'); $('#light').checked = true; }
+  if (q.get('ground')) { phone.dataset.ground = q.get('ground'); $$('#grounds button').forEach(x => x.classList.toggle('on', x.dataset.ground === q.get('ground'))); }
+  if (q.get('fill') === '1') fill(false);
+  const start = q.get('step') || 'name';
+  if (start !== 'name' && !S.name.trim()) { S.name = FALLBACK; nameInput.value = S.name; }
+  phone.style.visibility = 'hidden';
+  show(start);
+  requestAnimationFrame(() => requestAnimationFrame(() => { phone.style.visibility = ''; }));
+})();
+</script>
+</body>
+</html>

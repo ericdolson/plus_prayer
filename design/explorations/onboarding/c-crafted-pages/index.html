@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>+Prayer onboarding — C. Crafted pages</title>
+<style>
+/* ---------- fonts ---------- */
+@font-face { font-family: "Roca"; src: url("/app/assets/fonts/Roca_300.otf") format("opentype"); font-weight: 300; }
+@font-face { font-family: "Roca"; src: url("/app/assets/fonts/Roca_400.otf") format("opentype"); font-weight: 400; }
+@font-face { font-family: "Roca"; src: url("/app/assets/fonts/Roca_700.otf") format("opentype"); font-weight: 700; }
+
+/* ---------- proposed onboarding tokens (see proposal.md) ---------- */
+:root {
+  --ob-ground: #1A1411;      /* onboardingGround: warm umber, set apart from Home */
+  --ob-glow: #2C2017;        /* onboardingGlow: a soft radial warmth, top center */
+  --ob-raised: #2A211C;      /* onboardingRaised: fields, disabled CTA */
+  --ob-hair: #3B2F28;        /* onboardingHairline: field rim, thread */
+  --ob-ink: #F2EBDF;         /* welcomeInk, reused */
+  --ob-muted: #BBB1A3;       /* welcomeInkMuted, reused */
+  --ob-faint: #7E7366;       /* onboardingInkFaint: decorative only */
+  --ob-stitch-ahead: #4A3C33;/* onboardingStitchAhead: nodes not yet reached */
+  --paper: #EFE4CF;          /* paper: the printed-line stand-in */
+  --paper-ink: #2A2019;
+  --paper-muted: #6B5B4B;
+  --blue: #0580F9;           /* primary (dark), unchanged: blue = do this */
+
+  /* Home (existing dark tokens) */
+  --home-ground: #0E1012; --card: #1A1D21; --raised: #23272D; --raised-high: #2E333A;
+  --ink: #E8EAED; --muted: #9A9EA4; --intent: #A9ADB3; --faint: #6C7076; --thread: #3A3F47;
+  --carried: #53585E; --gold: #C8AE6E; --hair: #2A2E35;
+
+  --ts: 1;        /* type scale multiplier (Large text toggle) */
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --roca: "Roca", Georgia, serif;
+}
+
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: #ECE9E3; color: #2A2622; font-family: var(--sans);
+  display: flex; align-items: center; justify-content: center; gap: 40px; min-height: 100vh; padding: 32px 24px;
+}
+
+/* ---------- controls outside the phone ---------- */
+.controls { width: 250px; font-size: 13px; color: #4A443D; display: flex; flex-direction: column; gap: 14px; }
+.controls h1 { font: 500 15px/1.3 var(--sans); margin: 0; color: #2A2622; }
+.controls h1 small { display: block; font-weight: 400; color: #7A7268; font-size: 12px; margin-top: 2px; }
+.controls .group { display: flex; flex-direction: column; gap: 6px; }
+.controls .label { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #8A8278; }
+.controls .row { display: flex; flex-wrap: wrap; gap: 6px; }
+.controls button {
+  font: 500 13px var(--sans); color: #2A2622; background: #fff; border: 1px solid #D6D0C6; border-radius: 8px;
+  padding: 6px 10px; cursor: pointer;
+}
+.controls button:hover { border-color: #9E958A; }
+.controls button.on { background: #2A2622; color: #fff; border-color: #2A2622; }
+.controls label.check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.controls a { color: #0573E0; cursor: pointer; text-decoration: none; }
+.controls a:hover { text-decoration: underline; }
+.controls p { margin: 0; line-height: 1.45; color: #6B645A; }
+
+/* ---------- phone ---------- */
+.phone {
+  width: 426px; height: 898px; border-radius: 68px; background: #0B0B0C; padding: 12px; flex: none;
+  box-shadow: 0 30px 60px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.12);
+}
+.screen {
+  position: relative; width: 402px; height: 874px; border-radius: 56px; overflow: clip; background: var(--ob-ground);
+  color: var(--ob-ink); font-size: 17px;
+}
+.ground { position: absolute; inset: 0; transition: opacity .7s ease; }
+.ground.ob { background: radial-gradient(120% 55% at 50% 0%, var(--ob-glow) 0%, var(--ob-ground) 70%); }
+.ground.home { background: var(--home-ground); opacity: 0; }
+
+.island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 126px; height: 37px; border-radius: 20px; background: #000; z-index: 50; }
+.statusbar { position: absolute; top: 0; left: 0; right: 0; height: 54px; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 36px 10px; font: 600 16px var(--sans); z-index: 40; pointer-events: none; }
+.statusbar .time { letter-spacing: -.01em; }
+.statusbar svg { display: block; }
+.home-indicator { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 140px; height: 5px; border-radius: 3px; background: currentColor; opacity: .9; z-index: 45; }
+
+/* ---------- onboarding layer: the one template ---------- */
+.ob-layer { position: absolute; inset: 0; display: flex; flex-direction: column; padding-top: 54px; transition: opacity .25s ease; }
+.ob-layer.leaving { opacity: 0; pointer-events: none; }
+
+.topbar { height: 52px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; position: relative; }
+.topbar .tb-btn {
+  font: 400 calc(17px * var(--ts)) var(--sans); color: var(--ob-ink); background: none; border: 0; padding: 0 12px; height: 44px; cursor: pointer;
+  border-radius: 22px; display: inline-flex; align-items: center; gap: 2px; transition: opacity .25s;
+}
+.topbar .tb-btn:active { background: rgba(242,235,223,.08); }
+.topbar .tb-btn.hidden { opacity: 0; pointer-events: none; }
+.topbar .tb-btn svg { width: 12px; height: 20px; margin-left: -4px; margin-right: 3px; }
+.stitch { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); }
+.stitch line { stroke: var(--ob-stitch-ahead); stroke-width: 1.25; }
+.stitch line.done { stroke: var(--ob-ink); transition: x2 .5s cubic-bezier(.2,.8,.2,1); }
+.stitch circle { fill: var(--ob-stitch-ahead); stroke: transparent; stroke-width: 1.5; transition: fill .4s, stroke .4s, r .4s; }
+.stitch circle.done { fill: var(--ob-ink); }
+.stitch circle.now { fill: var(--ob-ground); stroke: var(--ob-ink); }
+
+.content { position: relative; flex: 1; min-height: 0; }
+.pane {
+  position: absolute; inset: 0; padding: 20px 24px 16px; overflow-y: auto; overscroll-behavior: contain;
+  opacity: 0; transform: translateY(18px); pointer-events: none;
+  transition: opacity .34s ease, transform .42s cubic-bezier(.2,.8,.2,1);
+}
+.pane::-webkit-scrollbar { display: none; }
+.pane.active { opacity: 1; transform: none; pointer-events: auto; transition-delay: .08s; }
+.pane.exit-up { transform: translateY(-18px); }
+.pane.from-above { transform: translateY(-18px); }
+
+.leader {
+  font: 400 calc(34px * var(--ts)) / 1.18 var(--roca); color: var(--ob-ink); margin: 0; letter-spacing: -.005em;
+  min-height: calc(34px * 1.18 * 2 * var(--ts)); display: flex; align-items: flex-end;
+}
+.sub { font: 400 calc(17px * var(--ts)) / 1.35 var(--sans); color: var(--ob-muted); margin: 14px 0 0; }
+.block { margin-top: 28px; }
+.block + .block { margin-top: 22px; }
+.flabel { font: 500 calc(15px * var(--ts)) / 1.3 var(--sans); color: var(--ob-muted); margin: 0 0 8px 2px; }
+.flabel .opt { font-weight: 400; color: var(--ob-faint); }
+.field {
+  position: relative; display: flex; align-items: center; height: calc(58px * var(--ts)); border-radius: 16px; background: var(--ob-raised);
+  box-shadow: inset 0 0 0 1px var(--ob-hair); transition: box-shadow .2s;
+}
+.field:focus-within { box-shadow: inset 0 0 0 1.5px var(--ob-muted); }
+.field input {
+  flex: 1; width: 100%; height: 100%; background: none; border: 0; outline: 0; color: var(--ob-ink); padding: 0 18px; margin: 0;
+  caret-color: var(--blue);
+}
+.field input.roca { font: 400 calc(24px * var(--ts)) var(--roca); }
+.field input.sans { font: 400 calc(17px * var(--ts)) var(--sans); }
+.field input::placeholder { color: var(--ob-faint); }
+.field input.roca::placeholder { font-family: var(--roca); }
+.caption { font: 400 calc(13px * var(--ts)) / 1.35 var(--sans); color: var(--ob-muted); margin: 8px 2px 0; }
+
+/* the printed line (stand-in for the photograph of the list) */
+.strip-wrap { margin-top: 26px; }
+.strip {
+  position: relative; height: 74px; border-radius: 6px; background: var(--paper); color: var(--paper-ink); overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center; padding: 0 92px 0 34px;
+  box-shadow: 0 1px 0 rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.35);
+}
+.strip::before { /* the stitched edge */
+  content: ""; position: absolute; left: 14px; top: 8px; bottom: 8px; width: 0; border-left: 1.5px dashed rgba(42,32,25,.35);
+}
+.strip-name { font: 400 22px/1.1 var(--roca); color: var(--paper-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.strip-name.pending { visibility: hidden; }
+.strip-intent { font: 400 13px/1.3 var(--sans); color: var(--paper-muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 17px; }
+.strip-intent:empty::before { content: ""; }
+.strip-seal { position: absolute; right: -12px; top: 50%; width: 84px; height: 84px; transform: translateY(-50%); filter: drop-shadow(0 2px 2px rgba(0,0,0,.35)); }
+.strip-list { position: absolute; right: 92px; top: 10px; font: 500 11px var(--sans); letter-spacing: .08em; color: var(--paper-muted); text-transform: uppercase; }
+.flyer { position: absolute; z-index: 60; font: 400 24px/1 var(--roca); color: var(--ob-ink); white-space: nowrap; pointer-events: none;
+  transition: left .55s cubic-bezier(.2,.8,.2,1), top .55s cubic-bezier(.2,.8,.2,1), font-size .55s cubic-bezier(.2,.8,.2,1), color .55s ease; }
+
+/* CTA: same place, same shape, every step */
+.cta-area { flex: none; padding: 12px 24px 34px; transition: padding .25s; }
+.cta-area.kb { padding-bottom: 10px; }
+.cta {
+  width: 100%; height: 56px; border-radius: 28px; border: 0; cursor: pointer;
+  font: 600 calc(17px * var(--ts)) var(--sans); color: var(--ob-faint); background: var(--ob-raised);
+  transition: background .3s, color .3s, transform .12s;
+}
+.cta.on { background: var(--blue); color: #fff; }
+.cta.on:active { transform: scale(.985); }
+
+/* ---------- simulated keyboard ---------- */
+.keyboard { flex: none; height: 0; overflow: hidden; background: #2A2A2C; transition: height .28s cubic-bezier(.2,.8,.2,1); color: #fff; }
+.keyboard.up { height: 300px; }
+.kb-inner { padding: 10px 3px 0; }
+.kb-row { display: flex; justify-content: center; gap: 6px; margin-bottom: 11px; }
+.key {
+  flex: none; width: 34px; height: 43px; border-radius: 6px; background: #6B6B6E; color: #fff; font: 400 22px var(--sans);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 0 #000; user-select: none;
+}
+.key.dark { background: #464649; font-size: 16px; }
+.key.w { width: 44px; } .key.wide { width: 90px; font-size: 16px; } .key.space { width: 186px; font-size: 16px; }
+.key:active { filter: brightness(1.25); }
+.key.shift.on { background: #fff; color: #000; }
+
+/* ---------- sign-in sheet (native sheet stand-in) ---------- */
+.scrim { position: absolute; inset: 0; background: rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 70; }
+.scrim.show { opacity: 1; pointer-events: auto; }
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; background: #241C17; border-radius: 38px 38px 0 0; padding: 10px 24px 42px; z-index: 71;
+  transform: translateY(105%); transition: transform .38s cubic-bezier(.2,.8,.2,1);
+}
+.sheet.show { transform: none; }
+.grabber { width: 36px; height: 5px; border-radius: 3px; background: rgba(242,235,223,.25); margin: 0 auto 22px; }
+.sheet h2 { font: 600 20px var(--sans); margin: 0 0 8px; color: var(--ob-ink); }
+.sheet p { font: 400 15px/1.4 var(--sans); color: var(--ob-muted); margin: 0 0 22px; }
+.sheet .prov { width: 100%; height: 54px; border-radius: 27px; border: 0; font: 600 17px var(--sans); display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; margin-bottom: 12px; }
+.sheet .apple { background: #000; color: #fff; } .sheet .google { background: #fff; color: #1F1F1F; }
+.sheet .cancel { width: 100%; height: 48px; border: 0; background: none; color: var(--ob-ink); font: 400 17px var(--sans); cursor: pointer; margin-top: 6px; }
+.sheet .new { font-size: 13px; color: var(--ob-muted); text-align: center; margin: 14px 0 0; }
+.toast { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font: 400 17px var(--sans); color: var(--ob-muted); opacity: 0; transition: opacity .3s; z-index: 72; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+/* ---------- the morphing blue: CTA capsule → pray button ---------- */
+.morph { position: absolute; background: var(--blue); z-index: 65; display: none; overflow: hidden;
+  transition: left .68s cubic-bezier(.4,0,.2,1), top .68s cubic-bezier(.4,0,.2,1), width .68s cubic-bezier(.4,0,.2,1), height .68s cubic-bezier(.4,0,.2,1), border-radius .68s cubic-bezier(.4,0,.2,1); }
+.morph .m-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 600 17px var(--sans); color: #fff; transition: opacity .25s; }
+.morph .m-hands { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .3s .3s; }
+.morph .m-hands svg { width: 30px; height: 30px; }
+
+/* ---------- Home (simplified) ---------- */
+.home-layer { position: absolute; inset: 0; color: var(--ink); opacity: 0; pointer-events: none; padding-top: 54px; }
+.home-layer.show { opacity: 1; pointer-events: auto; }
+.home-layer .h-item { opacity: 0; transform: translateY(10px); transition: opacity .4s ease, transform .5s cubic-bezier(.2,.8,.2,1); }
+.home-layer.show .h-item { opacity: 1; transform: none; }
+.home-layer.rm .h-item { transition-delay: 0s !important; transform: none; }
+.h-header { height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+.glass { background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); backdrop-filter: blur(16px); }
+.avatar { border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: rgba(255,255,255,.7); font: 600 12px var(--sans); letter-spacing: .04em; flex: none; }
+.h-filter { width: 40px; height: 40px; border-radius: 20px; display: flex; align-items: center; justify-content: center; }
+.card { margin: 14px 20px 0; background: var(--card); border-radius: 22px; padding: 20px; position: relative; overflow: hidden; }
+.card .seal { position: absolute; left: -23px; top: -15px; width: 110px; height: 110px; }
+.card .world { padding-left: 90px; min-height: 84px; }
+.card .listno { font: 700 22px/1.2 var(--roca); color: var(--ink); }
+.card .counts { font: 400 15px/1.4 var(--sans); color: var(--muted); margin-top: 2px; }
+.card .counts b { font-weight: 500; color: var(--ink); }
+.card .live { display: flex; align-items: center; gap: 7px; font: 400 15px var(--sans); color: var(--muted); margin-top: 2px; }
+.card .live i { width: 6px; height: 6px; border-radius: 3px; background: var(--ink); display: inline-block; }
+.card .you { margin-top: 16px; display: flex; gap: 4px; }
+.card .you .avatar { width: 28px; height: 28px; font-size: 11px; box-shadow: 0 0 0 2px var(--card); }
+.card .status { font: 400 15px/1.3 var(--sans); color: var(--ink); margin-top: 8px; }
+.rows { padding: 24px 20px 0; }
+.row { display: flex; align-items: center; gap: 14px; height: 52px; }
+.row .avatar { width: 44px; height: 44px; font-size: 17.6px; }
+.row .name { font: 700 19px var(--roca); color: var(--ink); display: flex; align-items: center; gap: 6px; }
+.carried-mark { width: 11px; height: 11px; color: var(--carried); }
+.intent-row { display: flex; align-items: center; height: 40px; position: relative; padding-left: 58px; font: 400 13px var(--sans); color: var(--intent); }
+.intent-row svg.thread { position: absolute; left: 21px; top: -12px; width: 40px; height: 34px; }
+.intent-row svg.thread path { fill: none; stroke: var(--thread); stroke-width: 1; }
+.intent-row .carried-mark { width: 9px; height: 9px; margin-left: 4px; }
+.group + .group { margin-top: 24px; }
+.h-empty { padding: 48px 20px 0; font: 400 15px/1.4 var(--sans); color: var(--muted); text-align: center; }
+.bottombar { position: absolute; left: 16px; right: 16px; bottom: 34px; display: flex; gap: 12px; align-items: center; }
+.pill { flex: 1; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: space-around; padding: 0 20px; }
+.pill svg { width: 26px; height: 26px; }
+.pray { width: 62px; height: 62px; border-radius: 31px; background: var(--blue); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
+.pray svg { width: 30px; height: 30px; }
+.pray.hidden { visibility: hidden; }
+
+/* Reduce Motion: fades only, no travel */
+.reduce .pane, .reduce .pane.active { transform: none !important; transition: opacity .3s ease !important; }
+.reduce .flyer, .reduce .morph { transition: none !important; }
+.reduce .keyboard { transition: none; }
+.reduce .stitch line.done, .reduce .stitch circle { transition: none; }
+.reduce .home-layer .h-item { transform: none; transition: opacity .3s ease; }
+.reduce .ground { transition: opacity .4s ease; }
+</style>
+</head>
+<body>
+
+<aside class="controls">
+  <h1>C. Crafted pages<small>+Prayer onboarding mock · iPhone 17 Pro (402×874)</small></h1>
+  <div class="group">
+    <div class="label">Flow</div>
+    <div class="row">
+      <button id="restart">Restart</button>
+      <button id="fill">Fill sample</button>
+    </div>
+  </div>
+  <div class="group">
+    <div class="label">Jump to</div>
+    <div class="row" id="jumper">
+      <button data-step="1">1 Name</button>
+      <button data-step="2">2 Carried</button>
+      <button data-step="3">3 Someone</button>
+      <button data-step="4">4 Intention</button>
+      <button data-step="home">Home</button>
+    </div>
+  </div>
+  <div class="group">
+    <div class="label">Settings</div>
+    <label class="check"><input type="checkbox" id="reduce"> Reduce Motion</label>
+    <label class="check"><input type="checkbox" id="large"> Larger text (×1.3)</label>
+  </div>
+  <div class="group">
+    <div class="label">Notes</div>
+    <p>Type in the fields with your keyboard, or tap the on-screen keys. Continue needs input; Skip passes without it. Sign in lives top-right on the first step only.</p>
+    <p>The paper line on step 2 stands in for a photograph of the printed list.</p>
+  </div>
+</aside>
+
+<div class="phone">
+  <div class="screen" id="screen">
+    <div class="ground ob"></div>
+    <div class="ground home" id="groundHome"></div>
+    <div class="island"></div>
+    <div class="statusbar" id="statusbar">
+      <span class="time">9:41</span>
+      <span style="display:flex;gap:7px;align-items:center">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg>
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 9.6a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2zm0-3.6c1.5 0 2.9.6 3.9 1.6l-1.3 1.3a3.7 3.7 0 0 0-5.2 0L4.6 7.6a5.5 5.5 0 0 1 3.9-1.6zm0-3.5c2.5 0 4.7 1 6.4 2.6L13.6 6.4a7.2 7.2 0 0 0-10.2 0L2.1 5.1A9 9 0 0 1 8.5 2.5zM8.5 0c3.3 0 6.3 1.3 8.5 3.5l-1.3 1.3A10.5 10.5 0 0 0 1.3 4.8L0 3.5A12 12 0 0 1 8.5 0z"/></svg>
+        <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2" fill="currentColor"/><path d="M25 4.5v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+      </span>
+    </div>
+
+    <!-- ===================== ONBOARDING ===================== -->
+    <div class="ob-layer" id="ob">
+      <div class="topbar">
+        <button class="tb-btn hidden" id="back" aria-label="Back">
+          <svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>Back
+        </button>
+        <svg class="stitch" id="stitch" width="112" height="14" viewBox="0 0 112 14" aria-hidden="true">
+          <line x1="7" y1="7" x2="105" y2="7"></line>
+          <line class="done" id="stitchDone" x1="7" y1="7" x2="7" y2="7"></line>
+          <circle cx="7" cy="7" r="4"></circle>
+          <circle cx="39.6" cy="7" r="4"></circle>
+          <circle cx="72.3" cy="7" r="4"></circle>
+          <circle cx="105" cy="7" r="4"></circle>
+        </svg>
+        <button class="tb-btn" id="right">Sign in</button>
+      </div>
+
+      <div class="content" id="content">
+
+        <!-- Step 1: your name -->
+        <section class="pane active" data-step="1">
+          <h2 class="leader">Here, we pray for each&nbsp;other.</h2>
+          <p class="sub">What’s your name?</p>
+          <div class="block">
+            <div class="field"><input class="roca" id="inName" type="text" placeholder="Your name" autocomplete="off" autocapitalize="words" spellcheck="false" maxlength="40" data-caps="words"></div>
+            <p class="caption">Printed on the list the way you write it.</p>
+          </div>
+        </section>
+
+        <!-- Step 2: carried + optional self intention -->
+        <section class="pane" data-step="2">
+          <h2 class="leader">Tomorrow, your name is on the list.</h2>
+          <p class="sub">Pray with today’s list, and tomorrow you’re printed on it. The list is sealed each day and kept private.</p>
+          <div class="strip-wrap">
+            <div class="strip" id="strip">
+              <span class="strip-list">List 53</span>
+              <div class="strip-name" id="stripName">Your name</div>
+              <div class="strip-intent" id="stripIntent"></div>
+              <img class="strip-seal" src="/app/assets/img/wax_stamps/wax-brown.png" alt="">
+            </div>
+          </div>
+          <div class="block">
+            <p class="flabel">An intention for yourself <span class="opt">· optional</span></p>
+            <div class="field"><input class="sans" id="inSelfIntent" type="text" placeholder="e.g. Patience with the new job" autocomplete="off" maxlength="80" data-caps="sentence"></div>
+            <p class="caption">Prints beside your name. The people you pray for come next.</p>
+          </div>
+        </section>
+
+        <!-- Step 3: someone you pray for -->
+        <section class="pane" data-step="3">
+          <h2 class="leader">Who do you pray for?</h2>
+          <p class="sub">One person for now. You can add more anytime.</p>
+          <div class="block">
+            <p class="flabel">Their name</p>
+            <div class="field"><input class="roca" id="inPName" type="text" placeholder="e.g. Julie Olson" autocomplete="off" autocapitalize="words" spellcheck="false" maxlength="40" data-caps="words"></div>
+            <p class="caption">Printed on the list, carried with you.</p>
+          </div>
+          <div class="block">
+            <p class="flabel">What you call them <span class="opt">· optional</span></p>
+            <div class="field"><input class="roca" id="inPAlias" type="text" placeholder="e.g. Mom" autocomplete="off" autocapitalize="words" spellcheck="false" maxlength="24" data-caps="words"></div>
+            <p class="caption">Only you see this.</p>
+          </div>
+        </section>
+
+        <!-- Step 4: their intention -->
+        <section class="pane" data-step="4">
+          <h2 class="leader" id="leader4">And for Mom?</h2>
+          <p class="sub">What are you praying for? A request: healing, a new job, peace.</p>
+          <div class="block">
+            <div class="field"><input class="sans" id="inPIntent" type="text" placeholder="e.g. Healing after surgery" autocomplete="off" maxlength="80" data-caps="sentence"></div>
+            <p class="caption">Prints beside their name on the list.</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="cta-area" id="ctaArea"><button class="cta" id="cta">Continue</button></div>
+      <div class="keyboard" id="keyboard"><div class="kb-inner" id="kbInner"></div></div>
+    </div>
+
+    <div class="flyer" id="flyer" style="display:none"></div>
+
+    <!-- morphing blue -->
+    <div class="morph" id="morph">
+      <div class="m-label" id="morphLabel">Begin</div>
+      <div class="m-hands"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c-1.9 2.6-4 5.3-4 9.2 0 2.9 1.5 5.3 4 7.8 2.5-2.5 4-4.9 4-7.8 0-3.9-2.1-6.6-4-9.2z"/><path d="M8.4 11.5C6.2 12.6 4.5 14.6 4.5 17.6c0 1.6.5 2.9 1.3 3.9M15.6 11.5c2.2 1.1 3.9 3.1 3.9 6.1 0 1.6-.5 2.9-1.3 3.9"/></svg></div>
+    </div>
+
+    <!-- ===================== HOME (simplified) ===================== -->
+    <div class="home-layer" id="home">
+      <div class="h-header h-item" style="transition-delay:.05s">
+        <span class="avatar glass" id="hAvatar" style="width:32px;height:32px;font-size:12.8px"></span>
+        <span class="h-filter glass"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 6h16M6 11h10M9 16h4"/></svg></span>
+      </div>
+      <div class="card h-item" style="transition-delay:.12s">
+        <img class="seal" src="/app/assets/img/wax_stamps/wax-purple.png" alt="">
+        <div class="world">
+          <div class="listno">List 52</div>
+          <div class="counts"><b>4,345</b> people · <b>3,880</b> prayers</div>
+          <div class="live"><i></i>213 praying now</div>
+        </div>
+        <div class="you" id="cardYou"></div>
+        <div class="status">Pray to carry them onto List 53</div>
+      </div>
+      <div class="rows" id="rows"></div>
+      <div class="bottombar h-item" style="transition-delay:.2s">
+        <div class="pill glass">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div class="pray" id="pray"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c-1.9 2.6-4 5.3-4 9.2 0 2.9 1.5 5.3 4 7.8 2.5-2.5 4-4.9 4-7.8 0-3.9-2.1-6.6-4-9.2z"/><path d="M8.4 11.5C6.2 12.6 4.5 14.6 4.5 17.6c0 1.6.5 2.9 1.3 3.9M15.6 11.5c2.2 1.1 3.9 3.1 3.9 6.1 0 1.6-.5 2.9-1.3 3.9"/></svg></div>
+      </div>
+    </div>
+
+    <!-- sign-in sheet -->
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet">
+      <div class="grabber"></div>
+      <h2>Sign in</h2>
+      <p>If you’ve used +Prayer before, your list comes back.</p>
+      <button class="prov apple" data-prov="Apple"><svg width="17" height="20" viewBox="0 0 17 20" fill="#fff"><path d="M14.1 10.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8C4.2 5.1 2.7 6 1.9 7.5c-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.7-3.9zM11.7 3.4c.7-.8 1.1-1.9 1-3-1 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1 2.9 1.1.1 2.2-.5 2.8-1.3z"/></svg>Continue with Apple</button>
+      <button class="prov google" data-prov="Google"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.2 5.5-4.7 7.2l7.4 5.7c4.3-4 7.1-9.9 7.1-16.9z"/><path fill="#FBBC05" d="M10.5 28.6A14.5 14.5 0 0 1 9.7 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.9 2.3-8.5 2.3-6.3 0-11.6-4.1-13.5-9.9l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>Continue with Google</button>
+      <p class="new">New here? Just type your name.</p>
+      <button class="cancel" id="sheetCancel">Cancel</button>
+    </div>
+    <div class="toast" id="toast">Signing in…</div>
+    <div class="home-indicator" id="hi"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const screen = $('#screen'), ob = $('#ob'), home = $('#home'), groundHome = $('#groundHome');
+  const back = $('#back'), right = $('#right'), cta = $('#cta'), ctaArea = $('#ctaArea');
+  const keyboard = $('#keyboard'), kbInner = $('#kbInner');
+  const inputs = { name: $('#inName'), selfIntent: $('#inSelfIntent'), pName: $('#inPName'), pAlias: $('#inPAlias'), pIntent: $('#inPIntent') };
+  const sample = { name: 'Eric Olson', selfIntent: 'Patience with the new job', pName: 'Julie Olson', pAlias: 'Mom', pIntent: 'Healing after her surgery' };
+  const panes = [...document.querySelectorAll('.pane')];
+  const stitchCircles = [...document.querySelectorAll('#stitch circle')];
+  const stitchX = [7, 39.6, 72.3, 105];
+
+  const state = { step: 1, atHome: false, reduce: false, busy: false };
+  let activeInput = null, manualShift = false;
+
+  /* ---------- helpers ---------- */
+  const v = (k) => inputs[k].value.trim();
+  const personLabel = () => v('pAlias') || v('pName') || 'them';
+  const initials = (s) => { const p = s.trim().split(/\s+/).filter(Boolean); if (!p.length) return ''; return (p.length === 1 ? p[0][0] : p[0][0] + p[p.length - 1][0]).toUpperCase(); };
+  const TONE_SELF = '#00876A', TONE_PERSON = '#D81B60';
+
+  function stepReady() {
+    switch (state.step) {
+      case 1: return !!v('name');
+      case 2: return !!v('selfIntent');
+      case 3: return !!v('pName');
+      case 4: return !!v('pIntent');
+    }
+  }
+
+  function refresh() {
+    // step chrome
+    back.classList.toggle('hidden', state.step === 1);
+    right.textContent = state.step === 1 ? 'Sign in' : 'Skip';
+    const label = state.step === 4 ? 'Begin' : 'Continue';
+    if (cta.textContent !== label) cta.textContent = label;
+    cta.classList.toggle('on', !!stepReady());
+    // stitch
+    stitchCircles.forEach((c, i) => {
+      c.classList.toggle('done', i < state.step - 1);
+      c.classList.toggle('now', i === state.step - 1);
+    });
+    $('#stitchDone').setAttribute('x2', stitchX[Math.max(0, state.step - 1)]);
+    // live content
+    $('#stripName').textContent = v('name') || 'Your name';
+    $('#stripIntent').textContent = v('selfIntent');
+    $('#leader4').textContent = 'And for ' + personLabel() + '?';
+  }
+
+  /* ---------- transitions between steps (one container) ---------- */
+  function goTo(n, dir) {
+    if (state.busy || n === state.step) return;
+    const from = panes[state.step - 1], to = panes[n - 1];
+    const forward = dir === undefined ? n > state.step : dir > 0;
+    hideKeyboard();
+    const doFlip = forward && state.step === 1 && n === 2 && v('name') && !state.reduce;
+    from.classList.remove('active', 'from-above');
+    from.classList.toggle('exit-up', forward);   // forward: out upward; back: out downward (the resting offset)
+    to.classList.remove('exit-up');
+    to.classList.toggle('from-above', !forward);
+    to.scrollTop = 0;
+    state.step = n;
+    refresh();
+    if (doFlip) flyName(from, to);
+    requestAnimationFrame(() => requestAnimationFrame(() => { to.classList.add('active'); }));
+    setTimeout(() => { from.classList.remove('exit-up', 'from-above'); }, 450);
+  }
+
+  // The typed name travels from the field to its printed line (matchedGeometryEffect in SwiftUI).
+  function flyName(from, to) {
+    const flyer = $('#flyer'), input = inputs.name, target = $('#stripName');
+    const sr = screen.getBoundingClientRect();
+    const ir = input.getBoundingClientRect();
+    // measure the target with the pane laid out in place
+    const prev = { tr: to.style.transition, t: to.style.transform };
+    to.style.transition = 'none'; to.style.transform = 'none';
+    const tr = target.getBoundingClientRect();
+    to.style.transition = prev.tr; to.style.transform = prev.t;
+    const ts = getComputedStyle(document.documentElement).getPropertyValue('--ts') || 1;
+    const fs0 = 24 * parseFloat(ts);
+    flyer.textContent = v('name');
+    flyer.style.display = 'block';
+    flyer.style.transition = 'none';
+    flyer.style.fontSize = fs0 + 'px'; flyer.style.color = 'var(--ob-ink)';
+    flyer.style.left = (ir.left - sr.left + 18) + 'px';
+    flyer.style.top = (ir.top - sr.top + (ir.height - fs0) / 2) + 'px';
+    target.classList.add('pending');
+    input.style.color = 'transparent';
+    flyer.getBoundingClientRect();
+    flyer.style.transition = '';
+    requestAnimationFrame(() => {
+      flyer.style.fontSize = '22px'; flyer.style.color = 'var(--paper-ink)';
+      flyer.style.left = (tr.left - sr.left) + 'px';
+      flyer.style.top = (tr.top - sr.top) + 'px';
+    });
+    setTimeout(() => { target.classList.remove('pending'); flyer.style.display = 'none'; input.style.color = ''; }, 620);
+  }
+
+  /* ---------- CTA / Skip / Back ---------- */
+  cta.addEventListener('click', () => {
+    if (!stepReady()) { // a nudge: focus the first empty field
+      const first = panes[state.step - 1].querySelector('input'); first.focus(); return;
+    }
+    advance();
+  });
+  function advance() {
+    if (state.step < 4) goTo(state.step + 1, 1); else finish();
+  }
+  right.addEventListener('click', () => {
+    if (state.step === 1) { openSheet(); return; }
+    if (state.step === 2) goTo(3, 1);
+    else finish();           // skipping the person skips their intention too
+  });
+  back.addEventListener('click', () => { if (state.step > 1) goTo(state.step - 1, -1); });
+
+  /* ---------- fields + keyboard ---------- */
+  Object.values(inputs).forEach((inp) => {
+    inp.addEventListener('input', () => { manualShift = false; refresh(); renderKeys(); });
+    inp.addEventListener('focus', () => { activeInput = inp; showKeyboard(); renderKeys(); });
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submitField(inp); } });
+  });
+  function submitField(inp) {
+    if (inp === inputs.pName) { inputs.pAlias.focus(); return; }
+    if (stepReady()) advance(); else inp.blur();
+  }
+  function showKeyboard() { keyboard.classList.add('up'); ctaArea.classList.add('kb'); }
+  function hideKeyboard() { keyboard.classList.remove('up'); ctaArea.classList.remove('kb'); if (activeInput) activeInput.blur(); activeInput = null; }
+  // tapping anywhere outside a field dismisses the keyboard (iOS: tap to dismiss on these screens)
+  $('#content').addEventListener('mousedown', (e) => { if (!e.target.closest('.field')) hideKeyboard(); });
+
+  const ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+  function wantsCaps() {
+    if (!activeInput) return false;
+    if (manualShift) return true;
+    const val = activeInput.value;
+    if (activeInput.dataset.caps === 'words') return val === '' || /\s$/.test(val);
+    return val === '' || /[.!?]\s$/.test(val);
+  }
+  function renderKeys() {
+    const caps = wantsCaps();
+    let h = '';
+    ROWS.forEach((r, i) => {
+      h += '<div class="kb-row">';
+      if (i === 2) h += `<div class="key dark w shift ${manualShift ? 'on' : ''}" data-k="shift">⇧</div>`;
+      for (const ch of r) h += `<div class="key" data-k="${ch}">${caps ? ch.toUpperCase() : ch}</div>`;
+      if (i === 2) h += '<div class="key dark w" data-k="bs">⌫</div>';
+      h += '</div>';
+    });
+    h += '<div class="kb-row"><div class="key dark wide" data-k="num">123</div><div class="key space" data-k="space">space</div><div class="key dark wide" data-k="ret">' + (state.step === 4 ? 'begin' : (activeInput === inputs.pName ? 'next' : 'continue')) + '</div></div>';
+    kbInner.innerHTML = h;
+  }
+  renderKeys();
+  kbInner.addEventListener('mousedown', (e) => e.preventDefault()); // keep the field focused
+  kbInner.addEventListener('click', (e) => {
+    const k = e.target.closest('.key'); if (!k || !activeInput) return;
+    const key = k.dataset.k, inp = activeInput;
+    if (key === 'shift') { manualShift = !manualShift; renderKeys(); return; }
+    if (key === 'bs') { inp.value = inp.value.slice(0, -1); }
+    else if (key === 'space') { inp.value += ' '; }
+    else if (key === 'ret') { submitField(inp); return; }
+    else if (key === 'num') { return; }
+    else { const caps = wantsCaps(); inp.value += caps ? key.toUpperCase() : key; manualShift = false; }
+    inp.dispatchEvent(new Event('input'));
+  });
+
+  /* ---------- sign-in sheet ---------- */
+  function openSheet() { hideKeyboard(); $('#scrim').classList.add('show'); $('#sheet').classList.add('show'); }
+  function closeSheet() { $('#scrim').classList.remove('show'); $('#sheet').classList.remove('show'); }
+  $('#scrim').addEventListener('click', closeSheet);
+  $('#sheetCancel').addEventListener('click', closeSheet);
+  document.querySelectorAll('.prov').forEach((b) => b.addEventListener('click', () => {
+    closeSheet();
+    $('#toast').textContent = 'Signing in with ' + b.dataset.prov + '…';
+    $('#toast').classList.add('show');
+    // an existing account: onboarding is skipped and their list loads
+    setTimeout(() => {
+      $('#toast').classList.remove('show');
+      Object.keys(sample).forEach((k) => inputs[k].value = sample[k]);
+      refresh();
+      finish(true);
+    }, 900);
+  }));
+
+  /* ---------- the hand-off to Home ---------- */
+  function finish(signedIn) {
+    if (state.busy || state.atHome) return;
+    state.busy = true; state.atHome = true;
+    hideKeyboard();
+    buildHome();
+    const pray = $('#pray');
+    pray.classList.add('hidden');
+    home.classList.toggle('rm', state.reduce);
+    ob.classList.add('leaving');
+
+    if (state.reduce || signedIn) {
+      groundHome.style.opacity = 1;
+      setTimeout(() => { home.classList.add('show'); pray.classList.remove('hidden'); ob.style.display = 'none'; state.busy = false; }, 260);
+      return;
+    }
+    // the blue capsule becomes the pray button
+    const morph = $('#morph'), sr = screen.getBoundingClientRect();
+    const a = cta.getBoundingClientRect(), b = pray.getBoundingClientRect();
+    morph.style.transition = 'none';
+    morph.style.display = 'block';
+    morph.style.left = (a.left - sr.left) + 'px'; morph.style.top = (a.top - sr.top) + 'px';
+    morph.style.width = a.width + 'px'; morph.style.height = a.height + 'px'; morph.style.borderRadius = '28px';
+    $('#morphLabel').textContent = cta.textContent; $('#morphLabel').style.opacity = 1;
+    morph.querySelector('.m-hands').style.opacity = 0;
+    morph.getBoundingClientRect();
+    morph.style.transition = '';
+    requestAnimationFrame(() => {
+      groundHome.style.opacity = 1;
+      morph.style.left = (b.left - sr.left) + 'px'; morph.style.top = (b.top - sr.top) + 'px';
+      morph.style.width = b.width + 'px'; morph.style.height = b.height + 'px'; morph.style.borderRadius = '31px';
+      $('#morphLabel').style.opacity = 0;
+      morph.querySelector('.m-hands').style.opacity = 1;
+    });
+    setTimeout(() => { home.classList.add('show'); }, 380);
+    setTimeout(() => { pray.classList.remove('hidden'); morph.style.display = 'none'; ob.style.display = 'none'; state.busy = false; }, 760);
+  }
+
+  function avatarHTML(tone, text, cls, extra) {
+    return `<span class="avatar ${cls || ''}" style="background:${tone};${extra || ''}">${text}</span>`;
+  }
+  function carriedMark(cls) {
+    return `<svg class="carried-mark ${cls || ''}" viewBox="0 0 12 12" fill="currentColor"><path d="M6 0.6l.9 3.1 2.6-1.9-1.9 2.6L10.7 6l-3.1.6 1.9 2.6-2.6-1.9L6 11.4l-.9-3.1-2.6 1.9 1.9-2.6L1.3 6l3.1-.6-1.9-2.6 2.6 1.9z"/></svg>`;
+  }
+  function buildHome() {
+    const name = v('name') || 'Your name';
+    $('#hAvatar').textContent = initials(name);
+    $('#hAvatar').style.background = TONE_SELF + 'CC';
+    let you = avatarHTML(TONE_SELF, initials(name));
+    if (v('pName')) you += avatarHTML(TONE_PERSON, initials(personLabel()));
+    $('#cardYou').innerHTML = you;
+    const thread = `<svg class="thread" viewBox="0 0 40 34"><path d="M1 0v21a12 12 0 0 0 12 12h26"/></svg>`;
+    let rows = `<div class="group h-item" style="transition-delay:.18s"><div class="row">${avatarHTML(TONE_SELF, initials(name))}<span class="name">Me ${carriedMark()}</span></div>`;
+    if (v('selfIntent')) rows += `<div class="intent-row">${thread}${v('selfIntent')}${carriedMark()}</div>`;
+    rows += '</div>';
+    if (v('pName')) {
+      rows += `<div class="group h-item" style="transition-delay:.24s"><div class="row">${avatarHTML(TONE_PERSON, initials(personLabel()))}<span class="name">${personLabel()} ${carriedMark()}</span></div>`;
+      if (v('pIntent')) rows += `<div class="intent-row">${thread}${v('pIntent')}${carriedMark()}</div>`;
+      rows += '</div>';
+    } else {
+      rows += `<div class="h-empty h-item" style="transition-delay:.24s">Add the people you pray for with ＋.</div>`;
+    }
+    $('#rows').innerHTML = rows;
+  }
+
+  /* ---------- outside controls ---------- */
+  function restart() {
+    state.busy = false; state.atHome = false; state.step = 1; manualShift = false;
+    Object.values(inputs).forEach((i) => i.value = '');
+    hideKeyboard(); closeSheet();
+    home.classList.remove('show'); groundHome.style.opacity = 0; $('#morph').style.display = 'none';
+    ob.style.display = ''; ob.classList.remove('leaving');
+    panes.forEach((p, i) => { p.classList.remove('exit-up', 'from-above'); p.classList.toggle('active', i === 0); p.scrollTop = 0; });
+    $('#pray').classList.remove('hidden');
+    refresh(); renderKeys();
+  }
+  $('#restart').addEventListener('click', restart);
+  $('#fill').addEventListener('click', () => {
+    const keysByStep = { 1: ['name'], 2: ['selfIntent'], 3: ['pName', 'pAlias'], 4: ['pIntent'] };
+    (keysByStep[state.step] || []).forEach((k) => inputs[k].value = sample[k]);
+    refresh(); renderKeys();
+  });
+  $('#jumper').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    const target = b.dataset.step;
+    if (state.atHome) { restart(); }
+    const fillUpTo = (n) => { const order = ['name', 'selfIntent', 'pName', 'pAlias', 'pIntent']; const upto = { 1: 0, 2: 1, 3: 2, 4: 4, home: 5 }[n]; order.slice(0, upto).forEach((k) => { if (!inputs[k].value) inputs[k].value = sample[k]; }); refresh(); };
+    if (target === 'home') { fillUpTo('home'); state.step = 4; refresh(); finish(); return; }
+    const n = +target; fillUpTo(n);
+    if (n === state.step) return;
+    goTo(n);
+  });
+  $('#reduce').addEventListener('change', (e) => { state.reduce = e.target.checked; screen.classList.toggle('reduce', state.reduce); });
+  $('#large').addEventListener('change', (e) => { document.documentElement.style.setProperty('--ts', e.target.checked ? 1.3 : 1); });
+
+  // Deep-link a state for review: ?step=2&fill=1&kb=1&large=1&reduce=1  (step=home for Home)
+  (function fromQuery() {
+    const q = new URLSearchParams(location.search);
+    if (q.get('large')) { $('#large').checked = true; document.documentElement.style.setProperty('--ts', 1.3); }
+    if (q.get('reduce')) { $('#reduce').checked = true; state.reduce = true; screen.classList.add('reduce'); }
+    const st = q.get('step');
+    if (!st) return;
+    const order = ['name', 'selfIntent', 'pName', 'pAlias', 'pIntent'];
+    const upto = { 1: 0, 2: 1, 3: 2, 4: 4, home: 5 }[st] ?? 0;
+    const fillN = q.get('fill') ? ({ 1: 1, 2: 2, 3: 4, 4: 5, home: 5 }[st] ?? upto) : upto;
+    order.slice(0, fillN).forEach((k) => inputs[k].value = sample[k]);
+    if (st === 'home') { state.step = 4; refresh(); finish(true); return; }
+    const n = +st;
+    panes.forEach((p, i) => p.classList.toggle('active', i === n - 1));
+    state.step = n; refresh();
+    if (q.get('kb')) { const first = panes[n - 1].querySelector('input'); first.focus(); }
+    if (q.get('sheet')) openSheet();
+  })();
+})();
+</script>
+</body>
+</html>

@@ -2233,3 +2233,45 @@ self page shows your name under "Me").
   save at Add/Skip on screen 5; the self keeps the avatar color the name
   screen showed; the interim welcome seal is wax variant 0.
 
+
+### Decision: Onboarding redesigned as one stage (second pass)
+**Timestamp:** 2026-11-09
+- **Why:** the first 2026-11-09 build felt cold and cheap on the phone: a
+  Begin-only first screen made people opt in to onboarding, a lecture screen
+  ("Welcome, Eric Olson." + two paragraphs + footer), mixed fonts and
+  alignment, bold sans titles that "yell", three button styles, and pushed
+  pages that never felt like one experience.
+- **Process:** a critic (research on Hallow, Abide, Pray.com, Glorify, Calm,
+  Headspace, Duolingo, Finch, Apple's HIG) and three concept mocks (One
+  stage, Pray first, Crafted pages), then a merged mock. All in
+  `design/explorations/onboarding/`; `d-merged/` is the chosen reference.
+- **Decided:** one stage (no pushed pages) with B's motion system (anchors
+  stay and travel, text fades in and out around them); four steps: name
+  (Sign in top-right, no keyboard on arrival) → the moment (the name becomes
+  Roca, the avatar forms, the name settles onto a "List 53" paper line, and
+  the one-sentence mechanic) → one optional person (the add sheet's labeled
+  fields with examples) → their optional intention (only them on screen,
+  "Carried on the list with you.") → a designed hand-off into Home with the
+  pray button arriving last. Ground: **Candlelight** (Home's ground with one
+  breathing warm glow; warmth from light, not a brown hue). Leader: "Here, we
+  pray for each other." Keeps "Pray with today's list" (the app's phrase for
+  the gate, chosen 2026-11-08 so it doesn't collide with "Pray for Dad"; the
+  leader already says "for").
+- **After the first Amen:** "You'll be carried on List 53." → reminder time →
+  notification permission (the reminder outranks the self intention: it is
+  what brings people back on day 2). The **self intention** leaves onboarding
+  and becomes one dismissable line under the Me row after the first prayer
+  ("Add an intention for yourself" · "It prints beside your name.").
+- **Rejected:** pray first (a first prayer for 4,345 strangers before knowing
+  what this is; the first prayer belongs on Home, with their person); the
+  initials floating out of the name into the avatar (unnecessary); a wax
+  seal press in onboarding (saved for the first Amen); progress dots or a
+  stitch (the travelling objects show progress); the reminder ask inside
+  onboarding (typical, and nothing has earned it yet); a self intention in
+  onboarding (it routes "help my son find a job" onto the self); a coach-mark
+  tour (Q34: the hand-off's order introduces Home); Dawn / Blue hour / Lamp
+  grounds; brown or parchment grounds.
+- **Supersedes:** the first 2026-11-09 flow (Welcome → Name → Welcome back →
+  Someone → Intention → back to Welcome back), `welcomeGround` /
+  `welcomeInk` / `welcomeInkMuted` and `size.seal.welcome`, and the Welcome
+  photograph plan (the photo becomes the paper line on step 2).

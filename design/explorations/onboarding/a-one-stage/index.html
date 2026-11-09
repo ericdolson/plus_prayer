@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>+Prayer onboarding · A · One stage</title>
+<style>
+/* ---------- fonts ---------- */
+@font-face { font-family: Roca; src: url(/app/assets/fonts/Roca_400.otf) format("opentype"); font-weight: 400; }
+@font-face { font-family: Roca; src: url(/app/assets/fonts/Roca_700.otf) format("opentype"); font-weight: 700; }
+
+/* ---------- tokens (proposed; see proposal.md) ---------- */
+:root {
+  /* onboarding stage */
+  --stage: #1C1612;                 /* onboarding.ground */
+  --stage-light: rgba(150,108,62,.20); /* onboarding.light: a low warm light from above */
+  --ink: #F2EBDF;                   /* onboarding.ink (welcomeInk) */
+  --ink-muted: #BBB1A3;             /* onboarding.inkMuted (welcomeInkMuted) */
+  --ink-faint: #7E746A;             /* onboarding.inkFaint */
+  --field: rgba(242,235,223,.07);   /* onboarding.field */
+  --hair: rgba(242,235,223,.14);    /* onboarding.hairline */
+  --paper: #D8CAAF;                 /* onboarding.paper */
+  --paper-ink: #2B2119;             /* onboarding.paperInk */
+  --blue: #0580F9;                  /* primary (dark) */
+  --onblue: #FFFFFF;
+  --gold: #C8AE6E;
+  /* home (dark) */
+  --home: #0E1012; --card: #1A1D21; --raised: #23272D; --raised-high: #2E333A;
+  --hink: #E8EAED; --hink-muted: #9A9EA4; --hink-int: #A9ADB3; --mark: #53585E; --thread: #3A3F47;
+  /* motion */
+  --geo: 700ms; --geo-ease: cubic-bezier(.4,0,.2,1);   /* duration.calm, "calm" easing */
+  --settle: 320ms; --quick: 160ms; --tone: 800ms;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+html, body { margin: 0; height: 100%; }
+body {
+  background: #2a2724; color: #d9d2c7; font-family: var(--sans);
+  display: flex; align-items: center; justify-content: center; gap: 48px; min-height: 100vh;
+}
+button { font-family: inherit; }
+
+/* ---------- reviewer panel (outside the phone) ---------- */
+.panel { width: 240px; font-size: 13px; line-height: 1.5; color: #b9b1a5; }
+.panel h1 { font: 500 15px/1.3 var(--sans); color: #efe8dc; margin: 0 0 4px; }
+.panel .sub { color: #8d857a; margin: 0 0 18px; }
+.panel ol { list-style: none; padding: 0; margin: 0 0 16px; }
+.panel li button {
+  display: block; width: 100%; text-align: left; background: none; border: 0; color: #b9b1a5;
+  padding: 7px 10px; border-radius: 8px; cursor: pointer; font-size: 13px;
+}
+.panel li button:hover { background: rgba(255,255,255,.06); color: #efe8dc; }
+.panel li button.on { background: rgba(255,255,255,.1); color: #fff; }
+.panel li button span { color: #8d857a; margin-right: 8px; font-variant-numeric: tabular-nums; }
+.panel .ctl { display: flex; flex-direction: column; gap: 8px; }
+.panel .ctl button, .panel .ctl label {
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); color: #efe8dc;
+  padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: left;
+}
+.panel .ctl label { display: flex; align-items: center; gap: 8px; }
+.panel .ctl label input { margin: 0; }
+.panel .note { margin-top: 18px; color: #8d857a; font-size: 12px; }
+
+/* ---------- phone ---------- */
+.phone {
+  width: 402px; height: 874px; border-radius: 58px; position: relative;
+  box-shadow: 0 0 0 12px #121010, 0 0 0 14px #2b2826, 0 40px 90px rgba(0,0,0,.6);
+  overflow: hidden; flex: none;
+}
+.screen {
+  position: absolute; inset: 0; overflow: hidden; background: var(--stage);
+  transition: background-color var(--tone) ease;
+  color: var(--ink);
+}
+.screen::before { /* the low warm light */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 55% at 50% -5%, var(--stage-light), transparent 65%);
+  opacity: 1; transition: opacity var(--tone) ease;
+}
+.screen.step-5 { background: var(--home); --ink: var(--hink); --ink-muted: var(--hink-muted); }
+.screen.step-5::before { opacity: 0; }
+.screen.instant, .screen.instant * { transition-duration: 0ms !important; transition-delay: 0ms !important; animation: none !important; }
+.screen.rm { --geo: 0ms; } /* Reduce Motion: nothing travels; things fade in place */
+.screen.rm * { transition-delay: 0ms !important; }
+
+/* status bar */
+.status { position: absolute; top: 0; left: 0; right: 0; height: 59px; pointer-events: none; }
+.status .time { position: absolute; left: 52px; top: 19px; font: 600 17px/20px var(--sans); color: var(--ink); transition: color var(--tone); }
+.status .island { position: absolute; left: 50%; top: 11px; width: 126px; height: 37px; margin-left: -63px; border-radius: 20px; background: #000; }
+.status .right { position: absolute; right: 36px; top: 21px; display: flex; gap: 7px; align-items: center; }
+.status .cell { width: 18px; height: 12px; display: flex; gap: 1.5px; align-items: flex-end; }
+.status .cell i { display: block; width: 3px; background: var(--ink); border-radius: 1px; transition: background var(--tone); }
+.status .wifi { width: 16px; height: 12px; border-radius: 50% 50% 0 0 / 100% 100% 0 0; border: 2.4px solid var(--ink); border-bottom: 0; box-sizing: border-box; transform: translateY(1px); transition: border-color var(--tone); }
+.status .batt { width: 27px; height: 13px; border: 1.5px solid var(--ink); border-radius: 4px; box-sizing: border-box; position: relative; opacity: .9; transition: border-color var(--tone); }
+.status .batt::after { content: ""; position: absolute; left: 2px; top: 2px; bottom: 2px; width: 17px; background: var(--ink); border-radius: 1.5px; transition: background var(--tone); }
+.home-indicator { position: absolute; left: 50%; bottom: 8px; width: 139px; height: 5px; margin-left: -70px; border-radius: 3px; background: var(--ink); opacity: .9; transition: background var(--tone); }
+
+/* ---------- chrome: back, sign in ---------- */
+.chrome-btn {
+  position: absolute; top: 65px; height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center;
+  background: none; border: 0; color: var(--ink-muted); font: 400 17px/22px var(--sans); cursor: pointer; padding: 0 12px;
+  opacity: 0; pointer-events: none; transition: opacity var(--settle) ease, color var(--settle);
+}
+.chrome-btn:hover { color: var(--ink); }
+#back { left: 8px; }
+#back svg { width: 12px; height: 20px; display: block; }
+#back svg path { stroke: currentColor; stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+#signin { right: 8px; }
+.step-2 #back, .step-3 #back, .step-4 #back { opacity: 1; pointer-events: auto; }
+.step-1 #signin { opacity: 1; pointer-events: auto; }
+.becoming #signin { opacity: 0; pointer-events: none; }
+
+/* ---------- persistent objects ---------- */
+#av {
+  position: absolute; border-radius: 50%; background: var(--tone-self, #007B86);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: scale(.7);
+  transition: left var(--geo) var(--geo-ease), top var(--geo) var(--geo-ease), width var(--geo) var(--geo-ease), height var(--geo) var(--geo-ease),
+              opacity var(--settle) ease, transform var(--settle) ease, font-size var(--geo) var(--geo-ease), box-shadow var(--geo);
+  color: rgba(255,255,255,.7); font: 600 1em/1 var(--sans); letter-spacing: .04em; text-indent: .04em;
+  will-change: left, top, width, height;
+}
+#av.shown { opacity: 1; transform: none; }
+#av b { font-weight: 600; opacity: 1; transition: opacity 120ms; }
+#av.lifting b { opacity: 0; }
+
+#nm {
+  position: absolute; white-space: nowrap; font: 700 30px/1.2 Roca, serif; color: var(--ink);
+  opacity: 0; left: 50%; transform: translateX(-50%);
+  transition: left var(--geo) var(--geo-ease), top var(--geo) var(--geo-ease), font-size var(--geo) var(--geo-ease),
+              transform var(--geo) var(--geo-ease), opacity var(--settle) ease, color var(--geo) ease;
+}
+#nm .ini { display: inline; }
+#nm .me, #nm .full { display: inline-block; transition: opacity var(--settle) ease; }
+#nm .me { position: absolute; left: 0; top: 0; opacity: 0; }
+.step-5 #nm .me { opacity: 1; transition-delay: 450ms; }
+.step-5 #nm .full { opacity: 0; transition-delay: 450ms; }
+.becoming #nm, .step-2 #nm, .step-3 #nm, .step-4 #nm, .step-5 #nm { opacity: 1; }
+.step-2 #nm { color: var(--paper-ink); transition-delay: 200ms; }
+.step-2 #nm.landing-done { }
+
+.fly { position: absolute; font: 700 30px/1.2 Roca, serif; color: var(--ink); pointer-events: none; will-change: transform; transform-origin: 0 0; }
+
+/* paper (the list stand-in) */
+#paper {
+  position: absolute; left: 69px; top: 240px; width: 264px; height: 236px; border-radius: 3px;
+  background: linear-gradient(180deg, #DDD0B7 0%, var(--paper) 60%, #CDBEA2 100%);
+  box-shadow: 0 18px 40px rgba(0,0,0,.5), 0 2px 4px rgba(0,0,0,.25);
+  opacity: 0; transform: translateY(28px);
+  transition: opacity var(--settle) ease, transform var(--geo) var(--geo-ease);
+}
+#paper::before { /* the stitch */
+  content: ""; position: absolute; left: 14px; right: 14px; top: 9px; border-top: 1.5px dashed rgba(43,33,25,.38);
+}
+#paper i { position: absolute; left: 22px; height: 9px; border-radius: 5px; background: rgba(43,33,25,.30); filter: blur(1.4px); }
+.step-2 #paper { opacity: 1; transform: none; }
+
+#seal {
+  position: absolute; width: 60px; height: 60px; left: 171px; top: 446px;
+  opacity: 0; transform: scale(1.25);
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,.45));
+  transition: left var(--geo) var(--geo-ease), top var(--geo) var(--geo-ease), width var(--geo) var(--geo-ease), height var(--geo) var(--geo-ease),
+              opacity var(--settle) ease, transform var(--settle) cubic-bezier(0,0,.58,1), clip-path var(--geo) var(--geo-ease), filter var(--geo);
+  clip-path: inset(0 0 0 0 round 0);
+}
+#seal img { width: 100%; height: 100%; display: block; }
+.step-2 #seal { opacity: 1; transform: none; transition-delay: 1000ms; }
+.step-3 #seal, .step-4 #seal { opacity: 1; transform: none; width: 32px; height: 32px; left: 185px; top: 71px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+.step-5 #seal { opacity: 1; transform: none; width: 110px; height: 110px; left: -3px; top: 109px; filter: none;
+  clip-path: inset(15px 0 0 23px round 22px 0 0 0); transition-delay: 150ms; }
+.step-1 #seal, .becoming #seal { transition-delay: 0ms; }
+
+/* the second person's row */
+#row2 {
+  position: absolute; top: 182px; height: 44px; opacity: 0; transform: translateY(12px); pointer-events: none;
+  transition: left var(--geo) var(--geo-ease), top var(--geo) var(--geo-ease), opacity var(--settle) ease, transform var(--settle) ease;
+}
+.step-4 #row2, .step-5 #row2.present { opacity: 1; transform: none; }
+.step-4 #row2 { transition-delay: 250ms; }
+#row2 .rav { position: absolute; left: 0; top: 0; width: 44px; height: 44px; border-radius: 50%; background: var(--tone-other, #3949AB);
+  display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.7); font: 600 17.6px/1 var(--sans); letter-spacing: .04em; text-indent: .04em; }
+#row2 .rname { position: absolute; left: 56px; top: 10px; white-space: nowrap; font: 700 19px/1.2 Roca, serif; color: var(--ink); transition: color var(--tone); }
+#row2 .rint { position: absolute; left: 56px; top: 49px; white-space: nowrap; font: 400 13px/1.3 var(--sans); color: var(--hink-int); opacity: 0; transition: opacity var(--settle) ease 200ms; }
+#row2 svg.thread { position: absolute; left: 0; top: 0; width: 60px; height: 70px; overflow: visible; }
+#row2 svg.thread path { fill: none; stroke: var(--thread); stroke-width: 1; stroke-dasharray: 60; stroke-dashoffset: 60; transition: stroke-dashoffset var(--settle) ease; }
+#row2.has-int .rint { opacity: 1; }
+#row2.has-int svg.thread path { stroke-dashoffset: 0; }
+.mark { display: inline-block; width: 11px; height: 11px; margin-left: 6px; background: var(--mark); vertical-align: 0;
+  -webkit-mask: url(/app/assets/img/+prayer_icon.svg) center / contain no-repeat; mask: url(/app/assets/img/+prayer_icon.svg) center / contain no-repeat;
+  opacity: 0; transition: opacity var(--settle) ease; }
+.mark.small { width: 9px; height: 9px; margin-left: 4px; }
+.step-5 .mark { opacity: 1; transition-delay: 700ms; }
+
+/* ---------- content panels ---------- */
+.p { position: absolute; left: 0; right: 0; top: 0; bottom: 0; pointer-events: none; z-index: 1; }
+#paper { z-index: 2; } #seal, #av, #nm, #row2 { z-index: 3; } #primary, #secondary, .chrome-btn { z-index: 4; } .fly { z-index: 5; } .sheet, .sheet-scrim { z-index: 10; } .keyboard { z-index: 6; } .home-indicator { z-index: 7; }
+.p > * { opacity: 0; transform: translateY(10px); transition: opacity var(--settle) ease, transform var(--settle) ease; }
+.step-1 .p1 > *, .step-2 .p2 > *, .step-3 .p3 > *, .step-4 .p4 > * { opacity: 1; transform: none; pointer-events: auto; }
+.step-2 .p2 > * { transition-delay: 1100ms; }
+.step-3 .p3 > *, .step-4 .p4 > * { transition-delay: 300ms; }
+.becoming .p1 > .q, .becoming .p1 > .field-wrap .field { opacity: 0; }
+.becoming .p1 > .leader { opacity: 0; transition-duration: 600ms; }
+
+.leader { position: absolute; left: 32px; right: 32px; top: 206px; text-align: center; font: 400 32px/1.25 Roca, serif; color: var(--ink); }
+.arrive .leader { transition-delay: 120ms; }
+.q { position: absolute; left: 32px; right: 32px; text-align: center; font: 500 22px/1.3 var(--sans); letter-spacing: -0.01em; color: var(--ink); }
+.body { position: absolute; left: 36px; right: 36px; text-align: center; font: 400 17px/1.4 var(--sans); color: var(--ink-muted); }
+.body.lead { font: 500 20px/1.35 var(--sans); color: var(--ink); letter-spacing: -0.01em; }
+.cap { position: absolute; left: 32px; right: 32px; text-align: center; font: 400 13px/1.3 var(--sans); color: var(--ink-faint); }
+
+.field-wrap { position: absolute; left: 24px; right: 24px; }
+.field {
+  display: block; width: 100%; height: 56px; box-sizing: border-box; border-radius: 16px; border: 1px solid var(--hair); background: var(--field);
+  color: var(--ink); font: 400 22px/1.2 var(--sans); text-align: center; padding: 0 18px; outline: none;
+  transition: background var(--settle), border-color var(--settle), opacity var(--settle), color var(--settle);
+  caret-color: var(--blue);
+}
+.field::placeholder { color: var(--ink-faint); }
+.field:focus { border-color: rgba(242,235,223,.3); background: rgba(242,235,223,.09); }
+.field.big { font-size: 24px; }
+
+/* button system: one primary slot, one secondary slot, always in the same place */
+#primary {
+  position: absolute; left: 24px; right: 24px; top: 700px; height: 56px; border-radius: 28px; border: 0;
+  background: var(--blue); color: var(--onblue); font: 600 17px/56px var(--sans); cursor: pointer;
+  transition: opacity var(--settle) ease, transform var(--settle) ease, background var(--settle);
+  overflow: hidden;
+}
+#primary:disabled { opacity: .38; cursor: default; }
+#primary .lbl { position: absolute; inset: 0; transition: opacity var(--quick) ease; }
+#primary .lbl.out { opacity: 0; }
+#primary:active:not(:disabled) { transform: scale(.985); }
+.step-5 #primary, .becoming #primary { opacity: 0; pointer-events: none; }
+#secondary {
+  position: absolute; left: 24px; right: 24px; top: 768px; height: 44px; border: 0; background: none;
+  color: var(--ink-muted); font: 400 17px/44px var(--sans); cursor: pointer; border-radius: 22px;
+  opacity: 0; pointer-events: none; transition: opacity var(--settle) ease, color var(--settle);
+}
+#secondary:hover { color: var(--ink); }
+.step-3 #secondary, .step-4 #secondary { opacity: 1; pointer-events: auto; transition-delay: 300ms; }
+
+/* step 1 */
+.p1 .q { top: 328px; }
+.p1 .field-wrap { top: 380px; }
+
+/* step 2 */
+.p2 .body.lead { top: 516px; }
+.p2 .body { top: 586px; }
+
+/* step 3 */
+.p3 .q { top: 212px; }
+.p3 .fw1 { top: 268px; } .p3 .cap1 { top: 332px; }
+.p3 .fw2 { top: 372px; } .p3 .cap2 { top: 436px; }
+
+/* step 4 */
+.p4 .q { top: 262px; }
+.p4 .body { top: 316px; font-size: 15px; left: 48px; right: 48px; }
+.p4 .field-wrap { top: 388px; }
+
+/* ---------- Home ---------- */
+.ph > * { transition: opacity 400ms ease, transform var(--geo) var(--geo-ease); }
+.step-5 .ph > * { opacity: 1; transform: none; pointer-events: auto; }
+.step-5 .ph .card { transition-delay: 200ms; }
+.step-5 .ph .bar { transition-delay: 500ms; }
+.step-5 .ph .hdr { transition-delay: 350ms; }
+.step-5 .ph .merow { transition-delay: 500ms; }
+.ph .bar { transform: translateY(24px); }
+.ph .card { transform: translateY(-10px); }
+
+.glass { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); box-shadow: inset 0 1px 0 rgba(255,255,255,.05); backdrop-filter: blur(20px); }
+.hdr .badge { position: absolute; left: 60px; top: 71px; width: 58px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+.hdr .badge img { width: 22px; height: 22px; filter: grayscale(1) brightness(1.25); opacity: .38; }
+.hdr .filter { position: absolute; right: 20px; top: 71px; width: 32px; height: 32px; border-radius: 16px; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; }
+.hdr .filter i { display: block; height: 1.5px; background: var(--hink-muted); border-radius: 1px; }
+.hdr .filter i:nth-child(1) { width: 14px; } .hdr .filter i:nth-child(2) { width: 10px; } .hdr .filter i:nth-child(3) { width: 6px; }
+
+.card { position: absolute; left: 20px; right: 20px; top: 124px; height: 185px; border-radius: 22px; background: var(--card); overflow: hidden; }
+.card .world { position: absolute; left: 99px; top: 20px; right: 20px; }
+.card .title { font: 700 24px/1.2 Roca, serif; color: var(--hink); }
+.card .counts { margin-top: 5px; font: 400 15px/1.3 var(--sans); color: var(--hink-muted); font-variant-numeric: tabular-nums; }
+.card .counts b { font-weight: 400; color: var(--hink); }
+.card .counts .dot { margin: 0 5px; }
+.card .presence { margin-top: 4px; font: 400 15px/1.3 var(--sans); color: var(--hink-muted); display: flex; align-items: center; gap: 7px; }
+.card .presence::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--hink-muted); }
+.card .you { position: absolute; left: 20px; right: 20px; bottom: 20px; }
+.card .cl { display: flex; height: 28px; }
+.card .cl span { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.7); font: 600 11.2px/1 var(--sans); letter-spacing: .04em; text-indent: .04em; box-shadow: 0 0 0 2px var(--card); }
+.card .cl span + span { margin-left: -4px; }
+.card .cl span.hide { display: none; }
+.card .cstatus { margin-top: 8px; font: 400 15px/1.3 var(--sans); color: var(--hink); }
+#cl-me { background: var(--tone-self, #007B86); } #cl-other { background: var(--tone-other, #3949AB); }
+
+.merow { position: absolute; left: 20px; top: 333px; width: 44px; height: 44px; border-radius: 50%; background: var(--tone-self, #007B86); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.7); font: 600 17.6px/1 var(--sans); letter-spacing: .04em; text-indent: .04em; }
+#nm .mark { vertical-align: 1px; }
+
+.bar { position: absolute; left: 16px; right: 16px; top: 786px; height: 62px; }
+.bar .pill { position: absolute; left: 0; top: 0; height: 62px; right: 74px; border-radius: 31px; display: flex; align-items: center; justify-content: space-around; padding: 0 28px; }
+.bar .pill svg { width: 26px; height: 26px; display: block; }
+.bar .pill svg * { stroke: var(--hink); stroke-width: 1.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.bar .pray { position: absolute; right: 0; top: 0; width: 62px; height: 62px; border-radius: 50%; background: rgba(5,128,249,.92); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 18px rgba(5,128,249,.25); display: flex; align-items: center; justify-content: center; }
+.bar .pray i { display: block; width: 30px; height: 30px; background: #fff;
+  -webkit-mask: url(/app/assets/unbundled/design/icons/praying_hands_outlined.svg) center / contain no-repeat; mask: url(/app/assets/unbundled/design/icons/praying_hands_outlined.svg) center / contain no-repeat; }
+
+/* ---------- sign-in sheet ---------- */
+.sheet-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.55); opacity: 0; pointer-events: none; transition: opacity var(--settle); }
+.sheet { position: absolute; left: 8px; right: 8px; bottom: 8px; border-radius: 34px; background: #2A2320; padding: 24px 16px 12px;
+  transform: translateY(110%); transition: transform 420ms cubic-bezier(.2,.8,.2,1); color: var(--ink); }
+.sheet.open { transform: none; } .sheet-scrim.open { opacity: 1; pointer-events: auto; }
+.sheet h3 { margin: 0 0 4px; font: 500 20px/1.3 var(--sans); text-align: center; letter-spacing: -0.01em; }
+.sheet p { margin: 0 0 20px; text-align: center; font: 400 15px/1.4 var(--sans); color: var(--ink-muted); }
+.sheet .sbtn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 54px; border-radius: 27px; border: 0; font: 600 17px/54px var(--sans); cursor: pointer; margin-bottom: 10px; }
+.sheet .apple { background: #000; color: #fff; }
+.sheet .google { background: #fff; color: #1f1f1f; }
+.sheet .google img { width: 20px; height: 20px; }
+.sheet .cancel { background: none; color: var(--ink-muted); font-weight: 400; margin: 0; height: 48px; line-height: 48px; }
+.sheet .apple svg { width: 16px; height: 20px; fill: #fff; }
+
+/* arrival: the first frame scoops (staggered, once) */
+.pre .p1 > * { opacity: 0 !important; transform: translateY(12px) !important; }
+.arrive .p1 .leader { transition-duration: 700ms; transition-delay: 80ms; }
+.arrive .p1 .q { transition-duration: 600ms; transition-delay: 420ms; }
+.arrive .p1 .field-wrap { transition-duration: 600ms; transition-delay: 520ms; }
+.arrive #primary { transition-duration: 600ms; transition-delay: 700ms; }
+.arrive #signin { transition-delay: 900ms; }
+.pre #primary, .pre #signin { opacity: 0 !important; }
+
+/* keyboard stand-in: shows where Continue rides while typing */
+.keyboard { position: absolute; left: 0; right: 0; bottom: 0; height: 336px; background: #2A2A2D; transform: translateY(100%); transition: transform 280ms cubic-bezier(.2,.8,.2,1); padding: 10px 3px 0; box-sizing: border-box; }
+.kb .keyboard { transform: none; }
+.keyboard .r { display: flex; justify-content: center; gap: 6px; margin-bottom: 11px; }
+.keyboard .r i { display: block; width: 33px; height: 43px; border-radius: 5px; background: #6B6B6F; box-shadow: 0 1px 0 #1b1b1d; }
+.keyboard .r i.w { width: 48px; background: #464649; } .keyboard .r i.sp { width: 190px; }
+.kb #primary { top: 470px; } .kb #secondary { opacity: 0; pointer-events: none; }
+.kb .home-indicator { background: #fff; }
+
+/* measurer */
+#meas { position: absolute; visibility: hidden; white-space: nowrap; left: -9999px; top: 0; }
+</style>
+</head>
+<body>
+
+<aside class="panel">
+  <h1>A · One stage</h1>
+  <p class="sub">iPhone 17 Pro · 402 × 874 pt. One surface, one ground; objects stay and transform.</p>
+  <ol id="steps">
+    <li><button data-j="1"><span>1</span>Your name</button></li>
+    <li><button data-j="2"><span>2</span>Your name becomes you (the moment)</button></li>
+    <li><button data-j="3"><span>3</span>Set onto the list, sealed</button></li>
+    <li><button data-j="4"><span>4</span>Who else you pray for</button></li>
+    <li><button data-j="5"><span>5</span>Their intention</button></li>
+    <li><button data-j="6"><span>6</span>Hand-off to Home</button></li>
+  </ol>
+  <div class="ctl">
+    <button id="restart">Restart</button>
+    <button id="fill">Fill sample for this step</button>
+    <label><input type="checkbox" id="rm"> Reduce Motion</label>
+  </div>
+  <p class="note">Type in the fields, or fill a sample. Back (‹) works on every step after the first. Sign in sits top-right on the first frame only.</p>
+</aside>
+
+<div class="phone">
+  <div class="screen step-1 pre" id="screen">
+    <div class="status">
+      <div class="time">9:41</div>
+      <div class="island"></div>
+      <div class="right">
+        <div class="cell"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></div>
+        <div class="wifi"></div>
+        <div class="batt"></div>
+      </div>
+    </div>
+
+    <!-- chrome -->
+    <button class="chrome-btn" id="back" aria-label="Back"><svg viewBox="0 0 12 20"><path d="M10 2 2 10l8 8"/></svg></button>
+    <button class="chrome-btn" id="signin">Sign in</button>
+
+    <!-- persistent objects -->
+    <div id="paper">
+      <i style="top:28px;width:112px"></i><i style="top:58px;width:154px"></i>
+      <i style="top:118px;width:130px"></i><i style="top:148px;width:92px"></i><i style="top:178px;width:146px"></i><i style="top:208px;width:104px"></i>
+    </div>
+    <div id="seal"><img src="/app/assets/img/wax_stamps/wax-blue.png" alt=""></div>
+    <div id="av"><b></b><b></b></div>
+    <div id="nm"><span class="full"></span><span class="me">Me<i class="mark"></i></span></div>
+    <div id="row2">
+      <svg class="thread" viewBox="0 0 60 70"><path d="M22 44 V 48 Q 22 56 30 56 H 48"/></svg>
+      <div class="rav"></div>
+      <div class="rname"><span class="t"></span><i class="mark"></i></div>
+      <div class="rint"><span class="t"></span><i class="mark small"></i></div>
+    </div>
+
+    <!-- step 1: your name -->
+    <div class="p p1">
+      <div class="leader">Your name,<br>carried by the world.</div>
+      <div class="q">What’s your name?</div>
+      <div class="field-wrap"><input class="field big" id="f1" placeholder="Your name" autocomplete="off" autocapitalize="words" maxlength="40"></div>
+    </div>
+
+    <!-- step 2: set onto the list -->
+    <div class="p p2">
+      <div class="body lead">Pray with today’s list.<br>Tomorrow your name is on it.</div>
+      <div class="body">The list is printed and sealed each day,<br>and kept private.</div>
+    </div>
+
+    <!-- step 3: who else -->
+    <div class="p p3">
+      <div class="q">Who else do you pray for?</div>
+      <div class="field-wrap fw1"><input class="field" id="f3a" placeholder="Their name" autocomplete="off" autocapitalize="words" maxlength="40"></div>
+      <div class="cap cap1">Printed on the list</div>
+      <div class="field-wrap fw2"><input class="field" id="f3b" placeholder="What you call them · optional" autocomplete="off" autocapitalize="words" maxlength="40"></div>
+      <div class="cap cap2">Only you see this</div>
+    </div>
+
+    <!-- step 4: their intention -->
+    <div class="p p4">
+      <div class="q" id="q4">What are you praying for, for Mom?</div>
+      <div class="body">An intention is a request: healing, a new job, peace. It can print with their name.</div>
+      <div class="field-wrap"><input class="field" id="f4" placeholder="e.g. Healing after surgery" autocomplete="off" maxlength="80"></div>
+    </div>
+
+    <!-- the button slots -->
+    <button id="primary" disabled><span class="lbl">Continue</span></button>
+    <button id="secondary">Not now</button>
+
+    <!-- Home -->
+    <div class="p ph">
+      <div class="hdr">
+        <div class="badge glass"><img src="/app/assets/img/wax_stamps/wax-neutral.png" alt=""></div>
+        <div class="filter glass"><i></i><i></i><i></i></div>
+      </div>
+      <div class="card">
+        <div class="world">
+          <div class="title">List 52</div>
+          <div class="counts"><b>4,345</b> people<span class="dot">·</span><b>3,881</b> prayers</div>
+          <div class="presence">239 praying now</div>
+        </div>
+        <div class="you">
+          <div class="cl"><span id="cl-me"></span><span id="cl-other" class="hide"></span></div>
+          <div class="cstatus" id="cstatus">Pray to be on List 53</div>
+        </div>
+      </div>
+      <div class="merow" id="merow"></div>
+      <div class="bar">
+        <div class="pill glass">
+          <svg viewBox="0 0 26 26"><path d="M4.5 13a8.5 8.5 0 1 0 2.6-6.1"/><path d="M4.5 3.5v4h4"/><path d="M13 8v5.5l3.5 2"/></svg>
+          <svg viewBox="0 0 26 26"><circle cx="11.5" cy="11.5" r="7"/><path d="m17 17 5 5"/></svg>
+          <svg viewBox="0 0 26 26"><path d="M13 4v18M4 13h18"/></svg>
+        </div>
+        <div class="pray"><i></i></div>
+      </div>
+    </div>
+
+    <div class="sheet-scrim" id="scrim"></div>
+    <div class="sheet" id="sheet">
+      <h3>Already have an account?</h3>
+      <p>Sign in and your list comes back.</p>
+      <button class="sbtn apple"><svg viewBox="0 0 16 20"><path d="M13.3 10.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8C3.8 5.4 2.3 6.3 1.5 7.7c-1.7 2.9-.4 7.2 1.2 9.6.8 1.2 1.7 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.1.8 1.3 0 2.1-1.2 2.9-2.3.9-1.3 1.3-2.6 1.3-2.7 0 0-2.8-1.1-2.8-4.1zM11 3.7c.6-.8 1.1-1.8 1-2.9-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.8 1 .1 2.1-.5 2.7-1.3z"/></svg>Sign in with Apple</button>
+      <button class="sbtn google"><img src="/app/assets/img/google_logo.png" alt="">Continue with Google</button>
+      <button class="sbtn cancel" id="scancel">Cancel</button>
+    </div>
+
+    <div class="keyboard" aria-hidden="true">
+      <div class="r"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="r"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="r"><i class="w"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="w"></i></div>
+      <div class="r"><i class="w"></i><i class="sp"></i><i class="w" style="width:90px"></i></div>
+    </div>
+    <div class="home-indicator"></div>
+    <span id="meas"></span>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const screen = $('#screen'), av = $('#av'), nm = $('#nm'), nmFull = nm.querySelector('.full'), row2 = $('#row2');
+  const f1 = $('#f1'), f3a = $('#f3a'), f3b = $('#f3b'), f4 = $('#f4');
+  const primary = $('#primary'), secondary = $('#secondary'), back = $('#back');
+  const W = 402, CX = 201;
+  const S = { step: 1, name: '', other: '', alias: '', intention: '', busy: false, hasOther: false };
+  const SAMPLE = { name: 'Eric Olson', other: 'Julie Olson', alias: 'Mom', intention: 'Healing after her surgery' };
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const rm = () => screen.classList.contains('rm');
+
+  // --- helpers ---
+  function initials(s) {
+    const w = s.trim().split(/\s+/).filter(Boolean);
+    if (!w.length) return '';
+    const a = [...w[0]][0].toUpperCase();
+    if (w.length === 1) return a;
+    return a + [...w[w.length - 1]][0].toUpperCase();
+  }
+  function measure(text, font) { const m = $('#meas'); m.style.font = font; m.textContent = text; return m.getBoundingClientRect().width; }
+  function setLabel(btn, text) {
+    const l = btn.querySelector('.lbl'); if (l.textContent === text) return;
+    l.classList.add('out'); setTimeout(() => { l.textContent = text; l.classList.remove('out'); }, rm() ? 0 : 160);
+  }
+  function renderName() {
+    const words = (S.name || '').split(/(\s+)/);
+    let html = '', n = 0; const idx = words.filter(w => w.trim()).length;
+    words.forEach((w, i) => {
+      if (!w.trim()) { html += w; return; }
+      const isIni = (n === 0 || n === idx - 1); n++;
+      const first = [...w][0], rest = [...w].slice(1).join('');
+      html += isIni ? `<span class="ini">${esc(first)}</span>${esc(rest)}` : esc(w);
+    });
+    nmFull.innerHTML = html + '<i class="mark"></i>';
+    const ini = initials(S.name); const bs = av.querySelectorAll('b');
+    bs[0].textContent = ini[0] || ''; bs[1].textContent = ini[1] || '';
+    $('#cl-me').textContent = ini; $('#merow').textContent = ini;
+  }
+  function esc(s) { return s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+  function otherLabel() { return S.alias.trim() || S.other.trim(); }
+  function renderRow2() {
+    const lab = otherLabel(); const ini = initials(lab);
+    row2.querySelector('.rav').textContent = ini;
+    row2.querySelector('.rname .t').textContent = lab;
+    row2.querySelector('.rint .t').textContent = S.intention;
+    row2.classList.toggle('has-int', !!S.intention);
+    $('#q4').textContent = `What are you praying for, for ${lab}?`;
+    const co = $('#cl-other'); co.textContent = ini; co.classList.toggle('hide', !S.hasOther);
+    $('#cstatus').textContent = S.hasOther ? 'Pray to carry them onto List 53' : 'Pray to be on List 53';
+  }
+
+  // --- geometry per step (the stage's slots) ---
+  function layout() {
+    const st = S.step, nameW19 = measure(S.name || 'Your name', '700 19px Roca');
+    const place = (el, l, t, w, h) => { el.style.left = l + 'px'; el.style.top = t + 'px'; if (w != null) { el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.fontSize = (w * .4) + 'px'; } };
+    nm.style.transform = ''; nm.style.left = ''; nm.style.top = ''; nm.style.fontSize = '';
+    if (st === 1) {
+      place(av, CX - 48, 262, 96, 96);
+      nm.style.left = '50%'; nm.style.top = '390px'; nm.style.fontSize = '30px'; nm.style.transform = 'translateX(-50%)';
+    } else if (st === 2) {
+      place(av, CX - 48, 118, 96, 96);
+      nm.style.left = '91px'; nm.style.top = '316px'; nm.style.fontSize = '19px'; nm.style.transform = 'none';
+    } else if (st === 3 || st === 4) {
+      const w = 44 + 12 + nameW19, l0 = Math.round(CX - w / 2);
+      place(av, l0, 118, 44, 44);
+      nm.style.left = (l0 + 56) + 'px'; nm.style.top = '128px'; nm.style.fontSize = '19px'; nm.style.transform = 'none';
+      const w2 = 44 + 12 + measure(otherLabel() || 'Mom', '700 19px Roca');
+      row2.style.left = Math.round(CX - w2 / 2) + 'px'; row2.style.top = '182px';
+    } else if (st === 5) {
+      place(av, 20, 71, 32, 32);
+      nm.style.left = '76px'; nm.style.top = '343px'; nm.style.fontSize = '19px'; nm.style.transform = 'none';
+      row2.style.left = '20px'; row2.style.top = '409px';
+    }
+  }
+
+  function applyStep(step, { instant = false } = {}) {
+    S.step = step;
+    if (instant) screen.classList.add('instant');
+    screen.classList.remove('step-1', 'step-2', 'step-3', 'step-4', 'step-5', 'becoming');
+    screen.classList.add('step-' + step);
+    layout();
+    if (step === 1) { av.classList.remove('shown'); nm.classList.remove('shown'); f1.value = S.name; }
+    else av.classList.add('shown');
+    row2.classList.toggle('present', S.hasOther);
+    if (step !== 4 && step !== 5) row2.classList.remove('present');
+    setLabel(primary, step === 4 ? 'Add' : 'Continue');
+    secondary.textContent = step === 4 ? 'Skip' : 'Not now';
+    primary.disabled = !canContinue();
+    markJumper(step === 1 ? 1 : step + 1);
+    if (instant) { void screen.offsetWidth; requestAnimationFrame(() => requestAnimationFrame(() => screen.classList.remove('instant'))); }
+  }
+  function markJumper(j) { document.querySelectorAll('#steps button').forEach(b => b.classList.toggle('on', +b.dataset.j === j)); }
+  function canContinue() {
+    if (S.step === 1) return S.name.trim().length > 0;
+    if (S.step === 3) return S.other.trim().length > 0;
+    return true;
+  }
+
+  // --- the moment: the typed name becomes Roca, the initials lift into the avatar ---
+  async function becoming() {
+    if (S.busy) return; S.busy = true;
+    renderName();
+    screen.classList.add('becoming'); markJumper(2);
+    f1.blur(); screen.classList.remove('kb');
+    await wait(rm() ? 200 : 380);
+    if (!rm()) {
+      // flyers from the two initials in the Roca name to their place in the disc
+      const srcs = nm.querySelectorAll('.ini'); const dsts = av.querySelectorAll('b');
+      const sr = screen.getBoundingClientRect();
+      av.classList.add('lifting'); av.classList.add('shown');
+      const flyers = [];
+      srcs.forEach((s, i) => {
+        const d = dsts[i]; if (!d || !d.textContent) return;
+        const a = s.getBoundingClientRect(); const fl = document.createElement('div');
+        fl.className = 'fly'; fl.textContent = s.textContent;
+        fl.style.left = (a.left - sr.left) + 'px'; fl.style.top = (a.top - sr.top) + 'px';
+        screen.appendChild(fl); flyers.push({ fl, s, d, a });
+      });
+      await wait(30);
+      const anims = flyers.map(({ fl, d, a }) => {
+        const b = d.getBoundingClientRect();
+        const sc = b.height / a.height;
+        const dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+        return fl.animate([
+          { transform: 'translate(0,0) scale(1)', opacity: 1, offset: 0 },
+          { transform: `translate(${dx}px, ${dy}px) scale(${sc})`, opacity: 1, offset: .82 },
+          { transform: `translate(${dx}px, ${dy}px) scale(${sc})`, opacity: 0, offset: 1 }
+        ], { duration: 720, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished;
+      });
+      setTimeout(() => av.classList.remove('lifting'), 560);
+      await Promise.race([Promise.all(anims), wait(800)]);
+      flyers.forEach(({ fl }) => fl.remove());
+    } else {
+      av.classList.add('shown');
+      await wait(320);
+    }
+    await wait(rm() ? 150 : 350);
+    applyStep(2);
+    S.busy = false;
+  }
+
+  async function handoff() {
+    if (S.busy) return; S.busy = true;
+    renderRow2();
+    applyStep(5);
+    await wait(rm() ? 400 : 1300);
+    S.busy = false;
+  }
+
+  // --- actions ---
+  primary.addEventListener('click', async () => {
+    if (S.busy || primary.disabled) return;
+    if (S.step === 1) { S.name = f1.value.trim(); await becoming(); }
+    else if (S.step === 2) { applyStep(3); }
+    else if (S.step === 3) { S.other = f3a.value.trim(); S.alias = f3b.value.trim(); S.hasOther = true; f3a.blur(); f3b.blur(); renderRow2(); applyStep(4); }
+    else if (S.step === 4) {
+      S.intention = f4.value.trim(); f4.blur(); screen.classList.remove('kb');
+      if (S.intention) { renderRow2(); S.busy = true; await wait(rm() ? 250 : 700); S.busy = false; }
+      await handoff();
+    }
+  });
+  secondary.addEventListener('click', async () => {
+    if (S.busy) return;
+    if (S.step === 3) { S.hasOther = false; S.other = ''; S.alias = ''; S.intention = ''; renderRow2(); await handoff(); }
+    else if (S.step === 4) { S.intention = ''; renderRow2(); await handoff(); }
+  });
+  back.addEventListener('click', () => {
+    if (S.busy) return;
+    if (S.step === 2) { applyStep(1); }
+    else if (S.step === 3) applyStep(2);
+    else if (S.step === 4) { S.hasOther = false; applyStep(3); }
+  });
+  f1.addEventListener('input', () => { S.name = f1.value; primary.disabled = !canContinue(); });
+  f3a.addEventListener('input', () => { S.other = f3a.value; primary.disabled = !canContinue(); });
+  f3b.addEventListener('input', () => { S.alias = f3b.value; });
+  f4.addEventListener('input', () => { S.intention = f4.value; });
+  [f1, f3a, f3b, f4].forEach(f => {
+    f.addEventListener('keydown', e => { if (e.key === 'Enter' && !primary.disabled) primary.click(); });
+    f.addEventListener('focus', () => screen.classList.add('kb'));
+    f.addEventListener('blur', () => setTimeout(() => { if (!document.activeElement || !document.activeElement.classList.contains('field')) screen.classList.remove('kb'); }, 0));
+  });
+  primary.addEventListener('mousedown', e => e.preventDefault()); // keep the field's focus: the button stays put under the finger
+  screen.addEventListener('mousedown', e => { if (!e.target.closest('.field, #primary, #secondary, .keyboard')) document.activeElement && document.activeElement.blur && document.activeElement.blur(); });
+
+  // sign in sheet
+  $('#signin').addEventListener('click', () => { $('#sheet').classList.add('open'); $('#scrim').classList.add('open'); });
+  const closeSheet = () => { $('#sheet').classList.remove('open'); $('#scrim').classList.remove('open'); };
+  $('#scrim').addEventListener('click', closeSheet); $('#scancel').addEventListener('click', closeSheet);
+  document.querySelectorAll('.sheet .apple, .sheet .google').forEach(b => b.addEventListener('click', () => { closeSheet(); }));
+
+  // --- reviewer panel ---
+  function ensure(level) {
+    if (!S.name.trim()) S.name = SAMPLE.name;
+    if (level >= 2) { if (!S.other.trim()) { S.other = SAMPLE.other; S.alias = SAMPLE.alias; } S.hasOther = true; }
+    if (level >= 3 && !S.intention.trim()) S.intention = SAMPLE.intention;
+    f1.value = S.name; f3a.value = S.other; f3b.value = S.alias; f4.value = S.intention;
+    renderName(); renderRow2();
+  }
+  async function jump(j) {
+    if (S.busy) return;
+    screen.classList.remove('pre', 'arrive');
+    switch (j) {
+      case 1: applyStep(1, { instant: true }); break;
+      case 2: ensure(1); applyStep(1, { instant: true }); await wait(250); await becoming(); break;
+      case 3: ensure(1); applyStep(2, { instant: true }); break;
+      case 4: ensure(1); S.hasOther = false; applyStep(3, { instant: true }); break;
+      case 5: ensure(2); S.intention = ''; f4.value = ''; renderRow2(); applyStep(4, { instant: true }); break;
+      case 6: ensure(3); applyStep(4, { instant: true }); await wait(300); await handoff(); break;
+    }
+  }
+  document.querySelectorAll('#steps button').forEach(b => b.addEventListener('click', () => jump(+b.dataset.j)));
+  $('#restart').addEventListener('click', () => {
+    if (S.busy) return;
+    Object.assign(S, { name: '', other: '', alias: '', intention: '', hasOther: false });
+    [f1, f3a, f3b, f4].forEach(f => f.value = ''); renderName(); renderRow2();
+    applyStep(1, { instant: true }); screen.classList.add('pre');
+    setTimeout(() => { screen.classList.add('arrive'); screen.classList.remove('pre'); }, 60);
+    setTimeout(() => screen.classList.remove('arrive'), 1800);
+  });
+  $('#fill').addEventListener('click', () => {
+    if (S.step === 1) { f1.value = SAMPLE.name; S.name = SAMPLE.name; }
+    else if (S.step === 3) { f3a.value = SAMPLE.other; f3b.value = SAMPLE.alias; S.other = SAMPLE.other; S.alias = SAMPLE.alias; }
+    else if (S.step === 4) { f4.value = SAMPLE.intention; S.intention = SAMPLE.intention; }
+    primary.disabled = !canContinue();
+  });
+  $('#rm').addEventListener('change', e => screen.classList.toggle('rm', e.target.checked));
+
+  // --- boot ---
+  document.fonts.load('700 30px Roca').then(() => document.fonts.load('400 32px Roca')).finally(() => {
+    renderName(); renderRow2(); applyStep(1, { instant: true });
+    setTimeout(() => { screen.classList.add('arrive'); screen.classList.remove('pre'); }, 80);
+    setTimeout(() => screen.classList.remove('arrive'), 1900);
+  });
+  // deep link: ?step=N jumps after fonts load (for screenshots)
+  const qs = new URLSearchParams(location.search);
+  if (qs.get('rm')) { $('#rm').checked = true; screen.classList.add('rm'); }
+  if (qs.get('step')) document.fonts.ready.then(() => setTimeout(async () => { await jump(+qs.get('step')); if (qs.get('focus')) ({ 1: f1, 3: f3a, 4: f4 }[S.step] || f1).focus(); }, 200));
+})();
+</script>
+</body>
+</html>
