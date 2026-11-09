@@ -36,6 +36,9 @@ struct OnboardingFlow: View {
     /// The screen's height without the keyboard (steps 1–2 sit a share of
     /// it down).
     @State private var screenHeight: CGFloat = 0
+    /// The step scroll view's visible height (between the top bar and the
+    /// button); step 2 centers its composition in it.
+    @State private var viewportHeight: CGFloat = 0
 
     // Anchors
     @State private var selfTrip = Trip()
@@ -188,6 +191,11 @@ struct OnboardingFlow: View {
             }
             .scrollBounceBehavior(.basedOnSize)
             .scrollIndicators(.hidden)
+            .onScrollGeometryChange(for: CGFloat.self) {
+                $0.containerSize.height - $0.contentInsets.top - $0.contentInsets.bottom
+            } action: { _, height in
+                viewportHeight = height
+            }
             .stageSlot(.viewport)
             .id(model.step)
             .transition(.asymmetric(insertion: .identity, removal: stepRemoval))
@@ -204,7 +212,8 @@ struct OnboardingFlow: View {
         let top = max(PP.space.xl, screenHeight * PP.number.onboarding.leadTop)
         switch step {
         case .name: NameStep(model: model, top: top)
-        case .moment: MomentStep(model: model, top: top, fromName: entered != .someone)
+        case .moment: MomentStep(model: model, top: top, fill: max(0, viewportHeight - PP.space.xl),
+                                 fromName: entered != .someone)
         case .someone: SomeoneStep(model: model)
         case .intention: IntentionStep(model: model)
         case .handoff: Color.clear

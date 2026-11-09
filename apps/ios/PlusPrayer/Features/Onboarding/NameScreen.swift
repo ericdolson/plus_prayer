@@ -116,27 +116,29 @@ private struct LineIf: ViewModifier {
 struct MomentStep: View {
     let model: OnboardingModel
     let top: CGFloat
+    /// The visible height to fill (the scroll viewport, less the content's
+    /// bottom padding): the composition centers in it.
+    let fill: CGFloat
     /// Arriving from the name (the whole moment) or back from the person
     /// step (the paper and lines simply return).
     let fromName: Bool
 
     var body: some View {
-        let paperAt = fromName ? PP.duration.onboardingMomentPaper : PP.duration.onboardingReturnPaper
-        let linesAt = fromName ? PP.duration.onboardingMomentLines : PP.duration.onboardingReturnLines
+        ZStack(alignment: .top) {
+            typedNameSlot
+            composition
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /// Step 1's lead, question and field, invisible and out of the
+    /// composition's layout: the name starts exactly where it was typed
+    /// (`nameAbove`), then travels onto the paper.
+    private var typedNameSlot: some View {
         VStack(spacing: 0) {
-            // Step 1's lead and question, invisible: the avatar sits above
-            // where the field was, and the name starts exactly there.
-            ZStack(alignment: .bottom) {
-                NameStepLead(animated: false)
-                    .hidden()
-                    .accessibilityHidden(true)
-                Color.clear
-                    .frame(width: PP.size.avatar.large, height: PP.size.avatar.large)
-                    .stageSlot(.momentAvatar)
-                    .padding(.bottom, PP.space.sm)
-            }
-            .padding(.top, top)
-            // Where the field's text was: the name's first place.
+            NameStepLead(animated: false)
+                .hidden()
+                .padding(.top, top)
             UnderlinedField(focused: false, ruled: false) {
                 Text(verbatim: model.displayName.isEmpty ? " " : model.displayName)
                     .font(PP.type.onboardingField)
@@ -146,7 +148,23 @@ struct MomentStep: View {
                     .stageSlot(.nameAbove)
             }
             .padding(.top, PP.space.lg)
-            .accessibilityHidden(true)
+        }
+        .accessibilityHidden(true)
+    }
+
+    /// The resting composition, centered in the space above the button:
+    /// the avatar, the paper line, the mechanic and the privacy line, with
+    /// room between each group (2026-11-09: the first build stacked them
+    /// under step 1's geometry and crowded the button).
+    private var composition: some View {
+        let paperAt = fromName ? PP.duration.onboardingMomentPaper : PP.duration.onboardingReturnPaper
+        let linesAt = fromName ? PP.duration.onboardingMomentLines : PP.duration.onboardingReturnLines
+        return VStack(spacing: 0) {
+            Spacer(minLength: PP.space.xl)
+            Color.clear
+                .frame(width: PP.size.avatar.large, height: PP.size.avatar.large)
+                .stageSlot(.momentAvatar)
+                .accessibilityHidden(true)
             ListPaperLine(label: model.nextListNumber.map(L10n.Card.title)) {
                 Color.clear
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -162,17 +180,18 @@ struct MomentStep: View {
                 .foregroundStyle(PP.color.ink)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, PP.space.xl)
+                .padding(.top, PP.space.xxxl)
                 .onboardingLine(delay: OnboardingTiming.line(0, after: linesAt))
             Text(L10n.Onboarding.privacy)
                 .font(PP.type.body)
                 .foregroundStyle(PP.color.inkMuted)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, PP.space.md)
+                .padding(.top, PP.space.lg)
                 .onboardingLine(delay: OnboardingTiming.line(1, after: linesAt))
+            Spacer(minLength: PP.space.xxl)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, minHeight: fill)
     }
 }
 

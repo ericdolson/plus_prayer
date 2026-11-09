@@ -41,7 +41,7 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(next.isEnabled, file: file, line: line)
         next.tap()
 
-        XCTAssertTrue(any(app, "label == 'Pray with today’s list. Tomorrow your name is on it.'")
+        XCTAssertTrue(any(app, "label BEGINSWITH 'Pray with today’s list.'")
             .waitForExistence(timeout: 8), "the moment", file: file, line: line)
         XCTAssertTrue(any(app, "label == 'The list is printed and sealed each day, and kept private.'").exists,
                       file: file, line: line)
@@ -110,7 +110,7 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(field.waitForExistence(timeout: 5), "back on step 1")
         XCTAssertEqual(field.value as? String, "Eric Olson", "the name is kept")
         app.buttons["onboarding.name.continue"].tap()
-        XCTAssertTrue(any(app, "label == 'Pray with today’s list. Tomorrow your name is on it.'")
+        XCTAssertTrue(any(app, "label BEGINSWITH 'Pray with today’s list.'")
             .waitForExistence(timeout: 8), "the moment again")
         toSomeone(app)
         app.buttons["onboarding.notNow"].tap()

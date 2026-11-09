@@ -2467,7 +2467,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pray with today’s list. Tomorrow your name is on it."
+            "value" : "Pray with today’s list.\nTomorrow your name is on it."
           }
         }
       }

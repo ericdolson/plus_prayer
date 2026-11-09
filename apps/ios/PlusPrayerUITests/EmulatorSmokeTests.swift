@@ -45,7 +45,7 @@ final class EmulatorSmokeTests: XCTestCase {
         field.typeText("Eric Olson")
         app.buttons["onboarding.name.continue"].tap()
 
-        XCTAssertTrue(any(app, "label == 'Pray with today’s list. Tomorrow your name is on it.'")
+        XCTAssertTrue(any(app, "label BEGINSWITH 'Pray with today’s list.'")
             .waitForExistence(timeout: 15), "the moment")
         XCTAssertTrue(any(app, "label == 'Eric Olson'").exists, "the full name on the paper line")
         app.buttons["onboarding.moment.continue"].tap()
