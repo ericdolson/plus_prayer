@@ -87,9 +87,10 @@ Beta users get premium via a one-off grant (`includeLimit`) — no billing yet.
 - [ ] [app] **History screen** (history.md, 2026-11-08): one screen, filter
       chip, All (strand + day sheet) · Held · Lists · Journal · Answered; the person page's
       preview row and tiles open it. Replaces the page's History calendar.
-      Built on the mock (349abcc). **Backend gap:** no operation returns all
-      list entries across your subjects (getSubjectDetail is per subject);
-      needed before the real repository.
+      Built on the mock (349abcc). Backend gap closed 2026-11-08:
+      getMyListEntries (every printed entry across your subjects) feeds the
+      real repository on the emulators; needs a production Data Connect
+      deploy.
 - [ ] [app] In-prayer mode: halo, nav removed, footer prayer bar (timer, "with N
       others", ✕), check = holding with ember + haptic, selection rules,
       FAB ring → Amen at 5s

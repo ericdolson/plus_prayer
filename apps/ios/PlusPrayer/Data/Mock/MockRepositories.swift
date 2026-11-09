@@ -30,6 +30,12 @@ final class MockSubjectRepository: SubjectRepository {
     }
 
     func history() -> AsyncStream<HistoryLog> { backend.history.stream() }
+
+    /// The mock keeps no archive yet (`MockBackend.restoreSubject` restores
+    /// an item handed to it), so an id can't be found.
+    func restoreSubject(_ id: String) async throws -> Bool {
+        throw SetCarriedError.failed
+    }
 }
 
 final class MockListRepository: ListRepository {
@@ -45,6 +51,10 @@ final class MockUserRepository: UserRepository {
     init(backend: MockBackend) { self.backend = backend }
 
     func header() -> AsyncStream<UserHeader?> { backend.header.stream() }
+
+    func setSelfName(_ name: String) async throws {
+        try await backend.setSelfName(name)
+    }
 }
 
 /// Holds writes on the device until the mock backend takes them: FIFO (a

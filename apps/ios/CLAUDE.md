@@ -29,9 +29,11 @@ of the pages (⋯), Prayer detail and past lists' pages (their History
 rows are inert until then), then build order step 3 (onboarding, auth,
 setSelfName).
 Still open in prayer mode: backgrounding and the welcome-back question, the
-presence draft, the first Amen's onboarding steps. Also pending: the offline
-queue (Data/Queue, replacing the mock's in-memory hold), a debug menu for the
-mock's scenario controls.
+presence draft, the first Amen's onboarding steps. The real repositories run
+against the emulators (2026-11-08; "Real repositories" below), with the
+offline queue (Data/Queue) and the name step; production comes later. Also
+pending: the mock still holds writes in memory (MockPrayerRepository), a
+debug menu for the mock's scenario controls.
 
 ## Stack
 - SwiftUI, **iOS 26** minimum (Liquid Glass), **iPhone only** (2026-11-05),
@@ -194,8 +196,8 @@ Screens never touch the SDK or RTDB. Same surfaces as the Flutter build:
   intention to a person at the cap comes back off, `restoredCarryFlag` in
   PlusPrayerDomain, the mock mirrors it); `history()` (a `HistoryLog`:
   getMyPrayerHistory's prayers with what each held, and every list entry of
-  your subjects, the entries getSubjectDetail returns per subject; an
-  account-wide entries read is a backend ask before the real repository);
+  your subjects: getMyListEntries, the account-wide form of
+  getSubjectDetail's entries);
   reorder / resolve / archive / purge.
 - `ListRepository`: getCurrentListMeta / getMyListStatus (SQL Connect)
   merged with RTDB `/lists/current` (live count, `closesAt`).
@@ -250,16 +252,122 @@ compose queries; if an operation is missing, ask for a backend change.
   queue lives in **Application Support** (never Caches, which iOS may purge).
 
 ## Mock backend and environments
-- `AppEnvironment` picks one at launch from the scheme's launch argument
-  `-PPEnvironment mock|emulator|firebase`. Debug defaults to **mock**.
+- `AppEnvironment` picks one at launch from the launch argument
+  `-PPEnvironment mock|emulator|firebase`. Debug defaults to **mock**. A
+  choice passed as an argument is **remembered on the device**
+  (`PPEnvironment.saved`, with `-PPEmulatorHost` as `PPEmulatorHost.saved`),
+  so the app opened later from the Home Screen stays on it; launch once with
+  `-PPEnvironment mock` to go back. Under XCTest only an explicit argument
+  counts (unit tests' host app stays on the mock). Schemes: **PlusPrayer**
+  (no argument: mock), **PlusPrayer Emulator** (`-PPEnvironment emulator`,
+  localhost: the simulator; no tests), **PlusPrayerUITests** (each test
+  passes `-PPEnvironment mock`).
 - **mock**: in-memory seed data matching the reference screenshots (Me, Dad,
   Mom, Daniel Kim…), simulated latency, a debug toggle to go offline (to
   exercise the queue), a clock you can advance past midnight and the flip.
   No Firebase calls.
 - **emulator**: the real repositories against the local emulators
-  (`backend/firebase.json`: SQL Connect 9399, RTDB 9000, Auth 9099).
-- **firebase**: production. Release builds only use this.
+  (`backend/firebase.json`: SQL Connect 9399, RTDB 9000, Auth 9099,
+  Functions 5001) on `-PPEmulatorHost <Mac's LAN address>`, else
+  127.0.0.1 (the simulator). `FirebaseBackend` configures Firebase in code
+  for the `demo-plusprayer` project with placeholder ids (never the
+  production plist), turns Analytics and Crashlytics collection off, and
+  signs in anonymously (a cached user the emulators no longer know is
+  replaced).
+- **firebase**: production. Release builds only use this. Not wired yet:
+  it logs and runs on the mock (TODO, build step 4: production options
+  from GoogleService-Info.plist).
 - Previews and tests always use mock.
+
+### Test on your phone with the emulators
+Everything is local: the `demo-plusprayer` project, never production. The
+Mac and the phone must be on the **same Wi-Fi** (the emulators listen on
+all interfaces; allow incoming connections if macOS asks). From the repo
+root:
+1. **Start** the emulators (and the sweeper that stands in for
+   onPrayerLogged): `npm --prefix backend/functions run emulators`. Leave
+   it running; Ctrl-C stops it. Needs Java 21+ (it falls back to Android
+   Studio's bundled one).
+2. **Set the phone's host** and run the app:
+   `apps/ios/scripts/run-on-phone-emulator.sh` builds, installs and
+   launches on your iPhone with `-PPEnvironment emulator -PPEmulatorHost
+   <this Mac's Wi-Fi address>` (`HOST=…` to override, `--no-build` to
+   relaunch, `--mock` to go back to the mock). The app remembers the
+   choice, so opening it from the Home Screen stays on the emulators. On
+   the simulator, run the **PlusPrayer Emulator** scheme instead.
+3. **First run:** the app signs in anonymously and shows "What's your
+   name?". Enter a name: Home opens (empty until you seed).
+4. **Seed:** `npm --prefix backend/functions run seed:emulator`. It seeds
+   every account the Auth emulator holds (your phone's), keeps the name you
+   entered, and wipes whatever else was in SQL Connect: lists 1–70 ending
+   today, Me, Dad, Mom, Aunt Bea, Daniel, Our parish, Ukraine, Lena, two
+   months of prayers and lists, a streak. Bring the app back to the
+   foreground (or relaunch) to see it.
+5. **Snapshot:** `npm --prefix backend/functions run emulators:snapshot`
+   while the emulators run (to `backend/emulator-data/seed`, gitignored; it
+   includes Auth, so your phone's anonymous account is in it).
+6. **Restore** in seconds: Ctrl-C, then `npm --prefix backend/functions run
+   emulators:seeded`. Each restart from the snapshot is the same state
+   (nothing is exported on exit); your phone's account is still signed in
+   and sees the seeded data again.
+- The snapshot keeps the day it was taken (List 70 is "today" then):
+  re-seed and snapshot again to bring it up to date. Deleting the app makes
+  a new anonymous account on next launch: seed and snapshot again.
+- What the emulators can't do: onPrayerLogged and the scheduled jobs don't
+  run there (the sweeper applies prayers within ~3 s; presence reconcile and
+  draft auto-save don't run). More in backend/CLAUDE.md, "Emulators".
+
+## Real repositories (emulator; 2026-11-08)
+- `Data/Firebase/FirebaseBackend`: the SDKs for one environment (Auth,
+  Functions us-central1, RTDB with persistence, `DataConnect.plusprayerConnector`),
+  `uid()` (anonymous sign-in, shared), `call(_:_:)` for the user callables
+  (`CallableError`: code + details `reason`; unreachable vs. permanent).
+  `RemoteID`: the app keeps `UUID.uuidString` ids (what `PrayerSession`
+  makes, so a prayer's local and server ids match); callables and RTDB get
+  the 32-hex form the functions compare with.
+- `Data/SQLConnect`: `RemoteValue` (a server read that streams: nothing
+  until the first read lands, `refresh()` re-reads), `serverThenCache`
+  (`.serverOnly`, falling back to `.cacheOnly` offline), `RemoteData` (the
+  shared reads: getMySubjects, getMyHeader, History = getMyPrayerHistory
+  (≤1,000) + getMyListEntries (≤5,000), getCurrentListMeta,
+  getMyListStatus; `changed(…)` re-reads after a write) and the mapping to
+  domain types. `SQLConnectSubjectRepository` (addSubject, then
+  SetSubjectAvatarTone for the picked tone; setCarriedItems;
+  restoreSubject; errors mapped from the callables' codes/reasons),
+  `SQLConnectUserRepository` (header; no User row yet reads as a header
+  with no name; setSelfName).
+- `Data/RTDB`: `RTDBNode` (an observed node), `FirebaseListRepository`
+  (meta merged with `/lists/current`: the live count never below the
+  stored one, closesAt; a higher listNumber re-reads the meta), and
+  `RTDBLiveRepository` (`/stats/live`, `/config` over the defaults).
+- `Data/Queue`: `WriteQueue` (the actor: `FileQueueStore` in Application
+  Support, atomic, excluded from backup; persisted before sending; FIFO;
+  `.retry` keeps the head and everything behind it with backoff, `.drop`
+  removes and logs) and `QueuedPrayerRepository` (LogPrayer /
+  UpdatePrayerNote; a SQL Connect operation error is permanent, anything
+  else retried; a sent prayer stays folded in ~15 s while the reads re-run
+  at 0, 4 and 10 s, so the streak and count land without a blink);
+  `PathNetworkRepository` (NWPathMonitor; reconnect flushes and re-reads).
+  The scene becoming active flushes and re-reads too
+  (`AppEnvironment.onActive`).
+- **The name step** (`Features/Onboarding/NameStep`, auth-onboarding.md
+  step 3): a full-screen cover over Home while `HomeModel.needsSelfName`
+  (a header has arrived without a self name); a native `Form`: "What's your
+  name?", the Name field (40), the helper "Your name, carried by the
+  world." and the privacy sentence, Continue → setSelfName; the header
+  re-read takes it away onto Home. Errors in ink in the footer (contact
+  info, "Needs a connection.", a failure). The mock seed has a name, so
+  mock runs and UI tests never see it.
+- Not on the real backend yet (TODO): presence and the in-progress draft
+  (`/presence/{uid}/{deviceId}`, not built on the mock either), the
+  DeviceDataWiper and sign-out, reminders and settings, search
+  (searchMySubjects: Home filters locally), the archive (restoreSubject is
+  wired, no screen), History paging.
+- `PlusPrayerUITests/EmulatorSmokeTests`: skipped unless
+  `TEST_RUNNER_PP_EMULATOR_SMOKE=1`; the name step on a fresh account, then
+  (after `seed:emulator`) Home, Dad's page, History and a full prayer, then
+  a restore from the snapshot. Run against `npm run emulators`, in order,
+  with `-only-testing:`.
 
 ## Theming: tokens only
 - `design/tokens.json` (W3C Design Tokens) is the source of truth.
@@ -439,8 +547,9 @@ compose queries; if an operation is missing, ask for a backend change.
   answered intention (its day has an entry); Lena only today. `MockPrayerRepository`
   holds prayers in memory until the backend takes them; the real queue
   replaces it.
-- `App/AppEnvironment`: `-PPEnvironment mock|emulator|firebase`; only mock
-  exists, the others log and fall back to it until build step 4.
+- `App/AppEnvironment`: `-PPEnvironment mock|emulator|firebase`; mock and
+  emulator exist (firebase logs and falls back to the mock until build
+  step 4).
 - `State/HomeModel`: watches the repositories in `run()` (the view's
   `.task`), derives rows, counts, header and card through the domain;
   `log(_:)` sends Amen's prayer and starts the linger under Still to hold;

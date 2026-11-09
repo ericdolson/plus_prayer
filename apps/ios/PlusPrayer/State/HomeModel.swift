@@ -252,6 +252,18 @@ final class HomeModel {
         await repositories.prayers.updateNote(prayerId: prayerId, note: note)
     }
 
+    // MARK: Onboarding (auth-onboarding.md)
+
+    /// No self name yet (onboarding resumes from data, never a stored step):
+    /// the "What's your name?" step. False until the header has arrived.
+    var needsSelfName: Bool { header.map { !$0.hasSelfName } ?? false }
+
+    /// The setSelfName callable (online only). Throws `SelfNameError`; the
+    /// header re-read brings Home.
+    func setSelfName(_ name: String) async throws {
+        try await repositories.user.setSelfName(cleanText(name))
+    }
+
     /// The addSubject callable (online only). The add sheet's carry row
     /// already said whether it's carried.
     func addSubject(_ input: NewSubject) async throws -> AddedSubject {

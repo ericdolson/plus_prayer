@@ -930,6 +930,78 @@
         }
       }
     },
+    "onboarding.name.continue" : {
+      "comment" : "First run, the name step: the toolbar button that saves the name (setSelfName) and opens Home. Not in the spec yet; plainest wording, for review.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        }
+      }
+    },
+    "onboarding.name.failed" : {
+      "comment" : "First run, the name step: under the field when saving failed for any other reason. Not in the spec; plainest wording, for review.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t save your name. Try again."
+          }
+        }
+      }
+    },
+    "onboarding.name.helper" : {
+      "comment" : "First run, the name step: the helper under the field, that their name will be carried by the world in prayer (auth-onboarding.md; the splash line's wording). Review.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name, carried by the world."
+          }
+        }
+      }
+    },
+    "onboarding.name.offline" : {
+      "comment" : "First run, the name step: under the field when saving needs a connection (as on a page's carry row).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs a connection."
+          }
+        }
+      }
+    },
+    "onboarding.name.privacy" : {
+      "comment" : "First run, the name step: the privacy sentence under the helper (privacy.md, app-brief §3).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Printed once on a single private copy. Never shared, never shown."
+          }
+        }
+      }
+    },
+    "onboarding.name.title" : {
+      "comment" : "First run, the name step's title (auth-onboarding.md step 3).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What’s your name?"
+          }
+        }
+      }
+    },
     "prayer.amen" : {
       "comment" : "The pray button once the 5 s minimum has passed: ends the prayer.",
       "extractionState" : "manual",

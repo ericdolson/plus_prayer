@@ -32,6 +32,9 @@ struct HomeView: View {
         .overlay { Halo(active: session.isPraying, flare: session.amenCount) }
         .sensoryFeedback(.impact(weight: .light), trigger: session.checkCount)
         .sheet(isPresented: prayerSheetShown) { PrayerSheet() }
+        // No self name yet (auth-onboarding.md): "What's your name?" over
+        // Home; setSelfName's re-read takes it away and lands on Home.
+        .fullScreenCover(isPresented: .constant(home.needsSelfName)) { NameStep() }
         // Back or swipe-back off a page praying in place: Home, still praying.
         .onChange(of: path) { old, new in
             if new.count < old.count && session.page != nil && session.isPraying { session.leavePage() }

@@ -3,8 +3,8 @@ import PlusPrayerDomain
 
 // The seam between the UI and the backend (apps/ios/CLAUDE.md,
 // "Repositories"). Models only ever see these protocols; the mock (Data/Mock)
-// and the real implementations (Data/SQLConnect, Data/RTDB; build step 4)
-// both satisfy them. What the UI watches is an AsyncStream that yields the
+// and the real implementations (Data/SQLConnect, Data/RTDB, Data/Queue, over
+// Data/Firebase) both satisfy them. What the UI watches is an AsyncStream that yields the
 // current value first; commands are async.
 //
 // Each protocol carries what's built so far; the rest of each surface
@@ -27,6 +27,13 @@ protocol SubjectRepository {
     /// never trimmed, over the pool or a person's cap). Throws
     /// `SetCarriedError`.
     func setCarriedItems(_ ids: [String]) async throws
+
+    /// The restoreSubject callable: an archived item comes back ACTIVE, pool-
+    /// and cap-aware (a name over the pool or an intention to a person at the
+    /// cap comes back off; `restoredCarryFlag` in PlusPrayerDomain). Returns
+    /// its flag after. Throws `SetCarriedError`. No screen uses it yet (the
+    /// archive comes with the pages' ⋯).
+    func restoreSubject(_ id: String) async throws -> Bool
 
     /// History (history.md): your prayers, newest first, each with what it
     /// held (getMyPrayerHistory), and every list entry of your subjects
@@ -111,10 +118,25 @@ protocol ListRepository {
     func myStatus() -> AsyncStream<MyListStatus?>
 }
 
-/// getMyHeader (later: reminders, updateMySettings).
+/// getMyHeader + setSelfName (later: reminders, updateMySettings).
 protocol UserRepository {
-    /// nil while the account isn't ready yet.
+    /// nil while the account isn't ready yet. A signed-in account with no
+    /// self name yet comes as a header without one (`hasSelfName` false):
+    /// onboarding resumes at "What's your name?" (auth-onboarding.md).
     func header() -> AsyncStream<UserHeader?>
+
+    /// The setSelfName callable: the first call creates the self ("Me") and
+    /// sets the display name. Online only. Throws `SelfNameError`.
+    func setSelfName(_ name: String) async throws
+}
+
+/// From the setSelfName callable's codes: invalid-argument with
+/// `CONTACT_OR_LINK` → `.input(.contactInfo)`, no connection → `.offline`,
+/// anything else (the 7-day rename limit, an unexpected error) → `.failed`.
+enum SelfNameError: Error, Equatable {
+    case input(TextIssue)
+    case offline
+    case failed
 }
 
 /// logPrayer / updatePrayerNote, through the offline queue.

@@ -186,6 +186,28 @@ final class MockBackend {
         subjects.send(proposed)
     }
 
+    /// The setSelfName callable: the first call creates the self ("Me",
+    /// always carried) and sets the display name; later calls rename it.
+    func setSelfName(_ raw: String) async throws(SelfNameError) {
+        try? await Task.sleep(for: latency)
+        guard online else { throw .offline }
+        guard !failsAdds else { throw .failed }
+        if let issue = validatePrinted(raw, kind: .soul) { throw .input(issue) }
+        let name = cleanText(raw)
+        if let i = subjects.value.firstIndex(where: \.isSelf) {
+            subjects.update { $0[i].publicName = name }
+        } else {
+            subjects.update { $0.insert(Subject(id: "self", kind: .soul, publicName: name, alias: "Me", isSelf: true,
+                                                isCarried: true, sortOrder: 0, createdAt: now()), at: 0) }
+        }
+        header.update { header in
+            guard var next = header else { return }
+            next.displayName = name
+            next.selfSubjectId = next.selfSubjectId ?? "self"
+            header = next
+        }
+    }
+
     /// The restoreSubject callable, for an item the mock holds outside Home
     /// (it has no archive yet): `item` and, for a name, its cascade-archived
     /// `intentions` come back. Pool- and cap-aware like the server: a name

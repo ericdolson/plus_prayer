@@ -392,6 +392,17 @@ nonisolated enum L10n {
         static var tileAnswered: String { t("history.tile.answered") }
     }
 
+    /// First run (auth-onboarding.md). Only "What's your name?" so far.
+    enum Onboarding {
+        private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
+        static var nameTitle: String { t("onboarding.name.title") }
+        static var nameHelper: String { t("onboarding.name.helper") }
+        static var namePrivacy: String { t("onboarding.name.privacy") }
+        static var nameContinue: String { t("onboarding.name.continue") }
+        static var nameOffline: String { t("onboarding.name.offline") }
+        static var nameFailed: String { t("onboarding.name.failed") }
+    }
+
     enum Common {
         static var save: String { NSLocalizedString("common.save", comment: "") }
         static var done: String { NSLocalizedString("common.done", comment: "") }

@@ -531,6 +531,10 @@ every item; send Eric only what can't be called confidently. Never edit text.
   engine batches them into one invalid statement. Atomic multi-step writes are
   ONE `_execute` statement of data-modifying CTEs; validation runs first in a
   `query @redact` step with `@check` (a failed check stops the operation).
+- A native SQL param over an optional variable the client leaves unset (not
+  sent at all, as the Swift SDK does for an untouched `@OptionalVariable`)
+  fails the whole operation ("Failed to compute Any_SQL_Expr"). Clients send
+  null explicitly (LogPrayer's `communityListId` / `note`; found 2026-11-08).
 - `_executeReturning` wraps its SQL, so it takes plain `DML … RETURNING` only.
 - SQL Connect returns UUIDs as 32 hex digits (no dashes); ids written to RTDB
   use the same form.
