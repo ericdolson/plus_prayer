@@ -14,7 +14,7 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/../../.." && pwd)"
 DEVICE="${DEVICE:-00008150-001A75D02639401C}" # Eric's iPhone 17 Pro
-DD="${DD:-${TMPDIR:-/tmp}/pp-dd-device-emulator}"
+DD="${DD:-${TMPDIR:-/tmp}/pp-dd-device-emulator-2}"
 BUILD=1
 ENVIRONMENT=emulator
 for arg in "$@"; do
