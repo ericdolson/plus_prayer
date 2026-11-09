@@ -47,8 +47,11 @@
           },
           "tiktok": {
             "post_id": "6af0f06d8d48d49ba89a25e5",
-            "status": "unconfirmed",
-            "platform_publish_handle": "v_pub_url~v2-1.7705924450294417422"
+            "status": "published",
+            "platform_publish_handle": "v_pub_url~v2-1.7705924450294417422",
+            "platform_post_id": "7705924489376271629",
+            "platform_post_url": "https://www.tiktok.com/@plusprayer/video/7705924489376271629",
+            "note": "Confirmed via analytics 2026-11-09 (latePostId match, 122 views)."
           }
         },
         "comments": {
