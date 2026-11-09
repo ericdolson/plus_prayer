@@ -61,7 +61,7 @@ struct IntentionPage: View {
         }
         .background(PP.color.ground)
         .navigationBarTitleDisplayMode(.inline)
-        .safeAreaBar(edge: .bottom) {
+        .pagePrayBar {
             if home.intentionPage(id) != nil {
                 PagePrayBar(label: L10n.Page.pray(for: nil),
                             prayerStartedAt: praying ? session.startedAt : nil,

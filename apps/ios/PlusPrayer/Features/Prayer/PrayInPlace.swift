@@ -42,7 +42,6 @@ struct PagePrayBar: View {
                                glassID: prayID)
                         .glassEffectTransition(reduceMotion ? .materialize : .matchedGeometry)
                 } else {
-                    Spacer(minLength: 0)
                     Button(action: onPray) {
                         Label {
                             Text(verbatim: label).lineLimit(1)
@@ -63,6 +62,9 @@ struct PagePrayBar: View {
                 }
             }
         }
+        // The capsule on the trailing (thumb) side; the space beside it is
+        // empty, not part of any control.
+        .frame(maxWidth: .infinity, alignment: .trailing)
         .padding(.horizontal, PP.size.bar.inset)
         .animation(.easeOut(duration: reduceMotion ? PP.duration.quick : PP.duration.settle),
                    value: prayerStartedAt == nil)
@@ -101,6 +103,17 @@ extension PrayerSession {
 }
 
 extension View {
+    /// A page's bar in the pray-button slot, as a safe-area inset: only the
+    /// capsule, the pray button and the pill take taps; the empty space
+    /// beside them passes them to the content underneath. Not a
+    /// `safeAreaBar` (Home's): on iOS 26 that takes taps across its whole
+    /// width, even with nothing but a clear, non-hit-testable spacer in it
+    /// (checked by `testHistoryFromAPersonsTile`). The cost: no native soft
+    /// scroll edge under the page's bar.
+    func pagePrayBar<Bar: View>(@ViewBuilder _ bar: () -> Bar) -> some View {
+        safeAreaInset(edge: .bottom) { bar() }
+    }
+
     /// Cancel's confirm past ~30 s (design-direction §4).
     func discardPrayerDialog(isPresented: Binding<Bool>, session: PrayerSession) -> some View {
         confirmationDialog(L10n.Prayer.discardQuestion, isPresented: isPresented, titleVisibility: .visible) {
