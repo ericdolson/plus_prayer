@@ -344,6 +344,42 @@ query GetMyPrayerHistory($limit: Int = 50, $offset: Int = 0) @auth(level: USER_A
 }
 
 
+# History (account-wide, history.md): every list entry of the user's own
+# subjects, across all of them — the bloom in the strand, the Lists tab, "N ·
+# lists" and the world count — in one round trip (getSubjectDetail returns
+# the same entries for one subject). Printed entries only (not EXCLUDED; HELD
+# is internal and prints, so a moderation state never shows); PURGED subjects
+# never appear. With getMyPrayerHistory (the prayers and what each held) and
+# getMySubjects (answered dates, "Begun") it is the whole History log. World
+# count: sum prayerCount over CLOSED lists and add the live RTDB count iff the
+# current list is among them (compare `list.id` with getCurrentListMeta).
+query GetMyListEntries($limit: Int = 5000, $offset: Int = 0) @auth(level: USER_ANON) {
+  prayerListEntries(
+    where: {
+      owner: { id: { eq_expr: "auth.uid" } }
+      subject: { status: { ne: PURGED } }
+      moderationStatus: { ne: EXCLUDED }
+    }
+    orderBy: [{ list: { listNumber: DESC } }]
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    kind
+    subject { id }
+    list {
+      id
+      listNumber
+      listDate
+      status
+      currentFrom
+      sealVariant
+      prayerCount
+    }
+  }
+}
+
+
 # History header "Time in prayer" — this week and all time. Never ranked.
 query GetMyPrayerTime($weekStart: Date!) @auth(level: USER_ANON) {
   week: prayers(

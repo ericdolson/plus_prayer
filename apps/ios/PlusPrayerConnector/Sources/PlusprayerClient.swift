@@ -46,6 +46,7 @@ public class PlusprayerConnector {
     self.getMyPortionQuery = GetMyPortionQuery(dataConnect: dataConnect)
     self.getSubjectDetailQuery = GetSubjectDetailQuery(dataConnect: dataConnect)
     self.getMyPrayerHistoryQuery = GetMyPrayerHistoryQuery(dataConnect: dataConnect)
+    self.getMyListEntriesQuery = GetMyListEntriesQuery(dataConnect: dataConnect)
     self.getMyPrayerTimeQuery = GetMyPrayerTimeQuery(dataConnect: dataConnect)
     self.getPrayerQuery = GetPrayerQuery(dataConnect: dataConnect)
     self.getMyMonthQuery = GetMyMonthQuery(dataConnect: dataConnect)
@@ -80,6 +81,7 @@ public let getMyListStatusQuery: GetMyListStatusQuery
 public let getMyPortionQuery: GetMyPortionQuery
 public let getSubjectDetailQuery: GetSubjectDetailQuery
 public let getMyPrayerHistoryQuery: GetMyPrayerHistoryQuery
+public let getMyListEntriesQuery: GetMyListEntriesQuery
 public let getMyPrayerTimeQuery: GetMyPrayerTimeQuery
 public let getPrayerQuery: GetPrayerQuery
 public let getMyMonthQuery: GetMyMonthQuery

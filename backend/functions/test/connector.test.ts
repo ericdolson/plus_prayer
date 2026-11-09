@@ -245,7 +245,7 @@ describe("§9 follow-ups on the client connector", () => {
 describe("every client query executes", () => {
   beforeEach(resetDb);
 
-  it("runs all 14 reads for a user with subjects, prayers, and list entries", async () => {
+  it("runs all 15 reads for a user with subjects, prayers, and list entries", async () => {
     const { selfId } = await createUser("me");
     const name = await addSubjectRow("me", { name: "Bea" });
     const intention = await addSubjectRow("me", { parentId: name, name: "Bea: rest" });
@@ -265,7 +265,7 @@ describe("every client query executes", () => {
       ["SearchMySubjects", { query: "Bea" }], ["GetMyListStatus", { listId }], ["GetMyPortion", { listId }],
       ["GetSubjectDetail", { id: name }], ["GetMyPrayerHistory", {}], ["GetMyPrayerTime", { weekStart: "2026-10-05" }],
       ["GetPrayer", { id: prayerId }], ["GetMyMonth", { from: "2026-10-01", to: "2026-10-31" }],
-      ["GetMyArchivedSubjects", {}], ["GetMyReminders", {}],
+      ["GetMyArchivedSubjects", {}], ["GetMyReminders", {}], ["GetMyListEntries", {}],
     ];
     for (const [op, vars] of ops) await run(op, vars);
 
@@ -311,5 +311,74 @@ describe("review is invisible to users (schema-brief §11)", () => {
       "GetSubjectDetail", { id: held }, as,
     )).data;
     assert.equal(detail.prayerSubjects[0].entries.length, 1, "a HELD entry printed, so it's a bead");
+  });
+});
+
+describe("getMyListEntries (History, account-wide)", () => {
+  beforeEach(resetDb);
+
+  type Entries = {
+    prayerListEntries: {
+      id: string;
+      kind: string;
+      subject: { id: string };
+      list: { id: string; listNumber: number; listDate: string; status: string; sealVariant: number | null; prayerCount: number };
+    }[];
+  };
+  const entry = (listId: string, subjectId: string, owner: string, name: string, status = "APPROVED") =>
+    exec(
+      `INSERT INTO prayer_list_entry (list_id, subject_id, owner_id, kind, public_name, source, moderation_status)
+       VALUES ($1::uuid, $2::uuid, $3, 'SOUL', $4, 'APP', $5::moderation_status)`,
+      [listId, subjectId, owner, name, status],
+    );
+
+  it("returns every printed entry of my subjects across lists, newest list first, nobody else's", async () => {
+    const { selfId } = await createUser("me");
+    await createUser("other");
+    const dad = await addSubjectRow("me", { name: "Dad" });
+    const flagged = await addSubjectRow("me", { name: "Flagged" });
+    const excluded = await addSubjectRow("me", { name: "Not printed" });
+    const purged = await addSubjectRow("me", { name: "Gone" });
+    const theirs = await addSubjectRow("other", { name: "Not mine" });
+    const l1 = await addList(1, { currentFrom: Date.now() - 2 * DAY, listDate: "2026-11-06" });
+    const l2 = await addList(2, { currentFrom: Date.now() - DAY, listDate: "2026-11-07" });
+    await exec("UPDATE prayer_list SET seal_variant = 6, prayer_count = 3475 WHERE id = $1::uuid", [l2]);
+    await entry(l1, selfId!, "me", "Me");
+    await entry(l1, dad, "me", "Dad");
+    await entry(l2, selfId!, "me", "Me");
+    await entry(l2, dad, "me", "Dad");
+    await entry(l2, flagged, "me", "Flagged", "HELD");
+    await entry(l2, excluded, "me", "Not printed", "EXCLUDED");
+    await entry(l2, purged, "me", "Gone");
+    await entry(l2, theirs, "other", "Not mine");
+    await clientDb.executeMutation("PurgeSubject", { id: purged }, impersonate("me"));
+
+    const res = (await clientDb.executeQuery<Entries, object>("GetMyListEntries", {}, impersonate("me"))).data;
+    const got = res.prayerListEntries.map((e) => `${e.list.listNumber}:${e.subject.id}`).sort();
+    assert.deepEqual(got, [`1:${dad}`, `1:${selfId}`, `2:${dad}`, `2:${flagged}`, `2:${selfId}`].sort(),
+      "APPROVED and HELD (HELD prints) only; never EXCLUDED, purged, or another user's");
+    assert.deepEqual(res.prayerListEntries.map((e) => e.list.listNumber), [2, 2, 2, 1, 1], "newest list first");
+    const onL2 = res.prayerListEntries.find((e) => e.list.id === l2)!;
+    assert.deepEqual(
+      { date: onL2.list.listDate, seal: onL2.list.sealVariant, prayers: onL2.list.prayerCount, status: onL2.list.status },
+      { date: "2026-11-07", seal: 6, prayers: 3475, status: "published" },
+    );
+    assert.ok(res.prayerListEntries.every((e) => !("moderationStatus" in e) && !("reasonCategory" in e)));
+
+    const theirsRes = (await clientDb.executeQuery<Entries, object>("GetMyListEntries", {}, impersonate("other"))).data;
+    assert.deepEqual(theirsRes.prayerListEntries.map((e) => e.subject.id), [theirs]);
+    await assert.rejects(
+      clientDb.executeQuery("GetMyListEntries", undefined as never, { impersonate: { unauthenticated: true } }),
+      /signed-in user/,
+    );
+  });
+
+  it("pages with limit / offset", async () => {
+    const { selfId } = await createUser("me");
+    for (let n = 1; n <= 3; n++) await entry(await addList(n, { currentFrom: Date.now() - (4 - n) * DAY }), selfId!, "me", "Me");
+    const page = (await clientDb.executeQuery<Entries, { limit: number; offset: number }>(
+      "GetMyListEntries", { limit: 2, offset: 1 }, impersonate("me"),
+    )).data;
+    assert.deepEqual(page.prayerListEntries.map((e) => e.list.listNumber), [2, 1]);
   });
 });

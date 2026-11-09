@@ -79,11 +79,20 @@ Config comes from `.env` / `.env.<projectId>` (what `firebase deploy` writes
 for the params) and the environment, so the CLI and the deployed functions
 agree. Every run prints the target project to stderr (production / EMULATOR).
 
+## Emulators (local only)
+`npm run emulators` (start + the sweeper), `npm run emulators:seeded`
+(restore from `../emulator-data/seed`), `npm run emulators:snapshot`
+(export), `npm run seed:emulator [-- --uid UID]` (rich test data for the
+app's account). All on the `demo-plusprayer` project; the seed and the
+sweeper refuse anything but local emulators (`src/emulatorGuard.ts`). Details
+in `../CLAUDE.md`, "Emulators"; the phone how-to in `apps/ios/CLAUDE.md`.
+
 ## Tests
 - `npm test` — starts the SQL Connect emulator (no Java needed) and runs
   `test/*.test.ts`: gate, the closesAt → N+1 lifecycle, streak/grace incl.
   late-sync repair, assembly + pool + blocklist, increment-only aggregates,
-  every client query, client mutations, accounts. RTDB is faked in memory.
+  every client query (getMyListEntries included), client mutations,
+  accounts, the emulator seed and its guard. RTDB is faked in memory.
 - `npm run test:rules` — RTDB rules + `live.ts` against the Database emulator
   (needs JDK 21+).
 - Against already-running emulators: `npm run test:run`.

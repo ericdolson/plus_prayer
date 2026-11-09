@@ -111,6 +111,40 @@ chosen intentions by sortOrder; never-entitled free users → includeLimit 0;
 `--dry-run` reports counts only; idempotent). The NamUs base-set import
 is not written yet.
 
+### Emulators (local testing; never production)
+Everything runs against the `demo-plusprayer` project, which the emulators
+and SDKs never connect to production for. `firebase.json` binds Auth 9099,
+RTDB 9000, SQL Connect 9399 and Functions 5001 to `0.0.0.0` so a phone on
+the same Wi-Fi can reach the Mac (the SQL Connect emulator's Postgres binds
+5432 on all interfaces with it: emulator data only). From `backend/functions`:
+- `npm run emulators` / `npm run emulators:seeded` / `npm run
+  emulators:snapshot` — `scripts/emulators.sh`: builds the functions,
+  starts the stack (`npx firebase-tools@15`; Java 21+, falling back to
+  Android Studio's bundled JBR) and the **sweeper**, or exports a snapshot
+  to `backend/emulator-data/seed` (gitignored: Auth users, RTDB JSON and a
+  Postgres dump; machine- and phone-specific and dated, so it's regenerated,
+  not committed).
+- **The sweeper** (`scripts/emulator-sweeper.ts`): the Functions emulator
+  ignores SQL Connect `onMutationExecuted` triggers (onPrayerLogged) and
+  scheduled functions (no Pub/Sub emulator), so it runs
+  `sweepUncountedPrayers` every 3 s — a logged prayer gets its list count,
+  RTDB mirror, streak and trial within seconds. presenceReconcile and
+  autoSavePrayerDrafts don't run in the emulators.
+- `npm run seed:emulator [-- --uid UID] [-- --name "…"]` —
+  `scripts/seed-emulator.ts` → `src/seedEmulator.ts`: wipes the SQL Connect
+  data and writes lists 1–70 (today's current and open, RTDB
+  `/lists/current` matching), and for every Auth-emulator user (or each
+  `--uid`) MockSeed's people, ~2 months of prayers, list entries and a
+  streak; RTDB `/config` (missing keys), the blocklist, `/stats/live`.
+- **Every emulator data script refuses non-emulator targets**
+  (`src/emulatorGuard.ts`, before any connection): all three emulator host
+  variables on localhost, a `demo-` project, no service-account key. Never
+  point them, or any admin command, at production.
+
+### Test on your phone with the emulators
+The how-to (start, seed, snapshot, restore, the phone's host, the same
+Wi-Fi) is in `apps/ios/CLAUDE.md`, "Test on your phone with the emulators".
+
 ### Daily transition timing (UPDATED 2026-06-24, Option C)
 The daily list transition runs **manually, kicked off by Eric, at the ~6am MT
 cutoff** — NOT on a schedule. The new list becomes current at that moment; its

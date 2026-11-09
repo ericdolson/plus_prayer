@@ -154,6 +154,18 @@ Two computed rules used throughout (never swept by a job):
   paginated: id, startedAt, prayedAt, durationSeconds, endedBy (AUTO → "~"),
   localDate, communityList { listNumber }, note, linked subjects
   (publicName/personalLabel). Grouped by day client-side.
+- **getMyListEntries** (OWNER, added 2026-11-08) — every list entry of the
+  user's own subjects across all of them, newest list first, `$limit` (5000)
+  / `$offset`: entry id, kind, subject { id }, list { id, listNumber,
+  listDate, status, currentFrom, sealVariant, prayerCount }. Printed entries
+  only (not EXCLUDED; HELD prints, so no moderation state shows); PURGED
+  subjects never appear; no moderation fields. The History screen's bloom,
+  Lists tab, "N · lists" tiles and world count (history.md) — the
+  account-wide form of getSubjectDetail's `entries`. With getMyPrayerHistory
+  (prayers + what each held) and getMySubjects (answered dates, "Begun") it
+  is the app's whole History log. World-count stitch as in getSubjectDetail:
+  compare `list.id` with getCurrentListMeta and add the live RTDB count only
+  for the current list.
 - **getMyPrayerTime** (OWNER) — `durationSeconds_sum` this week and all time
   for the "Time in prayer" header. Never ranked.
 - **getPrayer** (OWNER) — one prayer with its note and linked subjects (Prayer

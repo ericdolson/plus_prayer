@@ -13,7 +13,12 @@
     "test:run": "node --import tsx --test --test-concurrency=1 test/*.test.ts",
     "seed:config": "node --import tsx scripts/admin.ts seed-config",
     "test:rules": "firebase emulators:exec --only database --project demo-plusprayer '\"$npm_node_execpath\" --import tsx --test test/rules/*.test.ts'",
-    "admin": "node --import tsx scripts/admin.ts"
+    "admin": "node --import tsx scripts/admin.ts",
+    "emulators": "bash scripts/emulators.sh start",
+    "emulators:seeded": "bash scripts/emulators.sh seeded",
+    "emulators:snapshot": "bash scripts/emulators.sh snapshot",
+    "emulators:sweeper": "env -u GOOGLE_APPLICATION_CREDENTIALS DATA_CONNECT_EMULATOR_HOST=127.0.0.1:9399 FIREBASE_DATABASE_EMULATOR_HOST=127.0.0.1:9000 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 GCLOUD_PROJECT=demo-plusprayer node --import tsx scripts/emulator-sweeper.ts",
+    "seed:emulator": "env -u GOOGLE_APPLICATION_CREDENTIALS DATA_CONNECT_EMULATOR_HOST=127.0.0.1:9399 FIREBASE_DATABASE_EMULATOR_HOST=127.0.0.1:9000 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 GCLOUD_PROJECT=demo-plusprayer node --import tsx scripts/seed-emulator.ts"
   },
   "dependencies": {
     "firebase-admin": "^14.5.0",

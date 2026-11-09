@@ -46,6 +46,8 @@ part 'get_subject_detail.dart';
 
 part 'get_my_prayer_history.dart';
 
+part 'get_my_list_entries.dart';
+
 part 'get_my_prayer_time.dart';
 
 part 'get_prayer.dart';
@@ -421,6 +423,11 @@ class PlusprayerConnector {
   
   GetMyPrayerHistoryVariablesBuilder getMyPrayerHistory () {
     return GetMyPrayerHistoryVariablesBuilder(dataConnect, );
+  }
+  
+  
+  GetMyListEntriesVariablesBuilder getMyListEntries () {
+    return GetMyListEntriesVariablesBuilder(dataConnect, );
   }
   
   

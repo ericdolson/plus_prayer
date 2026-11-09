@@ -498,6 +498,69 @@ ref.subscribe(...);
 ```
 
 
+### GetMyListEntries
+#### Required Arguments
+```dart
+// No required arguments
+PlusprayerConnector.instance.getMyListEntries().execute();
+```
+
+#### Optional Arguments
+We return a builder for each query. For GetMyListEntries, we created `GetMyListEntriesBuilder`. For queries and mutations with optional parameters, we return a builder class.
+The builder pattern allows Data Connect to distinguish between fields that haven't been set and fields that have been set to null. A field can be set by calling its respective setter method like below:
+```dart
+class GetMyListEntriesVariablesBuilder {
+  ...
+ 
+  GetMyListEntriesVariablesBuilder limit(int? t) {
+   _limit.value = t;
+   return this;
+  }
+  GetMyListEntriesVariablesBuilder offset(int? t) {
+   _offset.value = t;
+   return this;
+  }
+
+  ...
+}
+PlusprayerConnector.instance.getMyListEntries()
+.limit(limit)
+.offset(offset)
+.execute();
+```
+
+#### Return Type
+`execute()` returns a `QueryResult<GetMyListEntriesData, GetMyListEntriesVariables>`
+```dart
+/// Result of an Operation Request (query/mutation).
+class OperationResult<Data, Variables> {
+  OperationResult(this.dataConnect, this.data, this.ref);
+  Data data;
+  OperationRef<Data, Variables> ref;
+  FirebaseDataConnect dataConnect;
+}
+
+/// Result of a query request. Created to hold extra variables in the future.
+class QueryResult<Data, Variables> extends OperationResult<Data, Variables> {
+  QueryResult(super.dataConnect, super.data, super.ref);
+}
+
+final result = await PlusprayerConnector.instance.getMyListEntries();
+GetMyListEntriesData data = result.data;
+final ref = result.ref;
+```
+
+#### Getting the Ref
+Each builder returns an `execute` function, which is a helper function that creates a `Ref` object, and executes the underlying operation.
+An example of how to use the `Ref` object is shown below:
+```dart
+final ref = PlusprayerConnector.instance.getMyListEntries().ref();
+ref.execute();
+
+ref.subscribe(...);
+```
+
+
 ### GetMyPrayerTime
 #### Required Arguments
 ```dart

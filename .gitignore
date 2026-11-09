@@ -67,3 +67,6 @@ backend/functions/lib/
 # ---- Python bytecode ----
 __pycache__/
 *.pyc
+
+# ---- Emulator snapshots (machine- and phone-specific; regenerate with seed:emulator) ----
+backend/emulator-data/

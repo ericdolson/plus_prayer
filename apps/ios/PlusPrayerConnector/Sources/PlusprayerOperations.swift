@@ -6232,6 +6232,389 @@ prayers: [Prayer]
 
 
 
+public class GetMyListEntriesQuery{
+
+  let dataConnect: DataConnect
+
+  init(dataConnect: DataConnect) {
+    self.dataConnect = dataConnect
+  }
+
+  public static let OperationName = "GetMyListEntries"
+
+  public typealias Ref = QueryRefObservation<GetMyListEntriesQuery.Data,GetMyListEntriesQuery.Variables>
+
+  public struct Variables: OperationVariable {
+  
+        @OptionalVariable
+        public var
+limit: Int?
+
+  
+        @OptionalVariable
+        public var
+offset: Int?
+
+
+    
+    
+    
+    public init (
+        
+        
+        
+        _ optionalVars: ((inout Variables)->())? = nil
+        ) {
+        
+
+        
+        if let optionalVars {
+            optionalVars(&self)
+        }
+        
+    }
+
+    public static func == (lhs: Variables, rhs: Variables) -> Bool {
+      
+        return lhs.limit == rhs.limit && 
+              lhs.offset == rhs.offset
+              
+    }
+
+    
+public func hash(into hasher: inout Hasher) {
+  
+  hasher.combine(limit)
+  
+  hasher.combine(offset)
+  
+}
+
+    enum CodingKeys: String, CodingKey {
+      
+      case limit
+      
+      case offset
+      
+    }
+
+    public func encode(to encoder: Encoder) throws {
+      var container = encoder.container(keyedBy: CodingKeys.self)
+      let codecHelper = CodecHelper<CodingKeys>()
+      
+      if $limit.isSet { 
+      try codecHelper.encode(limit, forKey: .limit, container: &container)
+      }
+      
+      if $offset.isSet { 
+      try codecHelper.encode(offset, forKey: .offset, container: &container)
+      }
+      
+    }
+
+  }
+
+  public struct Data: Decodable, Sendable {
+
+
+
+
+public struct PrayerListEntry: Decodable, Sendable ,Hashable, Equatable, Identifiable {
+  
+
+
+public var 
+id: UUID
+
+
+
+public var 
+kind: SubjectKind
+
+
+
+
+
+public struct PrayerSubject: Decodable, Sendable ,Hashable, Equatable, Identifiable {
+  
+
+
+public var 
+id: UUID
+
+
+  
+  public var prayerSubjectKey: PrayerSubjectKey {
+    return PrayerSubjectKey(
+      
+      id: id
+    )
+  }
+
+  
+public func hash(into hasher: inout Hasher) {
+  
+  hasher.combine(id)
+  
+}
+public static func == (lhs: PrayerSubject, rhs: PrayerSubject) -> Bool {
+    
+    return lhs.id == rhs.id 
+        
+  }
+
+  
+
+  
+  enum CodingKeys: String, CodingKey {
+    
+    case id
+    
+  }
+
+  public init(from decoder: any Decoder) throws {
+    var container = try decoder.container(keyedBy: CodingKeys.self)
+    let codecHelper = CodecHelper<CodingKeys>()
+
+    
+    
+    self.id = try codecHelper.decode(UUID.self, forKey: .id, container: &container)
+    
+    
+  }
+}
+public var 
+subject: PrayerSubject?
+
+
+
+
+
+public struct PrayerList: Decodable, Sendable ,Hashable, Equatable, Identifiable {
+  
+
+
+public var 
+id: UUID
+
+
+
+public var 
+listNumber: Int
+
+
+
+public var 
+listDate: LocalDate
+
+
+
+public var 
+status: String
+
+
+
+public var 
+currentFrom: Timestamp?
+
+
+
+public var 
+sealVariant: Int?
+
+
+
+public var 
+prayerCount: Int
+
+
+  
+  public var prayerListKey: PrayerListKey {
+    return PrayerListKey(
+      
+      id: id
+    )
+  }
+
+  
+public func hash(into hasher: inout Hasher) {
+  
+  hasher.combine(id)
+  
+}
+public static func == (lhs: PrayerList, rhs: PrayerList) -> Bool {
+    
+    return lhs.id == rhs.id 
+        
+  }
+
+  
+
+  
+  enum CodingKeys: String, CodingKey {
+    
+    case id
+    
+    case listNumber
+    
+    case listDate
+    
+    case status
+    
+    case currentFrom
+    
+    case sealVariant
+    
+    case prayerCount
+    
+  }
+
+  public init(from decoder: any Decoder) throws {
+    var container = try decoder.container(keyedBy: CodingKeys.self)
+    let codecHelper = CodecHelper<CodingKeys>()
+
+    
+    
+    self.id = try codecHelper.decode(UUID.self, forKey: .id, container: &container)
+    
+    
+    
+    self.listNumber = try codecHelper.decode(Int.self, forKey: .listNumber, container: &container)
+    
+    
+    
+    self.listDate = try codecHelper.decode(LocalDate.self, forKey: .listDate, container: &container)
+    
+    
+    
+    self.status = try codecHelper.decode(String.self, forKey: .status, container: &container)
+    
+    
+    
+    self.currentFrom = try codecHelper.decode(Timestamp?.self, forKey: .currentFrom, container: &container)
+    
+    
+    
+    self.sealVariant = try codecHelper.decode(Int?.self, forKey: .sealVariant, container: &container)
+    
+    
+    
+    self.prayerCount = try codecHelper.decode(Int.self, forKey: .prayerCount, container: &container)
+    
+    
+  }
+}
+public var 
+list: PrayerList
+
+
+  
+  public var prayerListEntryKey: PrayerListEntryKey {
+    return PrayerListEntryKey(
+      
+      id: id
+    )
+  }
+
+  
+public func hash(into hasher: inout Hasher) {
+  
+  hasher.combine(id)
+  
+}
+public static func == (lhs: PrayerListEntry, rhs: PrayerListEntry) -> Bool {
+    
+    return lhs.id == rhs.id 
+        
+  }
+
+  
+
+  
+  enum CodingKeys: String, CodingKey {
+    
+    case id
+    
+    case kind
+    
+    case subject
+    
+    case list
+    
+  }
+
+  public init(from decoder: any Decoder) throws {
+    var container = try decoder.container(keyedBy: CodingKeys.self)
+    let codecHelper = CodecHelper<CodingKeys>()
+
+    
+    
+    self.id = try codecHelper.decode(UUID.self, forKey: .id, container: &container)
+    
+    
+    
+    self.kind = try codecHelper.decode(SubjectKind.self, forKey: .kind, container: &container)
+    
+    
+    
+    self.subject = try codecHelper.decode(PrayerSubject?.self, forKey: .subject, container: &container)
+    
+    
+    
+    self.list = try codecHelper.decode(PrayerList.self, forKey: .list, container: &container)
+    
+    
+  }
+}
+public var 
+prayerListEntries: [PrayerListEntry]
+
+  }
+
+  public func ref(
+        
+        
+        
+        _ optionalVars: ((inout GetMyListEntriesQuery.Variables)->())? = nil
+        ) -> QueryRefObservation<GetMyListEntriesQuery.Data,GetMyListEntriesQuery.Variables>  {
+        var variables = GetMyListEntriesQuery.Variables()
+        
+        if let optionalVars {
+            optionalVars(&variables)
+        }
+        
+
+        let ref = dataConnect.query(name: "GetMyListEntries", variables: variables, resultsDataType:GetMyListEntriesQuery.Data.self, publisher: .observableMacro)
+        return ref as! QueryRefObservation<GetMyListEntriesQuery.Data,GetMyListEntriesQuery.Variables>
+   }
+
+  @MainActor
+   public func execute( fetchPolicy: QueryFetchPolicy = .preferCache,  
+        
+        
+        
+        _ optionalVars: (@MainActor (inout GetMyListEntriesQuery.Variables)->())? = nil
+        ) async throws -> OperationResult<GetMyListEntriesQuery.Data> {
+        var variables = GetMyListEntriesQuery.Variables()
+        
+        if let optionalVars {
+            optionalVars(&variables)
+        }
+        
+
+        let ref = dataConnect.query(name: "GetMyListEntries", variables: variables, resultsDataType:GetMyListEntriesQuery.Data.self, publisher: .observableMacro)
+        
+        let refCast = ref as! QueryRefObservation<GetMyListEntriesQuery.Data,GetMyListEntriesQuery.Variables>
+        return try await refCast.execute(fetchPolicy: fetchPolicy)
+        
+   }
+}
+
+
+
+
+
+
 public class GetMyPrayerTimeQuery{
 
   let dataConnect: DataConnect

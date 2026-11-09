@@ -388,6 +388,49 @@ DataConnect.plusprayerConnector.getMyPrayerHistoryQuery.execute(...)
 ```
 
 
+## GetMyListEntriesQuery
+### Variables
+
+
+#### Optional
+```swift
+
+let limit: Int = ...
+let offset: Int = ...
+```
+
+
+
+### Using the Query Reference
+```
+struct MyView: View {
+   var getMyListEntriesQueryRef = DataConnect.plusprayerConnector.getMyListEntriesQuery.ref(...)
+
+  var body: some View {
+    VStack {
+      if let data = getMyListEntriesQueryRef.data {
+        // use data in View
+      }
+      else {
+        Text("Loading...")
+      }
+    }
+    .task {
+        do {
+          let _ = try await getMyListEntriesQueryRef.execute()
+        } catch {
+        }
+      }
+  }
+}
+```
+
+### One-shot execute
+```
+DataConnect.plusprayerConnector.getMyListEntriesQuery.execute(...)
+```
+
+
 ## GetMyPrayerTimeQuery
 ### Variables
 #### Required
