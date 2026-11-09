@@ -386,8 +386,8 @@ root:
   (sans) and its line, the privacy footer; buttons "＋ Add someone" /
   "Add others later", after a first add the row of small avatars of only
   the people added (`addedIds`: the guided add and the add sheet's
-  `addedNameId`) and "＋ Add another" (the regular `AddSheet` over it) /
-  Continue. 4 **Someone** (`SomeoneScreen`, a `Form` like the add sheet's
+  `addedNameId`), "＋ Add another" (tinted secondary: the regular
+  `AddSheet` over it) and Continue (prominent). 4 **Someone** (`SomeoneScreen`, a `Form` like the add sheet's
   Name tab): the avatar (alias else name, `personLabel`), Name ("e.g. Julie
   Olson", "Printed on the list"), "What you call them · optional", then
   "{alias} will be carried on the list with you."; nothing saved here. 5
@@ -399,8 +399,8 @@ root:
   add sheet's line; if only the intention failed, ‹ hides and a retry adds
   only the intention. Shared with the add sheet: `textFieldRules` and
   `FieldFooter` (`Features/AddSheet/FieldRules.swift`). Labeled buttons
-  (`OnboardingButton`: glass prominent blue / glass ink, full width,
-  large). The mock starts the trial at the first prayer, like
+  (`OnboardingButton`, full width, large: `.prominent` glass prominent
+  blue, `.tinted` glass with a blue label, `.plain` glass ink). The mock starts the trial at the first prayer, like
   onPrayerLogged. **Pre-trial pool** (2026-11-09): `isPreTrial` /
   `effectivePoolLimit(prePool:)` in `Carry.swift` mirror pool.ts; the app
   passes /config `basePremiumPool`.

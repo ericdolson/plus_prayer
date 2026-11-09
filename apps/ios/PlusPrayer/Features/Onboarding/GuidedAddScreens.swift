@@ -81,7 +81,7 @@ struct SomeoneScreen: View {
         .background(PP.color.ground)
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaBar(edge: .bottom) {
-            OnboardingButton(title: L10n.Onboarding.someoneContinue, prominent: true,
+            OnboardingButton(title: L10n.Onboarding.someoneContinue, style: .prominent,
                              identifier: "onboarding.someone.continue", action: model.continueToIntention)
                 .disabled(!model.canContinuePerson)
                 .padding(.horizontal, PP.space.gutter)
@@ -152,7 +152,7 @@ struct IntentionScreen: View {
         .animation(.easeOut(duration: PP.duration.quick), value: notice)
         .safeAreaBar(edge: .bottom) {
             VStack(spacing: PP.space.sm) {
-                OnboardingButton(title: L10n.Onboarding.intentionAdd, prominent: true, busy: model.saving,
+                OnboardingButton(title: L10n.Onboarding.intentionAdd, style: .prominent, busy: model.saving,
                                  identifier: "onboarding.intention.add") { save(withIntention: true) }
                     .disabled(!model.canAddIntention)
                 OnboardingButton(title: L10n.Onboarding.intentionSkip, identifier: "onboarding.intention.skip") {

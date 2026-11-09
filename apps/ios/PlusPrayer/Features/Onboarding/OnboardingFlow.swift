@@ -61,7 +61,7 @@ struct WelcomeScreen: View {
                 .font(PP.type.body)
                 .foregroundStyle(PP.color.welcomeInkMuted)
                 .multilineTextAlignment(.center)
-            OnboardingButton(title: L10n.Onboarding.begin, prominent: true, identifier: "onboarding.begin",
+            OnboardingButton(title: L10n.Onboarding.begin, style: .prominent, identifier: "onboarding.begin",
                              action: onBegin)
                 .padding(.top, PP.space.sm)
             // SEAM (auth-onboarding.md screen 1): the quiet "Already have an

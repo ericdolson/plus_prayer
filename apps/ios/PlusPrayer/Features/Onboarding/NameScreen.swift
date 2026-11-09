@@ -52,7 +52,7 @@ struct NameScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         // Above the keyboard while it's up; above the home indicator otherwise.
         .safeAreaBar(edge: .bottom) {
-            OnboardingButton(title: L10n.Onboarding.nameContinue, prominent: true, busy: model.savingName,
+            OnboardingButton(title: L10n.Onboarding.nameContinue, style: .prominent, busy: model.savingName,
                              identifier: "onboarding.name.continue", action: submit)
                 .disabled(!model.canContinueName)
                 .padding(.horizontal, PP.space.gutter)
@@ -87,13 +87,19 @@ struct NameScreen: View {
     }
 }
 
-/// Onboarding's labeled buttons: the native prominent (blue) or glass
-/// (ink) button at full width, large; a spinner in place of the title while
-/// busy. Titles wrap at the largest text sizes rather than truncate.
+/// Onboarding's labeled buttons at full width, large: the native prominent
+/// button (blue), a tinted secondary (glass, blue label: "＋ Add another"
+/// beside a prominent Continue) or plain (glass, ink); a spinner in place of
+/// the title while busy. Titles wrap at the largest text sizes rather than
+/// truncate.
 struct OnboardingButton: View {
+    enum Style {
+        case prominent, tinted, plain
+    }
+
     let title: String
     var icon: Image?
-    var prominent = false
+    var style: Style = .plain
     var busy = false
     var identifier: String?
     let action: () -> Void
@@ -117,10 +123,10 @@ struct OnboardingButton: View {
         .controlSize(.large)
         .accessibilityLabel(title)
         .accessibilityIdentifier(identifier ?? title)
-        if prominent {
-            button.buttonStyle(.glassProminent).tint(PP.color.primary)
-        } else {
-            button.buttonStyle(.glass).tint(PP.color.ink)
+        switch style {
+        case .prominent: button.buttonStyle(.glassProminent).tint(PP.color.primary)
+        case .tinted: button.buttonStyle(.glass).tint(PP.color.primary)
+        case .plain: button.buttonStyle(.glass).tint(PP.color.ink)
         }
     }
 }

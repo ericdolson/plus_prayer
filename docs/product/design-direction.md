@@ -97,6 +97,8 @@ white; dark grounds taken about halfway to black; `sheet` added._
 | `inkMuted` | `#9A9EA4` (§1c) | `#566D83` (was `#5C748C`) | Secondary text. Dark 7.1:1 on ground; light darkened to pass 4.5:1 (4.6:1) |
 | `inkFaint` | decorative only | decorative only | ~3.7:1 dark, ~2.4:1 light — never essential text. Secondary text uses `inkMuted` |
 | `carriedMark` (new, 2026-11-01; revised same day) | `#53585E` (2.7:1) | `#A6B4C6` (1.8:1) | The carried mark (§5): its own value, halfway between `thread` and `inkFaint`. A quiet secondary cue, below 3:1 on purpose (`inkFaint` read too loud); the Carried filter is the reliable way to see what's carried |
+| `welcomeGround` (new, 2026-11-09) | `#15110E` | = dark | Onboarding's Welcome only: the warm dark stand-in for the photograph of the sealed list, the same in both appearances |
+| `welcomeInk` / `welcomeInkMuted` (new, 2026-11-09) | `#F2EBDF` / `#BBB1A3` | = dark | Text on `welcomeGround`: 15.8:1 and 8.9:1 |
 
 Contrast is computed (WCAG AA: 4.5:1 body text, 3:1 large text and non-text
 UI); the figures in `app/lib/theme/tokens.dart` are the checked ones.
@@ -193,7 +195,8 @@ gold.
 - **Sans page roles** (tokens, 2026-11-08): `type.sectionTitle` (Title 3
   semibold: "Intentions", "History"), `type.intentionTitle` (Title 2
   semibold: an intention page's title), `type.periodLabel` (Headline: a
-  History period's label).
+  History period's label), `type.onboardingTitle` (Large Title bold:
+  onboarding's questions, "What's your name?"; 2026-11-09).
 - Respect Dynamic Type / font scaling; layouts must not clip at large sizes.
 
 ---
@@ -702,7 +705,9 @@ on Today's list or Your portion.
   (Today's list, Your portion) or **32 pt** (the Amen invitation)
   (2026-11-05, was 28–32). They overlap **~4 pt**, as on the card, so
   two-letter initials are never covered (`size.cluster.overlap`). The
-  invitation's seal is **~56 pt** (`size.seal.invitation`, Flutter's value).
+  invitation's seal is **~56 pt** (`size.seal.invitation`, Flutter's value);
+  onboarding's Welcome shows **220 pt** (`size.seal.welcome`, 2026-11-09),
+  the interim stand-in for its photograph.
 - The separate floating "258 praying now" line above the list is removed.
 - **Card under filters and search** (2026-10-28):
   - **All:** shown.

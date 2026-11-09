@@ -77,14 +77,16 @@ struct WelcomeBackScreen: View {
     private func buttons(hasAdded: Bool) -> some View {
         VStack(spacing: PP.space.sm) {
             if hasAdded {
-                OnboardingButton(title: L10n.Onboarding.addAnother, icon: PPIcon.add, prominent: true,
+                // Most people move on: Continue is the clear way forward
+                // (decisions.md 2026-11-09, build calls).
+                OnboardingButton(title: L10n.Onboarding.addAnother, icon: PPIcon.add, style: .tinted,
                                  identifier: "onboarding.back.add") {
                     adding = AddSheetModel(home: home)
                 }
-                OnboardingButton(title: L10n.Onboarding.backContinue, identifier: "onboarding.back.continue",
-                                 action: model.finish)
+                OnboardingButton(title: L10n.Onboarding.backContinue, style: .prominent,
+                                 identifier: "onboarding.back.continue", action: model.finish)
             } else {
-                OnboardingButton(title: L10n.Onboarding.addSomeone, icon: PPIcon.add, prominent: true,
+                OnboardingButton(title: L10n.Onboarding.addSomeone, icon: PPIcon.add, style: .prominent,
                                  identifier: "onboarding.back.add", action: model.addSomeone)
                 OnboardingButton(title: L10n.Onboarding.addLater, identifier: "onboarding.back.later",
                                  action: model.finish)
