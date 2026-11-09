@@ -2220,5 +2220,8 @@ self page shows your name under "Me").
   ("Name" · "Printed on the list"; "What you call them · optional" · "Only
   you see this"; e.g. placeholders), so onboarding teaches the real form;
   "Their name" stays retired (2026-11-06). Intention line: "…printed with
-  their name on the list."
+  their name on the list."- Same day: the big avatar shows only on the name screen (live feedback,
+  teaches avatars); screen 3 has none, "Welcome, {full name}." carries it.
+  Screen 3's row shows only the people added, never the user (the question
+  is "who else").
 

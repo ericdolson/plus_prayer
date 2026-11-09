@@ -35,7 +35,8 @@ _Last updated: 2026-10-17_
      that fills with initials as you type, one field with the name set in
      Roca (how it prints), **Continue** above the keyboard. Nothing else.
      40-char cap; it becomes the self subject ("Me").
-  3. **Welcome back:** the avatar and **"Welcome, {full name}."** (Roca; the
+  3. **Welcome back:** no avatar (2026-11-09: the name screen's big avatar
+     twice in a row felt heavy) · **"Welcome, {full name}."** (Roca; the
      full name as printed, never a guessed first name) · "Pray with today's
      list. Tomorrow your name is on it, and the world prays for you." ·
      divider · **"Who else do you hold?"** · "Keep the people you pray for
@@ -54,7 +55,9 @@ _Last updated: 2026-10-17_
      "An intention is a request: healing, a new job, peace. One can be
      printed with their name on the list." · field with an example · **Add** / **Skip**.
      It becomes their chosen intention.
-  Then back to screen 3 with the new person's avatar; the buttons become
+  Then back to screen 3, where the people added show as a row of small
+  avatars (**only them**, never you: the question is "who *else*"; no row
+  before the first add); the buttons become
   **"＋ Add another"** (opens the regular add sheet, no extra help) and
   **Continue** (→ Home).
   6. After first Amen: "You'll be carried on List 53." → reminder choice
