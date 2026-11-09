@@ -12,6 +12,10 @@ nonisolated enum L10n {
         static var you: String { NSLocalizedString("home.header.you", comment: "") }
         /// A name row's long-press menu: opens the intention form for them.
         static var addIntention: String { NSLocalizedString("home.row.addIntention", comment: "") }
+        /// The line under Me after the first prayer (auth-onboarding.md, "After the first Amen").
+        static var selfIntention: String { NSLocalizedString("home.selfIntention.add", comment: "") }
+        static var selfIntentionLine: String { NSLocalizedString("home.selfIntention.line", comment: "") }
+        static var selfIntentionDismiss: String { NSLocalizedString("home.selfIntention.dismiss", comment: "") }
         static var filter: String { NSLocalizedString("home.filter", comment: "") }
         static var clearFilter: String { NSLocalizedString("home.filter.clear", comment: "") }
 
@@ -397,37 +401,31 @@ nonisolated enum L10n {
     enum Onboarding {
         private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
         private static func f(_ key: String, _ arg: String) -> String { String(format: t(key), arg) }
-        // 1 Welcome
-        static var welcomeTitle: String { t("onboarding.welcome.title") }
-        static var welcomeSubtitle: String { t("onboarding.welcome.subtitle") }
-        static var begin: String { t("onboarding.welcome.begin") }
-        // 2 Name
-        static var nameTitle: String { t("onboarding.name.title") }
-        static var nameContinue: String { t("onboarding.name.continue") }
+        // The stage
+        static var back: String { t("onboarding.back") }
+        static var continueLabel: String { t("onboarding.continue") }
+        // 1 Your name
+        static var lead: String { t("onboarding.name.lead") }
+        static var nameQuestion: String { t("onboarding.name.question") }
+        static var namePlaceholder: String { t("onboarding.name.placeholder") }
         static var nameOffline: String { t("onboarding.name.offline") }
         static var nameFailed: String { t("onboarding.name.failed") }
-        // 3 Welcome back
-        static func welcomeBack(_ fullName: String) -> String { f("onboarding.back.title", fullName) }
-        static var mechanic: String { t("onboarding.back.mechanic") }
-        static var whoElse: String { t("onboarding.back.question") }
-        static var whoElseLine: String { t("onboarding.back.questionLine") }
-        static var addSomeone: String { t("onboarding.back.addSomeone") }
-        static var addLater: String { t("onboarding.back.later") }
-        static var addAnother: String { t("onboarding.back.addAnother") }
-        static var backContinue: String { t("onboarding.back.continue") }
-        static var privacy: String { t("onboarding.back.privacy") }
-        static func added(_ names: String) -> String { f("onboarding.back.added", names) }
-        // 4 Someone you pray for
+        // 2 The moment
+        static var mechanic: String { t("onboarding.moment.mechanic") }
+        static var privacy: String { t("onboarding.moment.privacy") }
+        // 3 Someone you pray for
         static var someoneTitle: String { t("onboarding.someone.title") }
         static var someoneNamePlaceholder: String { t("onboarding.someone.namePlaceholder") }
         static var someoneNameCaption: String { t("onboarding.someone.nameCaption") }
-        static func carriedWithYou(_ label: String) -> String { f("onboarding.someone.carried", label) }
-        static var someoneContinue: String { t("onboarding.someone.continue") }
-        // 5 An intention
+        static var someoneAliasLabel: String { t("onboarding.someone.aliasLabel") }
+        static var optional: String { t("onboarding.someone.optional") }
+        static var notNow: String { t("onboarding.someone.notNow") }
+        // 4 Their intention
+        static var carriedWithYou: String { t("onboarding.intention.carried") }
         static func intentionTitle(_ label: String) -> String { f("onboarding.intention.title", label) }
         static var intentionLine: String { t("onboarding.intention.line") }
-        static var intentionAdd: String { t("onboarding.intention.add") }
-        static var intentionSkip: String { t("onboarding.intention.skip") }
+        static var add: String { t("onboarding.intention.add") }
+        static var skip: String { t("onboarding.intention.skip") }
     }
 
     enum Common {

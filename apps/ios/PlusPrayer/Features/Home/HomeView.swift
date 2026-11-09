@@ -20,29 +20,48 @@ struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var confirmingDiscard = false
     @State private var adding: AddSheetModel?
-    /// First run, while it's up (`OnboardingModel`).
+    /// First run, while it's up (`OnboardingModel`), and its hand-off into
+    /// Home.
     @State private var onboarding: OnboardingModel?
+    @State private var handoff = HomeHandoff()
+    /// "Add an intention for yourself" under Me was dismissed (for good, on
+    /// this device).
+    @AppStorage(SelfIntentionPrompt.dismissedKey) private var selfIntentionDismissed = false
     /// What's pushed over Home: pages (names and intentions) and History.
     @State private var path: [Route] = []
 
     var body: some View {
+        let homeShown = onboarding == nil || handoff.homeShown
         NavigationStack(path: $path) {
             homeContent
                 .toolbar(.hidden, for: .navigationBar)
                 .routes()
         }
+        // Onboarding's hand-off: Home's content fades in on its own ground,
+        // and the views the travelling copies land on report where they are.
+        .opacity(homeShown ? 1 : 0)
+        .accessibilityHidden(!homeShown)
+        .background(PP.color.ground.ignoresSafeArea())
+        .environment(\.handoffAnchoring, onboarding == nil ? nil : handoff.anchoring)
         .overlay { Halo(active: session.isPraying, flare: session.amenCount) }
+        // No self name yet (auth-onboarding.md, resume by state): onboarding,
+        // one stage over Home. It stays through the steps after the name is
+        // saved, until its hand-off into Home has played; a later launch with
+        // a name opens Home.
+        .overlay {
+            if let onboarding {
+                OnboardingFlow(model: onboarding, handoff: handoff)
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeOut(duration: PP.duration.quick), value: onboarding == nil)
         .sensoryFeedback(.impact(weight: .light), trigger: session.checkCount)
         .sheet(isPresented: prayerSheetShown) { PrayerSheet() }
-        // No self name yet (auth-onboarding.md, resume by state): onboarding
-        // over Home from Welcome. It stays through Welcome back and the
-        // guided add once the name is saved, until Add others later or
-        // Continue; a later launch with a name opens Home.
-        .fullScreenCover(isPresented: onboardingShown) {
-            if let onboarding { OnboardingFlow(model: onboarding) }
-        }
         .onChange(of: home.needsSelfName, initial: true) { _, needs in
-            if needs && onboarding == nil { onboarding = OnboardingModel(home: home) }
+            if needs && onboarding == nil {
+                handoff = HomeHandoff()
+                onboarding = OnboardingModel(home: home)
+            }
         }
         .onChange(of: onboarding?.isFinished) { _, finished in
             if finished == true { onboarding = nil }
@@ -62,10 +81,6 @@ struct HomeView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { home.refreshToday() }
         }
-    }
-
-    private var onboardingShown: Binding<Bool> {
-        Binding(get: { onboarding != nil }, set: { if !$0 { onboarding = nil } })
     }
 
     private var homeContent: some View {
@@ -185,6 +200,7 @@ struct HomeView: View {
                     held: held(name), secondary: secondary(name), hasIntentions: !group.intentions.isEmpty,
                     accessibilityLabel: name.accessibilityLabel(heldOutsidePrayer: !session.isPraying && name.heldToday),
                     check: session.isPraying ? session.check(name.id) : nil,
+                    avatarAnchor: .avatar(name.id),
                     onTap: { tap(name.id) })
                 // A name shown only for an intention the filter keeps: dimmed;
                 // the intention stays at full strength.
@@ -207,7 +223,17 @@ struct HomeView: View {
                              onTap: { tap(intention.id) })
                     .transition(.opacity)
             }
+            if name.id == home.meId, selfIntentionShown {
+                SelfIntentionPrompt(onAdd: { adding = AddSheetModel(home: home, intentionFor: name.id) },
+                                    onDismiss: { withAnimation(.easeOut(duration: PP.duration.quick)) { selfIntentionDismissed = true } })
+                    .transition(.opacity)
+            }
         }
+    }
+
+    /// The line under Me: the rule, and never in prayer or under a search.
+    private var selfIntentionShown: Bool {
+        !session.isPraying && !home.hasQuery && home.showsSelfIntentionPrompt(dismissed: selfIntentionDismissed)
     }
 
     /// The gold ring / dot: held today, or held live in this prayer.

@@ -31,28 +31,29 @@ final class EmulatorSmokeTests: XCTestCase {
     }
 
     /// A new anonymous account has no self name: onboarding over Home
-    /// (Welcome → Begin → "What's your name?"); Continue calls setSelfName
-    /// and lands on Welcome back with the full name; "Add others later" →
-    /// Home with "Me".
+    /// ("Here, we pray for each other." · "What's your name?"); Continue
+    /// calls setSelfName and plays the moment (the name on the paper line);
+    /// then Not now on the person step → Home with "Me".
     @MainActor
     func testNameStepOnFirstRun() throws {
         let app = launch()
-        let begin = app.buttons["onboarding.begin"]
-        XCTAssertTrue(begin.waitForExistence(timeout: 20), "Welcome for an account with no self name")
-        begin.tap()
-        let title = any(app, "label == 'What’s your name?'")
-        XCTAssertTrue(title.waitForExistence(timeout: 5), "the name screen")
         let field = app.textFields["onboarding.name.field"]
-        XCTAssertTrue(field.waitForExistence(timeout: 3))
+        XCTAssertTrue(field.waitForExistence(timeout: 20), "onboarding for an account with no self name")
+        XCTAssertTrue(any(app, "label == 'What’s your name?'").exists, "the name step")
         XCTAssertFalse(app.buttons["onboarding.name.continue"].isEnabled, "nothing to save yet")
         field.tap()
         field.typeText("Eric Olson")
         app.buttons["onboarding.name.continue"].tap()
 
-        XCTAssertTrue(any(app, "label == 'Welcome, Eric Olson.'").waitForExistence(timeout: 15), "Welcome back")
-        app.buttons["onboarding.back.later"].tap()
+        XCTAssertTrue(any(app, "label == 'Pray with today’s list. Tomorrow your name is on it.'")
+            .waitForExistence(timeout: 15), "the moment")
+        XCTAssertTrue(any(app, "label == 'Eric Olson'").exists, "the full name on the paper line")
+        app.buttons["onboarding.moment.continue"].tap()
+        let notNow = app.buttons["onboarding.notNow"]
+        XCTAssertTrue(notNow.waitForExistence(timeout: 5), "someone you pray for")
+        notNow.tap()
         XCTAssertTrue(any(app, "label BEGINSWITH 'Me, Eric Olson'").waitForExistence(timeout: 15), "Home, with Me")
-        XCTAssertTrue(app.buttons["Pray"].exists)
+        XCTAssertTrue(app.buttons["Pray"].waitForExistence(timeout: 5))
     }
 
     /// After `seed:emulator`: Home (the seeded people, List 70), Dad's page

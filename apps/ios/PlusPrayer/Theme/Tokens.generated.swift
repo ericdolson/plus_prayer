@@ -59,12 +59,14 @@ nonisolated enum PP {
         static let halo = Color(light: 0x9A7A30, dark: 0xC8AE6E)
         /// Behind custom (Tier A) overlays only; native sheets bring their own dimming.
         static let scrim = Color(light: 0x05294A, dark: 0x000000, lightAlpha: 0.4, darkAlpha: 0.75)
-        /// Onboarding Welcome (screen 1) only: a dark, warm ground in both themes, standing in for the photograph of the sealed list in warm low light (auth-onboarding.md, 2026-11-09).
-        static let welcomeGround = Color(light: 0x15110E, dark: 0x15110E)
-        /// Text on welcomeGround, both themes (15.9:1).
-        static let welcomeInk = Color(light: 0xF2EBDF, dark: 0xF2EBDF)
-        /// Secondary text on welcomeGround, both themes (8.9:1).
-        static let welcomeInkMuted = Color(light: 0xBBB1A3, dark: 0xBBB1A3)
+        /// Onboarding's Candlelight: one soft warm glow behind the content on Home's own ground, breathing slowly; the same in both appearances (onboarding is dark in both; auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)). Text uses Home's ink / inkMuted.
+        static let onboardingGlow = Color(light: 0xE2C48C, dark: 0xE2C48C, lightAlpha: 0.16, darkAlpha: 0.16)
+        /// The moment's paper line (onboarding step 2): the stand-in for a photographed line of the real list paper, the same in both appearances.
+        static let onboardingPaper = Color(light: 0xE4DBC8, dark: 0xE4DBC8)
+        /// The name set on the paper line (11.6:1 on onboardingPaper); its perforations and guide line at number.onboarding.paperPerforation / paperGuide.
+        static let onboardingPaperInk = Color(light: 0x2A2019, dark: 0x2A2019)
+        /// The paper line's "List 53" label (4.7:1 on onboardingPaper).
+        static let onboardingPaperMuted = Color(light: 0x6B5B4B, dark: 0x6B5B4B)
         /// The unsealed seal: the same shape, unpressed, neutral (before the list is published).
         static let unsealed = Color(light: 0xC9D1DF, dark: 0x30353D)
         /// Dark only: the unsealed blank's rim light (at wax.darkRimOpacity).
@@ -285,8 +287,6 @@ nonisolated enum PP {
             static let rimWidth: CGFloat = 1
             /// Seals smaller than this (beads) get the lift but no rim.
             static let rimMinSize: CGFloat = 24
-            /// The large seal on onboarding's Welcome (screen 1), the interim stand-in for the photograph.
-            static let welcome: CGFloat = 220
             /// At and above this, seals use the photographed stamps (when D3 lands).
             static let photoMinSize: CGFloat = 40
         }
@@ -343,6 +343,56 @@ nonisolated enum PP {
             /// The search match hint's minimum height (a comfortable tap target).
             static let minHeight: CGFloat = 48
         }
+        /// Onboarding (auth-onboarding.md, Flow redesigned 2026-11-09; the reference mock design/explorations/onboarding/d-merged).
+        enum onboarding {
+            /// The one blue button's height (a capsule); it becomes the pray button in the hand-off.
+            static let button: CGFloat = 56
+            /// The button's gap above the bottom safe area while the keyboard is down (the mock's 680 pt slot on an 874 pt screen).
+            static let buttonRest: CGFloat = 104
+            /// The button's gap above the keyboard while it's up.
+            static let buttonAboveKeyboard: CGFloat = 40
+            /// The person's avatar on the person and intention steps.
+            static let personAvatar: CGFloat = 48
+            /// The rule under an onboarding field (ink at number.onboarding.hairline, hairlineFocused while focused).
+            static let hairline: CGFloat = 1
+            /// Space above a field's text, between it and its hairline.
+            static let fieldPadding: CGFloat = 8
+            /// Incoming text groups rise this far as they fade in.
+            static let textRise: CGFloat = 12
+            /// Outgoing text groups rise this far as they fade out.
+            static let textFall: CGFloat = 8
+            /// The paper line rises this far as it fades in (the moment).
+            static let paperRise: CGFloat = 14
+            /// An avatar forming starts this blurred (then 0).
+            static let formBlur: CGFloat = 4
+            /// The Candlelight glow drifts up this far at the top of its breath.
+            static let glowDrift: CGFloat = 6
+            /// The moment's paper line (a stand-in for a photographed line of the real list).
+            enum paper {
+                /// Its height.
+                static let height: CGFloat = 74
+                /// Its corner radius.
+                static let radius: CGFloat = 5
+                /// The dashed stitch lines' inset from the left and right edges.
+                static let perforationInset: CGFloat = 14
+                /// The stitch lines' width.
+                static let perforationStroke: CGFloat = 1.5
+                /// The stitch lines' dash length (and gap).
+                static let perforationDash: CGFloat = 4.5
+                /// The stitch lines' and the label's inset from the top and bottom edges.
+                static let edgeInset: CGFloat = 9
+                /// The "LIST 53" label's inset from the trailing edge.
+                static let labelInset: CGFloat = 28
+                /// The guide line's inset from the leading and trailing edges.
+                static let guideInset: CGFloat = 34
+                /// The guide line's distance from the top edge (just under the name).
+                static let guideTop: CGFloat = 51
+                /// Its soft shadow's radius (the mock's 28 pt CSS blur).
+                static let shadowRadius: CGFloat = 14
+                /// Its soft shadow's offset down.
+                static let shadowY: CGFloat = 10
+            }
+        }
     }
 
     enum number {
@@ -387,6 +437,47 @@ nonisolated enum PP {
         static let contextRow: Double = 0.55
         /// The countdown before Amen: a small pie inside the button, this share of its diameter, running down to nothing (no ring outside, no change in size).
         static let countdownPie: Double = 0.4
+        /// Onboarding (auth-onboarding.md, Flow redesigned 2026-11-09).
+        enum onboarding {
+            /// The Candlelight glow: an ellipse this fraction of the screen's width as its horizontal radius.
+            static let glowWidth: Double = 0.64
+            /// The glow's vertical radius, as a fraction of the screen's height.
+            static let glowHeight: Double = 0.4
+            /// The glow's center, from the top, as a fraction of the screen's height.
+            static let glowCenterY: Double = 0.38
+            /// The glow's opacity at glowMidStop, relative to its center (0.05 of 0.16).
+            static let glowMid: Double = 0.3125
+            /// Where the glow reaches glowMid, as a fraction of its radius.
+            static let glowMidStop: Double = 0.5
+            /// Where the glow is gone, as a fraction of its radius.
+            static let glowEndStop: Double = 0.72
+            /// The glow's breath: low opacity (high is 1).
+            static let glowRestLow: Double = 0.72
+            /// Reduce Motion: the glow is static at this opacity.
+            static let glowReduceMotion: Double = 0.85
+            /// An avatar forming starts at this scale (then 1).
+            static let formScale: Double = 0.72
+            /// The blue button while it can't be used: primary at this opacity.
+            static let disabledTint: Double = 0.28
+            /// Its label's opacity then.
+            static let disabledLabel: Double = 0.55
+            /// A field's rule: ink at this opacity.
+            static let hairline: Double = 0.18
+            /// A focused field's rule: ink at this opacity.
+            static let hairlineFocused: Double = 0.5
+            /// The paper line's stitch lines: onboardingPaperInk at this opacity.
+            static let paperPerforation: Double = 0.32
+            /// The paper line's guide line: onboardingPaperInk at this opacity.
+            static let paperGuide: Double = 0.12
+            /// The paper line's shadow: shadow at this opacity.
+            static let paperShadow: Double = 0.35
+            /// The name shrinks onto the paper line: 28 → 22.
+            static let paperNameScale: Double = 0.7857
+            /// The paper's "LIST 53" label tracking, in em.
+            static let paperTracking: Double = 0.09
+            /// Steps 1 and 2: the space above the content, as a fraction of the screen's height (132 pt on an 874 pt screen; never less than space.xl).
+            static let leadTop: Double = 0.15
+        }
     }
 
     enum type {
@@ -414,8 +505,26 @@ nonisolated enum PP {
         static let labelSmall = Font.system(.footnote, weight: .medium)
         /// Timer and counts: tabular figures. When a count rises live, crossfade only the changed digits.
         static let count = Font.system(.subheadline, weight: .medium).monospacedDigit()
-        /// Onboarding's questions ("What's your name?", "Who's someone you pray for?"): system sans, Large Title bold (auth-onboarding.md, 2026-11-09). Wraps.
-        static let onboardingTitle = Font.system(.largeTitle, weight: .bold)
+        /// Onboarding's one big line per step ("Here, we pray for each other."): Roca regular, never bold (auth-onboarding.md, Type).
+        static let onboardingLead = Font.custom("Roca-Regular", size: 30, relativeTo: .largeTitle)
+        /// Onboarding's lead on the person steps ("Who do you pray for?", "What are you praying for, for Mom?"): Roca regular.
+        static let onboardingLeadSmall = Font.custom("Roca-Regular", size: 26, relativeTo: .title)
+        /// The user's name in the moment (step 2), in Roca bold as it prints; on the paper line it scales to number.onboarding.paperNameScale (22).
+        static let onboardingName = Font.custom("Roca-Bold", size: 28, relativeTo: .title)
+        /// The person's name under their avatar on the intention step ("Mom").
+        static let onboardingPersonName = Font.custom("Roca-Bold", size: 24, relativeTo: .title2)
+        /// The moment's one true sentence ("Pray with today's list. Tomorrow your name is on it.").
+        static let onboardingMechanic = Font.system(.title3, weight: .regular)
+        /// Onboarding's centered fields (your name, the intention): sans over a hairline, no box.
+        static let onboardingField = Font.system(.title2, weight: .regular)
+        /// Onboarding's labeled fields (the person's name, what you call them): sans, leading, over a hairline.
+        static let onboardingFieldLabeled = Font.system(.title3, weight: .regular)
+        /// A field's label above it on the person step ("Name", "What you call them"), inkMuted; "· optional" in bodySmall inkFaint.
+        static let onboardingFieldLabel = Font.system(.subheadline, weight: .medium)
+        /// Onboarding's one blue button ("Continue", "Add").
+        static let onboardingButton = Font.system(.headline, weight: .semibold)
+        /// The paper line's "LIST 53" label: uppercase, tracked number.onboarding.paperTracking em, onboardingPaperMuted.
+        static let onboardingPaperLabel = Font.system(.caption2, weight: .medium)
         /// Section titles on a page ("Intentions", "History"): system sans, Title 3 semibold (detail-page.md, 2026-11-08; Roca is for proper names).
         static let sectionTitle = Font.system(.title3, weight: .semibold)
         /// An intention as a page title: system sans, Title 2 semibold; wraps (detail-page.md, 2026-11-08).
@@ -457,6 +566,46 @@ nonisolated enum PP {
         static let haloFlareOffset: TimeInterval = 0
         /// The pray button's decaying ring before Amen appears; the invitation's ring.
         static let prayHold: TimeInterval = 5
+        /// Onboarding: outgoing text groups fade and rise (ease-in).
+        static let onboardingTextOut: TimeInterval = 0.24
+        /// Onboarding: incoming text groups start this long after a step change.
+        static let onboardingTextDelay: TimeInterval = 0.14
+        /// Onboarding: between incoming text groups.
+        static let onboardingStagger: TimeInterval = 0.06
+        /// Onboarding: an anchor (an avatar, the name) travels position and size together (ease-in-out).
+        static let onboardingTravel: TimeInterval = 0.6
+        /// The hand-off: the blue button becomes the pray button (position, width, radius).
+        static let onboardingButtonMorph: TimeInterval = 0.42
+        /// An avatar forming: fade, scale, settling blur (ease-out).
+        static let onboardingForm: TimeInterval = 0.48
+        /// The moment: the avatar starts forming.
+        static let onboardingMomentAvatar: TimeInterval = 0.38
+        /// The moment: the paper line rises.
+        static let onboardingMomentPaper: TimeInterval = 1
+        /// The moment: the name starts travelling onto the paper.
+        static let onboardingMomentName: TimeInterval = 1.12
+        /// The moment: the two lines arrive.
+        static let onboardingMomentLines: TimeInterval = 1.65
+        /// Back onto the moment: the paper line returns.
+        static let onboardingReturnPaper: TimeInterval = 0.3
+        /// Back onto the moment: the two lines return.
+        static let onboardingReturnLines: TimeInterval = 0.7
+        /// The intention step: the person's name rises in under their avatar.
+        static let onboardingPersonName: TimeInterval = 0.3
+        /// The hand-off: the person's avatar starts travelling into their row.
+        static let onboardingHandoffPerson: TimeInterval = 0.12
+        /// The hand-off: Home's card, rows and pill fade in.
+        static let onboardingHandoffHome: TimeInterval = 0.42
+        /// The hand-off: the blue button starts becoming the pray button (last).
+        static let onboardingHandoffPray: TimeInterval = 0.7
+        /// The hand-off: the praying hands appear in it.
+        static let onboardingHandoffGlyph: TimeInterval = 1
+        /// The hand-off waits at most this long for Home to show the new rows.
+        static let onboardingHandoffWait: TimeInterval = 1.5
+        /// Half of the Candlelight glow's breath (a 6.4 s cycle).
+        static let onboardingGlowBreath: TimeInterval = 3.2
+        /// Reduce Motion: no onboarding beat waits longer than this.
+        static let onboardingReduceMotionBeat: TimeInterval = 0.2
     }
 
     enum easing {

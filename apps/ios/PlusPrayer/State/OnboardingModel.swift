@@ -2,27 +2,27 @@ import Foundation
 import Observation
 import PlusPrayerDomain
 
-/// First run (auth-onboarding.md, "Flow (revised 2026-11-09)"): one native
-/// navigation stack over Home, one decision per screen.
+/// First run (auth-onboarding.md, "Flow (redesigned 2026-11-09, second
+/// pass)"): one stage over Home, four steps, then the hand-off into Home.
 ///
-///     Welcome ──Begin──▶ Name ──Continue (setSelfName)──▶ Welcome back
-///     Welcome back ──Add someone──▶ Someone ──Continue──▶ Intention
-///     Intention ──Add / Skip (addSubject ×1–2)──▶ Welcome back, with the row
-///     Welcome back ──Add others later / Continue──▶ Home
-///     Welcome back ──Add another──▶ the regular add sheet over it
+///     name ──Continue (setSelfName)──▶ moment ──Continue──▶ someone
+///     someone ──Continue──▶ intention ──Add / Skip (addSubject ×1–2)──▶ handoff
+///     someone ──Not now──▶ handoff
+///     ‹ Back: moment → name, someone → moment, intention → someone
 ///
 /// Shown while Home's header has no self name; once the name is saved it
 /// stays up for the rest of this run only (resume is state-based: a later
-/// launch with a name opens Home). The guided add saves the person when
-/// leaving the intention screen (Add or Skip): one save sequence, so going
-/// back from it never leaves a half-made person. If the person saved but the
-/// intention didn't, the intention screen keeps its text, hides ‹ (the
-/// person can't be edited from here any more), and Add retries only the
-/// intention.
+/// launch with a name opens Home). The person is saved when leaving the
+/// intention step (Add or Skip): one save sequence, so going back from it
+/// never leaves a half-made person. If the person saved but the intention
+/// didn't, the step keeps its text, hides ‹ (the person can't be edited from
+/// here any more), and Add retries only the intention.
 @MainActor @Observable
 final class OnboardingModel {
-    enum Screen: Hashable {
-        case name, welcomeBack, someone, intention
+    enum Step: Int, Comparable {
+        case name, moment, someone, intention, handoff
+
+        static func < (lhs: Step, rhs: Step) -> Bool { lhs.rawValue < rhs.rawValue }
     }
 
     /// What went wrong saving the name (the name step's existing lines).
@@ -30,7 +30,7 @@ final class OnboardingModel {
         case contact, offline, failed
     }
 
-    /// What went wrong in the guided add (the add sheet's existing lines).
+    /// What went wrong saving the person (the add sheet's existing lines).
     enum AddProblem: Equatable {
         case offline, cap, failed
     }
@@ -40,13 +40,12 @@ final class OnboardingModel {
         case personName, intention
     }
 
-    /// The pushed screens; Welcome is the root.
-    var path: [Screen] = []
+    private(set) var step: Step = .name
 
-    // MARK: Name
+    // MARK: Your name
 
     var name = ""
-    /// The name screen's avatar tone; the new self takes it.
+    /// The user's avatar tone; the new self takes it.
     let selfTone: Int
     private(set) var savingName = false
     private(set) var nameProblem: NameProblem?
@@ -54,7 +53,7 @@ final class OnboardingModel {
     /// moves on).
     private(set) var savedName: String?
 
-    // MARK: The guided add
+    // MARK: Someone you pray for
 
     var personName = ""
     var personAlias = ""
@@ -66,12 +65,11 @@ final class OnboardingModel {
     private(set) var contactShown: Set<Field> = []
     /// The person, once saved, while their intention is still unsaved.
     private(set) var savedPersonId: String?
+    /// The person this run added: the hand-off takes their avatar into
+    /// their row on Home.
+    private(set) var addedPersonId: String?
 
-    /// The people added in this run, in order (the guided add and the add
-    /// sheet): screen 3's row. Never the user.
-    private(set) var addedIds: [String] = []
-
-    /// Home: "Add others later" or Continue.
+    /// The hand-off has played: Home.
     private(set) var isFinished = false
 
     private let home: HomeModel
@@ -84,32 +82,35 @@ final class OnboardingModel {
 
     // MARK: Derived
 
-    /// The name screen's avatar: initials as you type (a person glyph while empty).
-    var nameInitials: String { initials(cleanText(name)) }
+    /// The name as it will print (cleaned; the full name, never split).
+    var displayName: String { cleanText(name) }
+
+    /// The user's avatar: initials of the name.
+    var nameInitials: String { initials(displayName) }
 
     var canContinueName: Bool { !savingName && validatePrinted(name, kind: .soul) == nil }
 
-    /// "Welcome, {full name}.": the full name as saved, never split.
-    var greeting: String { greetingName(home.header) ?? savedName ?? cleanText(name) }
+    /// "List 53" on the paper line: the list your name goes on (tomorrow's).
+    var nextListNumber: Int? { home.listContext.map { $0.listNumber + 1 } }
 
-    /// What you call them, else their name: the avatar, "{alias} will be
-    /// carried…" and "What are you praying for, for {alias}?".
+    /// What you call them, else their name: their avatar, the name under it
+    /// and "What are you praying for, for {alias}?".
     var personLabel: String { PlusPrayerDomain.personLabel(name: personName, alias: personAlias) }
 
     var personInitials: String { initials(personLabel) }
 
-    /// "{alias} will be carried on the list with you." once a name is entered.
-    var showsCarriedLine: Bool { !cleanText(personName).isEmpty }
+    /// Their avatar forms with the first letter of their name.
+    var hasPerson: Bool { !cleanText(personName).isEmpty }
 
     var isOffline: Bool { !home.isOnline }
 
-    /// Screen 4's Continue: a printable name, no contact message showing.
+    /// The person step's Continue: a printable name, no contact message showing.
     var canContinuePerson: Bool {
         validatePrinted(personName, kind: .soul) == nil && validateAlias(personAlias) == nil
             && !contactShown.contains(.personName)
     }
 
-    /// Screen 5's Add: an intention to save, and nothing in the way.
+    /// The intention step's Add: an intention to save, and nothing in the way.
     var canAddIntention: Bool {
         canSave && validatePrinted(intention, kind: .intention) == nil && !contactShown.contains(.intention)
     }
@@ -120,10 +121,14 @@ final class OnboardingModel {
     /// The person is saved, so ‹ back to their fields would edit nothing.
     var personLocked: Bool { savedPersonId != nil }
 
-    /// Screen 3's row: only the people added, in order; never you.
-    var added: [PickerName] {
-        let names = home.pickerNames()
-        return addedIds.compactMap { id in names.first { $0.id == id } }
+    /// ‹ Back in the top-leading slot (steps 2–4), unless something is saving
+    /// or the person is already saved.
+    var canGoBack: Bool {
+        switch step {
+        case .moment, .someone: true
+        case .intention: !personLocked && !saving
+        case .name, .handoff: false
+        }
     }
 
     // MARK: Fields
@@ -148,17 +153,17 @@ final class OnboardingModel {
 
     // MARK: Commands
 
-    func begin() { path = [.name] }
-
-    /// Continue on the name screen: setSelfName (online only), then Welcome back.
+    /// Continue (or Return) on the name: setSelfName (online only), then the
+    /// moment. The same name again (after ‹) just moves on.
     func submitName() async {
+        guard step == .name else { return }
         guard canContinueName else {
             if validatePrinted(name, kind: .soul) == .contactInfo { nameProblem = .contact }
             return
         }
-        let cleaned = cleanText(name)
+        let cleaned = displayName
         if cleaned == savedName {
-            show(.welcomeBack)
+            step = .moment
             return
         }
         savingName = true
@@ -167,7 +172,7 @@ final class OnboardingModel {
             try await home.setSelfName(cleaned, avatarTone: selfTone)
             savedName = cleaned
             nameProblem = nil
-            show(.welcomeBack)
+            step = .moment
         } catch SelfNameError.input {
             nameProblem = .contact
         } catch SelfNameError.offline {
@@ -177,29 +182,50 @@ final class OnboardingModel {
         }
     }
 
-    /// "＋ Add someone": a fresh guided add.
-    func addSomeone() {
+    /// The moment's Continue: someone you pray for. Their tone is picked now,
+    /// among the tones least used with yours in.
+    func continueFromMoment() {
+        guard step == .moment else { return }
+        if !hasPerson && savedPersonId == nil {
+            var generator = SystemRandomNumberGenerator()
+            personTone = pickTone(home.pickerNames().map(\.tone) + [selfTone], using: &generator)
+        }
+        step = .someone
+    }
+
+    /// The person step's Continue: on to their intention (nothing saved yet).
+    func continueToIntention() {
+        guard step == .someone, canContinuePerson else { return }
+        step = .intention
+    }
+
+    /// "Not now" on the person step: Home, with no one added.
+    func notNow() {
+        guard step == .someone else { return }
         personName = ""
         personAlias = ""
         intention = ""
-        personTone = home.toneForNewName()
-        savedPersonId = nil
-        addProblem = nil
         contactShown = []
-        show(.someone)
+        addProblem = nil
+        step = .handoff
     }
 
-    /// Screen 4's Continue: on to the intention (nothing saved yet).
-    func continueToIntention() {
-        guard canContinuePerson else { return }
-        show(.intention)
+    /// ‹ Back: one step back, the text kept.
+    func back() {
+        guard canGoBack else { return }
+        switch step {
+        case .moment: step = .name
+        case .someone: step = .moment
+        case .intention: step = .someone
+        case .name, .handoff: break
+        }
     }
 
     /// Add (with the intention) or Skip: saves the person, carried by default
-    /// (addSubject), then the intention under them, which becomes their
-    /// chosen one (Q32: they have none yet). Then back to Welcome back.
+    /// (addSubject: the pre-trial pool), then the intention under them, which
+    /// becomes their chosen one (Q32: they have none yet). Then the hand-off.
     func save(withIntention: Bool) async {
-        guard withIntention ? canAddIntention : canSave else { return }
+        guard step == .intention, withIntention ? canAddIntention : canSave else { return }
         saving = true
         addProblem = nil
         defer { saving = false }
@@ -212,14 +238,14 @@ final class OnboardingModel {
                                                                   alias: personAlias, avatarTone: personTone))
                 personId = person.id
                 savedPersonId = person.id
-                addedIds.append(person.id)
+                addedPersonId = person.id
             }
             if withIntention {
                 _ = try await home.addSubject(NewSubject(kind: .intention, publicName: intention,
                                                          parentId: personId, carry: true))
             }
             savedPersonId = nil
-            backToWelcomeBack()
+            step = .handoff
         } catch AddSubjectError.offline {
             addProblem = .offline
         } catch AddSubjectError.cap {
@@ -231,24 +257,9 @@ final class OnboardingModel {
         }
     }
 
-    /// A name added through the regular add sheet ("＋ Add another").
-    func addedFromSheet(_ id: String?) {
-        guard let id, !addedIds.contains(id) else { return }
-        addedIds.append(id)
-    }
-
-    /// "Add others later" or Continue: Home.
-    func finish() { isFinished = true }
-
-    private func show(_ screen: Screen) {
-        if path.last != screen { path.append(screen) }
-    }
-
-    private func backToWelcomeBack() {
-        if let i = path.firstIndex(of: .welcomeBack) {
-            path = Array(path.prefix(through: i))
-        } else {
-            path = [.name, .welcomeBack]
-        }
+    /// The hand-off has played: Home.
+    func finish() {
+        guard step == .handoff else { return }
+        isFinished = true
     }
 }

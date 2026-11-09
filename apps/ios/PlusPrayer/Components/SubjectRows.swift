@@ -36,11 +36,14 @@ struct NameRow: View {
     let accessibilityLabel: String
     /// In prayer: this row's check. nil = nav mode.
     var check: HoldState? = nil
+    /// Where onboarding's hand-off lands this name's avatar (Home's rows).
+    var avatarAnchor: HandoffAnchor? = nil
     var onTap: () -> Void = {}
 
     var body: some View {
         HStack(spacing: PP.space.md) {
             MonogramAvatar(initials: initials, tone: tone)
+                .handoffAnchor(avatarAnchor)
                 .heldRing(held)
             VStack(alignment: .leading, spacing: PP.space.xxs) {
                 CarriedLabel(text: label, carried: carried, context: .name)

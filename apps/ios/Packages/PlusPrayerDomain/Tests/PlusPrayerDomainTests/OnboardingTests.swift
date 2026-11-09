@@ -2,14 +2,14 @@ import Foundation
 import Testing
 @testable import PlusPrayerDomain
 
-/// auth-onboarding.md: resume by state, the alias-or-name label, the full
-/// name in the greeting, and the pre-trial pool (2026-11-09).
+/// auth-onboarding.md: resume by state, the alias-or-name label, the line
+/// under Me after the first prayer, and the pre-trial pool (2026-11-09).
 struct OnboardingTests {
     let now = Fixture.epoch
 
     @Test func resumeIsStateBased() {
         #expect(launchDestination(nil) == .waiting)
-        #expect(launchDestination(UserHeader(id: "u")) == .onboarding, "no self name: Welcome")
+        #expect(launchDestination(UserHeader(id: "u")) == .onboarding, "no self name: onboarding")
         #expect(launchDestination(UserHeader(id: "u", displayName: "Eric Olson")) == .onboarding,
                 "a display name without the self subject isn't done")
         #expect(launchDestination(UserHeader(id: "u", displayName: "Eric Olson", selfSubjectId: "s")) == .home)
@@ -23,12 +23,52 @@ struct OnboardingTests {
         #expect(initials(personLabel(name: "Julie Olson", alias: "Mom")) == "M")
         #expect(initials(personLabel(name: "Julie Olson", alias: "")) == "JO")
     }
+}
 
-    @Test func theGreetingIsTheFullName() {
-        #expect(greetingName(UserHeader(id: "u", displayName: "Sarah Beth Parker", selfSubjectId: "s"))
-                == "Sarah Beth Parker")
-        #expect(greetingName(UserHeader(id: "u")) == nil)
-        #expect(greetingName(nil) == nil)
+/// "After the first Amen" (auth-onboarding.md): the quiet line under Me,
+/// "Add an intention for yourself", after the first prayer, while Me has no
+/// open intention, until dismissed for good.
+struct SelfIntentionPromptTests {
+    let me = Fixture.name("self", "Eric Olson", order: 0, alias: "Me", isSelf: true)
+    let user = UserHeader(id: "u", displayName: "Eric Olson", selfSubjectId: "self")
+
+    @Test func prayedOnceMeansAnyTraceOfAPrayer() {
+        let tree = SubjectTree([me, Fixture.name("mom", "Julie Olson", order: 1, alias: "Mom")])
+        #expect(!hasPrayed(user, tree: tree, loggedPrayers: 0, localPrayers: 0), "a fresh account")
+        #expect(!hasPrayed(nil, tree: SubjectTree([]), loggedPrayers: 0, localPrayers: 0))
+        #expect(hasPrayed(user, tree: tree, loggedPrayers: 1, localPrayers: 0), "in the History log")
+        #expect(hasPrayed(user, tree: tree, loggedPrayers: 0, localPrayers: 1), "still on the device")
+        var withList = user
+        withList.lastListLocalDate = Fixture.today
+        #expect(hasPrayed(withList, tree: tree, loggedPrayers: 0, localPrayers: 0), "prayed with the list")
+        let held = SubjectTree([me, Fixture.name("mom", "Julie Olson", order: 1, alias: "Mom", prayed: 3)])
+        #expect(hasPrayed(user, tree: held, loggedPrayers: 0, localPrayers: 0), "a name held some day")
+    }
+
+    @Test func onlyAfterTheFirstPrayer() {
+        let tree = SubjectTree([me])
+        #expect(!showsSelfIntentionPrompt(hasPrayed: false, tree: tree, dismissed: false),
+                "the first Home has only Pray lit")
+        #expect(showsSelfIntentionPrompt(hasPrayed: true, tree: tree, dismissed: false))
+    }
+
+    @Test func goneOnceDismissedOrUsed() {
+        #expect(!showsSelfIntentionPrompt(hasPrayed: true, tree: SubjectTree([me]), dismissed: true),
+                "dismissed for good")
+        let withOne = SubjectTree([me, Fixture.intention("i", "self", "Patience", order: 0)])
+        #expect(!showsSelfIntentionPrompt(hasPrayed: true, tree: withOne, dismissed: false), "used")
+        let notChosen = SubjectTree([me, Fixture.intention("i", "self", "Patience", order: 0, carried: false)])
+        #expect(!showsSelfIntentionPrompt(hasPrayed: true, tree: notChosen, dismissed: false),
+                "any open intention on Me, printed or not")
+        let answered = SubjectTree([me, Fixture.intention("i", "self", "A new job", order: 0, answered: true)])
+        #expect(showsSelfIntentionPrompt(hasPrayed: true, tree: answered, dismissed: false),
+                "an answered one is no longer open")
+    }
+
+    @Test func neverBeforeMeExists() {
+        #expect(!showsSelfIntentionPrompt(hasPrayed: true, tree: SubjectTree([]), dismissed: false))
+        let others = SubjectTree([Fixture.name("mom", "Julie Olson", order: 1)])
+        #expect(!showsSelfIntentionPrompt(hasPrayed: true, tree: others, dismissed: false))
     }
 }
 

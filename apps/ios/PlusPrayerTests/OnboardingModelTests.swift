@@ -3,11 +3,12 @@ import PlusPrayerDomain
 import Testing
 @testable import PlusPrayer
 
-/// First run over the mock (auth-onboarding.md, "Flow (revised
-/// 2026-11-09)"): resume by state, the screens' path, the alias-or-name
-/// label, and the guided add's save sequence (the person carried, then the
-/// intention as their chosen one). The fresh seed (`-PPMockFresh`) has no
-/// self name and no people, never prayed: the pre-trial pool.
+/// First run over the mock (auth-onboarding.md, "Flow (redesigned
+/// 2026-11-09, second pass)"): resume by state, the steps, the
+/// alias-or-name label, the save sequence (the person carried, then the
+/// intention as their chosen one), and the line under Me after the first
+/// prayer. The fresh seed (`-PPMockFresh`) has no self name and no people,
+/// never prayed: the pre-trial pool.
 @MainActor
 struct OnboardingModelTests {
     let backend = MockBackend(seed: .fresh(now: .now), latency: .milliseconds(1), liveDrift: false)
@@ -28,23 +29,28 @@ struct OnboardingModelTests {
 
     private func subject(named name: String) -> Subject? { backend.subjects.value.first { $0.publicName == name } }
 
-    /// Begin → a name → Welcome back.
+    /// A name → the moment.
     private func throughTheName(_ model: OnboardingModel, _ name: String = "Eric Olson") async {
-        model.begin()
         model.name = name
         await model.submitName()
+    }
+
+    /// A name → the moment → someone.
+    private func toSomeone(_ model: OnboardingModel) async {
+        await throughTheName(model)
+        model.continueFromMoment()
     }
 
     // MARK: Resume
 
     @Test func aFreshAccountNeedsOnboardingAndTheNameEndsIt() async {
         defer { running.cancel() }
-        #expect(home.needsSelfName, "no self name: Welcome")
+        #expect(home.needsSelfName, "no self name: onboarding")
         let model = OnboardingModel(home: home)
         await throughTheName(model)
         await waitUntil { !home.needsSelfName }
         #expect(!home.needsSelfName, "a name exists: a later launch opens Home")
-        #expect(model.path == [.name, .welcomeBack], "this run stays on Welcome back")
+        #expect(model.step == .moment, "this run stays on the stage")
         #expect(!model.isFinished)
     }
 
@@ -58,31 +64,31 @@ struct OnboardingModelTests {
 
     // MARK: The name
 
-    @Test func theNameScreenSavesTheFullNameWithTheAvatarItShowed() async {
+    @Test func theNameSavesTheFullNameWithTheAvatarTheMomentShows() async {
         defer { running.cancel() }
         let model = OnboardingModel(home: home)
-        model.begin()
-        #expect(model.path == [.name])
-        #expect(!model.canContinueName, "Continue is disabled while empty")
-        #expect(model.nameInitials.isEmpty, "the person glyph")
+        #expect(model.step == .name)
+        #expect(!model.canContinueName, "Continue is unlit while empty")
+        #expect(model.nameInitials.isEmpty)
         model.name = "  Sarah Beth   Parker "
         #expect(model.nameInitials == "SP")
+        #expect(model.displayName == "Sarah Beth Parker", "the full name, never split")
         await model.submitName()
+        #expect(model.step == .moment)
         let me = backend.subjects.value.first(where: \.isSelf)
         #expect(me?.publicName == "Sarah Beth Parker")
-        #expect(me?.tone == model.selfTone, "the self keeps the name screen's color")
-        await waitUntil { home.header?.displayName != nil }
-        #expect(model.greeting == "Sarah Beth Parker", "the full name, never split")
+        #expect(me?.tone == model.selfTone, "the self keeps the moment's color")
+        await waitUntil { home.listContext != nil }
+        #expect(model.nextListNumber == (home.listContext?.listNumber ?? 0) + 1, "the paper line: tomorrow's list")
     }
 
     @Test func nameErrorsUseTheExistingLinesAndKeepTheText() async {
         defer { running.cancel() }
         let model = OnboardingModel(home: home)
-        model.begin()
         model.name = "call 555-123-4567"
         await model.submitName()
         #expect(model.nameProblem == .contact)
-        #expect(model.path == [.name])
+        #expect(model.step == .name)
         model.name = "Ann"
         model.nameChanged()
         #expect(model.nameProblem == nil)
@@ -96,35 +102,76 @@ struct OnboardingModelTests {
         #expect(model.nameProblem == .failed)
         backend.failsAdds = false
         await model.submitName()
-        #expect(model.path == [.name, .welcomeBack])
+        #expect(model.step == .moment)
     }
 
     @Test func backToTheNameAndContinueUnchangedDoesNotSaveAgain() async {
         defer { running.cancel() }
         let model = OnboardingModel(home: home)
         await throughTheName(model)
-        model.path = [.name]
+        #expect(model.canGoBack)
+        model.back()
+        #expect(model.step == .name)
+        #expect(model.name == "Eric Olson", "the text is kept")
         backend.online = false // a second setSelfName would fail
         await model.submitName()
-        #expect(model.path == [.name, .welcomeBack])
+        #expect(model.step == .moment)
         #expect(model.nameProblem == nil)
     }
 
-    // MARK: The guided add
+    // MARK: The steps
+
+    @Test func backGoesOneStepAndNeverFromTheName() async {
+        defer { running.cancel() }
+        let model = OnboardingModel(home: home)
+        #expect(!model.canGoBack, "no ‹ on the first step")
+        await toSomeone(model)
+        #expect(model.step == .someone)
+        model.personName = "Julie Olson"
+        model.continueToIntention()
+        #expect(model.step == .intention)
+        model.back()
+        #expect(model.step == .someone)
+        #expect(model.personName == "Julie Olson")
+        model.back()
+        #expect(model.step == .moment)
+        model.back()
+        #expect(model.step == .name)
+    }
+
+    @Test func notNowGoesToHomeWithNoOne() async {
+        defer { running.cancel() }
+        let model = OnboardingModel(home: home)
+        await toSomeone(model)
+        model.personName = "typed, then not now"
+        model.notNow()
+        #expect(model.step == .handoff)
+        #expect(model.addedPersonId == nil)
+        #expect(backend.subjects.value.count == 1, "only Me")
+        #expect(!model.isFinished, "the hand-off plays first")
+        model.finish()
+        #expect(model.isFinished)
+    }
+
+    @Test func thePersonsToneIsntYours() async {
+        defer { running.cancel() }
+        let model = OnboardingModel(home: home)
+        await toSomeone(model)
+        #expect(model.personTone != model.selfTone, "picked among the least used, yours counted")
+    }
+
+    // MARK: Someone you pray for
 
     @Test func theLabelIsWhatYouCallThemElseTheName() async {
         defer { running.cancel() }
         let model = OnboardingModel(home: home)
-        await throughTheName(model)
-        model.addSomeone()
-        #expect(model.path.last == .someone)
-        #expect(!model.showsCarriedLine && !model.canContinuePerson)
+        await toSomeone(model)
+        #expect(!model.hasPerson && !model.canContinuePerson, "their avatar forms with the first letter")
         model.personName = "Julie Olson"
         #expect(model.personLabel == "Julie Olson" && model.personInitials == "JO")
-        #expect(model.showsCarriedLine)
+        #expect(model.hasPerson && model.canContinuePerson)
         model.personAlias = "Mom"
         #expect(model.personLabel == "Mom" && model.personInitials == "M")
-        #expect(L10n.Onboarding.carriedWithYou(model.personLabel) == "Mom will be carried on the list with you.")
         #expect(L10n.Onboarding.intentionTitle(model.personLabel) == "What are you praying for, for Mom?")
         model.personAlias = " "
         #expect(model.personLabel == "Julie Olson")
@@ -133,12 +180,11 @@ struct OnboardingModelTests {
     @Test func addSavesThePersonCarriedThenTheirChosenIntention() async {
         defer { running.cancel() }
         let model = OnboardingModel(home: home)
-        await throughTheName(model)
-        model.addSomeone()
+        await toSomeone(model)
         model.personName = "Julie Olson"
         model.personAlias = "Mom"
         model.continueToIntention()
-        #expect(model.path == [.name, .welcomeBack, .someone, .intention])
+        #expect(model.step == .intention)
         #expect(backend.subjects.value.count == 1, "nothing saved before Add or Skip")
         model.intention = "Healing after surgery"
         await model.save(withIntention: true)
@@ -150,16 +196,14 @@ struct OnboardingModelTests {
         let intention = subject(named: "Healing after surgery")
         #expect(intention?.parentId == mom?.id)
         #expect(intention?.isCarried == true, "their chosen intention")
-        #expect(model.path == [.name, .welcomeBack], "back to Welcome back")
-        await waitUntil { !model.added.isEmpty }
-        #expect(model.added.map(\.label) == ["Mom"], "only the people added, never you")
+        #expect(model.step == .handoff, "then Home")
+        #expect(model.addedPersonId == mom?.id, "the hand-off takes her avatar into her row")
     }
 
     @Test func skipSavesThePersonWithoutAnIntention() async {
         defer { running.cancel() }
         let model = OnboardingModel(home: home)
-        await throughTheName(model)
-        model.addSomeone()
+        await toSomeone(model)
         model.personName = "Gary Olson"
         model.continueToIntention()
         model.intention = "typed, then skipped"
@@ -167,14 +211,13 @@ struct OnboardingModelTests {
         #expect(subject(named: "Gary Olson")?.isCarried == true)
         #expect(subject(named: "typed, then skipped") == nil)
         #expect(backend.subjects.value.filter { $0.kind == .intention }.isEmpty)
-        #expect(model.path == [.name, .welcomeBack])
+        #expect(model.step == .handoff)
     }
 
     @Test func aFailedSaveKeepsWhatTheyTypedAndStays() async {
         defer { running.cancel() }
         let model = OnboardingModel(home: home)
-        await throughTheName(model)
-        model.addSomeone()
+        await toSomeone(model)
         model.personName = "Julie Olson"
         model.personAlias = "Mom"
         model.continueToIntention()
@@ -182,10 +225,10 @@ struct OnboardingModelTests {
         backend.failsAdds = true
         await model.save(withIntention: true)
         #expect(model.addProblem == .failed)
-        #expect(model.path.last == .intention)
+        #expect(model.step == .intention)
         #expect(model.personName == "Julie Olson" && model.intention == "Healing after surgery")
         #expect(subject(named: "Julie Olson") == nil)
-        #expect(!model.personLocked, "nothing saved: ‹ stays")
+        #expect(!model.personLocked && model.canGoBack, "nothing saved: ‹ stays")
 
         backend.online = false
         await waitUntil { model.isOffline }
@@ -202,8 +245,7 @@ struct OnboardingModelTests {
     @Test func ifOnlyTheIntentionFailsTheRetryAddsOnlyTheIntention() async {
         defer { running.cancel() }
         let model = OnboardingModel(home: home)
-        await throughTheName(model)
-        model.addSomeone()
+        await toSomeone(model)
         model.personName = "Julie Olson"
         model.continueToIntention()
         model.intention = "Healing after surgery"
@@ -216,8 +258,8 @@ struct OnboardingModelTests {
         await model.save(withIntention: true)
         #expect(subject(named: "Julie Olson") != nil, "the person was saved")
         #expect(model.addProblem == .cap)
-        #expect(model.personLocked, "‹ goes: their fields can't change from here")
-        #expect(model.path.last == .intention)
+        #expect(model.personLocked && !model.canGoBack, "‹ goes: their fields can't change from here")
+        #expect(model.step == .intention)
         #expect(model.intention == "Healing after surgery", "what they typed stays")
 
         backend.subjects.update { $0.removeAll { $0.id.hasPrefix("filler-") } }
@@ -225,26 +267,7 @@ struct OnboardingModelTests {
         await model.save(withIntention: true)
         #expect(backend.subjects.value.filter { $0.publicName == "Julie Olson" }.count == 1, "never twice")
         #expect(subject(named: "Healing after surgery")?.isCarried == true)
-        #expect(model.path == [.name, .welcomeBack])
-        #expect(model.addedIds.count == 1)
-    }
-
-    @Test func peopleAddedThroughTheSheetJoinTheRow() async {
-        defer { running.cancel() }
-        let model = OnboardingModel(home: home)
-        await throughTheName(model)
-        let sheet = AddSheetModel(home: home)
-        sheet.name = "Gary Olson"
-        sheet.alias = "Dad"
-        await sheet.add()
-        model.addedFromSheet(sheet.addedNameId)
-        model.addedFromSheet(sheet.addedNameId)
-        model.addedFromSheet(nil)
-        await waitUntil { !model.added.isEmpty }
-        #expect(model.added.map(\.label) == ["Dad"])
-        #expect(subject(named: "Gary Olson")?.isCarried == true, "the pre-trial pool carries it")
-        model.finish()
-        #expect(model.isFinished)
+        #expect(model.step == .handoff)
     }
 
     @Test func theFirstPrayerStartsTheTrial() async {
@@ -257,5 +280,27 @@ struct OnboardingModelTests {
                                       listContextNumber: 52, subjectIds: []))
         #expect(backend.header.value?.trialStartedAt != nil)
         #expect(backend.header.value?.includeLimit == AppConfig.defaults.basePremiumPool)
+    }
+
+    // MARK: After the first Amen
+
+    @Test func theLineUnderMeComesAfterTheFirstPrayer() async throws {
+        defer { running.cancel() }
+        let model = OnboardingModel(home: home)
+        await throughTheName(model)
+        await waitUntil { home.meId != nil }
+        #expect(!home.hasPrayed)
+        #expect(!home.showsSelfIntentionPrompt(dismissed: false), "the first Home has only Pray lit")
+        let prayer = NewPrayer(id: UUID().uuidString, startedAt: .now.addingTimeInterval(-60), prayedAt: .now,
+                               localDate: LocalDate(.now), timezone: "UTC", communityListId: nil,
+                               listContextNumber: 52, subjectIds: [])
+        await home.log(prayer)
+        await waitUntil { home.hasPrayed }
+        #expect(home.showsSelfIntentionPrompt(dismissed: false))
+        #expect(!home.showsSelfIntentionPrompt(dismissed: true), "dismissed for good")
+        let me = try #require(home.meId)
+        _ = try await home.addSubject(NewSubject(kind: .intention, publicName: "Patience", parentId: me))
+        await waitUntil { !home.showsSelfIntentionPrompt(dismissed: false) }
+        #expect(!home.showsSelfIntentionPrompt(dismissed: false), "used: an intention on Me")
     }
 }

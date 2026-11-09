@@ -255,8 +255,25 @@ final class HomeModel {
     // MARK: Onboarding (auth-onboarding.md)
 
     /// No self name yet (onboarding resumes from data, never a stored step):
-    /// onboarding from Welcome. False until the header has arrived.
+    /// onboarding from its first step. False until the header has arrived.
     var needsSelfName: Bool { launchDestination(header) == .onboarding }
+
+    /// The self row's id ("Me"); nil before the name is saved.
+    var meId: String? { tree.me?.id }
+
+    /// Has the user ever prayed (the History log, this device's unsent
+    /// prayers, the header and the rows all count)?
+    var hasPrayed: Bool {
+        PlusPrayerDomain.hasPrayed(effectiveHeader, tree: tree, loggedPrayers: historyLog?.prayers.count ?? 0,
+                                   localPrayers: localPrayers.count)
+    }
+
+    /// "Add an intention for yourself" under the Me row ("After the first
+    /// Amen"): after the first prayer, while Me has no open intention, unless
+    /// dismissed (device-local, the view's `@AppStorage`).
+    func showsSelfIntentionPrompt(dismissed: Bool) -> Bool {
+        PlusPrayerDomain.showsSelfIntentionPrompt(hasPrayed: hasPrayed, tree: tree, dismissed: dismissed)
+    }
 
     /// The setSelfName callable (online only). Throws `SelfNameError`. A new
     /// self takes `avatarTone` (what the name screen showed).

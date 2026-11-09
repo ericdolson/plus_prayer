@@ -27,8 +27,8 @@ adding a name lands, and a minimal intention page; the pool counts people
 the strand, the day sheet); praying in place on both pages. Next: the rest
 of the pages (⋯), Prayer detail and past lists' pages (their History
 rows are inert until then), then the rest of build order step 3 (auth:
-sign-in and linking; onboarding screens 1–5 are built, 2026-11-09,
-"Onboarding" below).
+sign-in and linking; onboarding is built as one stage, 2026-11-09 second
+pass, "Onboarding" below; the post-first-Amen asks are next).
 Still open in prayer mode: backgrounding and the welcome-back question, the
 presence draft, the first Amen's onboarding steps. The real repositories run
 against the emulators (2026-11-08; "Real repositories" below), with the
@@ -268,7 +268,8 @@ compose queries; if an operation is missing, ask for a backend change.
   exercise the queue), a clock you can advance past midnight and the flip.
   No Firebase calls. **`-PPMockFresh`** (with the mock; not remembered)
   starts it as a first run instead (`MockSeed.fresh`: no self name, no
-  people, never prayed), so onboarding opens; the default seed is unchanged.
+  people, never prayed; the line under Me's dismissal is cleared), so
+  onboarding opens; the default seed is unchanged.
 - **emulator**: the real repositories against the local emulators
   (`backend/firebase.json`: SQL Connect 9399, RTDB 9000, Auth 9099,
   Functions 5001) on `-PPEmulatorHost <Mac's LAN address>`, else
@@ -299,8 +300,9 @@ root:
    choice, so opening it from the Home Screen stays on the emulators. On
    the simulator, run the **PlusPrayer Emulator** scheme instead.
 3. **First run:** the app signs in anonymously and shows onboarding
-   (Welcome → Begin → "What's your name?"). Enter a name, then "Add
-   others later" (or add someone): Home opens (empty until you seed).
+   ("Here, we pray for each other." · "What's your name?"). Enter a name,
+   Continue through the moment, then "Not now" (or add someone): Home
+   opens (empty until you seed).
 4. **Seed:** `npm --prefix backend/functions run seed:emulator`. It seeds
    every account the Auth emulator holds (your phone's), keeps the name you
    entered, and wipes whatever else was in SQL Connect: lists 1–70 ending
@@ -363,55 +365,86 @@ root:
   The scene becoming active flushes and re-reads too
   (`AppEnvironment.onActive`).
 - **Onboarding** (`Features/Onboarding`, `State/OnboardingModel`;
-  auth-onboarding.md "Flow (revised 2026-11-09)"): a full-screen cover over
-  Home, created when `HomeModel.needsSelfName` (`launchDestination` in
-  PlusPrayerDomain: a header without a self name) and kept until "Add
-  others later" / Continue (`isFinished`), so screens 3–5 stay up after
-  the name is saved; a later launch with a name opens Home. One native
-  `NavigationStack` (typed path `OnboardingModel.Screen`), system ‹ on
-  every screen after Welcome. 1 **Welcome** (`WelcomeScreen`): full bleed,
-  `WelcomeBackdrop` (SEAM for the photograph / loop: the 220 pt `WaxSeal`
-  on `color.welcomeGround`, warm and dark in both appearances; text in
-  `welcomeInk` / `welcomeInkMuted`, the controls in the dark appearance),
-  the Roca line, "One list. Everyone. Every day.", Begin; SEAM: no "Already
-  have an account? Sign in" until sign-in exists. 2 **Name** (`NameScreen`):
-  the question (`type.onboardingTitle`, Large Title bold sans), the 96 pt
-  avatar (`PPIcon.person` while empty; its tone becomes the new self's via
-  `setSelfName(_:avatarTone:)` → SetSubjectAvatarTone), one field in Roca
-  (`displayTitle`), Continue in a bottom `safeAreaBar` (above the
-  keyboard), disabled while empty; 40 cap, the contact / "Needs a
-  connection." / failure lines. Back and Continue with the name unchanged
-  doesn't save again. 3 **Welcome back** (`WelcomeBackScreen`): "Welcome,
-  {full name}." (Roca), the mechanic, a divider, "Who else do you hold?"
-  (sans) and its line, the privacy footer; buttons "＋ Add someone" /
-  "Add others later", after a first add the row of small avatars of only
-  the people added (`addedIds`: the guided add and the add sheet's
-  `addedNameId`), "＋ Add another" (tinted secondary: the regular
-  `AddSheet` over it) and Continue (prominent). 4 **Someone** (`SomeoneScreen`, a `Form` like the add sheet's
-  Name tab): the avatar (alias else name, `personLabel`), Name ("e.g. Julie
-  Olson", "Printed on the list"), "What you call them · optional", then
-  "{alias} will be carried on the list with you."; nothing saved here. 5
-  **Intention** (`IntentionScreen`, a plain `ScrollView`: a `Form`'s lazy
-  rows left the field unbuilt at AX sizes): Add / Skip run one save
-  sequence: addSubject (the person, carried by default: the pre-trial pool)
-  then, with Add, addSubject (the intention, `carry: true`, their chosen
-  one); then back to Welcome back. A failure keeps the text and shows the
-  add sheet's line; if only the intention failed, ‹ hides and a retry adds
-  only the intention. Shared with the add sheet: `textFieldRules` and
-  `FieldFooter` (`Features/AddSheet/FieldRules.swift`). Labeled buttons
-  (`OnboardingButton`, full width, large: `.prominent` glass prominent
-  blue, `.tinted` glass with a blue label, `.plain` glass ink). The mock starts the trial at the first prayer, like
-  onPrayerLogged. **Pre-trial pool** (2026-11-09): `isPreTrial` /
-  `effectivePoolLimit(prePool:)` in `Carry.swift` mirror pool.ts; the app
-  passes /config `basePremiumPool`.
+  auth-onboarding.md "Flow (redesigned 2026-11-09, second pass)", the mock
+  `design/explorations/onboarding/d-merged`): **one stage** over Home (an
+  overlay on HomeView, not a cover or pushed pages), created when
+  `HomeModel.needsSelfName` (`launchDestination`) and kept until its
+  hand-off has played (`isFinished`), so the steps after the name stay up
+  once it's saved; a later launch with a name opens Home. One model, one
+  step enum: name → moment → someone → intention → handoff (`back()`,
+  `notNow()`, `save(withIntention:)`). `OnboardingFlow` (the stage):
+  `CandlelightGround` (Home's `ground` + one `onboardingGlow` ellipse
+  breathing `duration.onboardingGlowBreath` each way, drifting
+  `size.onboarding.glowDrift`; static under Reduce Motion), dark in both
+  appearances (`colorScheme` dark in the stage, `preferredColorScheme(.dark)`
+  for the status bar and keyboard until the hand-off). Fixed slots: ‹ Back
+  top-leading (steps 2–4; hidden once the person is saved), one quiet text
+  action top-trailing (Not now / Skip; corners capped at xxxLarge with the
+  large content viewer, like native bars), the one blue button
+  (`OnboardingButton`: a capsule on glass tinted `primary`, like the pray
+  button; dim while unusable) in a bottom inset, `size.onboarding.buttonRest`
+  above the bottom or `buttonAboveKeyboard` above the keyboard. SEAM: Sign in
+  belongs in the top-trailing slot on step 1; empty until sign-in exists.
+  Each step's text sits in its own `ScrollView` (keyed by step); the
+  outgoing one fades and rises `textFall`, incoming groups fade and rise in
+  (`onboardingLine`, staggered). **Anchors** (`OnboardingMotion.swift`):
+  steps lay out invisible slots (`stageSlot(_:)`, global frames in
+  `StageGeometry`); the user's avatar, the person's and the user's name are
+  drawn in one overlay and travel between slots (`Trip` + `TravelEffect`,
+  an Animatable progress that only grows; clipped to the scroll viewport
+  while resting in it). 1 `NameStep`: the Roca lead, "What's your name?",
+  a centered sans field over a hairline (`UnderlinedField`), no keyboard on
+  arrival, Return continues; 40 cap, the contact / offline / failure lines.
+  Continue saves (`setSelfName(_:avatarTone:)`; back and Continue with the
+  name unchanged doesn't save again). 2 `MomentStep`: lays out an invisible
+  copy of step 1's lead so the name starts exactly where it was typed
+  (`nameAbove`), sans → Roca bold, the avatar forms above (opacity, scale
+  `formScale`, blur `formBlur`), the name settles onto `ListPaperLine`
+  (Components; SEAM for the photographed line: paper, stitches, "LIST 53"
+  = tomorrow's list, `nextListNumber`) scaled `paperNameScale`, then the
+  mechanic and the privacy line. 3 `SomeoneStep`: "Who do you pray for?"
+  (Roca), the person's avatar forms on the first letter (alias initials
+  once there is one; their tone picked here, yours counted), labeled fields
+  (`LabeledField`: label, field, the add sheet's `FieldFooter`), focused on
+  arrival; your avatar sits small in the top bar. 4 `IntentionStep`: only
+  them (their avatar travels up), alias else name (Roca bold), "Carried on
+  the list with you." + the carried mark, the question (Roca), the line, a
+  centered field growing 1 → 3 lines; Add / Skip run one save sequence:
+  addSubject (the person, carried by default: the pre-trial pool) then,
+  with Add, addSubject (the intention, `carry: true`). A failure keeps the
+  text and shows the add sheet's line; if only the intention failed, ‹ hides
+  and a retry adds only the intention. **Hand-off** (`HomeHandoff`): Home
+  stays at opacity 0 on its own ground under the stage; its header avatar,
+  row avatars (`NameRow(avatarAnchor:)`) and pray button report global
+  frames through `handoffAnchor(_:)` (Components/HandoffAnchor, an
+  environment value only set while onboarding is up) and stay hidden while
+  in `hidden`. The stage waits (≤ `onboardingHandoffWait`) for those frames,
+  then the ground fades (calm), your avatar travels into the header, the
+  person's into their row (+120 ms), Home fades in (+420), the button's
+  copy becomes the pray button (+700, glyph +1000), each copy handing over
+  to Home's own view as it lands. Reduce Motion: every transition a short
+  fade, beats ≤ `onboardingReduceMotionBeat`, nothing travels. Shared with
+  the add sheet: `textFieldRules` and `FieldFooter`. The mock starts the
+  trial at the first prayer, like onPrayerLogged. **Pre-trial pool**
+  (2026-11-09): `isPreTrial` / `effectivePoolLimit(prePool:)` in
+  `Carry.swift` mirror pool.ts; the app passes /config `basePremiumPool`.
+- **The line under Me** (auth-onboarding.md "After the first Amen";
+  `Features/Home/SelfIntentionPrompt`): "Add an intention for yourself"
+  (blue, opens `AddSheet(init(home:intentionFor:))` for Me) with "It prints
+  beside your name." and a × that hides it for good (`@AppStorage
+  "home.selfIntention.dismissed"`, device-local). Shown by
+  `showsSelfIntentionPrompt` (PlusPrayerDomain: `hasPrayed` ∧ Me has no
+  open intention ∧ not dismissed), never in prayer or under a search. The
+  "You'll be carried on List 53" → reminder → notification sequence isn't
+  built yet.
 - Not on the real backend yet (TODO): presence and the in-progress draft
   (`/presence/{uid}/{deviceId}`, not built on the mock either), the
   DeviceDataWiper and sign-out, reminders and settings, search
   (searchMySubjects: Home filters locally), the archive (restoreSubject is
   wired, no screen), History paging.
 - `PlusPrayerUITests/EmulatorSmokeTests`: skipped unless
-  `TEST_RUNNER_PP_EMULATOR_SMOKE=1`; onboarding on a fresh account (Begin →
-  name → Welcome back → Add others later), then
+  `TEST_RUNNER_PP_EMULATOR_SMOKE=1`; onboarding on a fresh account (name →
+  the moment → Not now → Home), then
   (after `seed:emulator`) Home, Dad's page, History and a full prayer, then
   a restore from the snapshot. Run against `npm run emulators`, in order,
   with `-only-testing:`.
@@ -557,6 +590,9 @@ root:
   environment; `ComponentGallery` stays for previews.
 - Strings: `App/L10n.swift` over `Resources/Localizable.xcstrings` (explicit
   keys, plural variations).
+- `ListPaperLine` (onboarding's moment: a drawn line of list paper, SEAM
+  for the photograph) and `handoffAnchor(_:)` / `HandoffAnchor` (where
+  onboarding's hand-off lands on Home; inert outside onboarding).
 
 ## Data and state so far (build step 2)
 - PlusPrayerDomain: models (`Subject`, `CurrentList`, `MyListStatus`,
@@ -779,11 +815,13 @@ root:
   in prayer → edge swipe → Home, still praying; Aunt Bea's
   page ("Private · in your prayers only") → carry her → her first
   intention → the ＋; search → results → no matches →
-  the match hint → ×. `OnboardingUITests` (`-PPMockFresh`): Begin → name →
-  Welcome back → Add someone → Julie Olson / Mom → intention → Add → the
-  row "Added: Mom" → Continue → Home with Me, Mom and the intention; Add
-  others later → Home; every screen at the largest accessibility size
-  (buttons on screen and tappable; no screenshots). Screenshots are attached to
+  the match hint → ×. `OnboardingUITests` (`-PPMockFresh`): name (no
+  keyboard on arrival, no Sign in) → the moment (the name on the paper
+  line) → Julie Olson / Mom → her intention → Add → Home with Me, Mom
+  (carried) and the intention, the pray button hittable last; ‹ Back keeps
+  the name → Not now → Home → the first prayer → the line under Me → ×;
+  every step at the largest accessibility size (buttons on screen and
+  tappable; no screenshots). Screenshots are attached to
   the result bundle (`xcrun xcresulttool export attachments`). To check
   motion (the keyboard with the sheet), record the simulator during the
   test (`xcrun simctl io <udid> recordVideo`) and look at frames.

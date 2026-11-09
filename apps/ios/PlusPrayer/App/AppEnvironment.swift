@@ -29,7 +29,8 @@ struct AppEnvironment {
 
     static let environmentKey = "PPEnvironment"
     /// `-PPMockFresh`: the mock starts as a first run (no self name, no
-    /// people) so onboarding can be tried. Not remembered.
+    /// people; the line under Me not dismissed) so onboarding can be tried.
+    /// Not remembered.
     static let mockFreshArgument = "-PPMockFresh"
     static let emulatorHostKey = "PPEmulatorHost"
     /// The remembered choices (the persistent domain, not the arguments').
@@ -73,6 +74,8 @@ struct AppEnvironment {
         switch choice.kind {
         case .mock:
             if processInfo.arguments.contains(mockFreshArgument) {
+                // A first run: the device-local first-run state goes too.
+                defaults.removeObject(forKey: SelfIntentionPrompt.dismissedKey)
                 return .mock(MockBackend(seed: .fresh(now: .now)))
             }
             return .mock()

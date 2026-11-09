@@ -55,6 +55,7 @@ struct HomeHeader: View {
                         }
                         .buttonStyle(.plain)
                         .glassEffect(.regular.tint(MonogramAvatar.color(tone: tone)).interactive(), in: .circle)
+                        .handoffAnchor(.selfAvatar)
                         .accessibilityLabel(L10n.Home.you)
 
                         StreakBadge(state: streakState, days: streakDays, onTap: onStreak)
@@ -122,6 +123,7 @@ struct HomeBar<SearchField: View>: View {
                 .glassEffect(.regular.interactive(), in: .capsule)
 
                 PrayButton(startedAt: prayerStartedAt, diameter: height, onPray: onPray, onAmen: onAmen)
+                    .handoffAnchor(.prayButton)
             }
         }
         .padding(.horizontal, PP.size.bar.inset)

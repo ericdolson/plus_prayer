@@ -98,6 +98,7 @@ white; dark grounds taken about halfway to black; `sheet` added._
 | `inkFaint` | decorative only | decorative only | ~3.7:1 dark, ~2.4:1 light — never essential text. Secondary text uses `inkMuted` |
 | `carriedMark` (new, 2026-11-01; revised same day) | `#53585E` (2.7:1) | `#A6B4C6` (1.8:1) | The carried mark (§5): its own value, halfway between `thread` and `inkFaint`. A quiet secondary cue, below 3:1 on purpose (`inkFaint` read too loud); the Carried filter is the reliable way to see what's carried |
 | `onboardingGlow` (new, 2026-11-09; replaces `welcomeGround` / `welcomeInk` / `welcomeInkMuted`) | warm white `#E2C48C` at 16% | = dark | Onboarding's Candlelight: one soft glow behind the content on Home's own `ground`, breathing slowly (auth-onboarding.md). Text uses Home's `ink` / `inkMuted` |
+| `onboardingPaper` / `onboardingPaperInk` / `onboardingPaperMuted` (new, 2026-11-09) | `#E4DBC8` / `#2A2019` / `#6B5B4B` | = dark | Onboarding's paper line (step 2, the stand-in for a photographed line of the list): the paper, the name on it (11.6:1) and its "LIST 53" label (4.7:1). Stitch lines and guide in `onboardingPaperInk` at 32% / 12% |
 
 Contrast is computed (WCAG AA: 4.5:1 body text, 3:1 large text and non-text
 UI); the figures in `app/lib/theme/tokens.dart` are the checked ones.
@@ -194,8 +195,23 @@ gold.
 - **Sans page roles** (tokens, 2026-11-08): `type.sectionTitle` (Title 3
   semibold: "Intentions", "History"), `type.intentionTitle` (Title 2
   semibold: an intention page's title), `type.periodLabel` (Headline: a
-  History period's label), `type.onboardingTitle` (Large Title bold:
-  onboarding's questions, "What's your name?"; 2026-11-09).
+  History period's label).
+- **Onboarding roles** (2026-11-09, second pass; replaces
+  `type.onboardingTitle`): `onboardingLead` (Roca regular 30, the one big
+  line per step, never bold) and `onboardingLeadSmall` (Roca regular 26: "Who
+  do you pray for?", "What are you praying for, for Mom?");
+  `onboardingName` (Roca bold 28: the user's name in the moment, 22 on the
+  paper line) and `onboardingPersonName` (Roca bold 24: "Mom" under her
+  avatar); sans: `onboardingMechanic` (Title 3 regular, the moment's one
+  sentence), `onboardingField` (Title 2 regular, centered fields),
+  `onboardingFieldLabeled` (Title 3 regular, labeled fields),
+  `onboardingFieldLabel` (Subheadline medium, inkMuted; "· optional" in
+  inkFaint), `onboardingButton` (Headline: the blue button),
+  `onboardingPaperLabel` (Caption 2 medium, uppercase, tracked 0.09 em);
+  questions and body use `body` / `bodySmall`. Sizes, motion and the glow's
+  values are `size.onboarding.*`, `number.onboarding.*` and
+  `duration.onboarding*` in `design/tokens.json` (from the d-merged mock's
+  notes).
 - Respect Dynamic Type / font scaling; layouts must not clip at large sizes.
 
 ---

@@ -27,6 +27,8 @@ nonisolated enum PPIcon {
     static let note = Image(systemName: "square.and.pencil")
     /// A row that pushes ("Prints with  … ›").
     static let disclosure = Image(systemName: "chevron.forward")
+    /// Onboarding's ‹ Back.
+    static let back = Image(systemName: "chevron.backward")
     /// History: "Today ▾" points at today's node.
     static let today = Image(systemName: "arrowtriangle.down.fill")
     /// History: a day an intention was answered (the gold ✦ on its node).

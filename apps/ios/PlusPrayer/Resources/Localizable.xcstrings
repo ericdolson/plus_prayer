@@ -930,20 +930,8 @@
         }
       }
     },
-    "onboarding.name.continue" : {
-      "comment" : "First run, screen 2 (Name): the button above the keyboard that saves the name (setSelfName) and opens Welcome back (auth-onboarding.md, Flow (revised 2026-11-09): Continue).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continue"
-          }
-        }
-      }
-    },
     "onboarding.name.failed" : {
-      "comment" : "First run, screen 2 (Name): under the field when saving failed for any other reason. Not in the spec; plainest wording, for review.",
+      "comment" : "First run, step 1: under the field when saving the name failed for any other reason (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -955,7 +943,7 @@
       }
     },
     "onboarding.name.offline" : {
-      "comment" : "First run, screen 2 (Name): under the field when saving needs a connection (as on a page's carry row).",
+      "comment" : "First run, step 1: under the field when saving the name needs a connection (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -966,140 +954,8 @@
         }
       }
     },
-    "onboarding.name.title" : {
-      "comment" : "First run, screen 2 (Name): the question, Large Title sans (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What’s your name?"
-          }
-        }
-      }
-    },
-    "onboarding.back.addAnother" : {
-      "comment" : "First run, screen 3 (Welcome back) after a first add: the button that opens the regular add sheet, shown with the ＋ glyph (“＋ Add another”, auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add another"
-          }
-        }
-      }
-    },
-    "onboarding.back.addSomeone" : {
-      "comment" : "First run, screen 3 (Welcome back): the prominent button, shown with the ＋ glyph (“＋ Add someone”, auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add someone"
-          }
-        }
-      }
-    },
-    "onboarding.back.added" : {
-      "comment" : "First run, screen 3 (Welcome back): VoiceOver for the row of avatars of the people added (their names, joined). Not in the spec; plainest wording, for review.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Added: %@"
-          }
-        }
-      }
-    },
-    "onboarding.back.continue" : {
-      "comment" : "First run, screen 3 (Welcome back) after a first add: the button to Home (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continue"
-          }
-        }
-      }
-    },
-    "onboarding.back.later" : {
-      "comment" : "First run, screen 3 (Welcome back): the secondary button to Home (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add others later"
-          }
-        }
-      }
-    },
-    "onboarding.back.mechanic" : {
-      "comment" : "First run, screen 3 (Welcome back): the mechanic, under the greeting (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pray with today’s list. Tomorrow your name is on it, and the world prays for you."
-          }
-        }
-      }
-    },
-    "onboarding.back.privacy" : {
-      "comment" : "First run, screen 3 (Welcome back): the faint privacy footer (auth-onboarding.md, Flow (revised 2026-11-09); privacy.md 2026-11-09).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The list is printed, sealed and kept private. Your name is never shared or shown publicly."
-          }
-        }
-      }
-    },
-    "onboarding.back.question" : {
-      "comment" : "First run, screen 3 (Welcome back): the question after the divider (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Who else do you hold?"
-          }
-        }
-      }
-    },
-    "onboarding.back.questionLine" : {
-      "comment" : "First run, screen 3 (Welcome back): the line under the question (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep the people you pray for here. When you want, carry them on the list too."
-          }
-        }
-      }
-    },
-    "onboarding.back.title" : {
-      "comment" : "First run, screen 3 (Welcome back): the greeting in Roca with the full name as printed, never split (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Welcome, %@."
-          }
-        }
-      }
-    },
     "onboarding.intention.add" : {
-      "comment" : "First run, screen 5: saves the person and the intention, then back to Welcome back (auth-onboarding.md, Flow (revised 2026-11-09)).",
+      "comment" : "First run, step 4: the blue button; saves the person and the intention, then Home (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1111,19 +967,19 @@
       }
     },
     "onboarding.intention.line" : {
-      "comment" : "First run, screen 5: the line under the question (auth-onboarding.md, Flow (revised 2026-11-09)).",
+      "comment" : "First run, step 4: the line under the question (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "An intention is a request: healing, a new job, peace. One can be printed with their name on the list."
+            "value" : "A request: healing, a new job, peace. It can print with their name."
           }
         }
       }
     },
     "onboarding.intention.skip" : {
-      "comment" : "First run, screen 5: saves the person without an intention, then back to Welcome back (auth-onboarding.md, Flow (revised 2026-11-09)).",
+      "comment" : "First run, step 4: the quiet text action top trailing; saves the person without an intention, then Home (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1135,7 +991,7 @@
       }
     },
     "onboarding.intention.title" : {
-      "comment" : "First run, screen 5 (an optional intention): the question; %@ = what you call them, else their name (auth-onboarding.md, Flow (revised 2026-11-09)).",
+      "comment" : "First run, step 4 (their intention): the Roca question; %@ = what you call them, else their name (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1146,32 +1002,8 @@
         }
       }
     },
-    "onboarding.someone.carried" : {
-      "comment" : "First run, screen 4: under the fields once a name is entered; %@ = what you call them, else their name (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ will be carried on the list with you."
-          }
-        }
-      }
-    },
-    "onboarding.someone.continue" : {
-      "comment" : "First run, screen 4: the button to the intention screen (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continue"
-          }
-        }
-      }
-    },
     "onboarding.someone.nameCaption" : {
-      "comment" : "First run, screen 4: the footer under the Name field (auth-onboarding.md, Flow (revised 2026-11-09)).",
+      "comment" : "First run, step 3: the caption under the Name field (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1183,7 +1015,7 @@
       }
     },
     "onboarding.someone.namePlaceholder" : {
-      "comment" : "First run, screen 4: the Name field's placeholder (auth-onboarding.md, Flow (revised 2026-11-09); the add sheet's is “e.g. Gary Olson”).",
+      "comment" : "First run, step 3: the Name field's placeholder (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1195,49 +1027,13 @@
       }
     },
     "onboarding.someone.title" : {
-      "comment" : "First run, screen 4 (the guided first add): the question, Large Title sans (auth-onboarding.md, Flow (revised 2026-11-09)).",
+      "comment" : "First run, step 3 (someone you pray for): the Roca line at the top (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Who’s someone you pray for?"
-          }
-        }
-      }
-    },
-    "onboarding.welcome.begin" : {
-      "comment" : "First run, screen 1 (Welcome): the prominent button (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Begin"
-          }
-        }
-      }
-    },
-    "onboarding.welcome.subtitle" : {
-      "comment" : "First run, screen 1 (Welcome): the line under the title (auth-onboarding.md, Flow (revised 2026-11-09)).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "One list. Everyone. Every day."
-          }
-        }
-      }
-    },
-    "onboarding.welcome.title" : {
-      "comment" : "First run, screen 1 (Welcome): the line in Roca on the lower third (auth-onboarding.md, Flow (revised 2026-11-09); the splash line).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your name, carried by the world."
+            "value" : "Who do you pray for?"
           }
         }
       }
@@ -2600,6 +2396,174 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yesterday"
+          }
+        }
+      }
+    },
+    "onboarding.back" : {
+      "comment" : "First run, steps 2–4: the ‹ Back text action, top leading (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        }
+      }
+    },
+    "onboarding.continue" : {
+      "comment" : "First run, steps 1–3: the one blue button (saves the name on step 1; auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        }
+      }
+    },
+    "onboarding.name.lead" : {
+      "comment" : "First run, step 1: the one Roca line above the question (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Here, we pray for each other."
+          }
+        }
+      }
+    },
+    "onboarding.name.question" : {
+      "comment" : "First run, step 1: the question above the name field, sans (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What’s your name?"
+          }
+        }
+      }
+    },
+    "onboarding.name.placeholder" : {
+      "comment" : "First run, step 1: the name field's placeholder, also its VoiceOver label (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name"
+          }
+        }
+      }
+    },
+    "onboarding.moment.mechanic" : {
+      "comment" : "First run, step 2 (the moment): the mechanic, under the paper line with your name (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pray with today’s list. Tomorrow your name is on it."
+          }
+        }
+      }
+    },
+    "onboarding.moment.privacy" : {
+      "comment" : "First run, step 2 (the moment): the line under the mechanic (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The list is printed and sealed each day, and kept private."
+          }
+        }
+      }
+    },
+    "onboarding.someone.aliasLabel" : {
+      "comment" : "First run, step 3: the label above the alias field, followed by \"· optional\" (onboarding.someone.optional) in a fainter ink (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you call them"
+          }
+        }
+      }
+    },
+    "onboarding.someone.optional" : {
+      "comment" : "First run, step 3: after \"What you call them ·\", fainter (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "optional"
+          }
+        }
+      }
+    },
+    "onboarding.someone.notNow" : {
+      "comment" : "First run, step 3: the quiet text action top trailing; skips adding a person and goes to Home (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not now"
+          }
+        }
+      }
+    },
+    "onboarding.intention.carried" : {
+      "comment" : "First run, step 4: under the person's name, followed by the carried mark (auth-onboarding.md, Flow (redesigned 2026-11-09, second pass)).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carried on the list with you."
+          }
+        }
+      }
+    },
+    "home.selfIntention.add" : {
+      "comment" : "Home: the blue line under the Me row after the first prayer; opens the add-intention form for Me (auth-onboarding.md, \"After the first Amen\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add an intention for yourself"
+          }
+        }
+      }
+    },
+    "home.selfIntention.line" : {
+      "comment" : "Home: under \"Add an intention for yourself\" (auth-onboarding.md, \"After the first Amen\").",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It prints beside your name."
+          }
+        }
+      }
+    },
+    "home.selfIntention.dismiss" : {
+      "comment" : "VoiceOver: the × beside \"Add an intention for yourself\" on Home; hides it for good (not in the spec: plainest wording, for review).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dismiss"
           }
         }
       }

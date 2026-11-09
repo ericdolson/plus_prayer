@@ -1,14 +1,15 @@
 import PlusPrayerDomain
 import SwiftUI
 
-/// Screen 4, the guided first add: "Who's someone you pray for?", then the
-/// add sheet's own fields in its order (a native `Form`, as the sheet's
-/// Name tab): the avatar (initials from what you call them, else the name),
-/// Name (required; "e.g. Julie Olson"; "Printed on the list") and "What you
-/// call them · optional" ("e.g. Mom"; "Only you see this"). Once a name is
-/// entered: "{alias} will be carried on the list with you." (carried by
-/// default, no switch). Continue → the intention. Nothing is saved here.
-struct SomeoneScreen: View {
+/// Step 3, someone you pray for (optional): "Who do you pray for?" (Roca),
+/// the empty place where their avatar forms with the first letter (the
+/// stage's anchor; initials from what you call them once there is one),
+/// then the add sheet's fields in onboarding's type, no form chrome: Name
+/// ("e.g. Julie Olson", "Printed on the list") and "What you call them ·
+/// optional" ("e.g. Mom", "Only you see this"). The add sheet's rules
+/// (`textFieldRules`, `FieldFooter`). Nothing is saved here. Focused on
+/// arrival; Return moves to the next field, then continues.
+struct SomeoneStep: View {
     @Bindable var model: OnboardingModel
     @FocusState private var focus: Field?
 
@@ -17,18 +18,27 @@ struct SomeoneScreen: View {
     }
 
     var body: some View {
-        Form {
-            Section {
-                OnboardingQuestion(text: L10n.Onboarding.someoneTitle)
-            }
-            Section {
-                MonogramAvatar(initials: model.personInitials, tone: model.personTone, size: PP.size.avatar.person,
-                               placeholder: PPIcon.person)
-                    .frame(maxWidth: .infinity)
-                    .listRowInsets(EdgeInsets(top: PP.space.sm, leading: 0, bottom: PP.space.sm, trailing: 0))
-                    .listRowBackground(Color.clear)
-            }
-            Section {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(L10n.Onboarding.someoneTitle)
+                .font(PP.type.onboardingLeadSmall)
+                .foregroundStyle(PP.color.ink)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
+                .accessibilityAddTraits(.isHeader)
+                .padding(.top, PP.space.lg)
+                .onboardingLine(delay: OnboardingTiming.line(0))
+            Color.clear
+                .frame(width: PP.size.onboarding.personAvatar, height: PP.size.onboarding.personAvatar)
+                .stageSlot(.someoneAvatar)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, PP.space.xl)
+                .accessibilityHidden(true)
+            LabeledField(focused: focus == .name, caption: L10n.Onboarding.someoneNameCaption,
+                         text: model.personName, cap: TextCap.name,
+                         contactIssue: model.contactShown.contains(.personName)) {
+                Text(L10n.Add.nameLabel)
+            } field: {
                 TextField(L10n.Add.nameLabel, text: $model.personName,
                           prompt: prompt(L10n.Onboarding.someoneNamePlaceholder))
                     .focused($focus, equals: .name)
@@ -42,15 +52,13 @@ struct SomeoneScreen: View {
                                     hasContactIssue: { model.hasContactIssue(.personName) },
                                     showContactIssue: { model.showContactIssue(.personName, $0) },
                                     onEdit: model.textChanged)
-                    .listRowBackground(PP.color.raised)
-            } header: {
-                Text(L10n.Add.nameLabel)
-            } footer: {
-                FieldFooter(text: model.personName, cap: TextCap.name,
-                            contactIssue: model.contactShown.contains(.personName),
-                            caption: L10n.Onboarding.someoneNameCaption)
             }
-            Section {
+            .onboardingLine(delay: OnboardingTiming.line(1))
+            LabeledField(focused: focus == .alias, caption: L10n.Add.aliasCaption,
+                         text: model.personAlias, cap: TextCap.alias, contactIssue: false) {
+                let optional = Text(L10n.Onboarding.optional).font(PP.type.bodySmall).foregroundStyle(PP.color.inkFaint)
+                Text("\(Text(L10n.Onboarding.someoneAliasLabel))\(Text(verbatim: " · ").foregroundStyle(PP.color.inkFaint))\(optional)")
+            } field: {
                 TextField(L10n.Add.aliasLabel, text: $model.personAlias, prompt: prompt(L10n.Add.aliasPlaceholder))
                     .focused($focus, equals: .alias)
                     .accessibilityLabel(L10n.Add.aliasLabel)
@@ -61,47 +69,58 @@ struct SomeoneScreen: View {
                     .onChange(of: model.personAlias) { _, new in
                         if new.count > TextCap.alias { model.personAlias = String(new.prefix(TextCap.alias)) }
                     }
-                    .listRowBackground(PP.color.raised)
-            } header: {
-                Text(L10n.Add.aliasLabel)
-            } footer: {
-                FieldFooter(text: model.personAlias, cap: TextCap.alias, contactIssue: false,
-                            caption: L10n.Add.aliasCaption)
             }
-            if model.showsCarriedLine {
-                Section {
-                    Text(L10n.Onboarding.carriedWithYou(model.personLabel))
-                        .foregroundStyle(PP.color.ink)
-                        .listRowBackground(Color.clear)
-                        .accessibilityIdentifier("onboarding.someone.carried")
-                }
-            }
+            .padding(.top, PP.space.xl)
+            .onboardingLine(delay: OnboardingTiming.line(2))
         }
-        .scrollContentBackground(.hidden)
-        .background(PP.color.ground)
-        .navigationBarTitleDisplayMode(.inline)
-        .safeAreaBar(edge: .bottom) {
-            OnboardingButton(title: L10n.Onboarding.someoneContinue, style: .prominent,
-                             identifier: "onboarding.someone.continue", action: model.continueToIntention)
-                .disabled(!model.canContinuePerson)
-                .padding(.horizontal, PP.space.gutter)
-                .padding(.bottom, PP.space.sm)
-        }
-        .onAppear { if focus == nil { focus = .name } }
+        .onAppear { focus = .name }
     }
 
     private func prompt(_ placeholder: String) -> Text {
-        Text(placeholder).foregroundStyle(PP.color.inkMuted)
+        Text(placeholder).foregroundStyle(PP.color.inkFaint)
     }
 }
 
-/// Screen 5, optional: "What are you praying for, for {alias}?", what an
-/// intention is, a field ("e.g. Healing after surgery"), Add / Skip. Either
-/// saves the person (carried) and, with Add, the intention as their chosen
-/// one, then returns to Welcome back. A failed save keeps the text and says
-/// so (the add sheet's lines); once the person is saved, ‹ goes (their
-/// fields can't change from here) and Add retries only the intention.
-struct IntentionScreen: View {
+/// A labeled onboarding field: the label above (`onboardingFieldLabel`,
+/// inkMuted), the field (`onboardingFieldLabeled`) over its hairline, and
+/// the add sheet's footer below (the caption, the contact message in its
+/// place, the counter near the cap).
+private struct LabeledField<Label: View, Field: View>: View {
+    let focused: Bool
+    let caption: String
+    let text: String
+    let cap: Int
+    let contactIssue: Bool
+    @ViewBuilder let label: () -> Label
+    @ViewBuilder let field: () -> Field
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PP.space.xxs) {
+            label()
+                .font(PP.type.onboardingFieldLabel)
+                .foregroundStyle(PP.color.inkMuted)
+                .accessibilityHidden(true)
+            UnderlinedField(focused: focused) {
+                field()
+                    .font(PP.type.onboardingFieldLabeled)
+                    .foregroundStyle(PP.color.ink)
+            }
+            FieldFooter(text: text, cap: cap, contactIssue: contactIssue, caption: caption)
+                .font(PP.type.caption)
+                .foregroundStyle(PP.color.inkMuted)
+                .padding(.top, PP.space.xs)
+        }
+    }
+}
+
+/// Step 4, their intention (optional): only them. Their avatar (the stage's
+/// anchor, travelled up), what you call them else their name (Roca bold),
+/// "Carried on the list with you." with the carried mark, then "What are
+/// you praying for, for {alias}?" (Roca), what an intention is, one centered
+/// field ("e.g. Healing after surgery"). The stage's Add and Skip run one
+/// save sequence (the person, then the intention as their chosen one). A
+/// failed save keeps the text and says so (the add sheet's lines).
+struct IntentionStep: View {
     @Bindable var model: OnboardingModel
     @FocusState private var focused: Bool
 
@@ -115,54 +134,62 @@ struct IntentionScreen: View {
     }
 
     var body: some View {
-        // A plain scroll, not a Form: a Form's rows are lazy, and at the
-        // largest text sizes the field (below the question) wasn't there to
-        // take focus.
-        ScrollView {
-            VStack(alignment: .leading, spacing: PP.space.lg) {
-                OnboardingQuestion(text: L10n.Onboarding.intentionTitle(model.personLabel))
-                Text(L10n.Onboarding.intentionLine)
-                    .font(PP.type.body)
+        VStack(spacing: 0) {
+            Color.clear
+                .frame(width: PP.size.onboarding.personAvatar, height: PP.size.onboarding.personAvatar)
+                .stageSlot(.intentionAvatar)
+                .padding(.top, PP.space.lg)
+                .accessibilityHidden(true)
+            VStack(spacing: PP.space.xs) {
+                Text(verbatim: model.personLabel)
+                    .font(PP.type.onboardingPersonName)
+                    .foregroundStyle(PP.color.ink)
+                    .lineLimit(2)
+                    .accessibilityAddTraits(.isHeader)
+                CarriedMark.after(Text(L10n.Onboarding.carriedWithYou), carried: true, context: .name)
+                    .font(PP.type.bodySmall)
                     .foregroundStyle(PP.color.inkMuted)
-                if let notice {
-                    Text(notice)
-                        .font(PP.type.body)
-                        .foregroundStyle(PP.color.ink)
-                        .accessibilityIdentifier("onboarding.intention.notice")
-                        .transition(.opacity)
-                }
-                VStack(alignment: .leading, spacing: PP.space.sm) {
-                    field
-                        .padding(PP.space.md)
-                        .background(PP.color.raised, in: RoundedRectangle(cornerRadius: PP.radius.md))
-                    FieldFooter(text: model.intention, cap: TextCap.intention,
-                                contactIssue: model.contactShown.contains(.intention))
-                        .font(PP.type.caption)
-                        .foregroundStyle(PP.color.inkMuted)
-                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, PP.space.gutter)
-            .padding(.vertical, PP.space.xl)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, PP.space.sm)
+            .onboardingLine(delay: PP.duration.onboardingPersonName, rise: PP.size.onboarding.textFall)
+            Text(L10n.Onboarding.intentionTitle(model.personLabel))
+                .font(PP.type.onboardingLeadSmall)
+                .foregroundStyle(PP.color.ink)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, PP.space.xl)
+                .onboardingLine(delay: OnboardingTiming.line(0))
+            Text(L10n.Onboarding.intentionLine)
+                .font(PP.type.bodySmall)
+                .foregroundStyle(PP.color.inkMuted)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, PP.space.sm)
+                .onboardingLine(delay: OnboardingTiming.line(1))
+            if let notice {
+                Text(notice)
+                    .font(PP.type.body)
+                    .foregroundStyle(PP.color.ink)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, PP.space.md)
+                    .accessibilityIdentifier("onboarding.intention.notice")
+                    .transition(.opacity)
+            }
+            VStack(spacing: PP.space.xs) {
+                UnderlinedField(focused: focused) { field }
+                FieldFooter(text: model.intention, cap: TextCap.intention,
+                            contactIssue: model.contactShown.contains(.intention))
+                    .font(PP.type.caption)
+                    .foregroundStyle(PP.color.inkMuted)
+            }
+            .padding(.top, PP.space.md)
+            .onboardingLine(delay: OnboardingTiming.line(2))
         }
-        .scrollBounceBehavior(.basedOnSize)
-        .background(PP.color.ground)
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(model.personLocked || model.saving)
+        .frame(maxWidth: .infinity)
         .animation(.easeOut(duration: PP.duration.quick), value: notice)
-        .safeAreaBar(edge: .bottom) {
-            VStack(spacing: PP.space.sm) {
-                OnboardingButton(title: L10n.Onboarding.intentionAdd, style: .prominent, busy: model.saving,
-                                 identifier: "onboarding.intention.add") { save(withIntention: true) }
-                    .disabled(!model.canAddIntention)
-                OnboardingButton(title: L10n.Onboarding.intentionSkip, identifier: "onboarding.intention.skip") {
-                    save(withIntention: false)
-                }
-                .disabled(!model.canSave)
-            }
-            .padding(.horizontal, PP.space.gutter)
-            .padding(.bottom, PP.space.sm)
-        }
         .onAppear { focused = true }
     }
 
@@ -170,10 +197,12 @@ struct IntentionScreen: View {
     /// adds, pasted breaks become spaces); the add sheet's rules.
     private var field: some View {
         TextField(L10n.Add.intentionLabel, text: $model.intention,
-                  prompt: Text(L10n.Add.intentionPlaceholder).foregroundStyle(PP.color.inkMuted), axis: .vertical)
+                  prompt: Text(L10n.Add.intentionPlaceholder).foregroundStyle(PP.color.inkFaint), axis: .vertical)
             .lineLimit(1...3)
-            .focused($focused)
+            .font(PP.type.onboardingField)
             .foregroundStyle(PP.color.ink)
+            .multilineTextAlignment(.center)
+            .focused($focused)
             .accessibilityLabel(L10n.Add.intentionLabel)
             .accessibilityIdentifier("onboarding.intention.field")
             .textInputAutocapitalization(.sentences)
@@ -183,7 +212,7 @@ struct IntentionScreen: View {
                 let typedReturn = new.count == old.count + 1 && new.filter { !$0.isNewline } == old
                 if typedReturn {
                     model.intention = old
-                    save(withIntention: true)
+                    Task { await model.save(withIntention: true) }
                 } else {
                     model.intention = String(new.map { $0.isNewline ? " " : $0 })
                 }
@@ -192,25 +221,5 @@ struct IntentionScreen: View {
                             hasContactIssue: { model.hasContactIssue(.intention) },
                             showContactIssue: { model.showContactIssue(.intention, $0) },
                             onEdit: model.textChanged)
-    }
-
-    private func save(withIntention: Bool) {
-        Task { await model.save(withIntention: withIntention) }
-    }
-}
-
-/// An onboarding question at the top of a form: Large Title, sans, on the
-/// ground (no row background), wrapping.
-struct OnboardingQuestion: View {
-    let text: String
-
-    var body: some View {
-        Text(text)
-            .font(PP.type.onboardingTitle)
-            .foregroundStyle(PP.color.ink)
-            .fixedSize(horizontal: false, vertical: true)
-            .accessibilityAddTraits(.isHeader)
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets())
     }
 }
