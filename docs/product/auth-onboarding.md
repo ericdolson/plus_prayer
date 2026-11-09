@@ -38,10 +38,14 @@ _Last updated: 2026-11-09_
     slowly breathing glow behind the content (warmth from light, not hue;
     not brown, not a gradient). Ink is Home's (`ink` / `inkMuted`) in both
     appearances. Reduce Motion: the glow is static.
-  - **Type.** One Roca line per step at regular weight (never bold, never a
-    bold sans title); names in Roca bold; questions, body, labels and
-    captions in the system sans. One primary pill (blue, the only colored
-    control); quiet actions are plain text.
+  - **Type.** One Roca line per step at regular weight, never bold and
+    never a bold sans title: the lead on steps 1–2, the question on steps
+    3–4 ("Who do you pray for?", "What are you praying for, for Mom?").
+    Names in Roca bold. Everything else in the system sans: "What's your
+    name?", the mechanic, labels, captions, and step 4's "Carried on the list
+    with you." (15 pt, `inkMuted`, with the carried mark). One primary
+    button: interactive glass tinted blue, like the pray button it becomes;
+    the only colored control. Quiet actions are plain text.
   1. **Your name.** "Here, we pray for each other." (Roca) · "What's your
      name?" · one field (sans, centered, placeholder "Your name"; 40-char cap)
      · **Continue** (lit once there's text; Return also continues) · **Sign

@@ -2275,3 +2275,16 @@ self page shows your name under "Me").
   Someone → Intention → back to Welcome back), `welcomeGround` /
   `welcomeInk` / `welcomeInkMuted` and `size.seal.welcome`, and the Welcome
   photograph plan (the photo becomes the paper line on step 2).
+
+### Decision: Onboarding build calls (298b0d9)
+**Timestamp:** 2026-11-09
+Orchestrator calls on the build's questions (overrule freely): the steps 3–4
+questions are that step's one Roca line (regular), as in the mock; the
+primary button is glass tinted blue (it becomes the pray button) rather than
+a solid pill; "Carried on the list with you." is 15 pt sans `inkMuted` with
+the carried mark; the paper line's list is tomorrow's (current + 1); Home's
+header, card, rows and pill fade in together in the hand-off (no stagger)
+pending a look on device; the line under Me shows only with no open
+intention on Me, after any prayer; Not now discards typed person text;
+corner actions cap at xxxLarge with the large content viewer; placeholders
+in `inkFaint`. Copy: "Back", "Dismiss" (VoiceOver, the ×).
