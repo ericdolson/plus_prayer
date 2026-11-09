@@ -2216,4 +2216,9 @@ self page shows your name under "Me").
   brand background color: the photo on screen 1 is the color; screens 2–5
   use the app's ground. Privacy line rewritten ("never shown publicly";
   reviewers do see names).
+- Same day: screen 4 mirrors the add sheet's fields and captions exactly
+  ("Name" · "Printed on the list"; "What you call them · optional" · "Only
+  you see this"; e.g. placeholders), so onboarding teaches the real form;
+  "Their name" stays retired (2026-11-06). Intention line: "…printed with
+  their name on the list."
 

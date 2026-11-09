@@ -44,14 +44,15 @@ _Last updated: 2026-10-17_
      printed, sealed and kept private. Your name is never shared or shown
      publicly."
   4. **Someone you pray for** (only after "Add someone"): "Who's someone you
-     pray for?" · **Their name** (required, first; placeholder an example
-     name) · **What you call them** (optional; placeholder "Mom") with one
-     line: the name is what's printed; what you call them stays with you ·
+     pray for?" · the **add sheet's own fields**, in its order: **Name**
+     (required; "e.g. Julie Olson", caption "Printed on the list") · **What
+     you call them · optional** ("e.g. Mom", caption "Only you see this").
+     The captions do the teaching; no extra helper (2026-11-09) ·
      avatar fills as they type · "{alias} will be carried on the list with
      you." (carried by default, no switch) · **Continue**.
   5. **An intention** (optional): "What are you praying for, for {alias}?" ·
      "An intention is a request: healing, a new job, peace. One can be
-     printed with their name." · field with an example · **Add** / **Skip**.
+     printed with their name on the list." · field with an example · **Add** / **Skip**.
      It becomes their chosen intention.
   Then back to screen 3 with the new person's avatar; the buttons become
   **"＋ Add another"** (opens the regular add sheet, no extra help) and
