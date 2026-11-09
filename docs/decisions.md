@@ -2184,3 +2184,11 @@ self page shows your name under "Me").
   native bottom bar). Rejected: a plain safe-area inset that passes taps
   beside the controls but loses the soft edge (bc32310, reverted in e6bdfe7).
 
+### Decision: The person page's intentions get Home's thread
+**Timestamp:** 2026-11-08
+- The thread drops from under the "Intentions" title at Home's trunk x and
+  curves into each intention; rows take Home's indent. Reverses 2026-11-07
+  ("no thread: it would hang from the section title"): on Dad's page
+  everything belongs to Dad, and matching Home's rows exactly is worth more
+  than the semantic nicety. Eric's call.
+

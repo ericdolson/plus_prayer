@@ -57,11 +57,12 @@ the detail page, this file wins.
   title and nothing repeats. Self page: title "Me", your name under it.
 - **Counts live in the tiles** (2026-11-08; were two lines under the name).
 - **Intentions section** reuses Home's intention row: gold "held today"
-  dot, trailing carried mark (§5), gold "Answered · {date}", **but no
-  thread** (2026-11-07): on Home the thread ties intentions to the name row
-  above; here the page itself is the name, so a thread would hang from the
-  section title. Without the thread there's **no Home indent**: rows sit
-  flush with the section title (dot, then text).
+  dot, trailing carried mark (§5), gold "Answered · {date}", ****and Home's
+  thread** (2026-11-08, reverses 2026-11-07): the thread drops from just
+  under the "Intentions" title at Home's trunk x (a 40 pt avatar's center)
+  and curves into each intention, so the rows look exactly like Home's;
+  rows take Home's indent. Same `thread` color and curve, in browsing and in
+  prayer. No intentions → no thread (the first-intention button shows).
   Same order as Home (Answered stay in place under the name; Released aren't
   shown). Tapping an intention pushes its own detail page.
 - **Adding (2026-11-08):** a plain action-blue **＋** (SF Symbol `plus`, no
