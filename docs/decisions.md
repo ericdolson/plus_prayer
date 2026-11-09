@@ -2224,4 +2224,12 @@ self page shows your name under "Me").
   teaches avatars); screen 3 has none, "Welcome, {full name}." carries it.
   Screen 3's row shows only the people added, never the user (the question
   is "who else").
+- **Build calls (210570e, b214760; orchestrator, overrule freely):** "Who
+  else do you hold?" is sans (Roca only for names and ceremonial lines);
+  after a first add, **Continue is the prominent button** and "＋ Add
+  another" the tinted secondary (most people move on; the clear way forward
+  wins for 40+); the people row uses small avatars; the privacy footer is
+  `inkMuted` caption (inkFaint is decorative only); the person and intention
+  save at Add/Skip on screen 5; the self keeps the avatar color the name
+  screen showed; the interim welcome seal is wax variant 0.
 
