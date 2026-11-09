@@ -5,8 +5,10 @@ _Last updated: 2026-10-18. Not legal advice — final text via a policy generato
 
 ## DECIDED
 - **Plain-language summary first**, legal text behind it. The same sentence
-  appears in onboarding under "What's your name?" (e.g. "Printed once on a
-  single private copy. Never shared, never shown.").
+  appears in onboarding under "What's your name?" (2026-11-09: "The list is
+  printed, sealed and kept private. Your name is never shared or shown
+  publicly." on onboarding's welcome-back screen; "never shown" alone
+  over-promised, since reviewers see names).
 - **Printed list:** single physical copy, sealed, never shared. Names are never
   legible in recordings.
 - **Retention of paper:** kept forever, stored at the +Prayer office in a
