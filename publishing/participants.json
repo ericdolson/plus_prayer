@@ -981,6 +981,66 @@
         "note": "Added directly by Eric 2026-11-08 — manual addition, not sourced from a social 🙏 comment."
       }
     ],
-    "72": []
+    "72": [
+      {
+        "platform": "facebook",
+        "handle": "Diana Irving",
+        "id": "28867262856292387",
+        "at": "2026-11-09T02:13:09Z",
+        "comment_url": "https://www.facebook.com/reel/1436948021969880/?comment_id=122142336938983291_1810291143508530",
+        "message": "",
+        "note": "Manual exception: empty-text comment (GIF) on the List 71 Facebook post, no readable 🙏. Added per Eric 2026-11-09."
+      },
+      {
+        "platform": "manual",
+        "handle": "Steven",
+        "id": null,
+        "at": "2026-11-09T02:13:09Z",
+        "comment_url": "https://www.facebook.com/reel/1436948021969880/?comment_id=122142336938983291_1810291143508530",
+        "note": "Diana Irving's son (surname not given). Carried alongside her onto List 72 per Eric 2026-11-09."
+      },
+      {
+        "platform": "manual",
+        "handle": "Eric Olson",
+        "id": null,
+        "at": "2026-11-09T19:35:04Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-09 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Mel Hill",
+        "id": null,
+        "at": "2026-11-09T19:35:04Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-09 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "manual",
+        "handle": "Julie Olson",
+        "id": null,
+        "at": "2026-11-09T19:35:04Z",
+        "comment_url": null,
+        "note": "Added directly by Eric 2026-11-09 — manual addition, not sourced from a social 🙏 comment."
+      },
+      {
+        "platform": "youtube",
+        "handle": "@germanvalladaresguerra697",
+        "id": "UCudqT2MPzr7Lii7CxM2UPOw",
+        "at": "2026-11-09T01:26:08Z",
+        "comment_url": "https://www.youtube.com/watch?v=wGWMlsQXlxQ&lc=Ugzgf7eh4PpPXEO9LAN4AaABAg",
+        "message": "Que relajantes, sige así",
+        "note": "No 🙏 — added per Eric 2026-11-09: pray for anyone who interacts while the pool is small."
+      },
+      {
+        "platform": "youtube",
+        "handle": "@LemonsPolk",
+        "id": "UC2byVOssjJmbzKZO0pWaIag",
+        "at": "2026-11-09T01:23:55Z",
+        "comment_url": "https://www.youtube.com/watch?v=wGWMlsQXlxQ&lc=UgzaHrxfQVUWIVatHCB4AaABAg.AcyIA56TZtrAcye3BNYfl2",
+        "message": "nice music",
+        "note": "No 🙏 (reply to the mechanic comment) — added per Eric 2026-11-09: pray for anyone who interacts while the pool is small."
+      }
+    ]
   }
 }
