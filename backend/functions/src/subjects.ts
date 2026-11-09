@@ -75,7 +75,9 @@ interface PoolState {
 async function poolState(deps: Deps, uid: string) {
   const state = await query<PoolState>(deps.db, "GetPoolState", { uid });
   if (!state.user) throw new HttpsError("failed-precondition", "Account is not ready yet");
-  return { user: state.user, subjects: state.subjects };
+  // Pre-trial users measure against the trial's pool (/config basePremiumPool).
+  const { basePremiumPool } = await getClientConfig(deps.live);
+  return { user: state.user, subjects: state.subjects, basePremiumPool };
 }
 
 function optionalBool(value: unknown, fallback: boolean, field: string): boolean {
@@ -127,7 +129,7 @@ export async function addSubject(
   const carryAsked = input.carry === true; // explicit: swap in at the cap
   const carryParent = optionalBool(input.carryParent, false, "carryParent");
 
-  const { user, subjects } = await poolState(deps, uid);
+  const { user, subjects, basePremiumPool } = await poolState(deps, uid);
   // The cap people see counts what's on Home (ACTIVE, Answered included), so
   // archiving makes room. A quiet hard cap on every row not purged stops
   // archive-and-add abuse.
@@ -160,7 +162,7 @@ export async function addSubject(
     const draft: PoolSubject = {
       id: "new", kind: "SOUL", isSelf: false, isCarried: true, status: "ACTIVE", resolvedAt: null, parent: null, sortOrder,
     };
-    const isCarried = carry && checkPool([...subjects, draft], user, deps.now(), deps.cfg).ok;
+    const isCarried = carry && checkPool([...subjects, draft], user, deps.now(), deps.cfg, basePremiumPool).ok;
     const res = await mutate<{ prayerSubject_insert: { id: string } }>(deps.db, "InsertSubject", {
       uid, kind, parentId: null, publicName, personalLabel, note, isCarried, sortOrder,
     });
@@ -174,7 +176,7 @@ export async function addSubject(
   // (the self is always carried); otherwise it's a no-op.
   const liftParent = carry && carryParent && !parent.isSelf && !parent.isCarried;
   const parentFits = !liftParent ||
-    checkPool(subjects.map((s) => (s.id === parent!.id ? { ...s, isCarried: true } : s)), user, deps.now(), deps.cfg).ok;
+    checkPool(subjects.map((s) => (s.id === parent!.id ? { ...s, isCarried: true } : s)), user, deps.now(), deps.cfg, basePremiumPool).ok;
 
   let isCarried = false;
   let unchosenIds: string[] = [];
@@ -262,12 +264,12 @@ export async function setCarriedItems(deps: Deps, uid: string, rawIds: unknown) 
   if (!Array.isArray(rawIds) || rawIds.some((id) => typeof id !== "string")) {
     throw new HttpsError("invalid-argument", "carriedIds must be a list of ids");
   }
-  const { user, subjects } = await poolState(deps, uid);
+  const { user, subjects, basePremiumPool } = await poolState(deps, uid);
   const wanted = new Set(rawIds as string[]);
   const proposed = subjects.map((s) =>
     s.isSelf || s.status !== "ACTIVE" || s.resolvedAt ? s : { ...s, isCarried: wanted.has(s.id) },
   );
-  const check = checkPool(proposed, user, deps.now(), deps.cfg);
+  const check = checkPool(proposed, user, deps.now(), deps.cfg, basePremiumPool);
   if (!check.ok && addsName(subjects, proposed)) {
     throw new HttpsError("failed-precondition", "Over the carried limit", {
       reason: "OVER_LIMIT",
@@ -304,7 +306,7 @@ export async function setCarriedItems(deps: Deps, uid: string, rawIds: unknown) 
  */
 export async function restoreSubject(deps: Deps, uid: string, rawId: unknown) {
   if (typeof rawId !== "string") throw new HttpsError("invalid-argument", "id is required");
-  const { user, subjects } = await poolState(deps, uid);
+  const { user, subjects, basePremiumPool } = await poolState(deps, uid);
   const item = subjects.find((s) => s.id === rawId && s.status === "ARCHIVED");
   if (!item) throw new HttpsError("not-found", "Archived item not found");
   const parent = item.parent ? subjects.find((s) => s.id === item.parent!.id) : undefined;
@@ -330,7 +332,7 @@ export async function restoreSubject(deps: Deps, uid: string, rawId: unknown) {
   if (isCarried) {
     const after = subjects.map((s) => restore(s, true));
     if (item.kind === "SOUL") {
-      if (!checkPool(after, user, deps.now(), deps.cfg).ok) isCarried = false;
+      if (!checkPool(after, user, deps.now(), deps.cfg, basePremiumPool).ok) isCarried = false;
     } else {
       const { intentionsPerPerson: cap } = await getClientConfig(deps.live);
       const chosenAfter = chosenIntentions(after, item.parent!.id);

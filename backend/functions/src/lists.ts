@@ -137,6 +137,7 @@ export async function assembleNextList(deps: Deps, input: { social?: unknown; fo
   if (!next) throw new HttpsError("failed-precondition", `List ${closing.listNumber + 1} is missing; run closeList`);
 
   const assemblyAt = now.toISOString();
+  const rules = await getClientConfig(deps.live);
   // The word blocklist is off for the beta (schema-brief §11); the code stays.
   const terms: BlockTerms = deps.cfg.wordBlocklistEnabled ? await loadBlockTerms(deps.live) : { words: [], substrings: [] };
   await mutate(deps.db, "AssembleList", {
@@ -147,7 +148,8 @@ export async function assembleNextList(deps: Deps, input: { social?: unknown; fo
     gateHours: deps.cfg.gateHours,
     freeLimit: deps.cfg.freeLimit,
     softLandingDays: deps.cfg.softLandingDays,
-    intentionsPerPerson: (await getClientConfig(deps.live)).intentionsPerPerson,
+    intentionsPerPerson: rules.intentionsPerPerson,
+    basePremiumPool: rules.basePremiumPool,
     blockWords: terms.words,
     blockSubstrings: terms.substrings,
     social,

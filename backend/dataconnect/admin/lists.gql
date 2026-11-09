@@ -112,6 +112,10 @@ mutation CloseList(
 # then carried names beyond the self (ACTIVE), in the user's order, up to the
 # effective limit (people):
 #   active entitlement                         → includeLimit
+#   pre-trial: never prayed (no trialStartedAt)
+#     and never entitled (no expiry)           → $basePremiumPool (2026-11-09;
+#                                                only while the first prayer's
+#                                                trial start is still pending)
 #   no active entitlement, names fit free      → $freeLimit (0: you, with your intention)
 #   no active entitlement, over free, ended
 #     within $softLandingDays                  → includeLimit (soft landing)
@@ -143,6 +147,7 @@ mutation AssembleList(
   $freeLimit: Int!
   $softLandingDays: Int!
   $intentionsPerPerson: Int!
+  $basePremiumPool: Int!
   $blockWords: Any!
   $blockSubstrings: Any!
   $social: Any!
@@ -209,7 +214,8 @@ mutation AssembleList(
             AND p.prayed_at < $2::timestamptz))
     ), u AS (
       SELECT usr.id, usr.include_limit, usr.self_name_changed_at, usr.entitlement_expires_at,
-        COALESCE(usr.entitlement_expires_at > $3::timestamptz, false) AS active
+        COALESCE(usr.entitlement_expires_at > $3::timestamptz, false) AS active,
+        (usr.trial_started_at IS NULL AND usr.entitlement_expires_at IS NULL) AS pre_trial
       FROM "user" usr JOIN q ON q.user_id = usr.id
     ), selfs AS (
       SELECT s.id, s.owner_id, s.public_name,
@@ -235,6 +241,7 @@ mutation AssembleList(
       SELECT u.id AS owner_id,
         CASE
           WHEN u.active THEN u.include_limit
+          WHEN u.pre_trial THEN $12::int
           WHEN st.n IS NULL OR st.n <= $5::int THEN $5::int
           WHEN u.entitlement_expires_at > $3::timestamptz - make_interval(days => $6::int)
             THEN u.include_limit
@@ -311,6 +318,7 @@ mutation AssembleList(
       { _expr: "vars.blockSubstrings" }
       { _expr: "vars.social" }
       { _expr: "vars.intentionsPerPerson" }
+      { _expr: "vars.basePremiumPool" }
     ]
   )
 }

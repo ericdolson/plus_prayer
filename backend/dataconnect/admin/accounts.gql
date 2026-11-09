@@ -98,6 +98,7 @@ query GetPoolState($uid: String!) @auth(level: NO_ACCESS) {
     planTier
     includeLimit
     entitlementExpiresAt
+    trialStartedAt
   }
   subjects: prayerSubjects(where: { owner: { id: { eq: $uid } }, status: { ne: PURGED } }) {
     id

@@ -67,7 +67,10 @@ Two computed rules used throughout (never swept by a job):
 - **Effective entitlement** — `includeLimit` (people) while
   `entitlementExpiresAt` is in the future (or a subscription is active);
   otherwise the free limit (0: you, with your intention). Trial and base
-  tier both grant `basePremiumPool` (RTDB `/config`, 10).
+  tier both grant `basePremiumPool` (RTDB `/config`, 10). **Pre-trial**
+  (2026-11-09): never prayed (no `trialStartedAt`) and never entitled (no
+  `entitlementExpiresAt`) → `basePremiumPool`, so onboarding's adds are
+  carried; the trial clock still starts at the first prayer.
 
 ---
 
@@ -399,7 +402,8 @@ and offline-friendly): see onPrayerLogged.
      after the cutoff belongs to N+1 only — one prayer never earns two
      lists. Per qualifying user:
      self + carried names up to the EFFECTIVE entitlement in people (free:
-     0; Q32), each person (the self included) with their chosen intentions
+     0; Q32; pre-trial: `basePremiumPool`, for a first prayer whose trial
+     start hasn't been applied yet), each person (the self included) with their chosen intentions
      (≤ `intentionsPerPerson`), with `parentEntry` linking intentions to
      their name's entry. SOFT LANDING (any entitlement end — trial or lapsed
      subscription): no active entitlement and carried names still over the

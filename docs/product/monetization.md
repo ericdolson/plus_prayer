@@ -19,7 +19,8 @@ _Last updated: 2026-10-17_
   value drives both; tune before launch. **One source:** RTDB `/config`
   `basePremiumPool`, read by the server's grant and by the app (2026-11-06).
 - **Effective entitlement is computed:** expired entitlement + no active
-  subscription ⇒ free limit (no scheduled job).
+  subscription ⇒ free limit (no scheduled job). Never prayed and never
+  entitled ⇒ the pre-trial pool (`basePremiumPool`; below).
 - **Trial-end soft landing:** assembly keeps carrying the full trial portion
   until the user completes the trial-end choice, up to 7 days; after that only
   the self name, with its chosen intention (free under Q32), until they choose. Portion screen shows "Waiting for your choice".

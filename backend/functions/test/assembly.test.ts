@@ -5,7 +5,8 @@ import { beforeEach, describe, it } from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
 import { mutate } from "../src/db";
 import { assembleNextList, closeList, getListForPrint, listLiveCopy, moderateEntry, publishList, publishListVideo } from "../src/lists";
-import { addSubject, setCarriedItems } from "../src/subjects";
+import { addSubject, restoreSubject, setCarriedItems } from "../src/subjects";
+import { processPrayer } from "../src/prayers";
 import { resetClientConfigCache } from "../src/clientConfig";
 import {
   addList, addSubjectRow, adminDb, clientDb, createUser, DAY, exec, impersonate, logPrayer, makeDeps, resetDb, sql, TestDeps,
@@ -95,16 +96,16 @@ describe("assembly: each user's portion", () => {
 
   it("free (0 people): you, with your intention", async () => {
     const deps = makeDeps();
-    const { selfId } = await createUser("f", { name: "Fay" });
+    const { selfId } = await createUser("f", { name: "Fay", trialEnded: true });
     await addSubjectRow("f", { parentId: selfId, name: "Fay: courage", sortOrder: 1 });
     await addSubjectRow("f", { parentId: selfId, name: "Fay: rest", sortOrder: 2 }); // over the cap (old data)
     const res = await setupAndAssemble(deps, ["f"]);
     assert.deepEqual(names(await entries(res.listId, "f")), ["Fay", "Fay: courage"]);
   });
 
-  it("free and over the free limit (a carried name), never premium: you, with your intention", async () => {
+  it("free after the trial and over the free limit (a carried name): you, with your intention", async () => {
     const deps = makeDeps();
-    const { selfId } = await createUser("g", { name: "Gus" });
+    const { selfId } = await createUser("g", { name: "Gus", trialEnded: true });
     await addSubjectRow("g", { name: "Mom" });
     await addSubjectRow("g", { parentId: selfId, name: "Gus: work" });
     const res = await setupAndAssemble(deps, ["g"]);
@@ -281,7 +282,7 @@ describe("the pool on the server (addSubject / setCarriedItems)", () => {
 
   it("free = 0 people: no name fits; choosing intentions costs nothing (Me's, or under an uncarried name)", async () => {
     const deps = makeDeps();
-    const { selfId } = await createUser("z");
+    const { selfId } = await createUser("z", { trialEnded: true });
     const mom = await addSubjectRow("z", { name: "Mom", carried: false });
     const momIntention = await addSubjectRow("z", { parentId: mom, name: "Mom: surgery", carried: false });
     const mine = await addSubjectRow("z", { parentId: selfId, name: "Me: patience", carried: false });
@@ -381,6 +382,101 @@ describe("the pool on the server (addSubject / setCarriedItems)", () => {
   });
 });
 
+describe("pre-trial pool (2026-11-09): never prayed, never entitled → basePremiumPool", () => {
+  beforeEach(resetDb);
+  const carriedNames = async (uid: string) =>
+    (await sql<{ public_name: string }>(
+      "SELECT public_name FROM prayer_subject WHERE owner_id = $1 AND kind = 'SOUL' AND is_carried AND NOT is_self ORDER BY sort_order",
+      [uid],
+    )).map((r) => r.public_name);
+
+  it("addSubject before the first prayer carries the name (onboarding's adds)", async () => {
+    const deps = makeDeps();
+    await createUser("new");
+    const julie = await addSubject(deps, "new", { kind: "SOUL", publicName: "Julie Olson", personalLabel: "Mom" });
+    assert.deepEqual([julie.isCarried, julie.effectivelyCarried], [true, true]);
+    const rest = await addSubject(deps, "new", { kind: "INTENTION", parentId: julie.id, publicName: "Healing after surgery" });
+    assert.deepEqual([rest.isCarried, rest.parentCarried, rest.effectivelyCarried], [true, true, true],
+      "the first intention becomes their chosen one");
+  });
+
+  it("a never-prayed user carries up to 10 people, not 11", async () => {
+    const deps = makeDeps();
+    await createUser("ten");
+    const added = [];
+    for (let i = 1; i <= 11; i++) added.push(await addSubject(deps, "ten", { kind: "SOUL", publicName: `P${i}` }));
+    assert.deepEqual(added.map((a) => a.isCarried), [...Array(10).fill(true), false]);
+    await assert.rejects(setCarriedItems(deps, "ten", added.map((a) => a.id)), (err: HttpsError) => {
+      assert.deepEqual(err.details, { reason: "OVER_LIMIT", carried: 11, limit: 10, free: false });
+      return true;
+    });
+    assert.deepEqual(await setCarriedItems(deps, "ten", added.slice(0, 10).map((a) => a.id)), { carried: 10, limit: 10 });
+  });
+
+  it("the pre-trial pool comes from /config basePremiumPool; restoreSubject sees it", async () => {
+    const deps = makeDeps();
+    deps.live.config = { basePremiumPool: 2 };
+    await createUser("cfg");
+    const a = await addSubject(deps, "cfg", { kind: "SOUL", publicName: "Ann" });
+    const b = await addSubject(deps, "cfg", { kind: "SOUL", publicName: "Ben" });
+    await clientDb.executeMutation("ArchiveSubject", { id: b.id }, impersonate("cfg"));
+    const c = await addSubject(deps, "cfg", { kind: "SOUL", publicName: "Cy" });
+    assert.deepEqual([a.isCarried, b.isCarried, c.isCarried], [true, true, true]);
+    const restored = await restoreSubject(deps, "cfg", b.id);
+    assert.deepEqual([restored.isCarried, restored.uncarried], [false, true], "over the pre-trial pool: back uncarried");
+  });
+
+  it("the first prayer starts the 14-day trial; the names stay carried", async () => {
+    const deps = makeDeps();
+    await createUser("first");
+    for (const n of ["Ann", "Ben", "Cy"]) await addSubject(deps, "first", { kind: "SOUL", publicName: n });
+    const listId = await addList(1, { currentFrom: Date.now() - DAY });
+    await processPrayer(deps, await logPrayer("first", { listId }));
+    const [u] = await sql<{ include_limit: number; started: boolean; days: number }>(
+      `SELECT include_limit, trial_started_at IS NOT NULL AS started,
+         round(extract(epoch FROM entitlement_expires_at - trial_started_at) / 86400)::int AS days
+       FROM "user" WHERE id = 'first'`,
+    );
+    assert.deepEqual(u, { include_limit: 10, started: true, days: 14 });
+    assert.deepEqual(await carriedNames("first"), ["Ann", "Ben", "Cy"]);
+    const d = await addSubject(deps, "first", { kind: "SOUL", publicName: "Dee" });
+    assert.equal(d.isCarried, true, "now measured against the trial's includeLimit");
+  });
+
+  it("not pre-trial: a trial that ended, or an entitlement that lapsed before any prayer, is free", async () => {
+    const deps = makeDeps();
+    await createUser("ended", { trialEnded: true });
+    assert.equal((await addSubject(deps, "ended", { kind: "SOUL", publicName: "Ann" })).isCarried, false);
+    await createUser("lapsedFirst", { includeLimit: 10, expiresInMs: -30 * DAY });
+    assert.equal((await addSubject(deps, "lapsedFirst", { kind: "SOUL", publicName: "Ann" })).isCarried, false);
+  });
+
+  it("assembly: a first prayer whose trial start hasn't run yet still prints the pre-trial pool", async () => {
+    const deps = makeDeps();
+    deps.live.config = { basePremiumPool: 2 };
+    await createUser("race", { name: "Rae" });
+    for (const n of ["Ann", "Ben", "Cy"]) await addSubjectRow("race", { name: n });
+    const res = await setupAndAssemble(deps, ["race"]); // the prayer isn't processed
+    assert.deepEqual(names(await entries(res.listId, "race")), ["Ann", "Ben", "Rae"]);
+  });
+
+  it("after the trial: over the free pool, the soft landing still prints the full portion for 7 days", async () => {
+    const deps = makeDeps();
+    await createUser("soft", { name: "Sol" });
+    for (const n of ["Tia", "Uma"]) await addSubject(deps, "soft", { kind: "SOUL", publicName: n });
+    const first = await addList(1, { currentFrom: Date.now() - 20 * DAY, closesAt: Date.now() - 19 * DAY, settled: true });
+    await processPrayer(deps, await logPrayer("soft", { listId: first, startedAt: Date.now() - 19.5 * DAY }));
+    await exec(`UPDATE "user" SET entitlement_expires_at = now() - interval '2 days' WHERE id = 'soft'`);
+    assert.equal((await addSubject(deps, "soft", { kind: "SOUL", publicName: "Vic" })).isCarried, false, "free now: no new places");
+    const listId = await addList(2, { currentFrom: Date.now() - DAY });
+    await logPrayer("soft", { listId });
+    await closeList(deps, 0);
+    deps.clock.now = new Date(Date.now() + 1000);
+    const res = await assembleNextList(deps, {});
+    assert.deepEqual(names(await entries(res.listId, "soft")), ["Sol", "Tia", "Uma"]);
+  });
+});
+
 describe("addSubject carry inputs (carry / carryParent)", () => {
   beforeEach(resetDb);
   const flags = (uid: string) =>
@@ -464,7 +560,7 @@ describe("addSubject carry inputs (carry / carryParent)", () => {
 
   it("free = 0: a new name is saved for private prayer", async () => {
     const deps = makeDeps();
-    await createUser("c9");
+    await createUser("c9", { trialEnded: true });
     const res = await addSubject(deps, "c9", { kind: "SOUL", publicName: "Mom" });
     assert.deepEqual([res.isCarried, res.effectivelyCarried], [false, false]);
   });
@@ -479,7 +575,7 @@ describe("addSubject carry inputs (carry / carryParent)", () => {
 
   it("free tier: carryParent can't carry another person's name", async () => {
     const deps = makeDeps();
-    await createUser("c6");
+    await createUser("c6", { trialEnded: true });
     const mom = await addSubjectRow("c6", { name: "Mom", carried: false });
     const res = await addSubject(deps, "c6", { kind: "INTENTION", parentId: mom, publicName: "Mom: surgery", carryParent: true });
     assert.deepEqual([res.isCarried, res.parentCarried, res.effectivelyCarried], [false, false, false]);

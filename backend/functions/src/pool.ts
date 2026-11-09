@@ -28,10 +28,33 @@ export interface PoolSubject {
 export interface Entitlement {
   includeLimit: number;
   entitlementExpiresAt: string | null;
+  /** Set at the first prayer (the reverse trial). Absent (an older read that
+   *  doesn't select it) counts as unknown: never pre-trial. */
+  trialStartedAt?: string | null;
 }
 
 export function hasActiveEntitlement(e: Entitlement, now: Date): boolean {
   return e.entitlementExpiresAt !== null && Date.parse(e.entitlementExpiresAt) > now.getTime();
+}
+
+/**
+ * Pre-trial (2026-11-09, monetization.md "Pre-trial pool"): never prayed (no
+ * trialStartedAt) and never entitled (no entitlementExpiresAt, past or
+ * future). The user has the trial's pool (`basePremiumPool`) so the people
+ * added in onboarding are carried; the 14-day clock still starts at the
+ * first prayer (prayers.ts).
+ */
+export function isPreTrial(e: Entitlement): boolean {
+  return e.trialStartedAt === null && e.entitlementExpiresAt === null;
+}
+
+/** The pool the carry is measured against now (people beyond the self name). */
+export function effectiveLimit(
+  e: Entitlement, now: Date, cfg: ServerConfig, basePremiumPool: number,
+): { limit: number; free: boolean } {
+  if (hasActiveEntitlement(e, now)) return { limit: e.includeLimit, free: false };
+  if (isPreTrial(e)) return { limit: basePremiumPool, free: false };
+  return { limit: cfg.freeLimit, free: true };
 }
 
 const isOpen = (s: PoolSubject) => s.status === "ACTIVE" && !s.resolvedAt;
@@ -56,16 +79,18 @@ export interface PoolCheck {
   ok: boolean;
   /** Carried names beyond the self name. */
   carried: number;
-  /** The limit the save is measured against (free → freeLimit). */
+  /** The limit the save is measured against (free → freeLimit; pre-trial →
+   *  basePremiumPool). */
   limit: number;
   free: boolean;
 }
 
 /** Do the carried names fit the user's EFFECTIVE entitlement right now? */
-export function checkPool(subjects: PoolSubject[], e: Entitlement, now: Date, cfg: ServerConfig): PoolCheck {
+export function checkPool(
+  subjects: PoolSubject[], e: Entitlement, now: Date, cfg: ServerConfig, basePremiumPool: number,
+): PoolCheck {
   const carried = carriedNames(subjects).length;
-  const free = !hasActiveEntitlement(e, now);
-  const limit = free ? cfg.freeLimit : e.includeLimit;
+  const { limit, free } = effectiveLimit(e, now, cfg, basePremiumPool);
   return { ok: carried <= limit, carried, limit, free };
 }
 

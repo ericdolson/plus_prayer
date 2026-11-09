@@ -103,6 +103,11 @@ harvest (SOCIAL), and the base set (BASE_SET), with moderation flags.
 **The pool counts people** (Q32, 2026-11-08): carried names up to the
 effective limit, each (and the self) printed with its chosen intentions, at
 most RTDB `/config` `intentionsPerPerson` (default 1); no "and N more".
+**Pre-trial pool** (2026-11-09): a user who has never prayed (no
+`trialStartedAt`) and was never entitled (no `entitlementExpiresAt`) has
+`basePremiumPool` as the effective limit (`pool.ts` `effectiveLimit`, used
+by addSubject, setCarriedItems and restoreSubject; AssembleList mirrors it),
+so onboarding's adds are carried; the first prayer still starts the trial.
 
 Data scripts (admin CLI): `seed-config` (RTDB `/config` + blocklist),
 `backfill` (lists 1..N from `publishing/*.json`) and `migrate-q32` (Q32

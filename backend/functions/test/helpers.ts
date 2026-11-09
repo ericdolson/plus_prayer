@@ -124,7 +124,12 @@ export function impersonate(uid: string, provider = "anonymous") {
 /** User (+ self subject unless self: false, + optional entitlement). */
 export async function createUser(
   uid: string,
-  opts: { self?: boolean; name?: string; includeLimit?: number; expiresInMs?: number | null; planTier?: string } = {},
+  opts: {
+    self?: boolean; name?: string; includeLimit?: number; expiresInMs?: number | null; planTier?: string;
+    /** Free after the trial: it started 30 days ago and ended 16 days ago (past the soft landing). Without
+     *  this or an entitlement, a new user is pre-trial (the trial's pool until the first prayer). */
+    trialEnded?: boolean;
+  } = {},
 ): Promise<{ uid: string; selfId: string | null }> {
   await mutate(adminDb, "EnsureUser", { uid, authProvider: "anonymous", isAnonymous: true });
   let selfId: string | null = null;
@@ -140,6 +145,12 @@ export async function createUser(
       includeLimit: opts.includeLimit ?? 1,
       entitlementExpiresAt: opts.expiresInMs == null ? null : iso(Date.now() + opts.expiresInMs),
     });
+  }
+  if (opts.trialEnded) {
+    await exec(
+      `UPDATE "user" SET trial_started_at = $2::timestamptz, entitlement_expires_at = $3::timestamptz WHERE id = $1`,
+      [uid, iso(Date.now() - 30 * DAY), iso(Date.now() - 16 * DAY)],
+    );
   }
   return { uid, selfId };
 }
