@@ -76,7 +76,7 @@ struct PersonPage: View {
         }
         .background(PP.color.ground)
         .navigationBarTitleDisplayMode(.inline)
-        .pagePrayBar {
+        .safeAreaBar(edge: .bottom) {
             if let page = home.page(id) {
                 PagePrayBar(label: L10n.Page.pray(for: page.isSelf ? nil : page.label),
                             prayerStartedAt: praying ? session.startedAt : nil,

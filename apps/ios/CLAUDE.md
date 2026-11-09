@@ -545,12 +545,8 @@ compose queries; if an operation is missing, ask for a backend change.
   Journal, "N · answered" (gold number) → Answered. "See all" → All; a node
   → All with that day's sheet. All push `Route.history`.
 - **Praying in place** (detail-page.md "Praying on the page";
-  `Features/Prayer/PrayInPlace.swift`, both pages): `PagePrayBar`
-  (`.pagePrayBar {}`) is the pray-button slot, in a `safeAreaInset`, not a
-  `safeAreaBar`: a `safeAreaBar` takes taps across its whole width (iOS 26,
-  even holding only a clear non-hit-testable spacer), and the empty space
-  beside the capsule must reach the content (a tile under it); so no native
-  soft scroll edge under the page's bar. It's a blue interactive-glass capsule
+  `Features/Prayer/PrayInPlace.swift`, both pages): `PagePrayBar` in a
+  `safeAreaBar` is the pray-button slot: a blue interactive-glass capsule
   "🙏 Pray for {alias}" ("Pray" on the self page and intention pages;
   answered intentions too) that morphs (`glassEffectID`, `GlassID` passed
   into `CountdownButton`; Reduce Motion: `materialize`) into the round

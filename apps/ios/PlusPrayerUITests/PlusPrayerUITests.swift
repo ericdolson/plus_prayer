@@ -212,7 +212,9 @@ final class PlusPrayerUITests: XCTestCase {
         dad.firstMatch.tap()
         let tile = app.buttons["page.history.tile.held"]
         XCTAssertTrue(app.buttons["page.history.seeAll"].waitForExistence(timeout: 3) || tile.exists)
-        for _ in 0..<4 where !tile.isHittable { app.swipeUp() }
+        // Clear of the pray capsule's bar at the bottom (it takes taps across its width).
+        let bar = app.buttons["Pray for Dad"]
+        for _ in 0..<4 where !tile.isHittable || tile.frame.maxY > bar.frame.minY { app.swipeUp() }
         XCTAssertTrue(tile.isHittable, "the tile, on Dad's page")
         tile.tap()
 
@@ -231,7 +233,7 @@ final class PlusPrayerUITests: XCTestCase {
         // Back on Dad's page, today's node opens History on today's sheet.
         app.navigationBars.buttons.element(boundBy: 0).tap()
         let node = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'history.node.'")).firstMatch
-        for _ in 0..<4 where !node.isHittable { app.swipeUp() }
+        for _ in 0..<4 where !node.isHittable || node.frame.maxY > bar.frame.minY { app.swipeUp() }
         node.tap()
         let onList = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'On List'")).firstMatch
         XCTAssertTrue(onList.waitForExistence(timeout: 3), "the day sheet: Dad is on today's list")
