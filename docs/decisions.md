@@ -2178,4 +2178,9 @@ self page shows your name under "Me").
   "Intentions" title stays in prayer (only ＋ fades); the ring shows held
   today or in this prayer, as on Home; Cancel on a page discards and stays
   on the page; the subject stays uncheckable-allowed (OPEN unchanged).
+- **Pray bar on pages keeps the native soft scroll edge** (same day; Eric):
+  the page's bar stays a `safeAreaBar` like Home's, accepting that iOS 26
+  takes taps across its full width (content scrolls clear, as under any
+  native bottom bar). Rejected: a plain safe-area inset that passes taps
+  beside the controls but loses the soft edge (bc32310, reverted in e6bdfe7).
 
