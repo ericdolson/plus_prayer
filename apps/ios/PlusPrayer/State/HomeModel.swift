@@ -255,13 +255,13 @@ final class HomeModel {
     // MARK: Onboarding (auth-onboarding.md)
 
     /// No self name yet (onboarding resumes from data, never a stored step):
-    /// the "What's your name?" step. False until the header has arrived.
-    var needsSelfName: Bool { header.map { !$0.hasSelfName } ?? false }
+    /// onboarding from Welcome. False until the header has arrived.
+    var needsSelfName: Bool { launchDestination(header) == .onboarding }
 
-    /// The setSelfName callable (online only). Throws `SelfNameError`; the
-    /// header re-read brings Home.
-    func setSelfName(_ name: String) async throws {
-        try await repositories.user.setSelfName(cleanText(name))
+    /// The setSelfName callable (online only). Throws `SelfNameError`. A new
+    /// self takes `avatarTone` (what the name screen showed).
+    func setSelfName(_ name: String, avatarTone: Int? = nil) async throws {
+        try await repositories.user.setSelfName(cleanText(name), avatarTone: avatarTone)
     }
 
     /// The addSubject callable (online only). The add sheet's carry row
@@ -290,7 +290,8 @@ final class HomeModel {
     func intentionCarryOffer(personId: String, intentionId: String? = nil) -> IntentionCarryOffer {
         let user = header ?? UserHeader(id: "")
         return PlusPrayerDomain.intentionCarryOffer(personId: personId, intentionId: intentionId, in: tree, user: user,
-                                                    now: clock(), cap: config.intentionsPerPerson)
+                                                    now: clock(), cap: config.intentionsPerPerson,
+                                                    prePool: config.basePremiumPool)
     }
 
     // MARK: A name's page (detail-page.md)
@@ -328,7 +329,8 @@ final class HomeModel {
             return CarryOffer(hasRoom: false, startsOn: tree[id]?.isCarried ?? false, used: 0, pool: freeCarryLimit,
                               isFree: true)
         }
-        return PlusPrayerDomain.nameCarryOffer(nameId: id, in: tree, user: header, now: clock())
+        return PlusPrayerDomain.nameCarryOffer(nameId: id, in: tree, user: header, now: clock(),
+                                               prePool: config.basePremiumPool)
     }
 
     /// Carries the person `id` or stops carrying them (their chosen

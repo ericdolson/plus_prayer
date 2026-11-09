@@ -20,6 +20,8 @@ struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var confirmingDiscard = false
     @State private var adding: AddSheetModel?
+    /// First run, while it's up (`OnboardingModel`).
+    @State private var onboarding: OnboardingModel?
     /// What's pushed over Home: pages (names and intentions) and History.
     @State private var path: [Route] = []
 
@@ -32,9 +34,19 @@ struct HomeView: View {
         .overlay { Halo(active: session.isPraying, flare: session.amenCount) }
         .sensoryFeedback(.impact(weight: .light), trigger: session.checkCount)
         .sheet(isPresented: prayerSheetShown) { PrayerSheet() }
-        // No self name yet (auth-onboarding.md): "What's your name?" over
-        // Home; setSelfName's re-read takes it away and lands on Home.
-        .fullScreenCover(isPresented: .constant(home.needsSelfName)) { NameStep() }
+        // No self name yet (auth-onboarding.md, resume by state): onboarding
+        // over Home from Welcome. It stays through Welcome back and the
+        // guided add once the name is saved, until Add others later or
+        // Continue; a later launch with a name opens Home.
+        .fullScreenCover(isPresented: onboardingShown) {
+            if let onboarding { OnboardingFlow(model: onboarding) }
+        }
+        .onChange(of: home.needsSelfName, initial: true) { _, needs in
+            if needs && onboarding == nil { onboarding = OnboardingModel(home: home) }
+        }
+        .onChange(of: onboarding?.isFinished) { _, finished in
+            if finished == true { onboarding = nil }
+        }
         // Back or swipe-back off a page praying in place: Home, still praying.
         .onChange(of: path) { old, new in
             if new.count < old.count && session.page != nil && session.isPraying { session.leavePage() }
@@ -50,6 +62,10 @@ struct HomeView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { home.refreshToday() }
         }
+    }
+
+    private var onboardingShown: Binding<Bool> {
+        Binding(get: { onboarding != nil }, set: { if !$0 { onboarding = nil } })
     }
 
     private var homeContent: some View {

@@ -126,8 +126,10 @@ protocol UserRepository {
     func header() -> AsyncStream<UserHeader?>
 
     /// The setSelfName callable: the first call creates the self ("Me") and
-    /// sets the display name. Online only. Throws `SelfNameError`.
-    func setSelfName(_ name: String) async throws
+    /// sets the display name; a new self then takes `avatarTone` (the tone
+    /// onboarding's name screen showed; nil keeps the id hash). Online
+    /// only. Throws `SelfNameError`.
+    func setSelfName(_ name: String, avatarTone: Int?) async throws
 }
 
 /// From the setSelfName callable's codes: invalid-argument with

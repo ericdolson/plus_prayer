@@ -28,6 +28,9 @@ struct AppEnvironment {
     var onActive: @MainActor () async -> Void = {}
 
     static let environmentKey = "PPEnvironment"
+    /// `-PPMockFresh`: the mock starts as a first run (no self name, no
+    /// people) so onboarding can be tried. Not remembered.
+    static let mockFreshArgument = "-PPMockFresh"
     static let emulatorHostKey = "PPEmulatorHost"
     /// The remembered choices (the persistent domain, not the arguments').
     static let savedEnvironmentKey = "PPEnvironment.saved"
@@ -69,6 +72,9 @@ struct AppEnvironment {
         let log = Logger(subsystem: "dev.hammock.plusprayer", category: "environment")
         switch choice.kind {
         case .mock:
+            if processInfo.arguments.contains(mockFreshArgument) {
+                return .mock(MockBackend(seed: .fresh(now: .now)))
+            }
             return .mock()
         case .emulator:
             #if !targetEnvironment(simulator)

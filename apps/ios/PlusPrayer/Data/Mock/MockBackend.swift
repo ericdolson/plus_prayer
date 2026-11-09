@@ -78,6 +78,16 @@ final class MockBackend {
                                                        durationSeconds: prayer.durationSeconds, note: prayer.note,
                                                        held: held)) }
 
+        // The first prayer starts the 14-day reverse trial (onPrayerLogged),
+        // unless an entitlement is already active.
+        header.update { header in
+            guard var next = header, next.trialStartedAt == nil, !hasActiveEntitlement(next, now: now()) else { return }
+            next.trialStartedAt = now()
+            next.entitlementExpiresAt = now().addingTimeInterval(14 * 86_400)
+            next.includeLimit = config.value.basePremiumPool
+            header = next
+        }
+
         guard prayer.includesList else { return }
         header.update { $0 = $0.map { afterListPrayer($0, on: prayer.localDate) } }
         guard let current = list.value, prayer.communityListId == current.id,
@@ -132,12 +142,13 @@ final class MockBackend {
         nextId += 1
         var updated = current
         let tree = SubjectTree(current)
+        let prePool = config.value.basePremiumPool
         if input.carry, let header = header.value {
             if subject.isName {
-                subject.isCarried = placesLeft(tree, user: header, now: now()) > 0
+                subject.isCarried = placesLeft(tree, user: header, now: now(), prePool: prePool) > 0
             } else if let parentId = input.parentId, let parent = tree[parentId] {
                 let lift = input.carryParent && !parent.isSelf && !parent.isCarried
-                let fits = !lift || placesLeft(tree, user: header, now: now()) > 0
+                let fits = !lift || placesLeft(tree, user: header, now: now(), prePool: prePool) > 0
                 let cap = config.value.intentionsPerPerson
                 if fits && cap > 0 {
                     // Chosen; at the cap, a swap.
@@ -174,7 +185,7 @@ final class MockBackend {
         let before = SubjectTree(subjects.value)
         let after = SubjectTree(proposed)
         let addsName = proposed.contains { $0.isName && !$0.isSelf && $0.isCarried && before[$0.id]?.isCarried != true }
-        if addsName, let header = header.value, !checkPool(after, user: header, now: now()).fits {
+        if addsName, let header = header.value, !checkPool(after, user: header, now: now(), prePool: config.value.basePremiumPool).fits {
             throw .overLimit
         }
         let cap = config.value.intentionsPerPerson
@@ -188,7 +199,9 @@ final class MockBackend {
 
     /// The setSelfName callable: the first call creates the self ("Me",
     /// always carried) and sets the display name; later calls rename it.
-    func setSelfName(_ raw: String) async throws(SelfNameError) {
+    /// `avatarTone` (SetSubjectAvatarTone after the callable) colors a new
+    /// self as onboarding's name screen showed it.
+    func setSelfName(_ raw: String, avatarTone: Int? = nil) async throws(SelfNameError) {
         try? await Task.sleep(for: latency)
         guard online else { throw .offline }
         guard !failsAdds else { throw .failed }
@@ -198,7 +211,8 @@ final class MockBackend {
             subjects.update { $0[i].publicName = name }
         } else {
             subjects.update { $0.insert(Subject(id: "self", kind: .soul, publicName: name, alias: "Me", isSelf: true,
-                                                isCarried: true, sortOrder: 0, createdAt: now()), at: 0) }
+                                                isCarried: true, sortOrder: 0, avatarTone: avatarTone,
+                                                createdAt: now()), at: 0) }
         }
         header.update { header in
             guard var next = header else { return }
@@ -225,7 +239,8 @@ final class MockBackend {
         }
         if let header = header.value {
             restored.isCarried = restoredCarryFlag(restored, intentions: intentions, into: SubjectTree(subjects.value),
-                                                   user: header, now: now(), cap: config.value.intentionsPerPerson)
+                                                   user: header, now: now(), cap: config.value.intentionsPerPerson,
+                                                   prePool: config.value.basePremiumPool)
         }
         subjects.send(subjects.value + [restored] + (item.isName ? intentions : []))
         return restored.isCarried

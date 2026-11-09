@@ -30,23 +30,28 @@ final class EmulatorSmokeTests: XCTestCase {
         app.descendants(matching: .any).matching(NSPredicate(format: format)).firstMatch
     }
 
-    /// A new anonymous account has no self name: "What's your name?" over
-    /// Home; Continue calls setSelfName and lands on Home with "Me".
+    /// A new anonymous account has no self name: onboarding over Home
+    /// (Welcome → Begin → "What's your name?"); Continue calls setSelfName
+    /// and lands on Welcome back with the full name; "Add others later" →
+    /// Home with "Me".
     @MainActor
     func testNameStepOnFirstRun() throws {
         let app = launch()
+        let begin = app.buttons["onboarding.begin"]
+        XCTAssertTrue(begin.waitForExistence(timeout: 20), "Welcome for an account with no self name")
+        begin.tap()
         let title = any(app, "label == 'What’s your name?'")
-        XCTAssertTrue(title.waitForExistence(timeout: 20), "the name step for an account with no self name")
-        let field = app.textFields["Name"]
+        XCTAssertTrue(title.waitForExistence(timeout: 5), "the name screen")
+        let field = app.textFields["onboarding.name.field"]
         XCTAssertTrue(field.waitForExistence(timeout: 3))
-        XCTAssertFalse(app.buttons["Continue"].isEnabled, "nothing to save yet")
+        XCTAssertFalse(app.buttons["onboarding.name.continue"].isEnabled, "nothing to save yet")
         field.tap()
         field.typeText("Eric Olson")
-        app.buttons["Continue"].tap()
+        app.buttons["onboarding.name.continue"].tap()
 
+        XCTAssertTrue(any(app, "label == 'Welcome, Eric Olson.'").waitForExistence(timeout: 15), "Welcome back")
+        app.buttons["onboarding.back.later"].tap()
         XCTAssertTrue(any(app, "label BEGINSWITH 'Me, Eric Olson'").waitForExistence(timeout: 15), "Home, with Me")
-        let gone = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: title)
-        wait(for: [gone], timeout: 10)
         XCTAssertTrue(app.buttons["Pray"].exists)
     }
 

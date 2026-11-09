@@ -52,8 +52,8 @@ final class MockUserRepository: UserRepository {
 
     func header() -> AsyncStream<UserHeader?> { backend.header.stream() }
 
-    func setSelfName(_ name: String) async throws {
-        try await backend.setSelfName(name)
+    func setSelfName(_ name: String, avatarTone: Int?) async throws {
+        try await backend.setSelfName(name, avatarTone: avatarTone)
     }
 }
 

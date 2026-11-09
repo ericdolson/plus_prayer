@@ -444,47 +444,23 @@ struct AddSheet: View {
             .listRowBackground(PP.color.raised)
     }
 
-    /// The section footer under a field: its contact-info message (ink) in
-    /// place of its hint, and the "34/40" counter in the last 10 characters.
-    @ViewBuilder private func fieldFooter(_ field: AddSheetModel.Field, text: String, caption: String?) -> some View {
-        let cap = AddSheetModel.cap(field)
-        let count = text.count
-        let issue = model.contactShown.contains(field)
-        if issue || caption != nil || count >= cap - 10 {
-            HStack(alignment: .firstTextBaseline) {
-                if issue {
-                    Text(L10n.Add.contactError).foregroundStyle(PP.color.ink)
-                } else if let caption {
-                    Text(caption)
-                }
-                Spacer(minLength: 0)
-                if count >= cap - 10 {
-                    Text(L10n.Add.counter(count, cap)).monospacedDigit()
-                }
-            }
-        }
+    /// The section footer under a field (`FieldFooter`, shared with
+    /// onboarding's guided add).
+    private func fieldFooter(_ field: AddSheetModel.Field, text: String, caption: String?) -> some View {
+        FieldFooter(text: text, cap: AddSheetModel.cap(field), contactIssue: model.contactShown.contains(field),
+                    caption: caption)
     }
 }
 
 private extension View {
-    /// A field's rules: caps stop input; the contact-info check runs once
-    /// typing pauses (and clears at once when fixed); typing again clears an
-    /// offline or failed add.
+    /// A field's rules (`textFieldRules`): caps stop input; the contact-info
+    /// check runs once typing pauses (and clears at once when fixed); typing
+    /// again clears an offline or failed add.
     func fieldRules(_ field: AddSheetModel.Field, text: Binding<String>, model: AddSheetModel) -> some View {
-        let cap = AddSheetModel.cap(field)
-        return self
-            .onChange(of: text.wrappedValue) { _, new in
-                if new.count > cap { text.wrappedValue = String(new.prefix(cap)) }
-                model.textChanged()
-            }
-            .task(id: text.wrappedValue) {
-                guard model.hasContactIssue(field) else {
-                    model.showContactIssue(field, false)
-                    return
-                }
-                try? await Task.sleep(for: .seconds(PP.duration.validationPause))
-                if !Task.isCancelled { model.showContactIssue(field, true) }
-            }
+        textFieldRules(text: text, cap: AddSheetModel.cap(field),
+                       hasContactIssue: { model.hasContactIssue(field) },
+                       showContactIssue: { model.showContactIssue(field, $0) },
+                       onEdit: { model.textChanged() })
     }
 }
 

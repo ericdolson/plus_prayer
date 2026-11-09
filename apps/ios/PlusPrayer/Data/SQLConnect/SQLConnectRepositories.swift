@@ -228,14 +228,22 @@ final class SQLConnectUserRepository: UserRepository {
         }
     }
 
-    func setSelfName(_ name: String) async throws {
+    func setSelfName(_ name: String, avatarTone: Int?) async throws {
+        let result: [String: Any]
         do {
-            _ = try await data.backend.call("setSelfName", ["name": name])
+            result = try await data.backend.call("setSelfName", ["name": name])
         } catch {
             if error.isUnreachable { throw SelfNameError.offline }
             if error.code == .invalidArgument, error.reason == "CONTACT_OR_LINK" { throw SelfNameError.input(.contactInfo) }
             throw SelfNameError.failed
         }
         await data.changed(history: false, list: false)
+        // A new self takes the tone the name screen showed (the callable
+        // doesn't take it); best effort, like addSubject's.
+        if result["created"] as? Bool == true, let tone = avatarTone,
+           let selfId = data.header.value?.selfSubjectId, let uuid = RemoteID.uuid(selfId) {
+            _ = try? await data.backend.connector.setSubjectAvatarToneMutation.execute(id: uuid) { $0.avatarTone = tone }
+            await data.changed(header: false, history: false, list: false)
+        }
     }
 }

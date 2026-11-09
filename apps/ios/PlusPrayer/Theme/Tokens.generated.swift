@@ -59,6 +59,12 @@ nonisolated enum PP {
         static let halo = Color(light: 0x9A7A30, dark: 0xC8AE6E)
         /// Behind custom (Tier A) overlays only; native sheets bring their own dimming.
         static let scrim = Color(light: 0x05294A, dark: 0x000000, lightAlpha: 0.4, darkAlpha: 0.75)
+        /// Onboarding Welcome (screen 1) only: a dark, warm ground in both themes, standing in for the photograph of the sealed list in warm low light (auth-onboarding.md, 2026-11-09).
+        static let welcomeGround = Color(light: 0x15110E, dark: 0x15110E)
+        /// Text on welcomeGround, both themes (15.9:1).
+        static let welcomeInk = Color(light: 0xF2EBDF, dark: 0xF2EBDF)
+        /// Secondary text on welcomeGround, both themes (8.9:1).
+        static let welcomeInkMuted = Color(light: 0xBBB1A3, dark: 0xBBB1A3)
         /// The unsealed seal: the same shape, unpressed, neutral (before the list is published).
         static let unsealed = Color(light: 0xC9D1DF, dark: 0x30353D)
         /// Dark only: the unsealed blank's rim light (at wax.darkRimOpacity).
@@ -279,6 +285,8 @@ nonisolated enum PP {
             static let rimWidth: CGFloat = 1
             /// Seals smaller than this (beads) get the lift but no rim.
             static let rimMinSize: CGFloat = 24
+            /// The large seal on onboarding's Welcome (screen 1), the interim stand-in for the photograph.
+            static let welcome: CGFloat = 220
             /// At and above this, seals use the photographed stamps (when D3 lands).
             static let photoMinSize: CGFloat = 40
         }
@@ -406,6 +414,8 @@ nonisolated enum PP {
         static let labelSmall = Font.system(.footnote, weight: .medium)
         /// Timer and counts: tabular figures. When a count rises live, crossfade only the changed digits.
         static let count = Font.system(.subheadline, weight: .medium).monospacedDigit()
+        /// Onboarding's questions ("What's your name?", "Who's someone you pray for?"): system sans, Large Title bold (auth-onboarding.md, 2026-11-09). Wraps.
+        static let onboardingTitle = Font.system(.largeTitle, weight: .bold)
         /// Section titles on a page ("Intentions", "History"): system sans, Title 3 semibold (detail-page.md, 2026-11-08; Roca is for proper names).
         static let sectionTitle = Font.system(.title3, weight: .semibold)
         /// An intention as a page title: system sans, Title 2 semibold; wraps (detail-page.md, 2026-11-08).

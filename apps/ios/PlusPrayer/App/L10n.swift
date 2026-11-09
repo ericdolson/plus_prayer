@@ -393,14 +393,41 @@ nonisolated enum L10n {
     }
 
     /// First run (auth-onboarding.md). Only "What's your name?" so far.
+    /// First run (auth-onboarding.md, "Flow (revised 2026-11-09)").
     enum Onboarding {
         private static func t(_ key: String) -> String { NSLocalizedString(key, comment: "") }
+        private static func f(_ key: String, _ arg: String) -> String { String(format: t(key), arg) }
+        // 1 Welcome
+        static var welcomeTitle: String { t("onboarding.welcome.title") }
+        static var welcomeSubtitle: String { t("onboarding.welcome.subtitle") }
+        static var begin: String { t("onboarding.welcome.begin") }
+        // 2 Name
         static var nameTitle: String { t("onboarding.name.title") }
-        static var nameHelper: String { t("onboarding.name.helper") }
-        static var namePrivacy: String { t("onboarding.name.privacy") }
         static var nameContinue: String { t("onboarding.name.continue") }
         static var nameOffline: String { t("onboarding.name.offline") }
         static var nameFailed: String { t("onboarding.name.failed") }
+        // 3 Welcome back
+        static func welcomeBack(_ fullName: String) -> String { f("onboarding.back.title", fullName) }
+        static var mechanic: String { t("onboarding.back.mechanic") }
+        static var whoElse: String { t("onboarding.back.question") }
+        static var whoElseLine: String { t("onboarding.back.questionLine") }
+        static var addSomeone: String { t("onboarding.back.addSomeone") }
+        static var addLater: String { t("onboarding.back.later") }
+        static var addAnother: String { t("onboarding.back.addAnother") }
+        static var backContinue: String { t("onboarding.back.continue") }
+        static var privacy: String { t("onboarding.back.privacy") }
+        static func added(_ names: String) -> String { f("onboarding.back.added", names) }
+        // 4 Someone you pray for
+        static var someoneTitle: String { t("onboarding.someone.title") }
+        static var someoneNamePlaceholder: String { t("onboarding.someone.namePlaceholder") }
+        static var someoneNameCaption: String { t("onboarding.someone.nameCaption") }
+        static func carriedWithYou(_ label: String) -> String { f("onboarding.someone.carried", label) }
+        static var someoneContinue: String { t("onboarding.someone.continue") }
+        // 5 An intention
+        static func intentionTitle(_ label: String) -> String { f("onboarding.intention.title", label) }
+        static var intentionLine: String { t("onboarding.intention.line") }
+        static var intentionAdd: String { t("onboarding.intention.add") }
+        static var intentionSkip: String { t("onboarding.intention.skip") }
     }
 
     enum Common {

@@ -77,6 +77,16 @@ struct MockSeed {
                         stats: LiveStats(prayingNow: 213, prayedLastHour: 640, prayedToday: 4113),
                         history: MockHistory.seeded(subjects, today: today, now: now, currentList: list, calendar: calendar))
     }
+
+    /// A first run (launch argument `-PPMockFresh`): an account with no self
+    /// name and no people, never prayed (pre-trial), so onboarding opens.
+    /// The list and live counts are the standard seed's.
+    static func fresh(now: Date, calendar: Calendar = .current) -> MockSeed {
+        let standard = standard(now: now, calendar: calendar)
+        return MockSeed(subjects: [], header: UserHeader(id: "mock-user"), list: standard.list,
+                        myStatus: MyListStatus(listId: standard.list.id), stats: standard.stats,
+                        history: HistoryLog())
+    }
 }
 
 /// The History log in the mock (getMyPrayerHistory + your subjects' list

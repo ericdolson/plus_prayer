@@ -37,12 +37,29 @@ public func carriedNames(_ tree: SubjectTree) -> [Subject] {
 // MARK: The pool (monetization.md, Q32)
 //
 // Effective entitlement: `includeLimit` people while `entitlementExpiresAt`
-// is in the future; otherwise free = 0 (you, with your intention).
+// is in the future; before the first prayer (never prayed, never entitled)
+// the trial's pool, `AppConfig.basePremiumPool` (2026-11-09); otherwise
+// free = 0 (you, with your intention). Mirrors pool.ts `effectiveLimit`.
+// `prePool` is /config's basePremiumPool (the compiled default when the
+// caller has no config).
 
 public let freeCarryLimit = 0
 
 public func hasActiveEntitlement(_ user: UserHeader, now: Date) -> Bool {
     user.entitlementExpiresAt.map { $0 > now } ?? false
+}
+
+/// Pre-trial (auth-onboarding.md "Trial starts at the first prayer",
+/// 2026-11-09): never prayed (no `trialStartedAt`) and never entitled (no
+/// `entitlementExpiresAt`). The people added in onboarding are carried; the
+/// 14-day clock starts at the first prayer.
+public func isPreTrial(_ user: UserHeader) -> Bool {
+    user.trialStartedAt == nil && user.entitlementExpiresAt == nil
+}
+
+/// The free tier: no active entitlement and not pre-trial.
+public func isFreeTier(_ user: UserHeader, now: Date) -> Bool {
+    !hasActiveEntitlement(user, now: now) && !isPreTrial(user)
 }
 
 /// The people the pool counts: carried names beyond the self.
@@ -73,29 +90,34 @@ public struct PoolCheck: Sendable, Equatable {
 }
 
 /// Do the tree's carried people fit the user's effective entitlement now?
-public func checkPool(_ tree: SubjectTree, user: UserHeader, now: Date) -> PoolCheck {
+public func checkPool(_ tree: SubjectTree, user: UserHeader, now: Date,
+                      prePool: Int = AppConfig.defaults.basePremiumPool) -> PoolCheck {
     let carried = carriedPeople(tree).count
-    let limit = effectivePoolLimit(user, now: now)
+    let limit = effectivePoolLimit(user, now: now, prePool: prePool)
     return PoolCheck(fits: carried <= limit, carried: carried, limit: limit,
-                     isFree: !hasActiveEntitlement(user, now: now))
+                     isFree: isFreeTier(user, now: now))
 }
 
 /// The pool the carry is measured against now: `includeLimit` while the
-/// entitlement is active, else free (0).
-public func effectivePoolLimit(_ user: UserHeader, now: Date) -> Int {
-    hasActiveEntitlement(user, now: now) ? user.includeLimit : freeCarryLimit
+/// entitlement is active, `prePool` before the first prayer, else free (0).
+public func effectivePoolLimit(_ user: UserHeader, now: Date,
+                               prePool: Int = AppConfig.defaults.basePremiumPool) -> Int {
+    if hasActiveEntitlement(user, now: now) { return user.includeLimit }
+    return isPreTrial(user) ? prePool : freeCarryLimit
 }
 
 /// Places free now (never below 0).
-public func placesLeft(_ tree: SubjectTree, user: UserHeader, now: Date) -> Int {
-    max(0, effectivePoolLimit(user, now: now) - carriedPeople(tree).count)
+public func placesLeft(_ tree: SubjectTree, user: UserHeader, now: Date,
+                       prePool: Int = AppConfig.defaults.basePremiumPool) -> Int {
+    max(0, effectivePoolLimit(user, now: now, prePool: prePool) - carriedPeople(tree).count)
 }
 
 /// Auto-carry (monetization.md): a new name is carried while the pool has
 /// room; a new intention is chosen while its person is under the cap.
 public func carriesNewSubject(_ new: Subject, in tree: SubjectTree, user: UserHeader, now: Date,
-                              cap: Int = AppConfig.defaults.intentionsPerPerson) -> Bool {
-    if new.isName { return placesLeft(tree, user: user, now: now) > 0 }
+                              cap: Int = AppConfig.defaults.intentionsPerPerson,
+                              prePool: Int = AppConfig.defaults.basePremiumPool) -> Bool {
+    if new.isName { return placesLeft(tree, user: user, now: now, prePool: prePool) > 0 }
     guard let parentId = new.parentId else { return false }
     return chosenIntentions(of: parentId, in: tree).count < cap
 }
@@ -127,9 +149,10 @@ public struct CarryOffer: Sendable, Equatable {
 }
 
 /// The carry toggle for the person `nameId` (not the self).
-public func nameCarryOffer(nameId: String, in tree: SubjectTree, user: UserHeader, now: Date) -> CarryOffer {
-    let pool = effectivePoolLimit(user, now: now)
-    let isFree = !hasActiveEntitlement(user, now: now)
+public func nameCarryOffer(nameId: String, in tree: SubjectTree, user: UserHeader, now: Date,
+                           prePool: Int = AppConfig.defaults.basePremiumPool) -> CarryOffer {
+    let pool = effectivePoolLimit(user, now: now, prePool: prePool)
+    let isFree = isFreeTier(user, now: now)
     let used = carriedPeople(tree).count
     guard let name = tree[nameId], name.isName, !name.isSelf else {
         return CarryOffer(hasRoom: false, startsOn: false, used: used, pool: pool, isFree: isFree)
@@ -196,11 +219,12 @@ public struct IntentionCarryOffer: Sendable, Equatable {
 ///   - cap: `AppConfig.intentionsPerPerson`.
 public func intentionCarryOffer(personId: String, intentionId: String? = nil, in tree: SubjectTree,
                                 user: UserHeader, now: Date,
-                                cap: Int = AppConfig.defaults.intentionsPerPerson) -> IntentionCarryOffer {
+                                cap: Int = AppConfig.defaults.intentionsPerPerson,
+                                prePool: Int = AppConfig.defaults.basePremiumPool) -> IntentionCarryOffer {
     let person = tree[personId]
     let isSelf = person?.isSelf ?? false
     let personCarried = isSelf || (person?.isCarried ?? false)
-    let left = placesLeft(tree, user: user, now: now)
+    let left = placesLeft(tree, user: user, now: now, prePool: prePool)
     let others = chosenIntentions(of: personId, in: tree).filter { $0.id != intentionId }
     let isOn = intentionId.flatMap { tree[$0] }.map { $0.isCarried && !$0.isResolved }
     let replaces = others.count >= max(cap, 1) ? Array(others.suffix(others.count - max(cap, 1) + 1)) : []
@@ -209,8 +233,8 @@ public func intentionCarryOffer(personId: String, intentionId: String? = nil, in
     return IntentionCarryOffer(isSelf: isSelf, personCarried: personCarried, startsOn: startsOn,
                                hasRoom: (isOn ?? false) || hasRoom, replaces: (isOn ?? false) ? [] : replaces,
                                alsoCarriesPerson: !personCarried, left: left,
-                               pool: effectivePoolLimit(user, now: now),
-                               isFree: !hasActiveEntitlement(user, now: now))
+                               pool: effectivePoolLimit(user, now: now, prePool: prePool),
+                               isFree: isFreeTier(user, now: now))
 }
 
 // MARK: Choosing what prints (setCarriedItems' input)
@@ -274,11 +298,12 @@ public func printsWith(_ intentionId: String?, for personId: String, in tree: Su
 /// their choices. Never blocks the restore.
 public func restoredCarryFlag(_ item: Subject, intentions: [Subject] = [], into tree: SubjectTree,
                               user: UserHeader, now: Date,
-                              cap: Int = AppConfig.defaults.intentionsPerPerson) -> Bool {
+                              cap: Int = AppConfig.defaults.intentionsPerPerson,
+                              prePool: Int = AppConfig.defaults.basePremiumPool) -> Bool {
     guard item.isCarried else { return false }
     if item.isName {
         let after = SubjectTree(Array(tree.all) + [item] + intentions)
-        return checkPool(after, user: user, now: now).fits
+        return checkPool(after, user: user, now: now, prePool: prePool).fits
     }
     guard !item.isResolved, let parentId = item.parentId else { return true }
     return chosenIntentions(of: parentId, in: tree).filter { $0.id != item.id }.count < cap
