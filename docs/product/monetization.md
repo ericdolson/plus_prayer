@@ -33,6 +33,9 @@ _Last updated: 2026-10-17_
   Social carries only your name; the free app adds one printed request of your
   own (under your self-row); premium carries others. SUPERSEDES the earlier note
   that non-premium intentions are never on the global list.
+- **Pre-trial pool** (2026-11-09): before the first prayer a user has the
+  trial's pool (`basePremiumPool`), so onboarding's adds are carried; the
+  trial clock starts at the first prayer.
 - **Reverse trial** (2026-10-17, "option D"): every new user gets premium free
   for ~14 days with NO payment info and NO auto-renew (not an App Store
   free-trial/intro offer). A heads-up comes before it ends (~day 10). After it

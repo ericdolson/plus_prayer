@@ -2192,3 +2192,28 @@ self page shows your name under "Me").
   everything belongs to Dad, and matching Home's rows exactly is worth more
   than the semantic nicety. Eric's call.
 
+### Decision: Onboarding redesign; pre-trial pool
+**Timestamp:** 2026-11-09
+- Three screens: **Welcome** (full-bleed sealed-list photo; "Your name,
+  carried by the world." · "One list. Everyone. Every day." · Begin · Sign
+  in), **Name** (question, avatar filling, Roca field, nothing else),
+  **Welcome back** ("Welcome, {full name}." · the mechanic in plain words ·
+  "Who else do you hold?" with the personal-prayer line · Add someone / Add
+  others later · privacy footer). Optional guided first add: **name first
+  (required), then what you call them (optional)**, then an optional first
+  intention; later adds use the regular sheet. Spec: auth-onboarding.md.
+- **Full name in the greeting**, never a guessed first name (no
+  on-device or AI parsing: unreliable, and sending names out for a cosmetic
+  greeting isn't worth it). Replaces "first word".
+- **Pre-trial pool:** before the first prayer the user has
+  `basePremiumPool`, so onboarding adds are carried; the trial still starts
+  at the first prayer. Rejected: starting the trial at sign-up (wastes
+  days for people who return later).
+- Rejected: "Get prayers in return" / "This is the world plus prayer" in
+  the app (transactional; wordplay). The "___ + Prayer" device belongs to
+  marketing (website, store, social). One welcome screen, not two: the
+  mechanic is taught where it lands (name step, screen 3, first Amen). No
+  brand background color: the photo on screen 1 is the color; screens 2–5
+  use the app's ground. Privacy line rewritten ("never shown publicly";
+  reviewers do see names).
+

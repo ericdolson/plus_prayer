@@ -23,20 +23,49 @@ _Last updated: 2026-10-17_
   (`app/assets/splash_image.png`; iOS uses it as `LaunchImage` 1x–3x at its
   natural size); `ground` is #E9EEF9 light, #0E1012 dark. Android: see
   open-questions D7.
-- **Flow:**
-  1. Splash: "Your name, carried by the world." With a quiet link: **"Already
-     have an account? Sign in"** (2026-11-05).
-  2. One plain screen: "Pray for today's list. Tomorrow, you're on it."
-  3. **"What's your name?"** — a personal, getting-to-know-you step (not
-     "what name should be carried"). Helper text conveys that their name will be
-     carried by the world in prayer, so introducing themselves feels exciting.
-     The answer becomes the self-subject ("Me") — the guarded entry that always
-     exists. 40-char cap.
-  4. "Who else do you hold?" — optional; add names/intentions (trial carries them).
-  5. Main screen, list row pinned, pray FAB gently pulsing. No tour.
+- **Flow (revised 2026-11-09; supersedes the 2026-10-17 steps):** three
+  screens, a guided first add only for those who want it. No tour.
+  1. **Welcome:** a full-bleed photograph of the sealed list in warm low
+     light (names never legible; interim: the large `WaxSeal` on a dark
+     ground), text on the lower third: **"Your name, carried by the world."**
+     (Roca) · "One list. Everyone. Every day." · **Begin** (prominent) · quiet
+     **"Already have an account? Sign in"**. Later upgrade: a 5–8 s silent
+     loop of the list being stitched and sealed.
+  2. **Name:** only **"What's your name?"** (Large Title, sans), a 96 pt avatar
+     that fills with initials as you type, one field with the name set in
+     Roca (how it prints), **Continue** above the keyboard. Nothing else.
+     40-char cap; it becomes the self subject ("Me").
+  3. **Welcome back:** the avatar and **"Welcome, {full name}."** (Roca; the
+     full name as printed, never a guessed first name) · "Pray with today's
+     list. Tomorrow your name is on it, and the world prays for you." ·
+     divider · **"Who else do you hold?"** · "Keep the people you pray for
+     here. When you want, carry them on the list too." · **"＋ Add someone"**
+     and **"Add others later"** (→ Home) · faint footer: "The list is
+     printed, sealed and kept private. Your name is never shared or shown
+     publicly."
+  4. **Someone you pray for** (only after "Add someone"): "Who's someone you
+     pray for?" · **Their name** (required, first; placeholder an example
+     name) · **What you call them** (optional; placeholder "Mom") with one
+     line: the name is what's printed; what you call them stays with you ·
+     avatar fills as they type · "{alias} will be carried on the list with
+     you." (carried by default, no switch) · **Continue**.
+  5. **An intention** (optional): "What are you praying for, for {alias}?" ·
+     "An intention is a request: healing, a new job, peace. One can be
+     printed with their name." · field with an example · **Add** / **Skip**.
+     It becomes their chosen intention.
+  Then back to screen 3 with the new person's avatar; the buttons become
+  **"＋ Add another"** (opens the regular add sheet, no extra help) and
+  **Continue** (→ Home).
   6. After first Amen: "You'll be carried on List 53." → reminder choice
      (Morning/Midday/Evening) → notification permission.
-- **Trial starts at the first prayer**, not at install.
+- For people 40+: one decision per screen, labeled buttons (no swipes or
+  carousel), ‹ back on every step after the first, full Dynamic Type.
+- Screens 2–5 use the app's ground (calm through space, content centered);
+  only screen 1 is photographic.
+- **Trial starts at the first prayer**, not at install. **Before the first
+  prayer the user has the trial's pool** (`basePremiumPool`, 10) so people
+  added in onboarding are carried; the 14-day clock still starts at the
+  first prayer (2026-11-09).
 - **Sign-in ("keep your list safe") prompts:** after first prayer (soft,
   dismissable), around a 3-day streak, and before the trial ends.
 - **Account deletion:** immediate after one confirmation; deletes User,
@@ -67,7 +96,9 @@ _Last updated: 2026-10-17_
   7 days, server-enforced (`selfNameChangedAt`), with the next-available date
   shown plainly. Frequent changes are a moderation signal.
 - **One name field** for the user: the same text is printed and used for the
-  app's greeting (first word). Maps to the self-subject's `publicName`;
+  app's greeting, **in full** (2026-11-09: never a guessed first name;
+  "Sarah Beth Parker" can't be split reliably in any language). A short form,
+  if ever needed, is asked for in You, never inferred. Maps to the self-subject's `publicName`;
   `User.displayName` mirrors it.
 
 - **Self subject creation** (2026-10-18): `onAuthUserCreated` creates the User

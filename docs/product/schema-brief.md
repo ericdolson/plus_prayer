@@ -22,7 +22,7 @@ per-operation `@auth`; names are never public.
 | `locale: String` | ADD — effective UI language (device or override) | screens (Language) |
 | `timezone: String` | ADD — IANA, updated from device | streaks-reminders |
 | `includeLimit: Int` | REDEFINE — size of the carried pool **beyond the self name**, in **people** (Q32, 2026-11-08). Free = 0 (you, with your intention). Premium = N people | monetization |
-| `trialStartedAt`, `entitlementExpiresAt: Timestamp` | ADD — 14-day no-card reverse trial, starts at first prayer | monetization |
+| `trialStartedAt`, `entitlementExpiresAt: Timestamp` | ADD — 14-day no-card reverse trial, starts at first prayer. **Before the first prayer** (no `trialStartedAt`, never entitled) the effective pool is `basePremiumPool` (2026-11-09) | monetization |
 | `currentStreak`, `bestStreak` | keep — streak = **local days prayed WITH THE LIST** | streaks-reminders |
 | `lastPrayedListNumber` | REMOVE → `lastListLocalDate: Date` (stored; app shows an *effective* streak from stored fields + today) | streaks-reminders |
 | `graceDays: Int` (0–cap), `graceOfferPending: Boolean`, `graceOffersEnabled: Boolean` | ADD | streaks-reminders |
