@@ -20,23 +20,59 @@
         "platforms": {
           "youtube": {
             "post_id": "6af2bf7d6d2f7f0170c5ca43",
-            "status": "scheduled"
+            "status": "published",
+            "platform_post_id": "CLS5pSzwfLw",
+            "platform_post_url": "https://www.youtube.com/watch?v=CLS5pSzwfLw"
           },
           "facebook": {
             "post_id": "6af2bf806d2f7f0170c5ca5a",
-            "status": "scheduled"
+            "status": "published",
+            "platform_post_id": "2188581988360373",
+            "platform_post_url": "https://www.facebook.com/watch/?v=2188581988360373"
           },
           "instagram": {
             "post_id": "6af2bf8481202d2a9216e1f0",
-            "status": "scheduled"
+            "status": "published",
+            "platform_post_id": "17967270393235180",
+            "platform_post_url": "https://www.instagram.com/reel/DfjUMzNDVhM/"
           },
           "threads": {
             "post_id": "6af2bf8881202d2a9216e1fa",
-            "status": "scheduled"
+            "status": "published",
+            "platform_post_id": "18102601547414488",
+            "platform_post_url": "https://www.threads.com/@plusprayer/post/DfjUVhCBFdT"
           },
           "tiktok": {
             "post_id": "6af2bf8a81202d2a9216e216",
-            "status": "scheduled"
+            "status": "unconfirmed",
+            "platform_post_id": "7706433130080603406",
+            "note": "Zernio reports published 06:56:58Z with a numeric id; confirm via analytics on the next harvest."
+          }
+        },
+        "comments": {
+          "youtube": {
+            "mechanic_id": "Ugyj_zG4MjPgpR-oQiF4AaABAg",
+            "mechanic_at": "2026-11-10T08:36:08Z",
+            "closeout": "pending",
+            "retired_id": null,
+            "prayer_id": "UgyJSduHfUOkSmArySB4AaABAg",
+            "prayer_at": "2026-11-10T08:37:00Z"
+          },
+          "facebook": {
+            "mechanic_id": "122142481742983291_1120628547488908",
+            "mechanic_at": "2026-11-10T07:02:00Z",
+            "closeout": "pending",
+            "retired_id": null,
+            "prayer_id": "122142481742983291_2224553724822633",
+            "prayer_at": "2026-11-10T08:37:00Z"
+          },
+          "instagram": {
+            "mechanic_id": "18132419543307549",
+            "mechanic_at": "2026-11-10T07:02:00Z",
+            "closeout": "pending",
+            "retired_id": null,
+            "prayer_id": "17959234317021755",
+            "prayer_at": "2026-11-10T08:37:00Z"
           }
         }
       }
@@ -94,24 +130,24 @@
             "mechanic_at": "2026-11-08T22:04:13Z",
             "prayer_id": "UgwZLqz80maxalnNjfN4AaABAg",
             "prayer_at": "2026-11-08T22:04:13Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "Ugwzf8z0uy4qgmlhNZl4AaABAg"
           },
           "facebook": {
             "mechanic_id": "122142336938983291_1636824474656520",
             "mechanic_at": "2026-11-08T22:04:13Z",
             "prayer_id": "122142336938983291_1619679529398546",
             "prayer_at": "2026-11-08T22:04:13Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "122142336938983291_1106127795569688"
           },
           "instagram": {
             "mechanic_id": "18099750656405995",
             "mechanic_at": "2026-11-08T22:07:52Z",
             "prayer_id": "18415551973084611",
             "prayer_at": "2026-11-08T22:07:52Z",
-            "closeout": "pending",
-            "retired_id": null
+            "closeout": "done",
+            "retired_id": "18648883537061317"
           }
         }
       }
