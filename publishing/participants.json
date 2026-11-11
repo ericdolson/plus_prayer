@@ -1,5 +1,5 @@
 {
-  "last_aggregated_at": "2026-11-09T19:33:18Z",
+  "last_aggregated_at": "2026-11-11T01:52:45Z",
   "brand_accounts": {
     "youtube": [
       "UCwVcRTUGUg_C3eQbA93wk3g",
@@ -238,12 +238,15 @@
     "facebook:1033072079891934_122142096086983291": 2,
     "instagram:18183666091429833": 2,
     "youtube:UngvksY9pvI": 2,
-    "facebook:1033072079891934_122142253448983291": 2,
+    "facebook:1033072079891934_122142253448983291": 3,
     "instagram:18160777444511323": 2,
     "youtube:9b8hHHLS7Bo": 2,
     "instagram:18646161217009856": 2,
     "facebook:1033072079891934_122142336938983291": 3,
-    "youtube:wGWMlsQXlxQ": 4
+    "youtube:wGWMlsQXlxQ": 3,
+    "instagram:17967270393235180": 2,
+    "facebook:1033072079891934_122142481742983291": 3,
+    "youtube:CLS5pSzwfLw": 2
   },
   "pending": {
     "7": [],
@@ -1064,6 +1067,15 @@
         "at": "2026-11-09T19:35:38Z",
         "comment_url": null,
         "note": "Added directly by Eric 2026-11-09 — manual addition, not sourced from a social 🙏 comment."
+      }
+    ],
+    "73": [
+      {
+        "platform": "facebook",
+        "handle": "Lee Laah",
+        "id": "29601271546229727",
+        "at": "2026-11-10T09:24:00Z",
+        "comment_url": "https://www.facebook.com/reel/2188581988360373/?comment_id=122142481742983291_1146553301182556"
       }
     ]
   }
